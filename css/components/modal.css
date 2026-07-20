@@ -1,0 +1,80 @@
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(5, 11, 28, 0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    position: relative;
+    background-color: var(--surface-white);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 420px;
+    padding: 24px;
+}
+
+.modal-header h3 {
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    padding-right: 32px; 
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    font-family: var(--font-heading);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background-color: var(--hover-light);
+    color: var(--text-primary);
+}
+
+.modal-close-btn .material-symbols-outlined {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+
+.modal-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}

@@ -1,0 +1,101 @@
+/* form styling */
+.conteudo-container form {
+    width: 100%;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px; 
+    font-size: 0.9rem;
+    color: var(--text-primary); 
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit
+}
+
+.form-row{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder, .form-group select:invalid {
+    color: var(--text-secondary);
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+.form-group select option {
+    color: var(--text-primary);
+}
+
+.form-group input[type="date"]:invalid {
+    color: var(--text-secondary);
+}
+
+.input-auto {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: block;
+}
+
+.form-group input.input-auto {
+    background-color: var(--slate-200);
+    color: var(--text-secondary);
+    font-style: italic;
+    cursor: pointer;
+    border: 1px dashed var(--slate-400);
+}
+
+.form-group input.input-auto:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group input.input-auto:hover {
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 1px var(--primary-color);
+}
+
+section .form-label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--primary-color); 
+}
+
+section .form-label .material-symbols-outlined {
+    font-size: 2rem;
+    vertical-align: middle;
+    margin-right: 8px;
+    color: var(--primary-color)
+}
+
+section .form-label-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}

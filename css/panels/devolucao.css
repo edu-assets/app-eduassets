@@ -1,0 +1,530 @@
+/* layout de duas colunas */
+.devolucao-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 38px;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 24px;
+    margin: 28px auto 0 auto;
+}
+
+.devolucao-lista-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.devolucao-item {
+    background-color: var(--surface-white);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    padding: 18px 22px;
+    gap: 16px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.devolucao-item:hover {
+    background-color: var(--surface-2);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary-300);
+}
+
+.devolucao-item.selected {
+    border-color: var(--primary-color);
+    background-color: color-mix(in srgb, var(--primary-color) 5%, var(--surface-white));
+    box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.devolucao-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.devolucao-linha-principal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.seta-svg {
+    width: 28px;
+    height: 13px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.devolucao-linha-hora {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+.devolucao-linha-hora .material-symbols-outlined {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+}
+
+.devolucao-obs-indicador {
+    display: inline-flex;
+    align-items: center;
+    color: var(--primary-color);
+    opacity: 0.7;
+}
+
+.devolucao-obs-indicador .material-symbols-outlined {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    display: inline-block;
+}
+
+.info-resp {
+    font-size: 1rem;
+    color: var(--primary-dark);
+    display: inline-block;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.devolver-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    background-color: var(--primary-color);
+    color: var(--text-on-primary);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.devolucao-vazia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 70px 20px;
+    width: 100%;
+}
+
+.devolucao-vazia-logo {
+    width: 340px;
+    height: auto;
+    opacity: 0.5;
+    filter: drop-shadow(1px 1px 0 rgba(255, 255, 255, 0.6)) drop-shadow(-1px -1px 1px rgba(5, 11, 28, 0.12));
+    border-radius: 8px;
+    border: 0.75px solid var(--border-color);
+}
+
+.devolucao-vazia-texto {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7), -1px -1px 1px rgba(5, 11, 28, 0.1);
+    font-family: var(--font-heading);
+}
+
+.devolucao-vazia-sub {
+    font-size: 0.9rem;
+    color: var(--slate-400);
+    text-align: center;
+    max-width: 320px;
+}
+
+/* ícone de papel (administrador/editor/usuário/convidado) */
+.devolucao-papel-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--slate-100);
+    color: var(--text-secondary);
+}
+
+.devolucao-papel-icon .material-symbols-outlined {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.devolucao-papel-icon-sm {
+    width: 40px;
+    height: 40px;
+}
+
+.devolucao-papel-icon-sm .material-symbols-outlined {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+/* ícones de equipamento adaptáveis ao espaço */
+.devolucao-itens-icons {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.devolucao-item-icon-pill {
+    flex: 0 0 auto;
+    width: fit-content;
+
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background-color: var(--surface-2);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    overflow: hidden;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.devolucao-item-icon-pill .material-symbols-outlined {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: inherit;
+    flex-shrink: 0;
+}
+
+/* Notebook (eq1) - Tom Azul */
+.devolucao-item-icon-pill[data-eq="eq1"] {
+    background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
+    border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+    color: var(--primary-dark);
+}
+
+/* Tablet (eq2) - Tom Roxo / Indigo */
+.devolucao-item-icon-pill[data-eq="eq2"] {
+    background-color: color-mix(in srgb, var(--secondary-color) 8%, transparent);
+    border-color: color-mix(in srgb, var(--secondary-color) 30%, transparent);
+    color: var(--secondary-color);
+}
+
+/* Fone de Ouvido (eq3) - Tom Verde / Success */
+.devolucao-item-icon-pill[data-eq="eq3"] {
+    background-color: color-mix(in srgb, var(--success-color) 8%, transparent);
+    border-color: color-mix(in srgb, var(--success-color) 30%, transparent);
+    color: var(--success-color);
+}
+
+/* Fonte de Carregamento (eq4) - Tom Amarelo / Alerta */
+.devolucao-item-icon-pill[data-eq="eq4"] {
+    background-color: #fff9db;
+    border-color: #fab005;
+    color: #f59f00;
+}
+
+/* Carregador USB (eq5) - Tom Ciano / Info */
+.devolucao-item-icon-pill[data-eq="eq5"] {
+    background-color: color-mix(in srgb, var(--info-color) 8%, transparent);
+    border-color: color-mix(in srgb, var(--info-color) 30%, transparent);
+    color: var(--info-color);
+}
+
+.devolucao-item-icon-pill-texto {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.devolucao-item-icon-mais {
+    flex: 0 0 40px;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+    cursor: default;
+}
+
+/* painel de detalhes (lateral, persistente) */
+.devolucao-detalhe-painel {
+    flex: 0 0 380px;
+    min-height: 500px;
+    background-color: var(--surface-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.devolucao-detalhe-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px 16px;
+}
+
+.devolucao-detalhe-empty .material-symbols-outlined {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+}
+
+.devolucao-detalhe-empty p {
+    font-size: 0.9rem;
+    max-width: 220px;
+}
+
+.devolucao-detalhe-conteudo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.devolucao-detalhe-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.devolucao-detalhe-header h3 {
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+}
+
+.devolucao-detalhe-fechar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.devolucao-detalhe-fechar:hover {
+    background-color: var(--hover-light);
+    color: var(--text-primary);
+}
+
+.devolucao-detalhe-fechar .material-symbols-outlined {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.devolucao-detalhe-pessoa {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.devolucao-detalhe-pessoa-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.devolucao-detalhe-pessoa-linha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.devolucao-detalhe-pessoa-data {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.devolucao-detalhe-secao {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.devolucao-detalhe-secao-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.devolucao-detalhe-contagem {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.devolucao-detalhe-editar-btn {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--surface-white);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.devolucao-detalhe-editar-btn:hover {
+    background-color: var(--hover-light);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.devolucao-detalhe-editar-btn .material-symbols-outlined {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+}
+
+.devolucao-detalhe-obs:empty {
+    display: none;
+}
+
+.devolucao-detalhe-acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+/* lista de itens dentro do painel de detalhes */
+.detalhe-emprestimo-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.detalhe-emprestimo-lista li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.detalhe-emprestimo-lista .material-symbols-outlined {
+    color: var(--primary-color);
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+}
+
+.detalhe-item-nome {
+    flex: 1;
+    min-width: 0;
+}
+
+.detalhe-item-status {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background-color: var(--success-bg);
+    color: var(--success-color);
+}
+
+.detalhe-emprestimo-obs-label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.detalhe-emprestimo-obs p {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* edição de itens - form em coluna única (painel estreito) */
+.devolucao-detalhe-painel .form-row {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.devolucao-detalhe-painel .detalhe-qtd-group {
+    flex: 1 1 auto;
+}
+
+.detalhe-emprestimo-item-edit {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detalhe-item-qtd {
+    width: 56px;
+    padding: 6px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.detalhe-item-remover {
+    margin-left: auto;
+    position: static;
+}

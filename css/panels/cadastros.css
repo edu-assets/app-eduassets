@@ -1,0 +1,169 @@
+.cadastros-container {
+    width: 100%;
+    max-width: 760px;
+    margin: 28px auto 0 auto;
+    margin-top: 38px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.cadastros-info-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background-color: var(--info-bg);
+    border: 1px solid color-mix(in srgb, var(--info-color) 25%, transparent);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--info-color);
+}
+
+.cadastros-info-banner .material-symbols-outlined {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.cadastros-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+}
+
+.cadastro-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    background-color: var(--surface-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    padding: 22px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cadastro-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
+    box-shadow: var(--shadow-md);
+}
+
+.cadastro-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.cadastro-card-chevron {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.cadastro-card:hover .cadastro-card-chevron {
+    transform: translateX(3px);
+    color: var(--primary-color);
+}
+
+.cadastro-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+}
+
+.cadastro-card-icon .material-symbols-outlined {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.cadastro-card-icon-primary {
+    background-color: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.cadastro-card-icon-success {
+    background-color: var(--success-bg);
+    color: var(--success-color);
+}
+
+.cadastro-card-icon-secondary {
+    background-color: var(--secondary-bg);
+    color: var(--secondary-color);
+}
+
+.cadastro-card-icon-info {
+    background-color: var(--info-bg);
+    color: var(--info-color);
+}
+
+.cadastro-card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: none;
+    font-family: var(--font-heading);
+}
+
+.cadastro-card-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.cadastro-modal-list-wrap {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cadastro-modal-list-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.cadastro-modal-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.cadastro-modal-item {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cadastro-modal-item:last-child {
+    border-bottom: none;
+}
+
+.cadastro-modal-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}

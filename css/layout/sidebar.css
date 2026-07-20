@@ -1,0 +1,116 @@
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    cursor: default;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-dark); 
+    color: var(--text-on-primary);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-md); 
+    z-index: 10; 
+}
+
+.brand-section {
+    padding: 24px;
+    border-bottom: 1px solid var(--primary-dark);
+}
+
+.brand-logo img {
+    width: 100%;
+    height: auto;
+    max-height: 60px; 
+    object-fit: contain; 
+}
+
+.brand-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.brand-subtitle {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7); 
+    margin-top: 4px;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 24px 16px;
+    overflow-y: auto;
+}
+
+.nav-section {
+    margin-bottom: 24px;
+}
+
+.nav-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6); 
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    display: block;
+    padding-left: 8px;
+}
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-nav .nav-link {
+    color: var(--text-on-primary);
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 10px 16px;
+    margin: 0 -16px;
+    border-radius: 0px;
+    display: block;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-nav .nav-link:hover {
+    background-color: var(--primary-400);
+}
+
+.sidebar-nav .nav-link.active {
+    font-weight: 600;
+    background-color: var(--primary-dark);
+    color: var(--white);
+    border-left: 3px solid var(--primary-300);
+}
+
+.sidebar-footer {
+    padding: 16px 24px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    border-top: 1px solid var(--primary-dark);
+}
+
+.main-content {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+    background-color: var(--bg-light); 
+     position: relative;
+}
+
+.main-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 32px;
+    background: linear-gradient(90deg, var(--slate-950) 0%, transparent 100%);
+    opacity: 0.05; 
+    pointer-events: none; 
+}
