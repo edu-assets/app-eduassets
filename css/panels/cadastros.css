@@ -167,3 +167,70 @@
     color: var(--text-secondary);
     font-size: 0.85rem;
 }
+
+/*RESPONSIVINESS*/
+
+@media (max-width: 1024px) {
+    .cadastros-container {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .cadastros-grid {
+        gap: 16px;
+    }
+
+    .cadastro-card {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .cadastros-container {
+        margin-top: 16px;
+        gap: 16px;
+    }
+
+    .cadastros-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .cadastro-card {
+        padding: 16px;
+        gap: 6px;
+    }
+
+    .cadastro-card-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 6px;
+    }
+
+    .cadastro-card-icon .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+    .cadastro-card-title {
+        font-size: 0.95rem;
+    }
+
+    .cadastro-card-desc {
+        font-size: 0.8rem;
+    }
+
+    .cadastros-info-banner {
+        padding: 12px 14px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 440px) {
+    .cadastros-container {
+        padding: 0 8px;
+    }
+
+    .cadastro-card {
+        padding: 14px 12px;
+    }
+}
