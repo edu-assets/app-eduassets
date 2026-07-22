@@ -1,4 +1,4 @@
-import { http } from './http.js';
+import { http } from './apiClient.js';
 
 /** @returns {Promise<Array<{id:number, nome:string}>>} */
 export function listarCategorias() {

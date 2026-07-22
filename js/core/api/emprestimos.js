@@ -1,4 +1,4 @@
-import { http } from './http.js';
+import { http } from './apiClient.js';
 
 export function listarEmprestimos() {
     return http.get('/emprestimos');

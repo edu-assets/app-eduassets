@@ -1,4 +1,4 @@
-import { http } from './http.js';
+import { http } from './apiClient.js';
 
 export function listarResponsaveis() {
     return http.get('/responsaveis');
