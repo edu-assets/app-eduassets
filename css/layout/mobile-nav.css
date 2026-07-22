@@ -1,0 +1,123 @@
+.mobile-topbar {
+    display: none;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    background-color: var(--bg-dark);
+    box-shadow: var(--shadow-md);
+    flex-shrink: 0;
+    z-index: 150;
+}
+
+.mobile-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-on-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.mobile-menu-btn:hover,
+.mobile-menu-btn:focus-visible {
+    background-color: var(--bg-dark-hover);
+}
+
+.mobile-menu-btn .material-symbols-outlined {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+}
+
+.mobile-topbar-logo {
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+}
+
+.sidebar-close-btn {
+    display: none;
+}
+
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(5, 11, 28, 0.55);
+    z-index: 190;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.sidebar-backdrop.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ===== Tablet: 1024px ===== */
+@media (max-width: 1024px) {
+    .mobile-topbar {
+        display: flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 280px;
+        max-width: 85vw;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 200;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar-close-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--text-on-primary);
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .sidebar-close-btn:hover {
+        background-color: var(--bg-dark-hover);
+    }
+
+    .sidebar-close-btn .material-symbols-outlined {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+
+    .main-content {
+        padding: 24px 20px;
+    }
+}
+
+/* ===== Mobile: 640px ===== */
+@media (max-width: 640px) {
+    .mobile-topbar {
+        padding: 10px 16px;
+    }
+
+    .main-content {
+        padding: 18px 16px;
+    }
+}

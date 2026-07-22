@@ -34,3 +34,19 @@ section h2 .material-symbols-outlined {
     margin-right: 8px;
     color: var(--primary-color)
 }
+
+@media (max-width: 640px) {
+    .panel-title {
+        font-size: 1.3rem;
+        gap: 8px;
+    }
+
+    .panel-subtitle {
+        margin-left: 0;
+        font-size: 0.88rem;
+    }
+
+    section h2 .material-symbols-outlined {
+        font-size: 2rem;
+    }
+}

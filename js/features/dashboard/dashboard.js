@@ -370,19 +370,19 @@ export function initDashboard() {
 
         historicoVazio.style.display = 'none';
         historicoLista.innerHTML = loans.map((loan) => `
-            <div class="historico-row" data-id="${loan.id}">
-                <span class="historico-numero">#${loan.numero}</span>
-                <span>${escapeHtml(loan.aluno)}</span>
-                <span>${escapeHtml(loan.responsavel)}</span>
-                <span class="historico-data">${loan.data}</span>
-                <span class="historico-data">${loan.dataDevolucao || '—'}</span>
-                <div class="historico-itens">${renderChipsItens(loan.itens)}</div>
-                <span class="historico-status-badge historico-status-${loan.status}">
-                    ${loan.status === 'aberto' ? 'Aberto' : 'Devolvido'}
-                </span>
-                <button type="button" class="btn btn-neutral btn-sm historico-detalhes-btn" data-id="${loan.id}">Detalhes</button>
-            </div>
-        `).join('');
+        <div class="historico-row" data-id="${loan.id}">
+            <span class="historico-numero" data-col="numero">#${loan.numero}</span>
+            <span data-col="solicitante" data-label="Solicitante">${escapeHtml(loan.aluno)}</span>
+            <span data-col="responsavel" data-label="Responsável">${escapeHtml(loan.responsavel)}</span>
+            <span class="historico-data" data-col="retirada" data-label="Retirada">${loan.data}</span>
+            <span class="historico-data" data-col="devolucao" data-label="Devolução">${loan.dataDevolucao || '—'}</span>
+            <div class="historico-itens" data-col="itens" data-label="Itens">${renderChipsItens(loan.itens)}</div>
+            <span class="historico-status-badge historico-status-${loan.status}" data-col="status" data-label="Status">
+                ${loan.status === 'aberto' ? 'Aberto' : 'Devolvido'}
+            </span>
+            <button type="button" class="btn btn-neutral btn-sm historico-detalhes-btn" data-id="${loan.id}">Detalhes</button>
+        </div>
+    `).join('');
     }
 
     historicoLista.addEventListener('click', (e) => {
