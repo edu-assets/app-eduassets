@@ -39,6 +39,11 @@
         color: var(--text-secondary);
     }
 
+    .devolucao-detalhe-fechar:hover {
+        background-color: transparent;
+        color: var(--text-secondary);
+    }
+
     /* ===== Formulários ===== */
     .form-group input.input-auto:hover {
         border-color: var(--slate-400);
