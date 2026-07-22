@@ -24,3 +24,6 @@
 @import "panels/cadastros.css";
 @import "panels/config.css";
 @import "components/toast.css";
+
+/* utils */
+@import "utils/touch-reset.css";

@@ -1,6 +1,7 @@
 import { getLoans, getLoansAbertos, subscribe } from '../../core/state/loans.js';
 import { showToast } from '../../core/toast/toast.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
+import { openModal, closeModal } from '../../core/modal/modal.js';
 
 const EQUIPAMENTO_ICONS = {
     eq1: 'laptop',
@@ -11,17 +12,14 @@ const EQUIPAMENTO_ICONS = {
 };
 
 const LIMITE_CHIPS_HISTORICO = 2;
+const BREAKPOINT_LAYOUT_EMPILHADO = 1024;
 
 export function initDashboard() {
     const estoqueContainer = document.getElementById('tab-estoque');
     if (!estoqueContainer) return;
 
-    const btnEditar = document.getElementById('btn-editar');
-    const btnDeletar = document.getElementById('btn-deletar');
-    const toolbar = document.getElementById('dashboard-toolbar');
     const btnExportar = document.getElementById('btn-dashboard-exportar');
 
-    const andamentoWrap = document.getElementById('dashboard-andamento');
     const andamentoLista = document.getElementById('dashboard-andamento-lista');
     const andamentoVazio = document.getElementById('dashboard-andamento-vazio');
 
@@ -36,82 +34,67 @@ export function initDashboard() {
     const historicoLista = document.getElementById('historico-lista');
     const historicoVazio = document.getElementById('historico-vazio');
 
-    const selecionados = new Set();
-    let editandoId = null;
+    const modalCategoriaBody = document.getElementById('modal-categoria-body');
+    const btnModalCategoriaSalvar = document.getElementById('modal-categoria-salvar');
+    const btnModalCategoriaCancelar = document.getElementById('modal-categoria-cancelar');
 
-    /* ===== Estoque: seleção + checkbox ===== */
-    estoqueContainer.addEventListener('change', (e) => {
-        if (!e.target.classList.contains('estoque-checkbox')) return;
-        const id = e.target.dataset.id;
-        e.target.checked ? selecionados.add(id) : selecionados.delete(id);
-        atualizarToolbar();
-    });
+    let rowModalAtual = null;
 
+    /* ===== Estoque: menu de ações por linha ===== */
     estoqueContainer.addEventListener('click', (e) => {
-        const row = e.target.closest('.estoque-row');
-        if (!row) return;
-        if (e.target.closest('.estoque-checkbox-wrap')) return;
+        const menuBtn = e.target.closest('.registros-row-menu-btn');
+        if (menuBtn) {
+            e.stopPropagation();
+            const menu = menuBtn.nextElementSibling;
+            const jaAberto = menu.classList.contains('active');
+            fecharTodosMenusEstoque();
+            if (!jaAberto) menu.classList.add('active');
+            return;
+        }
 
-        estoqueContainer.querySelectorAll('.estoque-row').forEach(r => r.classList.remove('selected'));
-        row.classList.add('selected');
-
-        abrirDetalheEstoque(row);
+        const opcaoMenu = e.target.closest('.registros-row-menu-opcao');
+        if (opcaoMenu) {
+            const row = opcaoMenu.closest('.estoque-row');
+            fecharTodosMenusEstoque();
+            abrirDetalheEstoque(row);
+        }
     });
 
-    function atualizarToolbar() {
-        if (btnEditar) btnEditar.disabled = selecionados.size !== 1;
-        if (btnDeletar) btnDeletar.disabled = selecionados.size === 0;
+    document.addEventListener('click', () => fecharTodosMenusEstoque());
+
+    function fecharTodosMenusEstoque() {
+        estoqueContainer.querySelectorAll('.registros-row-menu.active').forEach((menu) => menu.classList.remove('active'));
     }
 
-    if (btnEditar) {
-        btnEditar.addEventListener('click', () => {
-            if (selecionados.size !== 1) return;
-            const id = [...selecionados][0];
-            const row = estoqueContainer.querySelector(`.estoque-row[data-id="${id}"]`);
-            abrirDetalheEstoque(row);
-        });
+    function ehLayoutEmpilhado() {
+        return window.matchMedia(`(max-width: ${BREAKPOINT_LAYOUT_EMPILHADO}px)`).matches;
     }
 
-    if (btnDeletar) {
-        btnDeletar.addEventListener('click', () => {
-            selecionados.forEach((id) => {
-                estoqueContainer.querySelector(`.estoque-row[data-id="${id}"]`)?.remove();
-            });
-            if (editandoId && selecionados.has(editandoId)) fecharDetalhe();
-            selecionados.clear();
-            atualizarToolbar();
-            atualizarResumo();
-        });
+    function atualizarVisibilidadeDetalhe() {
+        if (!detalheContainer) return;
+        const abaAtiva = document.querySelector('.dashboard-tab-link.active')?.dataset.tab;
+        detalheContainer.style.display = (abaAtiva === 'estoque' && !ehLayoutEmpilhado()) ? 'flex' : 'none';
     }
 
     /* ===== Detalhe: Estoque (editar categoria) ===== */
-    function abrirDetalheEstoque(row) {
-        if (!row) return;
-        editandoId = row.dataset.id;
-
-        detalheTitulo.textContent = "Editar categoria";
-
+    function construirFormularioCategoria(row) {
         const total = Number(row.dataset.total) || 0;
         const disp = Number(row.dataset.disponivel) || 0;
         const queb = Number(row.dataset.quebrado) || 0;
         const emp = Math.max(0, total - disp - queb);
 
-        detalheBody.innerHTML = `
+        return `
             <p class="category-edit-subtitle">Atualize as informações da categoria.</p>
-            
-            <!-- Campo: Nome da Categoria -->
+
             <div class="form-group margin-bottom-lg">
                 <label class="category-field-label">Nome da categoria <span class="required-asterisk">*</span></label>
                 <input type="text" id="detalhe-estoque-categoria" class="category-field-input" value="${escapeHtml(row.dataset.categoria)}" disabled>
             </div>
 
-            <!-- Quadro: Resumo e Métricas da Categoria -->
             <div class="category-summary-box">
                 <h4 class="category-summary-box-title">Resumo da categoria</h4>
-                
+
                 <div class="category-summary-grid">
-                    
-                    <!-- Métrica: Total -->
                     <div class="category-metric-col col-total">
                         <div class="metric-icon-wrap">
                             <span class="material-symbols-outlined">devices</span>
@@ -120,7 +103,6 @@ export function initDashboard() {
                         <label for="detalhe-estoque-total">Total</label>
                     </div>
 
-                    <!-- Métrica: Disponíveis -->
                     <div class="category-metric-col col-disponivel">
                         <div class="metric-icon-wrap">
                             <span class="material-symbols-outlined">check_circle</span>
@@ -129,7 +111,6 @@ export function initDashboard() {
                         <label for="detalhe-estoque-disponivel">Disponíveis</label>
                     </div>
 
-                    <!-- Métrica: Emprestados (Calculado/Read-only) -->
                     <div class="category-metric-col col-emprestado">
                         <div class="metric-icon-wrap">
                             <span class="material-symbols-outlined">schedule</span>
@@ -138,7 +119,6 @@ export function initDashboard() {
                         <label>Emprestados</label>
                     </div>
 
-                    <!-- Métrica: Quebrados -->
                     <div class="category-metric-col col-quebrado">
                         <div class="metric-icon-wrap">
                             <span class="material-symbols-outlined">warning</span>
@@ -146,11 +126,22 @@ export function initDashboard() {
                         <input type="number" id="detalhe-estoque-quebrado" min="0" value="${queb}">
                         <label for="detalhe-estoque-quebrado">Quebrados</label>
                     </div>
-
                 </div>
             </div>
+        `;
+    }
 
-            <!-- Rodapé de Ações do Formulário -->
+    function abrirDetalheEstoque(row) {
+        if (!row) return;
+
+        if (ehLayoutEmpilhado()) {
+            abrirModalCategoria(row);
+            return;
+        }
+
+        detalheTitulo.textContent = 'Editar categoria';
+
+        detalheBody.innerHTML = construirFormularioCategoria(row) + `
             <div class="category-edit-actions">
                 <button type="button" class="btn btn-neutral" id="btn-detalhe-estoque-cancelar">Cancelar</button>
                 <button type="button" class="btn btn-primary" id="btn-detalhe-estoque-salvar-novo">
@@ -162,9 +153,31 @@ export function initDashboard() {
         document.getElementById('btn-detalhe-estoque-cancelar').addEventListener('click', fecharDetalhe);
         document.getElementById('btn-detalhe-estoque-salvar-novo').addEventListener('click', () => {
             salvarDetalheEstoque(row);
+            fecharDetalhe();
         });
 
         mostrarDetalhe();
+    }
+
+    function abrirModalCategoria(row) {
+        rowModalAtual = row;
+        modalCategoriaBody.innerHTML = construirFormularioCategoria(row);
+        openModal('modal-dashboard-categoria');
+    }
+
+    if (btnModalCategoriaSalvar) {
+        btnModalCategoriaSalvar.addEventListener('click', () => {
+            if (!rowModalAtual) return;
+            salvarDetalheEstoque(rowModalAtual);
+            closeModal('modal-dashboard-categoria');
+            rowModalAtual = null;
+        });
+    }
+
+    if (btnModalCategoriaCancelar) {
+        btnModalCategoriaCancelar.addEventListener('click', () => {
+            rowModalAtual = null;
+        });
     }
 
     function salvarDetalheEstoque(row) {
@@ -181,7 +194,6 @@ export function initDashboard() {
         setCol(row, 'quebrado', novoQuebrado);
 
         showToast('Categoria atualizada com sucesso', 'success');
-        fecharDetalhe();
         atualizarResumo();
     }
 
@@ -192,8 +204,6 @@ export function initDashboard() {
 
     /* ===== Detalhe: Histórico (visualização de empréstimo) ===== */
     function abrirDetalheHistorico(loan) {
-        editandoId = null;
-
         detalheTitulo.textContent = `Empréstimo #${loan.numero}`;
 
         const itensHtml = loan.itens.map((item) => `
@@ -253,10 +263,8 @@ export function initDashboard() {
     }
 
     function fecharDetalhe() {
-        editandoId = null;
         detalheConteudo.style.display = 'none';
         if (detalheEmpty) detalheEmpty.style.display = 'flex';
-        estoqueContainer.querySelectorAll('.estoque-row').forEach(r => r.classList.remove('selected'));
     }
 
     if (btnDetalheFechar) btnDetalheFechar.addEventListener('click', fecharDetalhe);
@@ -271,9 +279,7 @@ export function initDashboard() {
             const targetTab = document.getElementById(`tab-${tabLink.dataset.tab}`);
             if (targetTab) targetTab.classList.add('active');
 
-            if (detalheContainer) {
-                detalheContainer.style.display = tabLink.dataset.tab === 'estoque' ? 'flex' : 'none';
-            }
+            atualizarVisibilidadeDetalhe();
 
             fecharDetalhe();
         });
@@ -416,6 +422,8 @@ export function initDashboard() {
     atualizarResumo();
     renderAndamento();
     renderHistorico();
+    atualizarVisibilidadeDetalhe();
+    window.addEventListener('resize', atualizarVisibilidadeDetalhe);
     subscribe(() => {
         renderAndamento();
         renderHistorico();

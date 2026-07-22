@@ -243,8 +243,8 @@
                             </div>
                         </div>
                         <div class="inicio-info-buttons">
-                                <a href="#" class="btn btn-neutral btn-sm nav-link" data-panel="panel-sobre">
-                                    Ver documentação <span class="material-symbols-outlined">docs</span>
+                            <a href="#" class="btn btn-neutral btn-sm nav-link" data-panel="panel-sobre">
+                                Ver documentação <span class="material-symbols-outlined">docs</span>
                             </a>
                             <a href="#" class="btn btn-neutral btn-sm nav-link" data-panel="panel-manual">
                                 Manual de uso <span class="material-symbols-outlined">developer_guide</span>
@@ -511,6 +511,23 @@
                 <!-- PAINEL 3: Dashboard -->
                 <section class="panel" id="panel-dashboard">
 
+                    <!-- Modal de edição de categoria no dashboard -->
+                    <div class="modal-overlay" id="modal-dashboard-categoria">
+                        <div class="modal-box">
+                            <div class="modal-header">
+                                <h3>Editar categoria</h3>
+                            </div>
+                            <div class="modal-body" id="modal-categoria-body"></div>
+                            <div class="modal-footer">
+                                <button class="btn btn-neutral" id="modal-categoria-cancelar"
+                                    type="button">Cancelar</button>
+                                <button class="btn btn-primary" id="modal-categoria-salvar" type="button">
+                                    <span class="material-symbols-outlined">save</span> Salvar alterações
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="dashboard-header-row">
                         <div>
                             <h2 class="panel-title"><span
@@ -593,33 +610,45 @@
 
                                 <div class="dashboard-tab-content active" id="tab-estoque">
                                     <div class="estoque-header">
-                                        <span></span>
                                         <span>Categoria</span>
                                         <span>Total</span>
                                         <span>Disponível</span>
                                         <span>Quebrado</span>
+                                        <span></span>
                                     </div>
 
                                     <div class="estoque-row" data-id="notebook" data-categoria="Notebook"
                                         data-total="40" data-disponivel="28" data-quebrado="2">
-                                        <div class="estoque-checkbox-wrap">
-                                            <input type="checkbox" class="estoque-checkbox" data-id="notebook">
-                                        </div>
                                         <span data-col="categoria">Notebook</span>
                                         <span data-col="total" data-label="Total">40</span>
                                         <span data-col="disponivel" data-label="Disponível">28</span>
                                         <span data-col="quebrado" data-label="Quebrado">2</span>
+                                        <span class="registros-row-menu-wrap">
+                                            <button type="button" class="registros-row-menu-btn"
+                                                aria-label="Mais opções">
+                                                <span class="material-symbols-outlined">more_vert</span>
+                                            </button>
+                                            <div class="registros-row-menu">
+                                                <span class="registros-row-menu-opcao" data-acao="editar">Editar</span>
+                                            </div>
+                                        </span>
                                     </div>
 
                                     <div class="estoque-row" data-id="tablet" data-categoria="Tablet" data-total="20"
                                         data-disponivel="15" data-quebrado="1">
-                                        <div class="estoque-checkbox-wrap">
-                                            <input type="checkbox" class="estoque-checkbox" data-id="tablet">
-                                        </div>
                                         <span data-col="categoria">Tablet</span>
                                         <span data-col="total" data-label="Total">20</span>
                                         <span data-col="disponivel" data-label="Disponível">15</span>
                                         <span data-col="quebrado" data-label="Quebrado">1</span>
+                                        <span class="registros-row-menu-wrap">
+                                            <button type="button" class="registros-row-menu-btn"
+                                                aria-label="Mais opções">
+                                                <span class="material-symbols-outlined">more_vert</span>
+                                            </button>
+                                            <div class="registros-row-menu">
+                                                <span class="registros-row-menu-opcao" data-acao="editar">Editar</span>
+                                            </div>
+                                        </span>
                                     </div>
                                 </div>
 

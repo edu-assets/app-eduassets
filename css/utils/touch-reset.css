@@ -1,0 +1,113 @@
+/* Hover reset for touch devices */
+
+@media (hover: none), (pointer: coarse) {
+
+    /* ===== Botões ===== */
+    .btn-primary:hover:not(:disabled) {
+        background-color: var(--primary-color);
+        transform: none;
+    }
+
+    .btn-success:hover:not(:disabled),
+    .btn-warning:hover:not(:disabled),
+    .btn-danger:hover:not(:disabled) {
+        filter: none;
+    }
+
+    .btn-neutral:hover:not(:disabled) {
+        background-color: var(--surface-white);
+    }
+
+    .registrar-emprestimo:hover {
+        background-color: var(--primary-color);
+        transform: none;
+    }
+
+    /* ===== Navegação ===== */
+    .sidebar-nav .nav-link:hover {
+        background-color: transparent;
+    }
+
+    .mobile-menu-btn:hover,
+    .sidebar-close-btn:hover {
+        background-color: transparent;
+    }
+
+    /* ===== Modais ===== */
+    .modal-close-btn:hover {
+        background-color: transparent;
+        color: var(--text-secondary);
+    }
+
+    /* ===== Formulários ===== */
+    .form-group input.input-auto:hover {
+        border-color: var(--slate-400);
+        color: var(--text-secondary);
+        box-shadow: none;
+    }
+
+    .item-emprestimo-remover:hover {
+        background-color: var(--surface-white);
+        border-color: var(--border-color);
+        color: var(--text-secondary);
+    }
+
+    .itens-emprestimo-mais:hover {
+        background-color: transparent;
+    }
+
+    /* ===== Cards ===== */
+    .cadastro-card:hover {
+        transform: none;
+        border-color: var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .controle-resumo-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .inicio-acao-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-sm);
+        border-color: var(--border-color);
+    }
+
+    .devolucao-item:hover {
+        background-color: var(--surface-white);
+        border-color: var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .sobre-footer-link:hover {
+        background-color: transparent;
+        color: var(--text-secondary);
+        border-color: var(--border-color);
+        opacity: 0.7;
+    }
+
+    /* ===== Tabelas / linhas de registro ===== */
+    .registros-row:hover,
+    .estoque-row:hover,
+    .historico-row:hover {
+        background-color: transparent;
+    }
+
+    .novo-registro-opcao:hover,
+    .registros-row-menu-opcao:hover,
+    .registros-row-menu-opcao-danger:hover {
+        background-color: transparent;
+    }
+
+    .registros-row-menu-btn:hover {
+        background-color: transparent;
+        color: var(--text-muted);
+    }
+
+    .devolucao-detalhe-editar-btn:hover {
+        background-color: var(--surface-white);
+        color: var(--text-secondary);
+        border-color: var(--border-color);
+    }
+}
