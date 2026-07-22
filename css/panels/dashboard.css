@@ -103,7 +103,7 @@
 .dashboard-layout .devolucao-detalhe-painel {
     display: flex;
     flex-direction: column;
-    gap: 20px; 
+    gap: 20px;
     min-height: auto;
     height: fit-content;
 }
@@ -117,7 +117,7 @@
 }
 
 .dashboard-andamento {
-    flex: 0 0 auto; 
+    flex: 0 0 auto;
 }
 
 #dashboard-andamento-vazio {
@@ -127,7 +127,7 @@
     justify-content: center;
     gap: 12px;
     padding: 16px;
-    min-height: 70px; 
+    min-height: 70px;
     background-color: var(--surface-2);
     border: 1px dashed var(--border-color);
     border-radius: 6px;
@@ -346,6 +346,7 @@
     box-shadow: var(--shadow-sm);
     padding: 24px;
 }
+
 /* Tabs internas: Estoque | Histórico */
 .dashboard-tabs {
     display: flex;
@@ -355,7 +356,7 @@
     align-items: flex-end;
 }
 
-.dashboard-toolbar{
+.dashboard-toolbar {
     margin-left: auto;
 }
 
@@ -622,9 +623,13 @@
         position: relative;
         display: flex;
         flex-direction: column;
+        align-items: stretch;
         padding: 16px;
+        background-color: var(--surface-white, #ffffff);
+        border: 1px solid var(--border-color);
         border-radius: 8px;
         margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     }
 
     .estoque-checkbox-wrap {
@@ -667,9 +672,13 @@
     .historico-row {
         display: flex;
         flex-direction: column;
+        align-items: stretch;
         padding: 14px 16px;
+        background-color: var(--surface-white, #ffffff);
+        border: 1px solid var(--border-color);
         border-radius: 8px;
         margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     }
 
     .historico-row [data-col] {
@@ -683,6 +692,9 @@
 
     .historico-row [data-col="numero"] {
         border-top: none;
+        justify-content: center;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
     }
 
     .historico-row [data-col]::before {
@@ -694,15 +706,38 @@
         letter-spacing: 0.02em;
     }
 
+    .historico-row [data-col="responsavel"] {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--primary-dark, #1e293b);
+        
+    }
+
+    .historico-row [data-col="responsavel"]::before {
+        color: var(--primary-color);
+    }
+
     .historico-row [data-col="itens"] {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        align-items: flex-end;
+    }
+
+    .historico-row [data-col="itens"]::before {
+        color: var(--primary-color);
     }
 
     .historico-detalhes-btn {
         width: 100%;
         margin-top: 8px;
+    }
+
+    .historico-row [data-col="status"] {
+        justify-content: center; 
+        gap: 10px; 
+        border-top: none; 
+        margin-top: 8px;
+        padding: 6px 12px
     }
 
     /* ----- edit modal ----- */
