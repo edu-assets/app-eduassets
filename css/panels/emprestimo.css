@@ -1,7 +1,7 @@
 .emprestimo-container {
     display: flex;
     flex-direction: column;
-    align-items:center;
+    align-items: center;
     justify-content: center;
     margin-top: 24px;
     background-color: var(--bg-light);
@@ -71,7 +71,8 @@
     visibility: hidden;
 }
 
-.form-group .col-md .data-emprestimo, .form-label-optional {
+.form-group .col-md .data-emprestimo,
+.form-label-optional {
     display: inline-flex;
     align-items: center;
     font-size: 0.70rem;
@@ -235,13 +236,156 @@
     border: 0.5px solid var(--primary-color);
 }
 
- #panel-emprestimo .form-actions {
+#panel-emprestimo .form-actions {
     display: flex;
     justify-content: flex-end;
-} 
+}
 
 #panel-emprestimo .registrar-emprestimo {
     width: auto;
     min-width: 240px;
     margin-top: 0;
+}
+
+/* ==========================================
+   RESPONSIVIDADE: PAINEL DE EMPRÉSTIMO
+   ========================================== */
+
+@media (max-width: 1024px) {
+    .conteudo-container {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .form-emprestimo {
+        padding: 24px;
+        gap: 20px;
+    }
+
+    #panel-emprestimo .form-row {
+        gap: 14px;
+    }
+
+    #panel-emprestimo .form-group.col-md {
+        flex: 1 1 180px;
+    }
+}
+
+@media (max-width: 640px) {
+    .emprestimo-container {
+        margin-top: 16px;
+    }
+
+    .form-emprestimo {
+        padding: 20px 16px;
+        border-radius: 8px;
+        gap: 22px;
+    }
+
+    .form-section {
+        gap: 10px;
+    }
+
+    .form-section:not(:last-child) {
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+    }
+
+    .form-section .form-label-description {
+        margin-bottom: 6px;
+        font-size: 0.8rem;
+    }
+
+    #panel-emprestimo .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    #panel-emprestimo .form-group {
+        flex: 1 1 100%;
+    }
+
+    #panel-emprestimo .form-group.col-md {
+        flex: 0 0 auto;
+        min-width: 220px;
+    }
+
+    #panel-emprestimo .select-equipamento {
+        width: 100%;
+    }
+
+    #panel-emprestimo .form-row:has(#equipamento) {
+        display: grid;
+        grid-template-columns: 1fr 84px;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    #panel-emprestimo .form-group.col-sm {
+        flex: unset;
+        width: 100%;
+    }
+
+    #panel-emprestimo .form-group-align-btn {
+        flex: 1 1 100%;
+        margin-top: 8px;
+        display: flex;
+        justify-content: center;
+    }
+
+    #panel-emprestimo .form-group-align-btn .btn {
+        width: fit-content;
+        min-width: 160px;
+        justify-content: center;
+        height: 42px;
+    }
+
+    #panel-emprestimo .form-actions {
+        justify-content: stretch;
+        margin-top: 8px;
+    }
+
+    #panel-emprestimo .registrar-emprestimo {
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+        padding: 14px 16px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 440px) {
+    .conteudo-container {
+        padding: 0 6px;
+    }
+
+    .form-emprestimo {
+        padding: 16px 12px;
+        gap: 18px;
+    }
+
+    #panel-emprestimo .form-row:has(#equipamento) {
+        grid-template-columns: 1fr 76px;
+        gap: 8px;
+    }
+
+    #panel-emprestimo .form-group.col-md {
+        min-width: 100%;
+    }
+
+    .item-emprestimo-row {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    #panel-emprestimo .form-group-align-btn {
+        display: flex;
+        justify-content: center;
+    }
+
+    #panel-emprestimo .form-group-align-btn .btn {
+        width: fit-content;
+        min-width: 140px;
+    }
 }

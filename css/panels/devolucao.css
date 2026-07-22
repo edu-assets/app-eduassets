@@ -589,3 +589,95 @@
     margin-left: auto;
     position: static;
 }
+
+/* RESPONSIVINESS */
+
+@media (max-width: 1024px) {
+    .devolucao-detalhe-painel {
+        display: none;
+    }
+
+    .devolucao-detalhe-painel.mobile-aberto {
+        display: flex;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        /* size adjustments */
+        width: calc(100% - 32px);
+        max-width: 440px;
+        max-height: 85vh;
+        overflow-y: auto;
+
+
+        z-index: 1000;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .devolucao-detalhe-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background-color: rgba(5, 11, 28, 0.55);
+        z-index: 999;
+    }
+
+    .devolucao-detalhe-backdrop.active {
+        display: block;
+    }
+}
+
+@media (max-width: 640px) {
+    .devolucao-layout {
+        gap: 20px;
+    }
+
+    .devolucao-tabela-header {
+        display: none;
+    }
+
+    .devolucao-item {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "pessoa pessoa"
+            "equip equip"
+            "data status"
+            "acao acao";
+        row-gap: 12px;
+        column-gap: 10px;
+        padding: 16px;
+    }
+
+    .devolucao-col-resp {
+        grid-area: pessoa;
+    }
+
+    .devolucao-col-equip {
+        grid-area: equip;
+    }
+
+    .devolucao-col-data {
+        grid-area: data;
+        align-self: center;
+    }
+
+    .devolucao-col-status {
+        grid-area: status;
+        justify-self: end;
+        align-self: center;
+    }
+
+    .devolucao-col-acao {
+        grid-area: acao;
+    }
+
+    .devolver-btn {
+        width: 100%;
+        padding: 10px 16px;
+    }
+
+    .devolucao-vazia-logo {
+        width: 220px;
+    }
+}

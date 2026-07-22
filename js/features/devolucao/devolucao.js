@@ -5,6 +5,7 @@ import { criarDataAutoPicker } from '../../core/datepicker/datepicker.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
 
 const LIMITE_ICONES_CARD = 3;
+const BREAKPOINT_LAYOUT_EMPILHADO = 1024;
 
 const EQUIPAMENTO_ICONS = {
     eq1: 'laptop',
@@ -38,6 +39,8 @@ export function initDevolucao() {
     const btnDetalheFechar = document.getElementById('btn-detalhe-fechar');
     const btnDetalheCancelar = document.getElementById('btn-detalhe-cancelar');
     const btnConfirmarDevolucaoPainel = document.getElementById('btn-confirmar-devolucao-painel');
+    const painel = document.querySelector('.devolucao-detalhe-painel');
+    const backdrop = document.getElementById('devolucao-detalhe-backdrop');
 
     let idDetalheAberto = null;
     let itensEditando = [];
@@ -74,6 +77,15 @@ export function initDevolucao() {
     // --- fechar / cancelar painel ---
 
     btnDetalheFechar.addEventListener('click', fecharDetalhe);
+    if (backdrop) backdrop.addEventListener('click', fecharDetalhe);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && painel?.classList.contains('mobile-aberto')) fecharDetalhe();
+    });
+
+    window.addEventListener('resize', () => {
+        if (!ehLayoutEmpilhado()) fecharPainelMobile();
+    });
 
     btnDetalheCancelar.addEventListener('click', () => {
         if (modoEdicaoAtivo) {
@@ -136,6 +148,22 @@ export function initDevolucao() {
         setModoEdicao(false);
         renderDetalheItens(itensEditando, false);
     });
+
+    function ehLayoutEmpilhado() {
+        return window.matchMedia(`(max-width: ${BREAKPOINT_LAYOUT_EMPILHADO}px)`).matches;
+    }
+
+    function abrirPainelMobile() {
+        if (!painel || !backdrop) return;
+        painel.classList.add('mobile-aberto');
+        backdrop.classList.add('active');
+    }
+
+    function fecharPainelMobile() {
+        if (!painel || !backdrop) return;
+        painel.classList.remove('mobile-aberto');
+        backdrop.classList.remove('active');
+    }
 
     function abrirModalConfirmacao(id) {
         idPendente = id;
@@ -204,6 +232,8 @@ export function initDevolucao() {
         detalheEmpty.style.display = 'none';
         detalheConteudo.style.display = 'flex';
         marcarLinhaSelecionada(id);
+
+        if (ehLayoutEmpilhado()) abrirPainelMobile();
     }
 
     function fecharDetalhe() {
@@ -213,6 +243,7 @@ export function initDevolucao() {
         detalheConteudo.style.display = 'none';
         detalheEmpty.style.display = 'flex';
         marcarLinhaSelecionada(null);
+        fecharPainelMobile();
     }
 
     function marcarLinhaSelecionada(id) {
@@ -281,12 +312,12 @@ function render(loans) {
                 </span>
                 ` : ''}
             </div>
-            <div>
+            <div class="devolucao-col-status">
                 <span class="status-pill">
                     <span class="status-dot"></span> Pendente
                 </span>
             </div>
-            <div>
+            <div class="devolucao-col-acao">
                 <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}">Devolver</button>
             </div>
         </div>
