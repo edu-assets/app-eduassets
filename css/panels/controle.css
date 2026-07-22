@@ -35,9 +35,17 @@
     box-shadow: var(--shadow-md);
 }
 
-.controle-resumo-card-info { border-bottom-color: var(--info-color); }
-.controle-resumo-card-warning { border-bottom-color: var(--warning-color); }
-.controle-resumo-card-error { border-bottom-color: var(--error-color); }
+.controle-resumo-card-info {
+    border-bottom-color: var(--info-color);
+}
+
+.controle-resumo-card-warning {
+    border-bottom-color: var(--warning-color);
+}
+
+.controle-resumo-card-error {
+    border-bottom-color: var(--error-color);
+}
 
 .controle-resumo-icon {
     flex-shrink: 0;
@@ -338,7 +346,7 @@
     font-size: 15px;
     width: 15px;
     height: 15px;
-    color:inherit;
+    color: inherit;
 }
 
 /* ESTILIZAÇÃO POR TIPO DE PROBLEMA  */
@@ -361,7 +369,8 @@
 .registros-row[data-problema="bateria"] .controle-problema-badge {
     background-color: color-mix(in srgb, var(--warning-color) 8%, transparent);
     border-color: color-mix(in srgb, var(--warning-color) 35%, transparent);
-    color: #d97706; /* Tom de alerta visível sobre fundo claro */
+    color: #d97706;
+    /* Tom de alerta visível sobre fundo claro */
 }
 
 /* Carcaça - Vermelho / Error */
@@ -401,7 +410,8 @@
 
 /* Outro / Padrão - Cinza Neutro Muted */
 .registros-row[data-problema="outro"] .controle-problema-badge,
-.controle-problema-badge { /* Fallback caso não encontre o tipo */
+.controle-problema-badge {
+    /* Fallback caso não encontre o tipo */
     background-color: var(--surface-2);
     border-color: var(--border-color);
     color: var(--text-secondary);
@@ -555,4 +565,229 @@
     width: 20px;
     height: 20px;
     flex-shrink: 0;
+}
+
+/* RESPONSIVINESS */
+
+@media (max-width: 1024px) {
+    .controle-resumo-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+
+    .controle-resumo-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 16px 12px;
+        gap: 12px;
+    }
+
+    .controle-resumo-chevron {
+        display: none;
+    }
+
+    .controle-registros-toolbar .btn {
+        font-size: 0;
+        padding: 8px;
+        min-width: 36px;
+        justify-content: center;
+    }
+
+    .controle-registros-toolbar .btn .material-symbols-outlined {
+        font-size: 18px;
+        margin: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .controle-resumo-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .controle-registros-container {
+        padding: 18px;
+    }
+
+    .controle-registros-header-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .controle-registros-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .controle-tabs-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        padding-bottom: 4px;
+    }
+
+    .controle-tabs {
+        flex-wrap: nowrap;
+        width: 100%;
+        gap: 4px;
+        overflow-x: auto;
+    }
+
+    .controle-tab-link {
+        flex: 1;
+        text-align: center;
+        padding: 10px 4px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .controle-tabs-row .controle-tabs-ferramentas {
+        width: 100%;
+    }
+
+    .controle-tabs-row .controle-busca-wrap {
+        flex: 1;
+    }
+
+    .controle-tabs-row .controle-busca-wrap input {
+        width: 100%;
+    }
+
+    .controle-dica-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    /* ----- Registers cards ----- */
+    .registros-header,
+    .registros-header-resolvidos {
+        display: none;
+    }
+
+    .registros-row,
+    .registros-row-resolvidos {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "titulo titulo"
+            "sub sub"
+            "numero badge"
+            "desc desc"
+            "meta meta";
+        row-gap: 8px;
+        column-gap: 10px;
+        position: relative;
+        padding: 14px 40px 14px 14px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    .registros-row-resolvidos {
+        grid-template-areas:
+            "titulo titulo"
+            "sub sub"
+            "numero badge"
+            "desc desc"
+            "medidas medidas"
+            "meta meta";
+    }
+
+    .registros-row-icon {
+        display: none;
+    }
+
+    .registros-row [data-col="categoria"] {
+        grid-area: titulo;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .registros-row [data-col="modelo"] {
+        grid-area: sub;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+    }
+
+    .registros-row [data-col="numero"] {
+        grid-area: numero;
+        align-self: center;
+    }
+
+    .registros-row .controle-problema-badge {
+        grid-area: badge;
+        justify-self: end;
+        align-self: center;
+    }
+
+    .registros-row [data-col="descricao"] {
+        grid-area: desc;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        padding-top: 8px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .registros-row-resolvidos [data-col="medidas"] {
+        grid-area: medidas;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        padding-top: 8px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .registros-row-resolvidos [data-col="medidas"]::before {
+        content: "Medidas tomadas";
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .registros-row .registros-data {
+        grid-area: meta;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .registros-row .registros-row-menu-wrap {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    }
+
+    #btn-editar-registro,
+    #btn-deletar-registro {
+        display: none;
+    }
+
+    #btn-novo-registro {
+        font-size: 0.85rem;
+        padding: 6px 14px;
+        min-width: auto;
+    }
+
+    #btn-novo-registro .material-symbols-outlined {
+        margin-right: 4px;
+    }
+
+    .registros-row-menu-btn {
+        width: 36px;
+        height: 36px;
+        background-color: var(--surface-2);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .registros-row-menu-btn .material-symbols-outlined {
+        font-size: 22px;
+        color: var(--primary-color);
+    }
 }
