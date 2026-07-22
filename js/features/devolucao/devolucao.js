@@ -221,48 +221,80 @@ export function initDevolucao() {
         });
     }
 
-    function render(loans) {
-        if (!loans.length) {
-            lista.innerHTML = `
-                <div class="devolucao-vazia">
-                    <img src="assets/logos/eduAssets_logo-empty-state.png" alt="" class="devolucao-vazia-logo">
-                    <p class="devolucao-vazia-texto">Empréstimos aparecerão aqui</p>
-                    <p class="devolucao-vazia-sub">Registre um novo empréstimo para começar a acompanhar as devoluções.</p>
-                </div>
-            `;
-            fecharDetalhe();
-            return;
-        }
+    function gerarIniciais(nome) {
+    if (!nome) return '';
+    const partes = nome.trim().split(' ');
+    if (partes.length === 1) return partes[0].substring(0, 2).toUpperCase();
+    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
 
-        lista.innerHTML = loans.map((loan) => `
-            <div class="devolucao-item" data-id="${loan.id}">
-                <span class="devolucao-papel-icon devolucao-papel-icon-sm">
-                    <span class="material-symbols-outlined">badge</span>
-                </span>
-                <div class="devolucao-info">
-                    <div class="devolucao-linha-principal">
-                        <span class="info-resp">${escapeHtml(loan.responsavel)}</span>
-                        <svg class="seta-svg" viewBox="0 0 40 12" xmlns="http://www.w3.org/2000/svg">
-                            <line x1="0" y1="6" x2="32" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            <polyline points="26,1 36,6 26,11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        <span class="info-value">${escapeHtml(loan.aluno)}</span>
-                    </div>
-                    <div class="devolucao-itens-icons">${renderItensIcons(loan.itens)}</div>
-                    <div class="devolucao-linha-hora">
-                        <span class="material-symbols-outlined">schedule</span>
-                        <span>${formatarHora(loan.createdAt)}</span>
-                        ${loan.observacao ? `<span class="devolucao-obs-indicador" title="Contém observação"><span class="material-symbols-outlined">sticky_note_2</span></span>` : ''}
-                    </div>
+function formatarDataCard(date) {
+    const dataStr = date.toLocaleDateString('pt-BR');
+    const horaStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `${dataStr} às ${horaStr}`;
+}
+
+function render(loans) {
+    if (!loans.length) {
+        lista.innerHTML = `
+            <div class="devolucao-vazia">
+                <img src="assets/logos/eduAssets_logo-empty-state.png" alt="" class="devolucao-vazia-logo">
+                <p class="devolucao-vazia-texto">Empréstimos aparecerão aqui</p>
+                <p class="devolucao-vazia-sub">Registre um novo empréstimo para começar a acompanhar as devoluções.</p>
+            </div>
+        `;
+        fecharDetalhe();
+        return;
+    }
+
+    const cabecalho = `
+        <div class="devolucao-tabela-header">
+            <span>Responsável</span>
+            <span>Equipamentos</span>
+            <span>Empréstimo</span>
+            <span>Status</span>
+            <span>Ações</span>
+        </div>
+    `;
+
+    lista.innerHTML = cabecalho + loans.map((loan) => `
+        <div class="devolucao-item" data-id="${loan.id}">
+            <div class="devolucao-col-resp">
+                <div class="devolucao-avatar">${gerarIniciais(loan.responsavel)}</div>
+                <div class="devolucao-textos-resp">
+                    <span class="info-resp-nome">${escapeHtml(loan.responsavel)}</span>
+                    <span class="info-aluno-nome">${escapeHtml(loan.aluno)}</span>
                 </div>
+            </div>
+            <div class="devolucao-col-equip">
+                <div class="devolucao-itens-icons">${renderItensIcons(loan.itens)}</div>
+            </div>
+            <div class="devolucao-col-data">
+                <span class="info-data-completa">
+                    <span class="material-symbols-outlined">schedule</span>
+                    ${formatarHora(loan.createdAt)}
+                </span>
+                ${loan.observacao ? `
+                <span class="info-data-relativa">
+                    <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.7;">sticky_note_2</span>
+                    Com observação
+                </span>
+                ` : ''}
+            </div>
+            <div>
+                <span class="status-pill">
+                    <span class="status-dot"></span> Pendente
+                </span>
+            </div>
+            <div>
                 <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}">Devolver</button>
             </div>
-        `).join('');
+        </div>
+    `).join('');
 
-        if (idDetalheAberto) {
-            const aindaExiste = loans.some((l) => l.id === idDetalheAberto);
-            aindaExiste ? marcarLinhaSelecionada(idDetalheAberto) : fecharDetalhe();
-        }
+    if (idDetalheAberto) {
+        const aindaExiste = loans.some((l) => l.id === idDetalheAberto);
+        aindaExiste ? marcarLinhaSelecionada(idDetalheAberto) : fecharDetalhe();
     }
 }
 
@@ -295,4 +327,4 @@ function formatarHora(date) {
     const mesmoDia = date.toDateString() === hoje.toDateString();
     const hora = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     return mesmoDia ? `Hoje às ${hora}` : `${date.toLocaleDateString('pt-BR')} às ${hora}`;
-}
+}}
