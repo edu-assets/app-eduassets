@@ -1,4 +1,4 @@
-import { showToast } from '../../core/toast/toast.js';
+import { showToast } from '../../core/ui/index.js';
 
 export function initExportar() {
     const form = document.getElementById('form-exportar');

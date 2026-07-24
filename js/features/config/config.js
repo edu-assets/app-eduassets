@@ -1,4 +1,4 @@
-import { showToast } from '../../core/toast/toast.js';
+import { showToast } from '../../core/ui/index.js';
 
 export function initConfig() {
     const btnSalvar = document.getElementById('config-salvar');

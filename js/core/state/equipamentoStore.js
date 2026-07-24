@@ -1,4 +1,4 @@
-import { listarEquipamentos } from '../api/equipamentos.js';
+import { listarEquipamentos, atualizarEquipamento } from '../api/equipamentos.js';
 
 let equipamentos = [];
 let listeners = [];
@@ -11,6 +11,11 @@ export async function carregarEquipamentos() {
 
 export function getEquipamentos() {
     return equipamentos;
+}
+
+export async function atualizarEquipamentoPorId(id, dados) {
+    await atualizarEquipamento(id, dados);
+    await carregarEquipamentos();
 }
 
 export function subscribe(callback) {

@@ -1,26 +1,7 @@
-import { openModal, closeModal } from '../../core/modal/modal.js';
-import { showToast } from '../../core/toast/toast.js';
-import { confirmarExclusao } from '../../core/confirm/confirm.js';
-import { html, raw } from '../../core/utils/html.js';
-
-const PROBLEMA_ICONS = {
-    tela: { label: 'Tela', icon: 'monitor' },
-    audio: { label: 'Áudio', icon: 'headphones' },
-    bateria: { label: 'Bateria', icon: 'battery_alert' },
-    cabo: { label: 'Cabo', icon: 'cable' },
-    touch: { label: 'Touch', icon: 'touch_app' },
-    teclado: { label: 'Teclado', icon: 'keyboard' },
-    botao: { label: 'Botão', icon: 'smart_button' },
-    carcaca: { label: 'Carcaça', icon: 'construction' },
-    outro: { label: 'Outro', icon: 'help' }
-};
-
-const ICONE_POR_TIPO = {
-    observacao: 'chat_bubble',
-    manutencao: 'build',
-    quebrado: 'heart_broken',
-    resolvidos: 'task_alt'
-};
+import { openModal, closeModal, showToast, confirmarExclusao } from '../../core/ui/index.js';
+import { getEquipamentos } from '../../core/state/equipamentoStore.js';
+import { getOcorrenciasPorTipo, subscribe as subscribeOcorrencias, addOcorrencia, updateOcorrencia, deleteOcorrencia } from '../../core/state/ocorrenciasStore.js';
+import { renderControleLinha } from './controleTemplates.js';
 
 const TITULOS_POR_TIPO = {
     observacao: 'Nova Observação',
@@ -38,6 +19,8 @@ export function initControle() {
     const btnEditar = document.getElementById('btn-editar-registro');
     const btnDeletar = document.getElementById('btn-deletar-registro');
     const paginacaoTexto = document.getElementById('controle-paginacao-texto');
+
+    const tiposVisiveis = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
 
     let linhaSelecionada = null;
     let tipoAtual = null;
@@ -167,7 +150,7 @@ export function initControle() {
     }
 
     if (btnModalSalvar) {
-        btnModalSalvar.addEventListener('click', () => {
+        btnModalSalvar.addEventListener('click', async () => {
             if (!tipoAtual) return;
 
             if (!campoCategoria.value || !campoModelo.value || !campoNumero.value || !campoProblema.value) {
@@ -190,12 +173,17 @@ export function initControle() {
                 medidas: tipoAtual === 'resolvidos' ? campoMedidas.value : undefined
             };
 
-            if (idEditando && linhaEditando) {
-                editarRegistro(linhaEditando, tipoAtual, dados);
-                showToast('Registro atualizado com sucesso', 'success');
-            } else {
-                adicionarRegistro(tipoAtual, dados);
-                showToast('Registro criado com sucesso', 'success');
+            try {
+                if (idEditando) {
+                    await editarRegistro(idEditando, tipoAtual, dados);
+                    showToast('Registro atualizado com sucesso', 'success');
+                } else {
+                    await adicionarRegistro(tipoAtual, dados);
+                    showToast('Registro criado com sucesso', 'success');
+                }
+            } catch (erro) {
+                showToast(erro instanceof Error ? erro.message : 'Erro ao salvar registro.', 'error');
+                return;
             }
 
             closeModal('modal-controle-novo');
@@ -204,73 +192,72 @@ export function initControle() {
         });
     }
 
-    function renderMenuAcoes() {
-        return html`
-            <span class="registros-row-menu-wrap">
-                <button type="button" class="registros-row-menu-btn" aria-label="Mais opções">
-                    <span class="material-symbols-outlined">more_vert</span>
-                </button>
-                <div class="registros-row-menu">
-                    <span class="registros-row-menu-opcao" data-acao="editar">Editar</span>
-                    <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir">Excluir</span>
-                </div>
-            </span>
-        `;
+    function renderControle() {
+        tiposVisiveis.forEach((tipo) => {
+            const tabContent = document.getElementById(`tab-${tipo}`);
+            if (!tabContent) return;
+
+            const header = tabContent.querySelector('.registros-header')?.outerHTML
+                || tabContent.querySelector('.registros-header-resolvidos')?.outerHTML
+                || '';
+
+            const registros = getOcorrenciasPorTipo(tipo);
+            const rows = registros.length
+                ? registros.map((registro) => renderControleLinha(tipo, registro)).join('')
+                : `
+                    <div class="devolucao-detalhe-empty" style="display:flex; min-height: 220px; align-items:center; justify-content:center; flex-direction:column; gap: 12px;">
+                        <span class="material-symbols-outlined">inbox</span>
+                        <p>Nenhum registro encontrado.</p>
+                    </div>
+                `;
+
+            tabContent.innerHTML = header + rows;
+        });
+
+        tiposVisiveis.slice(0, 3).forEach(atualizarContagem);
+        atualizarPaginacaoTexto(document.querySelector('.controle-tab-content.active'));
+
+        if (linhaSelecionada) {
+            const selecionadaAtual = registrosElementById(linhaSelecionada.dataset.id);
+            if (selecionadaAtual) {
+                selecionarLinha(selecionadaAtual);
+            } else {
+                limparSelecao();
+            }
+        }
     }
 
-    function aplicarDadosNaLinha(row, dados) {
-        row.dataset.problema = dados.problema;
-        row.dataset.categoria = dados.categoria;
-        row.dataset.modelo = dados.modelo;
-        row.dataset.numero = dados.numero;
-        row.dataset.descricao = dados.descricao;
-        row.dataset.registradoEm = dados.registradoEm;
-        if (dados.medidas !== undefined) row.dataset.medidas = dados.medidas;
+    function registrosElementById(id) {
+        return document.querySelector(`.registros-row[data-id="${CSS.escape(String(id))}"]`);
     }
 
-    function renderLinhaConteudo(tipo, dados) {
-        const problemaInfo = PROBLEMA_ICONS[dados.problema] || PROBLEMA_ICONS.outro;
-        const iconeLinha = ICONE_POR_TIPO[tipo] || 'chat_bubble';
+    async function adicionarRegistro(tipo, dados) {
+        const equipamentoId = resolverEquipamentoId(dados.categoria, dados.modelo);
+        if (!equipamentoId) {
+            throw new Error('Não foi possível localizar um equipamento correspondente para salvar o registro.');
+        }
 
-        const colunaMedidas = tipo === 'resolvidos'
-            ? html`<span data-col="medidas">${dados.medidas}</span>`
-            : '';
-
-        return html`
-            <span class="registros-row-icon"><span class="material-symbols-outlined">${iconeLinha}</span></span>
-            <span data-col="categoria">${dados.categoria}</span>
-            <span data-col="modelo">${dados.modelo}</span>
-            <span class="registros-numero" data-col="numero">${dados.numero}</span>
-            <span class="controle-problema-badge"><span class="material-symbols-outlined">${problemaInfo.icon}</span>${problemaInfo.label}</span>
-            <span data-col="descricao">${dados.descricao}</span>
-            <span class="registros-data" data-col="registrado-em">${dados.registradoEm}</span>
-            ${raw(colunaMedidas)}
-            ${raw(renderMenuAcoes())}
-        `;
+        await addOcorrencia({
+            equipamentoId,
+            tipo: mapTipoApi(tipo),
+            problema: dados.problema,
+            descricao: dados.descricao,
+            numeros: [dados.numero]
+        });
     }
 
-    function adicionarRegistro(tipo, dados) {
-        const tabContent = document.getElementById(`tab-${tipo}`);
-        if (!tabContent) return;
+    async function editarRegistro(id, tipo, dados) {
+        const payload = {
+            problema: dados.problema,
+            descricao: dados.descricao,
+            numero: dados.numero
+        };
 
-        const completos = { ...dados, registradoEm: formatarDataHoraAtual() };
+        if (tipo === 'resolvidos' && dados.medidas !== undefined) {
+            payload.medidasTomadas = dados.medidas;
+        }
 
-        const row = document.createElement('div');
-        row.className = tipo === 'resolvidos' ? 'registros-row registros-row-resolvidos' : 'registros-row';
-        row.dataset.id = crypto.randomUUID();
-        aplicarDadosNaLinha(row, completos);
-        row.innerHTML = renderLinhaConteudo(tipo, completos);
-
-        tabContent.appendChild(row);
-        atualizarContagem(tipo);
-
-        if (tabContent.classList.contains('active')) atualizarPaginacaoTexto(tabContent);
-    }
-
-    function editarRegistro(row, tipo, dados) {
-        const completos = { ...dados, registradoEm: row.dataset.registradoEm };
-        aplicarDadosNaLinha(row, completos);
-        row.innerHTML = renderLinhaConteudo(tipo, completos);
+        await updateOcorrencia(Number(id), payload);
     }
 
     function atualizarContagem(tipo) {
@@ -344,9 +331,6 @@ export function initControle() {
     async function removerLinha(row) {
         if (!row) return;
 
-        const tabContent = row.closest('.controle-tab-content');
-        const tipo = tabContent ? tabContent.dataset.tipo : null;
-
         const confirmado = await confirmarExclusao({
             titulo: 'Excluir registro',
             mensagem: 'Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'
@@ -354,10 +338,8 @@ export function initControle() {
         if (!confirmado) return;
 
         if (row === linhaSelecionada) limparSelecao();
-        row.remove();
 
-        if (tipo) atualizarContagem(tipo);
-        if (tabContent && tabContent.classList.contains('active')) atualizarPaginacaoTexto(tabContent);
+        await deleteOcorrencia(Number(row.dataset.id));
 
         showToast('Registro excluído com sucesso', 'success');
     }
@@ -374,13 +356,29 @@ export function initControle() {
     }
 
     /* ===== Inicialização ===== */
-    ['observacao', 'manutencao', 'quebrado'].forEach(atualizarContagem);
-    atualizarPaginacaoTexto(document.getElementById('tab-observacao'));
+    renderControle();
+    subscribeOcorrencias(() => renderControle());
 }
 
-function formatarDataHoraAtual() {
-    const agora = new Date();
-    const data = agora.toLocaleDateString('pt-BR');
-    const hora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    return `${data} ${hora}`;
+function resolverEquipamentoId(categoria, modelo) {
+    const categoriaNormalizada = String(categoria || '').trim().toLowerCase();
+    const modeloNormalizado = String(modelo || '').trim().toLowerCase();
+
+    const equipamento = getEquipamentos().find((item) => {
+        const categoriaItem = String(item.categoria?.nome ?? '').trim().toLowerCase();
+        const modeloItem = String(item.modelo ?? '').trim().toLowerCase();
+        return categoriaItem === categoriaNormalizada && modeloItem === modeloNormalizado;
+    });
+
+    return equipamento?.id ?? null;
+}
+
+function mapTipoApi(tipo) {
+    const map = {
+        observacao: 'OBSERVACAO',
+        manutencao: 'MANUTENCAO',
+        quebrado: 'QUEBRADO'
+    };
+
+    return map[tipo] || 'OBSERVACAO';
 }

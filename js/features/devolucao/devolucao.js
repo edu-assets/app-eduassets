@@ -1,19 +1,10 @@
 import { getLoansAbertos, returnLoan, updateLoan, subscribe } from '../../core/state/loans.js';
-import { showToast } from '../../core/toast/toast.js';
-import { openModal, closeModal } from '../../core/modal/modal.js';
-import { criarDataAutoPicker } from '../../core/datepicker/datepicker.js';
+import { showToast, openModal, closeModal, criarDataAutoPicker } from '../../core/ui/index.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
+import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 
 const LIMITE_ICONES_CARD = 3;
 const BREAKPOINT_LAYOUT_EMPILHADO = 1024;
-
-const EQUIPAMENTO_ICONS = {
-    eq1: 'laptop',
-    eq2: 'tablet',
-    eq3: 'headphones',
-    eq4: 'bolt',
-    eq5: 'usb'
-};
 
 export function initDevolucao() {
     const lista = document.getElementById('lista-devolucoes-items');
@@ -60,10 +51,10 @@ export function initDevolucao() {
         if (card) abrirDetalhe(card.dataset.id);
     });
 
-    btnConfirmarDevolucao.addEventListener('click', () => {
+    btnConfirmarDevolucao.addEventListener('click', async () => {
         if (!idPendente) return;
 
-        returnLoan(idPendente, devolucaoDataInput.value);
+        await returnLoan(idPendente, devolucaoDataInput.value);
         showToast(`Devolução registrada para ${devolucaoDataInput.value}`, 'success');
         closeModal('modal-confirmar-devolucao');
         idPendente = null;
@@ -137,13 +128,13 @@ export function initDevolucao() {
         e.target.value = item.quantidade;
     });
 
-    btnDetalheSalvar.addEventListener('click', () => {
+    btnDetalheSalvar.addEventListener('click', async () => {
         if (!itensEditando.length) {
             showToast('O empréstimo precisa ter ao menos um equipamento', 'error');
             return;
         }
 
-        updateLoan(idDetalheAberto, { itens: itensEditando });
+        await updateLoan(idDetalheAberto, { itens: itensEditando });
         showToast('Empréstimo atualizado com sucesso', 'success');
         setModoEdicao(false);
         renderDetalheItens(itensEditando, false);
@@ -187,7 +178,7 @@ export function initDevolucao() {
         if (!editMode) {
             detalheLista.innerHTML = itens.map((item) => `
         <li>
-            <span class="material-symbols-outlined">${EQUIPAMENTO_ICONS[item.id] || 'devices_other'}</span>
+            <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
             <span class="detalhe-item-nome">${item.quantidade}x ${escapeHtml(item.nome)}</span>
             <span class="detalhe-item-status">Pendente</span>
         </li>
@@ -343,7 +334,7 @@ function renderItensIcons(itens) {
 
 // renderItemIconPill()
 function renderItemIconPill(item) {
-    const icon = EQUIPAMENTO_ICONS[item.id] || 'devices_other';
+    const icon = getEquipamentoIcon(item.id);
     const nome = escapeHtml(item.nome);
     return `
         <div class="devolucao-item-icon-pill" data-eq="${item.id}" title="${item.quantidade}x ${nome}">

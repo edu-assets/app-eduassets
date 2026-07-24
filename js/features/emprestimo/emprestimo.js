@@ -1,9 +1,7 @@
-import { addLoan } from '../../core/state/loanStore.js';
+import { addLoan } from '../../core/state/index.js';
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { getResponsaveis } from '../../core/state/responsavelStore.js';
-import { showToast } from '../../core/toast/toast.js';
-import { openModal } from '../../core/modal/modal.js';
-import { criarDataAutoPicker } from '../../core/datepicker/datepicker.js';
+import { showToast, openModal, criarDataAutoPicker } from '../../core/ui/index.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
 import { ApiError } from '../../core/api/index.js';
 

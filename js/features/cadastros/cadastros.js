@@ -1,5 +1,4 @@
-import { openModal, closeModal } from '../../core/modal/modal.js';
-import { showToast } from '../../core/toast/toast.js';
+import { openModal, closeModal, showToast } from '../../core/ui/index.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
 import {
     categoriasApi,

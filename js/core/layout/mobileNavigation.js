@@ -1,0 +1,19 @@
+export function initMobileNavigation() {
+    const navLinks = document.querySelectorAll('.mobile-nav-link');
+    const panels = document.querySelectorAll('.panel');
+
+    navLinks.forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const targetId = link.dataset.panel;
+
+            panels.forEach((panel) => panel.classList.remove('active'));
+
+            const targetPanel = document.getElementById(targetId);
+            if (targetPanel) targetPanel.classList.add('active');
+
+            navLinks.forEach((item) => item.classList.remove('active'));
+            link.classList.add('active');
+        });
+    });
+}
