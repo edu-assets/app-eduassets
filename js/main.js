@@ -9,8 +9,17 @@ import { initExportar } from './features/exportar/exportar.js';
 import { initConfig } from './features/config/config.js';
 import { initConfirm } from './core/confirm/confirm.js';
 import { initMobileNav } from './core/navigation/mobile-nav.js';
+import { carregarEquipamentos } from './core/state/equipamentoStore.js';
+import { carregarResponsaveis } from './core/state/responsavelStore.js';
+import { showToast } from './core/toast/toast.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await Promise.all([carregarEquipamentos(), carregarResponsaveis()]);
+    } catch (erro) {
+        showToast('Não foi possível carregar dados iniciais da API. Verifique se o backend está rodando.', 'error');
+    }
+
     const inits = [
         initNavigation,
         initMobileNav,
@@ -29,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             fn();
         } catch (err) {
-            console.error(`[eduAssets] Falha ao inicializar "${fn.name}":`, err);
+            console.error(`[eduAssets] Fail to initialize "${fn.name}":`, err);
         }
     });
 });

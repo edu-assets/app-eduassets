@@ -1,11 +1,11 @@
-import { addLoan } from '../../core/state/loans.js';
+import { addLoan } from '../../core/state/loanStore.js';
+import { getEquipamentos } from '../../core/state/equipamentoStore.js';
+import { getResponsaveis } from '../../core/state/responsavelStore.js';
 import { showToast } from '../../core/toast/toast.js';
 import { openModal } from '../../core/modal/modal.js';
 import { criarDataAutoPicker } from '../../core/datepicker/datepicker.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
-
-
-const LIMITE_ITENS_FORM = 3;
+import { ApiError } from '../../core/api/index.js';
 
 export function initEmprestimo() {
     const form = document.querySelector('#panel-emprestimo form');
@@ -18,9 +18,14 @@ export function initEmprestimo() {
     const itensList = document.getElementById('itens-emprestimo-list');
     const itensCount = document.getElementById('itens-emprestimo-count');
     const modalItensLista = document.getElementById('modal-itens-emprestimo-lista');
+    const responsavelSelect = document.getElementById('responsavel');
+    const btnSubmit = form.querySelector('.registrar-emprestimo');
 
     const picker = criarDataAutoPicker(dataInput);
     let itens = [];
+
+    popularSelectEquipamentos(equipamentoSelect);
+    popularSelectResponsaveis(responsavelSelect);
 
     btnAdicionar.addEventListener('click', () => {
         if (!equipamentoSelect.value) {
@@ -81,7 +86,7 @@ export function initEmprestimo() {
 
     renderItens();
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         if (!form.checkValidity()) {
@@ -94,24 +99,44 @@ export function initEmprestimo() {
             return;
         }
 
-        const responsavelSelect = document.getElementById('responsavel');
-        const responsavelOption = responsavelSelect.options[responsavelSelect.selectedIndex];
+        const dataSelecionada = picker.selectedDates[0] || new Date();
 
-        addLoan({
+        const payload = {
             aluno: document.getElementById('solicitante').value,
-            responsavel: responsavelOption.text,
+            responsavelId: responsavelSelect.value,
             itens,
-            data: dataInput.value,
+            dataRetiradaISO: dataSelecionada.toISOString(),
             observacao: document.getElementById('observacao').value
-        });
+        };
 
-        showToast('Empréstimo registrado com sucesso', 'success');
-        form.reset();
-        picker.setDate(new Date(), false);
-        dataInput.classList.add('input-auto');
-        itens = [];
-        renderItens();
+        btnSubmit.disabled = true;
+
+        try {
+            await addLoan(payload);
+            showToast('Empréstimo registrado com sucesso', 'success');
+            form.reset();
+            picker.setDate(new Date(), false);
+            dataInput.classList.add('input-auto');
+            itens = [];
+            renderItens();
+        } catch (erro) {
+            showToast(erro instanceof ApiError ? erro.message : 'Erro ao registrar empréstimo.', 'error');
+        } finally {
+            btnSubmit.disabled = false;
+        }
     });
+}
+
+function popularSelectEquipamentos(select) {
+    const equipamentos = getEquipamentos();
+    select.innerHTML = '<option value="" disabled selected hidden>Selecionar equipamento</option>' +
+        equipamentos.map((eq) => `<option value="${eq.id}">${escapeHtml(eq.modelo)} — ${escapeHtml(eq.categoria?.nome ?? '')}</option>`).join('');
+}
+
+function popularSelectResponsaveis(select) {
+    const responsaveis = getResponsaveis();
+    select.innerHTML = '<option value="" disabled selected hidden>Responsável pelo empréstimo</option>' +
+        responsaveis.map((r) => `<option value="${r.id}">${escapeHtml(r.nome)}</option>`).join('');
 }
 
 function renderItemRow(item) {
