@@ -1,4 +1,7 @@
 import { getEquipamentos, atualizarEquipamentoPorId } from '../../core/state/equipamentoStore.js';
+import { gerarLinhasCsv, baixarArquivoCsv } from '../../core/services/csv.js';
+
+/* ===== Data processing: calculations, data transformations ===== */
 
 export function calcularResumo(equipamentos) {
     let totalGeral = 0;
@@ -36,18 +39,14 @@ export function buscarEquipamentoPorId(id, equipamentos = getEquipamentos()) {
 }
 
 export function gerarCsvEstoque(equipamentos) {
-    const linhas = [['Categoria', 'Total', 'Disponivel', 'Quebrado']];
+    const linhas = equipamentos.map((equipamento) => [
+        equipamento.categoria?.nome ?? '',
+        equipamento.quantidadeTotal,
+        equipamento.quantidadeDisponivel,
+        equipamento.quantidadeQuebrada
+    ]);
 
-    equipamentos.forEach((equipamento) => {
-        linhas.push([
-            equipamento.categoria?.nome ?? '',
-            equipamento.quantidadeTotal,
-            equipamento.quantidadeDisponivel,
-            equipamento.quantidadeQuebrada
-        ]);
-    });
-
-    return linhas.map((linha) => linha.join(';')).join('\n');
+    return gerarLinhasCsv(['Categoria', 'Total', 'Disponivel', 'Quebrado'], linhas);
 }
 
 function formatarPct(valor, total) {
@@ -55,24 +54,14 @@ function formatarPct(valor, total) {
     return `${(valor / total * 100).toFixed(1).replace('.', ',')}%`;
 }
 
+/* ===== Actions: API, store, download ===== */
+
 export async function atualizarCategoria(equipamentoId, dados) {
     await atualizarEquipamentoPorId(equipamentoId, {
         quantidadeTotal: Number(dados.total),
         quantidadeDisponivel: Number(dados.disponivel),
         quantidadeQuebrada: Number(dados.quebrado)
     });
-}
-
-export function baixarArquivoCsv(csv, nomeArquivo) {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = nomeArquivo;
-    link.click();
-
-    URL.revokeObjectURL(url);
 }
 
 export function exportarEstoqueCsv(equipamentos) {

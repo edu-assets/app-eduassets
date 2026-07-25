@@ -5,7 +5,7 @@ import { initControle } from './features/controle/index.js';
 import { initCadastros } from './features/cadastros/index.js';
 import { initEmprestimo } from './features/emprestimo/index.js';
 import { initDevolucao } from './features/devolucao/index.js';
-import { initExportar } from './features/exportar/exportar.js';
+import { initExportar } from './features/exportar/index.js';
 import { initConfig } from './features/config/config.js';
 import { carregarEquipamentos, carregarEmprestimos, carregarOcorrencias, carregarResponsaveis } from './core/state/index.js';
 
