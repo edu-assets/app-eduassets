@@ -1,4 +1,5 @@
 import { html, raw } from '../../core/utils/html.js';
+import { renderEmptyState } from '../../shared/components/emptyState.js';
 
 export function renderCampo(campo, opcoes) {
     return campo.type === 'select' ? renderCampoSelect(campo, opcoes || []) : renderCampoTexto(campo);
@@ -32,7 +33,11 @@ export function renderItemRegistro(texto) {
 }
 
 export function renderListaVazia() {
-    return html`<div class="cadastro-modal-empty">Nenhum registro cadastrado.</div>`;
+    return renderEmptyState({
+        containerClass: 'cadastro-modal-empty',
+        titulo: 'Nenhum registro cadastrado.',
+        tituloTag: null
+    });
 }
 
 export function renderListaCarregando() {

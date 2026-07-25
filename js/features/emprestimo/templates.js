@@ -1,4 +1,5 @@
 import { html } from '../../core/utils/html.js';
+import { renderEmptyState } from '../../shared/components/emptyState.js';
 
 export function renderItemRow(item) {
     return html`
@@ -15,13 +16,16 @@ export function renderItemRow(item) {
 }
 
 export function renderItensEmptyState() {
-    return html`
-        <div class="itens-emprestimo-empty">
-            <span class="material-symbols-outlined">inventory_2</span>
-            <span class="itens-emprestimo-empty-titulo">Nenhum item adicionado ainda.</span>
-            <span class="itens-emprestimo-empty-sub">Adicione equipamentos acima para criar a lista.</span>
-        </div>
-    `;
+    return renderEmptyState({
+        containerClass: 'itens-emprestimo-empty',
+        icon: 'inventory_2',
+        titulo: 'Nenhum item adicionado ainda.',
+        tituloTag: 'span',
+        tituloClass: 'itens-emprestimo-empty-titulo',
+        subtitulo: 'Adicione equipamentos acima para criar a lista.',
+        subtituloTag: 'span',
+        subtituloClass: 'itens-emprestimo-empty-sub'
+    });
 }
 
 export function renderOpcaoEquipamento(equipamento) {

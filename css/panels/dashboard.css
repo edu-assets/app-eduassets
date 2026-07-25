@@ -488,29 +488,6 @@
     color: var(--primary-color);
 }
 
-.historico-status-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    width: fit-content;
-}
-
-.historico-status-aberto {
-    background-color: var(--warning-bg);
-    color: var(--warning-color);
-}
-
-.historico-status-devolvido {
-    background-color: var(--success-bg);
-    color: var(--success-color);
-}
-
 /* ===== Empréstimos em andamento (painel lateral, estado padrão) ===== */
 .dashboard-andamento {
     flex: 1;

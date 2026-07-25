@@ -133,27 +133,6 @@
     gap: 6px;
 }
 
-.status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background-color: var(--success-bg);
-    color: var(--success-color);
-    border: 1px solid color-mix(in srgb, var(--success-color) 30%, transparent);
-    width: fit-content;
-}
-
-.status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--success-color);
-}
-
 .seta-svg {
     width: 28px;
     height: 13px;

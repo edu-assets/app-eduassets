@@ -1,0 +1,22 @@
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    width: fit-content;
+}
+
+.status-badge--aberto {
+    background-color: var(--warning-bg);
+    color: var(--warning-color);
+}
+
+.status-badge--devolvido {
+    background-color: var(--success-bg);
+    color: var(--success-color);
+}

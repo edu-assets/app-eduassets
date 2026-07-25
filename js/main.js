@@ -6,7 +6,7 @@ import { initCadastros } from './features/cadastros/index.js';
 import { initEmprestimo } from './features/emprestimo/index.js';
 import { initDevolucao } from './features/devolucao/index.js';
 import { initExportar } from './features/exportar/index.js';
-import { initConfig } from './features/config/config.js';
+import { initConfig } from './features/config/index.js';
 import { carregarEquipamentos, carregarEmprestimos, carregarOcorrencias, carregarResponsaveis } from './core/state/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {

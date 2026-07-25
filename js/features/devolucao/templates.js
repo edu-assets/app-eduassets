@@ -1,17 +1,21 @@
 import { html, raw } from '../../core/utils/html.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { gerarIniciais, formatarHora } from './utils.js';
+import { renderEmptyState } from '../../shared/components/emptyState.js';
+import { renderStatusBadge } from '../../shared/components/statusBadge.js';
 
 const LIMITE_ICONES_CARD = 3;
 
 export function renderDevolucaoEmptyState() {
-    return html`
-        <div class="devolucao-vazia">
-            <img src="assets/logos/eduAssets_logo-empty-state.png" alt="" class="devolucao-vazia-logo">
-            <p class="devolucao-vazia-texto">Empréstimos aparecerão aqui</p>
-            <p class="devolucao-vazia-sub">Registre um novo empréstimo para começar a acompanhar as devoluções.</p>
-        </div>
-    `;
+    return renderEmptyState({
+        containerClass: 'devolucao-vazia',
+        imageSrc: 'assets/logos/eduAssets_logo-empty-state.png',
+        imageClass: 'devolucao-vazia-logo',
+        titulo: 'Empréstimos aparecerão aqui',
+        tituloClass: 'devolucao-vazia-texto',
+        subtitulo: 'Registre um novo empréstimo para começar a acompanhar as devoluções.',
+        subtituloClass: 'devolucao-vazia-sub'
+    });
 }
 
 export function renderDevolucaoTabelaHeader() {
@@ -54,9 +58,7 @@ export function renderDevolucaoCard(loan) {
                 ${raw(temObservacao)}
             </div>
             <div class="devolucao-col-status">
-                <span class="status-pill">
-                    <span class="status-dot"></span> Pendente
-                </span>
+                ${raw(renderStatusBadge('aberto'))}
             </div>
             <div class="devolucao-col-acao">
                 <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}">Devolver</button>

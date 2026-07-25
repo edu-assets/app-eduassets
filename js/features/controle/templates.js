@@ -1,4 +1,5 @@
 import { html, raw } from '../../core/utils/html.js';
+import { renderEmptyState } from '../../shared/components/emptyState.js';
 
 const PROBLEMA_ICONS = {
     tela: { label: 'Tela', icon: 'monitor' },
@@ -18,15 +19,6 @@ const ICONE_POR_TIPO = {
     quebrado: 'heart_broken',
     resolvidos: 'task_alt'
 };
-
-export function renderControleEmptyState() {
-    return html`
-        <div class="controle-empty-state">
-            <span class="material-symbols-outlined">inbox</span>
-            <p>Nenhum registro encontrado.</p>
-        </div>
-    `;
-}
 
 export function renderControleMenuAcoes() {
     return html`
@@ -68,4 +60,12 @@ export function renderControleLinha(tipo, dados) {
         ${raw(renderControleMenuAcoes())}
         </div>
     `;
+}
+
+export function renderControleEmptyState() {
+    return renderEmptyState({
+        containerClass: 'controle-empty-state',
+        icon: 'inbox',
+        titulo: 'Nenhum registro encontrado.'
+    });
 }
