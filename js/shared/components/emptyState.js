@@ -6,7 +6,6 @@ function renderTexto(texto, tag, classe) {
     return `<${tag} class="${escapeHtml(classe || '')}">${escapeHtml(texto)}</${tag}>`;
 }
 
-
 export function renderEmptyState({
     containerClass = '',
     icon,
