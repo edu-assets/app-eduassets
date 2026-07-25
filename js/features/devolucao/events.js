@@ -29,7 +29,8 @@ export function attachDevolucaoEvents(els, estado) {
         const card = e.target.closest('.devolucao-item');
         if (!card) return;
 
-        const loan = getLoansAbertos().find((l) => l.id === card.dataset.id);
+        const data = formatarDataCard(card.dataset.data);
+        const loan = getLoansAbertos().find((l) => String(l.id) === String(card.dataset.id));
         if (loan) abrirDetalhe(els, estado, loan);
     });
 

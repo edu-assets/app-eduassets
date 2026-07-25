@@ -33,7 +33,7 @@ export function attachDashboardEvents(els, estado) {
         if (opcaoMenu) {
             const row = opcaoMenu.closest('.estoque-row');
             fecharTodosMenusEstoque(els);
-            abrirDetalheEstoque(els, estado, Number(row.dataset.equipamentoId), ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
+            abrirDetalheEstoque(els, estado, row.dataset.equipamentoId, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
         }
     });
 
@@ -90,7 +90,7 @@ export function attachDashboardEvents(els, estado) {
     els.historicoLista.addEventListener('click', (e) => {
         const btn = e.target.closest('.historico-detalhes-btn');
         if (!btn) return;
-        const loan = getLoans().find((l) => l.id === btn.dataset.id);
+        const loan = getLoans().find((l) => String(l.id) === String(btn.dataset.id));
         if (loan) abrirDetalheHistorico(els, loan);
     });
 

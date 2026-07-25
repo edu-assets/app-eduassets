@@ -1,10 +1,10 @@
 import { escapeHtml } from '../../core/utils/sanitize.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 
-export function renderDashboardCategoriaForm(row) {
-    const total = Number(row.dataset.total) || 0;
-    const disponivel = Number(row.dataset.disponivel) || 0;
-    const quebrado = Number(row.dataset.quebrado) || 0;
+export function renderDashboardCategoriaForm(dados) {
+    const total = Number(dados.total) || 0;
+    const disponivel = Number(dados.disponivel) || 0;
+    const quebrado = Number(dados.quebrado) || 0;
     const emprestado = Math.max(0, total - disponivel - quebrado);
 
     return `
@@ -12,7 +12,8 @@ export function renderDashboardCategoriaForm(row) {
 
         <div class="form-group margin-bottom-lg">
             <label class="category-field-label">Nome da categoria <span class="required-asterisk">*</span></label>
-            <input type="text" id="detalhe-estoque-categoria" class="category-field-input" value="${escapeHtml(row.dataset.categoria)}" disabled>
+            <!-- Ajuste: Lendo dados.categoria diretamente -->
+            <input type="text" id="detalhe-estoque-categoria" class="category-field-input" value="${escapeHtml(dados.categoria)}" disabled>
         </div>
 
         <div class="category-summary-box">

@@ -1,4 +1,5 @@
 import { openModal } from '../../core/ui/index.js';
+import { formatarDataCard } from './utils.js';
 import {
     renderDevolucaoTabelaHeader,
     renderDevolucaoCard,
@@ -40,7 +41,7 @@ export function abrirDetalhe(els, estado, loan) {
 
     els.detalheResp.textContent = loan.responsavel;
     els.detalheAluno.textContent = loan.aluno;
-    els.detalheData.textContent = `Empréstimo realizado em ${loan.data}`;
+    els.detalheData.textContent = `Empréstimo realizado em ${formatarDataCard(loan.createdAt)}`;
 
     setModoEdicao(els, estado, false);
     renderDetalheItens(els, estado.itensEditando, false);
@@ -78,7 +79,7 @@ export function setModoEdicao(els, estado, ativo) {
 
 export function marcarLinhaSelecionada(els, id) {
     els.lista.querySelectorAll('.devolucao-item').forEach((el) => {
-        el.classList.toggle('selected', el.dataset.id === id);
+        el.classList.toggle('selected', String(el.dataset.id) === String(id));
     });
 }
 

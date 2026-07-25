@@ -32,7 +32,7 @@ export function calcularEmprestado(equipamento) {
 }
 
 export function buscarEquipamentoPorId(id, equipamentos = getEquipamentos()) {
-    return equipamentos.find((equipamento) => equipamento.id === id) ?? null;
+    return equipamentos.find((equipamento) => String(equipamento.id) === String(id)) ?? null;
 }
 
 export function gerarCsvEstoque(equipamentos) {

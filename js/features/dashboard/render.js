@@ -68,7 +68,7 @@ export function fecharTodosMenusEstoque(els) {
 export function atualizarVisibilidadeDetalhe(els, ehLayoutEmpilhadoAtual) {
     if (!els.detalheContainer) return;
     const abaAtiva = document.querySelector('.dashboard-tab-link.active')?.dataset.tab;
-    els.detalheContainer.style.display = (abaAtiva === 'estoque' && !ehLayoutEmpilhadoAtual) ? 'flex' : 'none';
+    els.detalheContainer.style.display = ((abaAtiva === 'estoque' || abaAtiva === 'historico') && !ehLayoutEmpilhadoAtual) ? 'flex' : 'none';
 }
 
 function montarDadosFormularioCategoria(equipamento) {
@@ -122,6 +122,8 @@ export function abrirDetalheHistorico(els, loan) {
 export function mostrarDetalhe(els) {
     if (els.detalheEmpty) els.detalheEmpty.style.display = 'none';
     els.detalheConteudo.style.display = 'block';
+
+    if (els.detalheContainer) els.detalheContainer.style.display = 'flex';
 }
 
 export function fecharDetalhe(els) {
