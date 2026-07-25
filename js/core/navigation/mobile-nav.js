@@ -1,1 +1,0 @@
-export { initMobileNavigation as initMobileNav } from '../layout/mobileNavigation.js';

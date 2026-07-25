@@ -1,1 +1,0 @@
-export { initNavigation } from '../layout/navigation.js';

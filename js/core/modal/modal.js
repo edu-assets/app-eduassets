@@ -1,1 +1,0 @@
-export { initModals, openModal, closeModal } from '../ui/modal.js';

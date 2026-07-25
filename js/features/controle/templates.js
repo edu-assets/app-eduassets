@@ -19,6 +19,15 @@ const ICONE_POR_TIPO = {
     resolvidos: 'task_alt'
 };
 
+export function renderControleEmptyState() {
+    return html`
+        <div class="controle-empty-state">
+            <span class="material-symbols-outlined">inbox</span>
+            <p>Nenhum registro encontrado.</p>
+        </div>
+    `;
+}
+
 export function renderControleMenuAcoes() {
     return html`
         <span class="registros-row-menu-wrap">

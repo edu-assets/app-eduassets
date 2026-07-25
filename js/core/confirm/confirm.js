@@ -1,1 +1,0 @@
-export { initConfirm, confirmarExclusao } from '../ui/confirm.js';

@@ -1,1 +1,0 @@
-export { criarDataAutoPicker } from '../ui/datepicker.js';
