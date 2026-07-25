@@ -1,5 +1,7 @@
 import { showToast, closeModal } from '../../core/ui/index.js';
 import { getLoansAbertos } from '../../core/state/loans.js';
+import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
+import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
 import {
     renderDetalheItens,
     abrirDetalhe,
@@ -15,9 +17,6 @@ import {
     confirmarDevolucao,
     salvarItensEmprestimo
 } from './service.js';
-import { ehLayoutEmpilhado } from './utils.js';
-
-const BREAKPOINT_LAYOUT_EMPILHADO = 1024;
 
 export function attachDevolucaoEvents(els, estado) {
     els.lista.addEventListener('click', (e) => {
@@ -58,7 +57,7 @@ export function attachDevolucaoEvents(els, estado) {
     });
 
     window.addEventListener('resize', () => {
-        if (!ehLayoutEmpilhado(BREAKPOINT_LAYOUT_EMPILHADO)) fecharPainelMobile(els);
+        if (!ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT)) fecharPainelMobile(els);
     });
 
     els.btnDetalheCancelar.addEventListener('click', () => {

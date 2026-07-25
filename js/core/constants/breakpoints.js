@@ -1,0 +1,1 @@
+export const LAYOUT_EMPILHADO_BREAKPOINT = 1024;

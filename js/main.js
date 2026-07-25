@@ -1,9 +1,9 @@
 import { initNavigation, initMobileNavigation } from './core/layout/index.js';
 import { initModals, initConfirm } from './core/ui/index.js';
-import { initDashboard } from './features/dashboard/dashboard.js';
+import { initDashboard } from './features/dashboard/index.js';
 import { initControle } from './features/controle/index.js';
-import { initCadastros } from './features/cadastros/cadastros.js';
-import { initEmprestimo } from './features/emprestimo/emprestimo.js';
+import { initCadastros } from './features/cadastros/index.js';
+import { initEmprestimo } from './features/emprestimo/index.js';
 import { initDevolucao } from './features/devolucao/index.js';
 import { initExportar } from './features/exportar/exportar.js';
 import { initConfig } from './features/config/config.js';

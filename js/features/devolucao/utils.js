@@ -17,7 +17,3 @@ export function formatarDataCard(date) {
     const horaStr = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     return `${dataStr} às ${horaStr}`;
 }
-
-export function ehLayoutEmpilhado(breakpoint) {
-    return window.matchMedia(`(max-width: ${breakpoint}px)`).matches;
-}
