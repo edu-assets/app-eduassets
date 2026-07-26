@@ -1,4 +1,5 @@
 import { showToast } from '../../core/ui/index.js';
+import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 
 export function initConfig() {
     const btnSalvar = document.getElementById('config-salvar');
@@ -24,6 +25,7 @@ export function initConfig() {
     });
 
     btnSalvar.addEventListener('click', () => {
+        if (bloquearSeConvidado()) return;
         showToast('Configurações salvas com sucesso', 'success');
     });
 }

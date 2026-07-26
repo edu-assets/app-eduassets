@@ -7,11 +7,13 @@ import {
     renderListaRegistros,
     limparCamposFormulario
 } from './render.js';
+import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 
 export function attachCadastrosEvents(els, estado) {
     els.cards.forEach((card) => {
         card.addEventListener('click', (e) => {
             e.preventDefault();
+            if (bloquearSeConvidado('Cadastros disponível apenas para administradores. Faça login para continuar.')) return;
             abrirCadastro(els, estado, card.dataset.cadastro);
         });
     });
@@ -58,6 +60,7 @@ async function recarregarLista(els, estado) {
 }
 
 async function salvarRegistro(els, estado) {
+    if (bloquearSeConvidado()) return;
     const config = getConfig(estado.tipoAtual);
     if (!config) return;
 

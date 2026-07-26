@@ -1,0 +1,50 @@
+.auth-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.auth-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.auth-status-badge .material-symbols-outlined {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.auth-status-badge-admin {
+    color: var(--primary-300);
+}
+
+.auth-status-action {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--text-on-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-erro {
+    color: var(--error-color);
+    font-size: 0.82rem;
+    display: none;
+}
+
+/* Guest mode disables interactive elements (works via CSS) */
+body.guest-mode [data-requires-auth] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}

@@ -135,7 +135,14 @@
                 </nav>
 
                 <div class="sidebar-footer">
-                    v0.1 · EduAssets | Thiago da Silva
+                    <div class="auth-status">
+                        <span class="auth-status-badge" id="auth-status-badge">
+                            <span class="material-symbols-outlined">person</span>
+                            <span id="auth-status-label">Modo Convidado</span>
+                        </span>
+                        <button type="button" class="auth-status-action" id="btn-auth-toggle">Login</button>
+                    </div>
+                    v0.9.0 · EduAssets
                 </div>
             </aside>
 
@@ -167,10 +174,9 @@
                                         <span class="material-symbols-outlined">open_in_new</span> Começar
                                     </a>
 
-                                    <!-- TODO: Implement login functionality -->
-                                    <a href="#" class="btn btn-primary inicio-cta nav-link" data-panel="panel-login">
-                                        <span class="material-symbols-outlined">open_in_new</span> Login
-                                    </a>
+                                    <button type="button" class="btn btn-primary inicio-cta" id="btn-abrir-login-hero">
+                                        <span class="material-symbols-outlined">login</span> Login
+                                    </button>
                                 </div>
                             </div>
 
@@ -356,7 +362,7 @@
                                 </div>
 
                                 <div class="form-actions">
-                                    <button class="btn btn-primary registrar-emprestimo" type="submit"> <span
+                                    <button class="btn btn-primary registrar-emprestimo" type="submit" data-requires-auth> <span
                                             class="material-symbols-outlined">check</span>Registrar
                                         Empréstimo</button>
                                 </div>
@@ -384,7 +390,7 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button class="btn btn-success" id="btn-confirmar-devolucao">Confirmar
+                                <button class="btn btn-success" id="btn-confirmar-devolucao" data-requires-auth>Confirmar
                                     Devolução</button>
                             </div>
                         </div>
@@ -441,7 +447,7 @@
                                         <span>Itens emprestados</span>
                                         <span class="devolucao-detalhe-contagem" id="detalhe-itens-contagem">(0)</span>
                                         <button type="button" class="devolucao-detalhe-editar-btn"
-                                            id="btn-detalhe-editar" aria-label="Editar itens">
+                                            id="btn-detalhe-editar" data-requires-auth aria-label="Editar itens">
                                             <span class="material-symbols-outlined">edit</span>
                                         </button>
                                     </div>
@@ -480,11 +486,11 @@
                                 </div>
 
                                 <div class="devolucao-detalhe-acoes">
-                                    <button class="btn btn-success btn-block" id="btn-detalhe-salvar"
+                                    <button class="btn btn-success btn-block" id="btn-detalhe-salvar" data-requires-auth
                                         style="display:none;">
                                         Salvar Alterações
                                     </button>
-                                    <button class="btn btn-primary btn-block" id="btn-confirmar-devolucao-painel">
+                                    <button class="btn btn-primary btn-block" id="btn-confirmar-devolucao-painel" data-requires-auth>
                                         <span class="material-symbols-outlined">check</span> Confirmar Devolução
                                     </button>
                                     <button class="btn btn-neutral btn-block"
@@ -510,7 +516,7 @@
                             <div class="modal-footer">
                                 <button class="btn btn-neutral" id="modal-categoria-cancelar"
                                     type="button">Cancelar</button>
-                                <button class="btn btn-primary" id="modal-categoria-salvar" type="button">
+                                <button class="btn btn-primary" id="modal-categoria-salvar" data-requires-auth type="button">
                                     <span class="material-symbols-outlined">save</span> Salvar alterações
                                 </button>
                             </div>
@@ -763,7 +769,7 @@
                             <div class="modal-footer">
                                 <button class="btn btn-neutral" id="controle-modal-cancelar"
                                     type="button">Cancelar</button>
-                                <button class="btn btn-success" id="controle-modal-salvar" type="button">Salvar</button>
+                                <button class="btn btn-success" id="controle-modal-salvar" data-requires-auth type="button">Salvar</button>
                             </div>
                         </div>
                     </div>
@@ -823,7 +829,7 @@
 
                                 <div class="controle-registros-toolbar">
                                     <div class="novo-registro-dropdown">
-                                        <button class="btn btn-primary btn-sm" id="btn-novo-registro" type="button">
+                                        <button class="btn btn-primary btn-sm" id="btn-novo-registro" data-requires-auth type="button">
                                             <span class="material-symbols-outlined">add</span> Novo
                                         </button>
                                         <div class="novo-registro-menu" id="novo-registro-menu">
@@ -833,10 +839,10 @@
                                         </div>
                                     </div>
 
-                                    <button class="btn btn-neutral btn-sm" id="btn-editar-registro" disabled>
+                                    <button class="btn btn-neutral btn-sm" id="btn-editar-registro" data-requires-auth disabled>
                                         <span class="material-symbols-outlined">edit</span> Editar
                                     </button>
-                                    <button class="btn btn-danger btn-sm" id="btn-deletar-registro" disabled>
+                                    <button class="btn btn-danger btn-sm" id="btn-deletar-registro" data-requires-auth disabled>
                                         <span class="material-symbols-outlined">delete</span> Deletar
                                     </button>
                                 </div>
@@ -1239,7 +1245,7 @@
                     <div class="cadastros-container">
 
                         <div class="cadastros-grid">
-                            <a href="#" class="cadastro-card" data-cadastro="equipamentos">
+                            <a href="#" class="cadastro-card" data-cadastro="equipamentos" data-requires-auth>
                                 <div class="cadastro-card-top">
                                     <span class="cadastro-card-icon cadastro-card-icon-primary">
                                         <span class="material-symbols-outlined">devices</span>
@@ -1252,7 +1258,7 @@
                                     para empréstimo.</p>
                             </a>
 
-                            <a href="#" class="cadastro-card" data-cadastro="responsaveis">
+                            <a href="#" class="cadastro-card" data-cadastro="responsaveis" data-requires-auth>
                                 <div class="cadastro-card-top">
                                     <span class="cadastro-card-icon cadastro-card-icon-success">
                                         <span class="material-symbols-outlined">badge</span>
@@ -1265,7 +1271,7 @@
                                 </p>
                             </a>
 
-                            <a href="#" class="cadastro-card" data-cadastro="usuarios">
+                            <a href="#" class="cadastro-card" data-cadastro="usuarios" data-requires-auth>
                                 <div class="cadastro-card-top">
                                     <span class="cadastro-card-icon cadastro-card-icon-secondary">
                                         <span class="material-symbols-outlined">admin_panel_settings</span>
@@ -1278,7 +1284,7 @@
                                     sistema.</p>
                             </a>
 
-                            <a href="#" class="cadastro-card" data-cadastro="categorias">
+                            <a href="#" class="cadastro-card" data-cadastro="categorias" data-requires-auth>
                                 <div class="cadastro-card-top">
                                     <span class="cadastro-card-icon cadastro-card-icon-info">
                                         <span class="material-symbols-outlined">category</span>
@@ -1291,7 +1297,8 @@
                         </div>
                         <div class="cadastros-info-banner">
                             <span class="material-symbols-outlined">info</span>
-                            <span>Gerencie equipamentos, categorias e responsáveis utilizados pelo sistema.</span>
+                            <span>Gerencie equipamentos, categorias e responsáveis utilizados pelo sistema.
+                            </span>
                         </div>
                     </div>
                 </section>
@@ -1486,7 +1493,7 @@
                                 <span class="material-symbols-outlined">info</span>
                                 <span>Alterações salvam automaticamente assim que você clicar em salvar.</span>
                             </div>
-                            <button class="btn btn-primary" id="config-salvar">
+                            <button class="btn btn-primary" id="config-salvar" data-requires-auth>
                                 <span class="material-symbols-outlined">save</span> Salvar Configurações
                             </button>
                         </div>
@@ -1830,6 +1837,31 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- login modal -->
+    <div class="modal-overlay" id="modal-login">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Login de Administrador</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="login-email">E-mail / Login</label>
+                    <input type="text" id="login-email" placeholder="usuario@escola.com" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-senha">Senha</label>
+                    <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <p class="login-erro" id="login-erro"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-neutral" id="login-continuar-convidado" type="button">Continuar como
+                    Convidado</button>
+                <button class="btn btn-primary" id="login-btn-entrar" type="button">Entrar</button>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="js/main.js"></script>

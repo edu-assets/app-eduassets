@@ -8,6 +8,8 @@
 @import "components/modal.css";
 @import "components/icons.css";
 @import "components/status-badge.css";
+@import "components/auth.css";
+@import "components/toast.css";
 
 /* layout */
 @import "layout/footer.css";

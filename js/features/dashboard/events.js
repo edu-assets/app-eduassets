@@ -16,6 +16,7 @@ import {
     fecharDetalhe
 } from './render.js';
 import { atualizarCategoria, exportarEstoqueCsv } from './service.js';
+import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 
 export function attachDashboardEvents(els, estado) {
     els.estoqueContainer.addEventListener('click', (e) => {
@@ -109,6 +110,7 @@ export function attachDashboardEvents(els, estado) {
 
 async function salvarCategoria(els, estado, equipamentoId, modalId = null) {
     if (!equipamentoId) return;
+    if (bloquearSeConvidado()) return;
 
     const dados = {
         total: document.getElementById('detalhe-estoque-total')?.value || '0',

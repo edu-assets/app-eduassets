@@ -8,6 +8,7 @@ import {
     abrirEdicaoRegistro
 } from './render.js';
 import { adicionarRegistro, editarRegistro, removerRegistro } from './service.js';
+import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 
 export function attachControleEvents(els, estado) {
     document.querySelectorAll('.controle-tab-link').forEach((tabLink) => {
@@ -21,6 +22,7 @@ export function attachControleEvents(els, estado) {
     if (els.btnNovo && els.menuNovo) {
         els.btnNovo.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (bloquearSeConvidado()) return;
             els.menuNovo.classList.toggle('active');
         });
 
@@ -100,6 +102,7 @@ export function attachControleEvents(els, estado) {
 }
 
 async function salvarModal(els, estado) {
+    if (bloquearSeConvidado()) return;
     if (!estado.tipoAtual) return;
 
     if (!els.campoCategoria.value || !els.campoModelo.value || !els.campoNumero.value || !els.campoProblema.value) {
@@ -142,6 +145,7 @@ async function salvarModal(els, estado) {
 
 async function excluirRegistro(els, estado, row) {
     if (!row) return;
+    if (bloquearSeConvidado()) return;
 
     const confirmado = await confirmarExclusao({
         titulo: 'Excluir registro',

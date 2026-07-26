@@ -66,7 +66,7 @@ function renderDashboardEstoqueLinha(equipamento) {
                     <span class="material-symbols-outlined">more_vert</span>
                 </button>
                 <div class="registros-row-menu">
-                    <span class="registros-row-menu-opcao" data-acao="editar">Editar</span>
+                    <span class="registros-row-menu-opcao" data-acao="editar"data-requires-auth>Editar</span>
                 </div>
             </span>
         </div>

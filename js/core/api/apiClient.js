@@ -1,4 +1,5 @@
 import { API_BASE_URL } from './apiConfig.js';
+import { getToken } from '../state/tokenStore.js';
 
 export class ApiError extends Error {
     constructor(message, status, payload) {
@@ -10,9 +11,13 @@ export class ApiError extends Error {
 }
 
 async function request(path, { method = 'GET', body } = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = getToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+
     const response = await fetch(`${API_BASE_URL}${path}`, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: body !== undefined ? JSON.stringify(body) : undefined
     });
 

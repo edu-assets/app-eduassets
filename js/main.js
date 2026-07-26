@@ -8,8 +8,10 @@ import { initDevolucao } from './features/devolucao/index.js';
 import { initExportar } from './features/exportar/index.js';
 import { initConfig } from './features/config/index.js';
 import { carregarEquipamentos, carregarEmprestimos, carregarOcorrencias, carregarResponsaveis } from './core/state/index.js';
+import { initAuth } from './features/auth/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    await initAuth();
     const cargasIniciais = await Promise.allSettled([
         carregarEquipamentos(),
         carregarResponsaveis(),

@@ -2,6 +2,8 @@ import { showToast, openModal } from '../../core/ui/index.js';
 import { adicionarOuIncrementarItem, removerItemPorId } from '../../core/utils/listaItens.js';
 import { renderItens, renderModalItens } from './render.js';
 import { registrarEmprestimo } from './service.js';
+import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+
 
 export function attachEmprestimoEvents(els, estado) {
     els.btnAdicionar.addEventListener('click', () => {
@@ -48,6 +50,7 @@ export function attachEmprestimoEvents(els, estado) {
 
     els.form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (bloquearSeConvidado()) return;
 
         if (!els.form.checkValidity()) {
             els.form.reportValidity();

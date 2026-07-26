@@ -6,11 +6,6 @@ import {
     ApiError
 } from '../../core/api/index.js';
 
-/*
- * CADASTRO_CONFIG mora aqui por enquanto (aprovado). Se crescer bastante
- * (novos tipos, campos condicionais, regras por tipo), extrair para
- * cadastroConfig.js e importar aqui.
- */
 const CADASTRO_CONFIG = {
     equipamentos: {
         titulo: 'Equipamentos',
@@ -52,12 +47,14 @@ const CADASTRO_CONFIG = {
         criar: (valores) => usuariosApi.criarUsuario({
             nome: valores['cad-nome-usuario'],
             login: valores['cad-login-usuario'],
+            senha: valores['cad-senha-usuario'],
             nivelAcesso: valores['cad-nivel-acesso']
         }),
         formatarItem: (item) => `${item.nome} — ${item.login} · ${item.nivelAcesso === 'ADMINISTRADOR' ? 'Administrador' : 'Editor'}`,
         campos: [
             { id: 'cad-nome-usuario', label: 'Nome', type: 'text', placeholder: 'Nome completo' },
             { id: 'cad-login-usuario', label: 'E-mail / Login', type: 'text', placeholder: 'usuario@escola.com' },
+            { id: 'cad-senha-usuario', label: 'Senha', type: 'password', placeholder: 'Mínimo 8 caracteres' },
             {
                 id: 'cad-nivel-acesso',
                 label: 'Nível de acesso',

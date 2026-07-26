@@ -17,11 +17,13 @@ import {
     confirmarDevolucao,
     salvarItensEmprestimo
 } from './service.js';
+import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 
 export function attachDevolucaoEvents(els, estado) {
     els.lista.addEventListener('click', (e) => {
         const btnDevolver = e.target.closest('.devolver-btn');
         if (btnDevolver) {
+            if (bloquearSeConvidado()) return;
             abrirModalConfirmacao(els, estado, btnDevolver.dataset.id);
             return;
         }
@@ -29,12 +31,12 @@ export function attachDevolucaoEvents(els, estado) {
         const card = e.target.closest('.devolucao-item');
         if (!card) return;
 
-        const data = formatarDataCard(card.dataset.data);
         const loan = getLoansAbertos().find((l) => String(l.id) === String(card.dataset.id));
         if (loan) abrirDetalhe(els, estado, loan);
     });
 
     els.btnConfirmarDevolucao.addEventListener('click', async () => {
+        if (bloquearSeConvidado()) return;
         if (!estado.idPendente) return;
 
         await confirmarDevolucao(estado.idPendente);
@@ -73,6 +75,7 @@ export function attachDevolucaoEvents(els, estado) {
     });
 
     els.btnDetalheEditar.addEventListener('click', () => {
+        if (bloquearSeConvidado()) return;
         setModoEdicao(els, estado, true);
         renderDetalheItens(els, estado.itensEditando, true);
     });
@@ -112,6 +115,7 @@ export function attachDevolucaoEvents(els, estado) {
     });
 
     els.btnDetalheSalvar.addEventListener('click', async () => {
+        if (bloquearSeConvidado()) return;
         try {
             await salvarItensEmprestimo(estado.idDetalheAberto, estado.itensEditando);
             showToast('Empréstimo atualizado com sucesso', 'success');

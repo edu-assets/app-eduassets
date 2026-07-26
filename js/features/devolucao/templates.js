@@ -61,7 +61,7 @@ export function renderDevolucaoCard(loan) {
                 ${raw(renderStatusBadge('aberto'))}
             </div>
             <div class="devolucao-col-acao">
-                <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}">Devolver</button>
+                <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}" data-requires-auth>Devolver</button>
             </div>
         </div>
     `;
