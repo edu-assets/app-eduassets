@@ -6,6 +6,20 @@
     margin-bottom: 10px;
 }
 
+#auth-status-label .usuario-nome {
+    font-size: 0.80rem;
+    font-weight: 700;
+    color: var(--text-on-primary);
+    padding: 0 0px;
+}
+
+#auth-status-label {
+    font-size: 0.80rem;
+    font-weight: 600;
+    color: var(--text-secondary);   
+    padding: 12px 4px;
+}
+
 .auth-status-badge {
     display: inline-flex;
     align-items: center;
@@ -16,9 +30,9 @@
 }
 
 .auth-status-badge .material-symbols-outlined {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    font-size: 32px;
+    width: 26px;
+    height: 26px;
 }
 
 .auth-status-badge-admin {
@@ -40,6 +54,31 @@
     color: var(--error-color);
     font-size: 0.82rem;
     display: none;
+}
+
+
+.auth-status-action {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--text-on-primary);
+}
+
+.auth-status-action .material-symbols-outlined {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.auth-status-action:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Guest mode disables interactive elements (works via CSS) */

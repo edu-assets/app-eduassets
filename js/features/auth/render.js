@@ -1,7 +1,7 @@
 export function renderAuthStatus(els, autenticado, usuario) {
-    els.badgeLabel.textContent = autenticado ? `Admin: ${usuario.nome}` : 'Modo Convidado';
+    els.badgeLabel.innerHTML = autenticado ? `<span class="usuario-nome">${usuario.nome}</span> Administrador` : 'Modo Convidado';
     els.badge.classList.toggle('auth-status-badge-admin', autenticado);
-    els.toggleBtn.textContent = autenticado ? 'Sair' : 'Login';
+    els.toggleBtn.innerHTML = autenticado ? '<span class="material-symbols-outlined">logout</span> Sair' : '<span class="material-symbols-outlined">login</span> Login';
     document.body.classList.toggle('guest-mode', !autenticado);
 }
 

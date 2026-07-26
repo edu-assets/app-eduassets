@@ -7,11 +7,11 @@ const LIMITE_CHIPS_HISTORICO_PADRAO = 2;
 
 export function renderDashboardCategoriaForm(dados) {
     return html`
-        <p class="category-edit-subtitle">Atualize as informações da categoria.</p>
+        <p class="category-edit-subtitle">Resumo somente leitura da categoria.</p>
 
         <div class="form-group margin-bottom-lg">
-            <label class="category-field-label">Nome da categoria <span class="required-asterisk">*</span></label>
-            <input type="text" id="detalhe-estoque-categoria" class="category-field-input" value="${dados.categoria}" disabled>
+            <label class="category-field-label">Nome da categoria</label>
+            <div class="category-field-input">${dados.categoria}</div>
         </div>
 
         <div class="category-summary-box">
@@ -22,16 +22,16 @@ export function renderDashboardCategoriaForm(dados) {
                     <div class="metric-icon-wrap">
                         <span class="material-symbols-outlined">devices</span>
                     </div>
-                    <input type="number" id="detalhe-estoque-total" min="0" value="${dados.total}">
-                    <label for="detalhe-estoque-total">Total</label>
+                    <div class="metric-readonly-value">${dados.total}</div>
+                    <label>Total</label>
                 </div>
 
                 <div class="category-metric-col col-disponivel">
                     <div class="metric-icon-wrap">
                         <span class="material-symbols-outlined">check_circle</span>
                     </div>
-                    <input type="number" id="detalhe-estoque-disponivel" min="0" value="${dados.disponivel}">
-                    <label for="detalhe-estoque-disponivel">Disponíveis</label>
+                    <div class="metric-readonly-value">${dados.disponivel}</div>
+                    <label>Disponíveis</label>
                 </div>
 
                 <div class="category-metric-col col-emprestado">
@@ -46,8 +46,8 @@ export function renderDashboardCategoriaForm(dados) {
                     <div class="metric-icon-wrap">
                         <span class="material-symbols-outlined">warning</span>
                     </div>
-                    <input type="number" id="detalhe-estoque-quebrado" min="0" value="${dados.quebrado}">
-                    <label for="detalhe-estoque-quebrado">Quebrados</label>
+                    <div class="metric-readonly-value">${dados.quebrado}</div>
+                    <label>Quebrados</label>
                 </div>
             </div>
         </div>

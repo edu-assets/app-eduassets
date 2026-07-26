@@ -587,6 +587,22 @@
     font-size: 0.95rem;
 }
 
+.controle-resolver-resumo {
+    padding-bottom: 16px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.controle-resolver-descricao {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
 /* RESPONSIVINESS */
 
 @media (max-width: 1024px) {

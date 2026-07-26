@@ -140,9 +140,8 @@
                             <span class="material-symbols-outlined">person</span>
                             <span id="auth-status-label">Modo Convidado</span>
                         </span>
-                        <button type="button" class="auth-status-action" id="btn-auth-toggle">Login</button>
+                        <button type="button" class="auth-status-action" id="btn-auth-toggle"></button>
                     </div>
-                    v0.9.0 · EduAssets
                 </div>
             </aside>
 
@@ -362,7 +361,8 @@
                                 </div>
 
                                 <div class="form-actions">
-                                    <button class="btn btn-primary registrar-emprestimo" type="submit" data-requires-auth> <span
+                                    <button class="btn btn-primary registrar-emprestimo" type="submit"
+                                        data-requires-auth> <span
                                             class="material-symbols-outlined">check</span>Registrar
                                         Empréstimo</button>
                                 </div>
@@ -390,7 +390,8 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button class="btn btn-success" id="btn-confirmar-devolucao" data-requires-auth>Confirmar
+                                <button class="btn btn-success" id="btn-confirmar-devolucao"
+                                    data-requires-auth>Confirmar
                                     Devolução</button>
                             </div>
                         </div>
@@ -490,7 +491,8 @@
                                         style="display:none;">
                                         Salvar Alterações
                                     </button>
-                                    <button class="btn btn-primary btn-block" id="btn-confirmar-devolucao-painel" data-requires-auth>
+                                    <button class="btn btn-primary btn-block" id="btn-confirmar-devolucao-painel"
+                                        data-requires-auth>
                                         <span class="material-symbols-outlined">check</span> Confirmar Devolução
                                     </button>
                                     <button class="btn btn-neutral btn-block"
@@ -510,15 +512,12 @@
                     <div class="modal-overlay" id="modal-dashboard-categoria">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <h3>Editar categoria</h3>
+                                <h3>Detalhes da categoria</h3>
                             </div>
                             <div class="modal-body" id="modal-categoria-body"></div>
                             <div class="modal-footer">
-                                <button class="btn btn-neutral" id="modal-categoria-cancelar"
-                                    type="button">Cancelar</button>
-                                <button class="btn btn-primary" id="modal-categoria-salvar" data-requires-auth type="button">
-                                    <span class="material-symbols-outlined">save</span> Salvar alterações
-                                </button>
+                                <button class="btn btn-neutral" id="modal-categoria-fechar"
+                                    type="button">Fechar</button>
                             </div>
                         </div>
                     </div>
@@ -769,7 +768,37 @@
                             <div class="modal-footer">
                                 <button class="btn btn-neutral" id="controle-modal-cancelar"
                                     type="button">Cancelar</button>
-                                <button class="btn btn-success" id="controle-modal-salvar" data-requires-auth type="button">Salvar</button>
+                                <button class="btn btn-success" id="controle-modal-salvar" data-requires-auth
+                                    type="button">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal de resolver registro -->
+                    <div class="modal-overlay" id="modal-controle-resolver">
+                        <div class="modal-box">
+                            <div class="modal-header">
+                                <h3>Resolver Registro</h3>
+                            </div>
+                            <div class="modal-body">
+                                <div class="controle-resolver-resumo">
+                                    <span class="config-item-title" id="controle-resolver-categoria-modelo">—</span>
+                                    <span class="config-item-desc" id="controle-resolver-numero-problema">—</span>
+                                    <p class="controle-resolver-descricao" id="controle-resolver-descricao"></p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="controle-resolver-medidas">Medidas tomadas</label>
+                                    <textarea id="controle-resolver-medidas" rows="3"
+                                        placeholder="Descreva a resolução aplicada..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-neutral" id="controle-resolver-cancelar"
+                                    type="button">Cancelar</button>
+                                <button class="btn btn-success" id="controle-resolver-confirmar" data-requires-auth
+                                    type="button">
+                                    <span class="material-symbols-outlined">task_alt</span> Confirmar Resolução
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -829,7 +858,8 @@
 
                                 <div class="controle-registros-toolbar">
                                     <div class="novo-registro-dropdown">
-                                        <button class="btn btn-primary btn-sm" id="btn-novo-registro" data-requires-auth type="button">
+                                        <button class="btn btn-primary btn-sm" id="btn-novo-registro" data-requires-auth
+                                            type="button">
                                             <span class="material-symbols-outlined">add</span> Novo
                                         </button>
                                         <div class="novo-registro-menu" id="novo-registro-menu">
@@ -839,10 +869,16 @@
                                         </div>
                                     </div>
 
-                                    <button class="btn btn-neutral btn-sm" id="btn-editar-registro" data-requires-auth disabled>
+                                    <button class="btn btn-success btn-sm" id="btn-resolver-registro" data-requires-auth
+                                        disabled>
+                                        <span class="material-symbols-outlined">task_alt</span> Resolver
+                                    </button>
+                                    <button class="btn btn-neutral btn-sm" id="btn-editar-registro" data-requires-auth
+                                        disabled>
                                         <span class="material-symbols-outlined">edit</span> Editar
                                     </button>
-                                    <button class="btn btn-danger btn-sm" id="btn-deletar-registro" data-requires-auth disabled>
+                                    <button class="btn btn-danger btn-sm" id="btn-deletar-registro" data-requires-auth
+                                        disabled>
                                         <span class="material-symbols-outlined">delete</span> Deletar
                                     </button>
                                 </div>

@@ -91,15 +91,13 @@ export function abrirDetalheEstoque(els, estado, equipamentoId, ehLayoutEmpilhad
         return;
     }
 
+
     const dadosFormulario = montarDadosFormularioCategoria(equipamento);
 
-    els.detalheTitulo.textContent = 'Editar categoria';
+    els.detalheTitulo.textContent = 'Detalhes da categoria';
     els.detalheBody.innerHTML = renderDashboardCategoriaForm(dadosFormulario) + `
         <div class="category-edit-actions">
-            <button type="button" class="btn btn-neutral" id="btn-detalhe-estoque-cancelar">Cancelar</button>
-            <button type="button" class="btn btn-primary" id="btn-detalhe-estoque-salvar-novo">
-                <span class="material-symbols-outlined">save</span> Salvar alterações
-            </button>
+            <button type="button" class="btn btn-neutral" id="btn-detalhe-estoque-fechar">Fechar</button>
         </div>
     `;
 

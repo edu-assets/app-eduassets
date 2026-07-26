@@ -151,18 +151,18 @@
 
 .inicio-acao-icon {
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .inicio-acao-icon .material-symbols-outlined {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 50px;
+    width: 40px;
+    height: 40px;
 }
 
 .inicio-acao-icon-primary {
@@ -236,7 +236,7 @@
 }
 
 .inicio-dica-info .material-symbols-outlined {
-    font-size: 20px;
+    font-size: 30px;
     width: 20px;
     height: 20px;
     flex-shrink: 0;

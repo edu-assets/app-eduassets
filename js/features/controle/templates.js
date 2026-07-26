@@ -20,13 +20,18 @@ const ICONE_POR_TIPO = {
     resolvidos: 'task_alt'
 };
 
-export function renderControleMenuAcoes() {
+export function renderControleMenuAcoes(tipo) {
+    const opcaoResolver = (tipo === 'manutencao' || tipo === 'quebrado')
+        ? html`<span class="registros-row-menu-opcao" data-acao="resolver" data-requires-auth>Resolver</span>`
+        : '';
+
     return html`
         <span class="registros-row-menu-wrap">
             <button type="button" class="registros-row-menu-btn" aria-label="Mais opções">
                 <span class="material-symbols-outlined">more_vert</span>
             </button>
             <div class="registros-row-menu">
+                ${raw(opcaoResolver)}
                 <span class="registros-row-menu-opcao" data-acao="editar"data-requires-auth>Editar</span>
                 <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir"data-requires-auth>Excluir</span>
             </div>
@@ -57,7 +62,7 @@ export function renderControleLinha(tipo, dados) {
         <span data-col="descricao">${dados.descricao}</span>
         <span class="registros-data" data-col="registrado-em">${dataTexto}</span>
         ${raw(colunaMedidas)}
-        ${raw(renderControleMenuAcoes())}
+        ${raw(renderControleMenuAcoes(tipo))}
         </div>
     `;
 }

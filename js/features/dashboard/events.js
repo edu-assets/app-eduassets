@@ -15,8 +15,8 @@ import {
     abrirDetalheHistorico,
     fecharDetalhe
 } from './render.js';
-import { atualizarCategoria, exportarEstoqueCsv } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import { exportarEstoqueCsv } from './service.js';
 
 export function attachDashboardEvents(els, estado) {
     els.estoqueContainer.addEventListener('click', (e) => {
@@ -42,24 +42,14 @@ export function attachDashboardEvents(els, estado) {
 
     if (els.detalheBody) {
         els.detalheBody.addEventListener('click', (e) => {
-            if (e.target.closest('#btn-detalhe-estoque-cancelar')) {
+            if (e.target.closest('#btn-detalhe-estoque-fechar')) {
                 fecharDetalhe(els);
-                return;
-            }
-            if (e.target.closest('#btn-detalhe-estoque-salvar-novo')) {
-                salvarCategoria(els, estado, estado.equipamentoIdPainelAtual);
             }
         });
     }
 
-    if (els.btnModalCategoriaSalvar) {
-        els.btnModalCategoriaSalvar.addEventListener('click', () => {
-            salvarCategoria(els, estado, estado.equipamentoIdModalAtual, 'modal-dashboard-categoria');
-        });
-    }
-
-    if (els.btnModalCategoriaCancelar) {
-        els.btnModalCategoriaCancelar.addEventListener('click', () => {
+    if (els.btnModalCategoriaFechar) {
+        els.btnModalCategoriaFechar.addEventListener('click', () => {
             estado.equipamentoIdModalAtual = null;
         });
     }

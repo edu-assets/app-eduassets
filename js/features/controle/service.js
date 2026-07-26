@@ -1,5 +1,5 @@
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
-import { addOcorrencia, updateOcorrencia, deleteOcorrencia } from '../../core/state/ocorrenciasStore.js';
+import { addOcorrencia, updateOcorrencia, deleteOcorrencia, resolveOcorrencia } from '../../core/state/ocorrenciasStore.js';
 
 const TIPO_API_MAP = {
     observacao: 'OBSERVACAO',
@@ -55,4 +55,8 @@ export async function editarRegistro(id, tipo, dados) {
 
 export async function removerRegistro(id) {
     await deleteOcorrencia(Number(id));
+}
+
+export async function resolverRegistro(id, medidasTomadas) {
+    await resolveOcorrencia(Number(id), medidasTomadas);
 }

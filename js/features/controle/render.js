@@ -97,8 +97,12 @@ export function limparSelecao(els, estado) {
 
 export function atualizarToolbar(els, estado) {
     const temSelecao = estado.linhaSelecionada !== null;
+    const tipoSelecionado = estado.linhaSelecionada?.closest('.controle-tab-content')?.dataset.tipo;
+    const podeResolver = temSelecao && (tipoSelecionado === 'manutencao' || tipoSelecionado === 'quebrado');
+
     if (els.btnEditar) els.btnEditar.disabled = !temSelecao;
     if (els.btnDeletar) els.btnDeletar.disabled = !temSelecao;
+    if (els.btnResolver) els.btnResolver.disabled = !podeResolver;
 }
 
 function limparCamposModal(els) {
@@ -148,4 +152,27 @@ export function abrirEdicaoRegistro(els, estado, row) {
     if (els.campoMedidas) els.campoMedidas.value = ehResolvido ? (row.dataset.medidas || '') : '';
 
     openModal('modal-controle-novo');
+}
+
+export function abrirResolverRegistro(els, estado, row) {
+    const tabContent = row.closest('.controle-tab-content');
+    const tipo = tabContent ? tabContent.dataset.tipo : null;
+    if (tipo !== 'manutencao' && tipo !== 'quebrado') return;
+
+    estado.idResolvendo = row.dataset.id;
+
+    if (els.resolverCategoriaModelo) {
+        els.resolverCategoriaModelo.textContent = `${row.dataset.categoria} — ${row.dataset.modelo}`;
+    }
+    if (els.resolverNumeroProblema) {
+        els.resolverNumeroProblema.textContent = `Nº ${row.dataset.numero}`;
+    }
+    if (els.resolverDescricao) {
+        els.resolverDescricao.textContent = row.dataset.descricao || '';
+    }
+    if (els.resolverMedidas) {
+        els.resolverMedidas.value = '';
+    }
+
+    openModal('modal-controle-resolver');
 }

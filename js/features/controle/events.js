@@ -5,9 +5,10 @@ import {
     selecionarLinha,
     limparSelecao,
     abrirNovoRegistro,
-    abrirEdicaoRegistro
+    abrirEdicaoRegistro,
+    abrirResolverRegistro
 } from './render.js';
-import { adicionarRegistro, editarRegistro, removerRegistro } from './service.js';
+import { adicionarRegistro, editarRegistro, removerRegistro, resolverRegistro } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 
 export function attachControleEvents(els, estado) {
@@ -71,6 +72,10 @@ export function attachControleEvents(els, estado) {
 
             if (opcaoMenu.dataset.acao === 'excluir') {
                 excluirRegistro(els, estado, row);
+            } else if (opcaoMenu.dataset.acao === 'resolver') {
+                if (bloquearSeConvidado()) return;
+                selecionarLinha(els, estado, row);
+                abrirResolverRegistro(els, estado, row);
             } else {
                 selecionarLinha(els, estado, row);
                 abrirEdicaoRegistro(els, estado, row);
@@ -98,6 +103,25 @@ export function attachControleEvents(els, estado) {
 
     if (els.btnDeletar) {
         els.btnDeletar.addEventListener('click', () => excluirRegistro(els, estado, estado.linhaSelecionada));
+    }
+
+    if (els.btnResolver) {
+        els.btnResolver.addEventListener('click', () => {
+            if (!estado.linhaSelecionada) return;
+            if (bloquearSeConvidado()) return;
+            abrirResolverRegistro(els, estado, estado.linhaSelecionada);
+        });
+    }
+
+    if (els.btnResolverCancelar) {
+        els.btnResolverCancelar.addEventListener('click', () => {
+            estado.idResolvendo = null;
+            closeModal('modal-controle-resolver');
+        });
+    }
+
+    if (els.btnResolverConfirmar) {
+        els.btnResolverConfirmar.addEventListener('click', () => salvarResolucao(els, estado));
     }
 }
 
@@ -141,6 +165,29 @@ async function salvarModal(els, estado) {
     closeModal('modal-controle-novo');
     estado.idEditando = null;
     estado.linhaEditando = null;
+}
+
+async function salvarResolucao(els, estado) {
+    if (bloquearSeConvidado()) return;
+    if (!estado.idResolvendo) return;
+
+    const medidas = els.resolverMedidas?.value.trim();
+    if (!medidas) {
+        showToast('Descreva as medidas tomadas antes de confirmar', 'warning');
+        els.resolverMedidas?.focus();
+        return;
+    }
+
+    try {
+        await resolverRegistro(estado.idResolvendo, medidas);
+        showToast('Registro marcado como resolvido', 'success');
+    } catch (erro) {
+        showToast(erro instanceof Error ? erro.message : 'Erro ao resolver registro.', 'error');
+        return;
+    }
+
+    closeModal('modal-controle-resolver');
+    estado.idResolvendo = null;
 }
 
 async function excluirRegistro(els, estado, row) {
