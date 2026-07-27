@@ -12,15 +12,24 @@ export function initModals() {
             header.appendChild(closeBtn);
         }
 
+        if (overlay.dataset.closeOnOverlay === 'false') return;
+
+        let mousedownNoOverlay = false;
+
+        overlay.addEventListener('mousedown', (e) => {
+            mousedownNoOverlay = e.target === overlay;
+        });
+
         overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeModal(overlay.id);
+            if (e.target === overlay && mousedownNoOverlay) closeModal(overlay.id);
+            mousedownNoOverlay = false;
         });
     });
 
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
         const activeModal = document.querySelector('.modal-overlay.active');
-        if (activeModal) closeModal(activeModal.id);
+        if (activeModal && activeModal.dataset.closeOnOverlay !== 'false') closeModal(activeModal.id);
     });
 }
 

@@ -5,7 +5,7 @@
     background-color: rgba(5, 11, 28, 0.55);
     align-items: center;
     justify-content: center;
-    z-index: 100;
+    z-index: 300;
 }
 
 .modal-overlay.active {

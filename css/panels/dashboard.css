@@ -395,7 +395,7 @@
 .estoque-header,
 .estoque-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 32px;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
@@ -627,17 +627,10 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     }
 
-    .estoque-row .registros-row-menu-wrap {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-    }
-
     .estoque-row [data-col="categoria"] {
         font-size: 1rem;
         font-weight: 700;
         color: var(--text-primary);
-        padding-right: 32px;
         margin-bottom: 8px;
     }
 

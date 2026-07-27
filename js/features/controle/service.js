@@ -60,3 +60,22 @@ export async function removerRegistro(id) {
 export async function resolverRegistro(id, medidasTomadas) {
     await resolveOcorrencia(Number(id), medidasTomadas);
 }
+
+export function listarCategoriasDisponiveis() {
+    const categoriasUnicas = new Map();
+    getEquipamentos().forEach((equipamento) => {
+        const nome = equipamento.categoria?.nome;
+        if (nome && !categoriasUnicas.has(nome)) categoriasUnicas.set(nome, true);
+    });
+    return [...categoriasUnicas.keys()].sort();
+}
+
+export function listarModelosPorCategoria(categoriaNome) {
+    const modelosUnicos = new Map();
+    getEquipamentos()
+        .filter((equipamento) => equipamento.categoria?.nome === categoriaNome)
+        .forEach((equipamento) => {
+            if (!modelosUnicos.has(equipamento.modelo)) modelosUnicos.set(equipamento.modelo, true);
+        });
+    return [...modelosUnicos.keys()].sort();
+}

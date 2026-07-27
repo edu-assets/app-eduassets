@@ -1,6 +1,8 @@
 import { openModal } from '../../core/ui/index.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
+import { escapeHtml } from '../../core/utils/sanitize.js';
 import { renderControleLinha, renderControleEmptyState } from './templates.js';
+import { listarCategoriasDisponiveis, listarModelosPorCategoria } from './service.js';
 
 const TIPOS_VISIVEIS = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
 
@@ -105,8 +107,24 @@ export function atualizarToolbar(els, estado) {
     if (els.btnResolver) els.btnResolver.disabled = !podeResolver;
 }
 
+export function popularSelectCategorias(els) {
+    const categorias = listarCategoriasDisponiveis();
+    const placeholder = '<option value="" disabled selected hidden>Selecionar categoria</option>';
+    els.campoCategoria.innerHTML = placeholder + categorias
+        .map((categoria) => `<option value="${escapeHtml(categoria)}">${escapeHtml(categoria)}</option>`)
+        .join('');
+}
+
+export function popularSelectModelos(els, categoriaNome) {
+    const modelos = categoriaNome ? listarModelosPorCategoria(categoriaNome) : [];
+    const placeholder = '<option value="" disabled selected hidden>Selecionar modelo</option>';
+    els.campoModelo.innerHTML = placeholder + modelos
+        .map((modelo) => `<option value="${escapeHtml(modelo)}">${escapeHtml(modelo)}</option>`)
+        .join('');
+}
+
 function limparCamposModal(els) {
-    [els.campoCategoria, els.campoModelo, els.campoNumero, els.campoDescricao, els.campoMedidas].forEach((campo) => {
+    [els.campoNumero, els.campoDescricao, els.campoMedidas].forEach((campo) => {
         if (campo) campo.value = '';
     });
     if (els.campoProblema) els.campoProblema.value = '';
@@ -122,6 +140,9 @@ export function abrirNovoRegistro(els, estado, tipo) {
     estado.linhaEditando = null;
 
     if (els.modalTitle) els.modalTitle.textContent = TITULOS_POR_TIPO[tipo] || 'Novo Registro';
+
+    popularSelectCategorias(els);
+    popularSelectModelos(els, null);
     limparCamposModal(els);
     alternarCampoMedidas(els, false);
 
@@ -141,7 +162,9 @@ export function abrirEdicaoRegistro(els, estado, row) {
         els.modalTitle.textContent = tipo === 'resolvidos' ? 'Editar Registro Resolvido' : 'Editar Registro';
     }
 
+    popularSelectCategorias(els);
     els.campoCategoria.value = row.dataset.categoria || '';
+    popularSelectModelos(els, row.dataset.categoria);
     els.campoModelo.value = row.dataset.modelo || '';
     els.campoNumero.value = row.dataset.numero || '';
     els.campoProblema.value = row.dataset.problema || '';

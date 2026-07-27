@@ -9,36 +9,19 @@ import {
     renderAndamento,
     renderHistorico,
     ativarAbaDashboard,
-    fecharTodosMenusEstoque,
     atualizarVisibilidadeDetalhe,
     abrirDetalheEstoque,
     abrirDetalheHistorico,
     fecharDetalhe
 } from './render.js';
-import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import { exportarEstoqueCsv } from './service.js';
 
 export function attachDashboardEvents(els, estado) {
     els.estoqueContainer.addEventListener('click', (e) => {
-        const menuBtn = e.target.closest('.registros-row-menu-btn');
-        if (menuBtn) {
-            e.stopPropagation();
-            const menu = menuBtn.nextElementSibling;
-            const jaAberto = menu.classList.contains('active');
-            fecharTodosMenusEstoque(els);
-            if (!jaAberto) menu.classList.add('active');
-            return;
-        }
-
-        const opcaoMenu = e.target.closest('.registros-row-menu-opcao');
-        if (opcaoMenu) {
-            const row = opcaoMenu.closest('.estoque-row');
-            fecharTodosMenusEstoque(els);
-            abrirDetalheEstoque(els, estado, row.dataset.equipamentoId, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
-        }
+        const row = e.target.closest('.estoque-row');
+        if (!row) return;
+        abrirDetalheEstoque(els, estado, row.dataset.equipamentoId, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
     });
-
-    document.addEventListener('click', () => fecharTodosMenusEstoque(els));
 
     if (els.detalheBody) {
         els.detalheBody.addEventListener('click', (e) => {
@@ -96,29 +79,4 @@ export function attachDashboardEvents(els, estado) {
         renderAndamento(els, getLoansAbertos());
         renderHistorico(els, [...getLoans()].sort((a, b) => b.createdAt - a.createdAt));
     });
-}
-
-async function salvarCategoria(els, estado, equipamentoId, modalId = null) {
-    if (!equipamentoId) return;
-    if (bloquearSeConvidado()) return;
-
-    const dados = {
-        total: document.getElementById('detalhe-estoque-total')?.value || '0',
-        disponivel: document.getElementById('detalhe-estoque-disponivel')?.value || '0',
-        quebrado: document.getElementById('detalhe-estoque-quebrado')?.value || '0'
-    };
-
-    try {
-        await atualizarCategoria(equipamentoId, dados);
-        showToast('Categoria atualizada com sucesso', 'success');
-
-        if (modalId) {
-            closeModal(modalId);
-            estado.equipamentoIdModalAtual = null;
-        } else {
-            fecharDetalhe(els);
-        }
-    } catch (erro) {
-        showToast(erro instanceof Error ? erro.message : 'Erro ao atualizar categoria.', 'error');
-    }
 }

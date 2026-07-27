@@ -603,6 +603,10 @@
     margin-top: 8px;
 }
 
+#modal-controle-novo .modal-box {
+    max-width: 620px;
+}
+
 /* RESPONSIVINESS */
 
 @media (max-width: 1024px) {

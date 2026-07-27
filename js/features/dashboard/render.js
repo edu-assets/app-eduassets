@@ -61,10 +61,6 @@ export function ativarAbaDashboard(els, tab) {
     if (targetTab) targetTab.classList.add('active');
 }
 
-export function fecharTodosMenusEstoque(els) {
-    els.estoqueContainer.querySelectorAll('.registros-row-menu.active').forEach((menu) => menu.classList.remove('active'));
-}
-
 export function atualizarVisibilidadeDetalhe(els, ehLayoutEmpilhadoAtual) {
     if (!els.detalheContainer) return;
     const abaAtiva = document.querySelector('.dashboard-tab-link.active')?.dataset.tab;

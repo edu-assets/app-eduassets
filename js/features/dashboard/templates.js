@@ -61,14 +61,6 @@ function renderDashboardEstoqueLinha(equipamento) {
             <span data-col="total" data-label="Total">${equipamento.quantidadeTotal}</span>
             <span data-col="disponivel" data-label="Disponível">${equipamento.quantidadeDisponivel}</span>
             <span data-col="quebrado" data-label="Quebrado">${equipamento.quantidadeQuebrada}</span>
-            <span class="registros-row-menu-wrap">
-                <button type="button" class="registros-row-menu-btn" aria-label="Mais opções">
-                    <span class="material-symbols-outlined">more_vert</span>
-                </button>
-                <div class="registros-row-menu">
-                    <span class="registros-row-menu-opcao" data-acao="editar"data-requires-auth>Editar</span>
-                </div>
-            </span>
         </div>
     `;
 }
@@ -80,7 +72,6 @@ export function renderDashboardEstoqueContent(equipamentos) {
             <span>Total</span>
             <span>Disponível</span>
             <span>Quebrado</span>
-            <span></span>
         </div>
     `;
 

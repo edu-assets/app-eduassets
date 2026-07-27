@@ -6,7 +6,8 @@ import {
     limparSelecao,
     abrirNovoRegistro,
     abrirEdicaoRegistro,
-    abrirResolverRegistro
+    abrirResolverRegistro,
+    popularSelectModelos
 } from './render.js';
 import { adicionarRegistro, editarRegistro, removerRegistro, resolverRegistro } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
@@ -52,6 +53,12 @@ export function attachControleEvents(els, estado) {
 
     if (els.btnModalSalvar) {
         els.btnModalSalvar.addEventListener('click', () => salvarModal(els, estado));
+    }
+
+    if (els.campoCategoria) {
+        els.campoCategoria.addEventListener('change', () => {
+            popularSelectModelos(els, els.campoCategoria.value);
+        });
     }
 
     els.registrosContainer.addEventListener('click', (e) => {
