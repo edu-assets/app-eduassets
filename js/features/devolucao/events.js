@@ -2,6 +2,7 @@ import { showToast, closeModal } from '../../core/ui/index.js';
 import { getLoansAbertos } from '../../core/state/loans.js';
 import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
 import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
+import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 import {
     renderDetalheItens,
     abrirDetalhe,
@@ -122,7 +123,7 @@ export function attachDevolucaoEvents(els, estado) {
             setModoEdicao(els, estado, false);
             renderDetalheItens(els, estado.itensEditando, false);
         } catch (erro) {
-            showToast(erro.message || 'Erro ao atualizar empréstimo', 'error');
+            showToast(formatarErroEstoque(erro, 'Erro ao atualizar empréstimo'), 'error');
         }
     });
 }

@@ -1,5 +1,6 @@
 import { showToast, openModal } from '../../core/ui/index.js';
 import { adicionarOuIncrementarItem, removerItemPorId } from '../../core/utils/listaItens.js';
+import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 import { renderItens, renderModalItens } from './render.js';
 import { registrarEmprestimo } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
@@ -78,7 +79,7 @@ export function attachEmprestimoEvents(els, estado) {
             estado.itens = [];
             renderItens(els, estado.itens);
         } catch (erro) {
-            showToast(erro instanceof Error ? erro.message : 'Erro ao registrar empréstimo.', 'error');
+            showToast(formatarErroEstoque(erro, 'Erro ao registrar empréstimo.'), 'error');
         } finally {
             els.btnSubmit.disabled = false;
         }
