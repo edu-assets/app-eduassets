@@ -2,6 +2,7 @@ import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { criarDataAutoPicker } from '../../core/ui/index.js';
 import { renderLista, popularSelectDetalheEquipamento } from './render.js';
 import { attachDevolucaoEvents } from './events.js';
+import { getLoansAbertos, subscribe } from '../../core/state/loanStore.js';
 
 export function initDevolucao() {
     const lista = document.getElementById('lista-devolucoes-items');
