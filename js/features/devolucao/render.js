@@ -8,6 +8,7 @@ import {
     renderDetalheItensEdit,
     renderDetalheObservacao
 } from './templates.js';
+import { renderOpcaoEquipamento } from '../emprestimo/templates.js';
 
 export function renderLista(els, estado, loans) {
     if (!loans.length) {
@@ -51,6 +52,11 @@ export function abrirDetalhe(els, estado, loan) {
     marcarLinhaSelecionada(els, loan.id);
 
     if (window.matchMedia('(max-width: 1024px)').matches) abrirPainelMobile(els);
+}
+
+export function popularSelectDetalheEquipamento(select, equipamentos) {
+    const placeholder = '<option value="" disabled selected hidden>Selecionar equipamento</option>';
+    select.innerHTML = placeholder + equipamentos.map(renderOpcaoEquipamento).join('');
 }
 
 export function fecharDetalhe(els, estado) {

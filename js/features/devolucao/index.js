@@ -1,6 +1,6 @@
-import { getLoansAbertos, subscribe } from '../../core/state/loans.js';
+import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { criarDataAutoPicker } from '../../core/ui/index.js';
-import { renderLista } from './render.js';
+import { renderLista, popularSelectDetalheEquipamento } from './render.js';
 import { attachDevolucaoEvents } from './events.js';
 
 export function initDevolucao() {
@@ -30,8 +30,11 @@ export function initDevolucao() {
         btnDetalheCancelar: document.getElementById('btn-detalhe-cancelar'),
         btnConfirmarDevolucaoPainel: document.getElementById('btn-confirmar-devolucao-painel'),
         painel: document.querySelector('.devolucao-detalhe-painel'),
-        backdrop: document.getElementById('devolucao-detalhe-backdrop')
+        backdrop: document.getElementById('devolucao-detalhe-backdrop'),
+        detalheEquipamentoSelect: document.getElementById('detalhe-equipamento'),
     };
+
+    popularSelectDetalheEquipamento(els.detalheEquipamentoSelect, getEquipamentos());
 
     els.devolucaoPicker = criarDataAutoPicker(els.devolucaoDataInput);
 

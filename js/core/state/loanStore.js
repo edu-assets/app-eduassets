@@ -36,7 +36,10 @@ export async function returnLoan(id) {
 
 export async function updateLoan(id, updates) {
     if (updates.itens) {
-        await atualizarItensEmprestimo(id, updates.itens.map((item) => ({ equipamentoId: Number(item.id), quantidade: item.quantidade })));
+        await atualizarItensEmprestimo(id, updates.itens.map((item) => ({
+            equipamentoId: Number(item.id), // Number("eq1") = NaN
+            quantidade: item.quantidade
+        })));
     }
     await carregarEmprestimos();
 }
