@@ -1,8 +1,10 @@
 import { showToast, closeModal } from '../../core/ui/index.js';
 import { getLoansAbertos } from '../../core/state/loans.js';
+import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
 import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
+import { calcularDisponivelEfetivo } from '../../core/utils/estoqueDisponivel.js';
 import {
     renderDetalheItens,
     abrirDetalhe,
@@ -40,10 +42,17 @@ export function attachDevolucaoEvents(els, estado) {
         if (bloquearSeConvidado()) return;
         if (!estado.idPendente) return;
 
-        await confirmarDevolucao(estado.idPendente);
-        showToast(`Devolução registrada para ${els.devolucaoDataInput.value}`, 'success');
-        closeModal('modal-confirmar-devolucao');
-        estado.idPendente = null;
+        els.btnConfirmarDevolucao.disabled = true;
+        try {
+            await confirmarDevolucao(estado.idPendente);
+            showToast(`Devolução registrada para ${els.devolucaoDataInput.value}`, 'success');
+            closeModal('modal-confirmar-devolucao');
+            estado.idPendente = null;
+        } catch (erro) {
+            showToast(erro instanceof Error ? erro.message : 'Erro ao registrar devolução.', 'error');
+        } finally {
+            els.btnConfirmarDevolucao.disabled = false;
+        }
     });
 
     els.btnConfirmarDevolucaoPainel.addEventListener('click', () => {
@@ -87,11 +96,22 @@ export function attachDevolucaoEvents(els, estado) {
             return;
         }
 
+        const equipamentoId = els.detalheEquipamentoSelect.value;
         const quantidade = Number(els.detalheQuantidadeInput.value) || 1;
         const nome = els.detalheEquipamentoSelect.options[els.detalheEquipamentoSelect.selectedIndex].text;
 
+        const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(equipamentoId));
+        const reservadoOriginal = estado.itensOriginais?.find((item) => String(item.id) === String(equipamentoId))?.quantidade ?? 0;
+        const jaNoRascunho = estado.itensEditando.find((item) => String(item.id) === String(equipamentoId))?.quantidade ?? 0;
+        const disponivelEfetivo = calcularDisponivelEfetivo(equipamento, reservadoOriginal);
+
+        if (jaNoRascunho + quantidade > disponivelEfetivo) {
+            showToast(`Estoque insuficiente: ${nome} (disponível: ${disponivelEfetivo}, já neste empréstimo: ${jaNoRascunho})`, 'warning');
+            return;
+        }
+
         estado.itensEditando = adicionarOuIncrementarItem(estado.itensEditando, {
-            id: els.detalheEquipamentoSelect.value,
+            id: equipamentoId,
             nome,
             quantidade
         });
@@ -110,13 +130,29 @@ export function attachDevolucaoEvents(els, estado) {
 
     els.detalheLista.addEventListener('change', (e) => {
         if (!e.target.classList.contains('detalhe-item-qtd')) return;
-        estado.itensEditando = atualizarQuantidadeItem(estado.itensEditando, e.target.dataset.id, e.target.value);
-        const item = estado.itensEditando.find((i) => i.id === e.target.dataset.id);
+
+        const id = e.target.dataset.id;
+        const quantidadeDesejada = Math.max(1, Number(e.target.value) || 1);
+
+        const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(id));
+        const reservadoOriginal = estado.itensOriginais?.find((item) => String(item.id) === String(id))?.quantidade ?? 0;
+        const disponivelEfetivo = calcularDisponivelEfetivo(equipamento, reservadoOriginal);
+
+        if (quantidadeDesejada > disponivelEfetivo) {
+            showToast(`Estoque insuficiente: apenas ${disponivelEfetivo} unidade(s) disponível(is) para este equipamento.`, 'warning');
+            const itemAtual = estado.itensEditando.find((i) => String(i.id) === String(id));
+            e.target.value = itemAtual?.quantidade ?? 1;
+            return;
+        }
+
+        estado.itensEditando = atualizarQuantidadeItem(estado.itensEditando, id, quantidadeDesejada);
+        const item = estado.itensEditando.find((i) => String(i.id) === String(id));
         if (item) e.target.value = item.quantidade;
     });
 
     els.btnDetalheSalvar.addEventListener('click', async () => {
         if (bloquearSeConvidado()) return;
+        els.btnDetalheSalvar.disabled = true;
         try {
             await salvarItensEmprestimo(estado.idDetalheAberto, estado.itensEditando);
             showToast('Empréstimo atualizado com sucesso', 'success');
@@ -124,6 +160,8 @@ export function attachDevolucaoEvents(els, estado) {
             renderDetalheItens(els, estado.itensEditando, false);
         } catch (erro) {
             showToast(formatarErroEstoque(erro, 'Erro ao atualizar empréstimo'), 'error');
+        } finally {
+            els.btnDetalheSalvar.disabled = false;
         }
     });
 }

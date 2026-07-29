@@ -39,6 +39,7 @@ export function renderObservacao(els, observacao) {
 export function abrirDetalhe(els, estado, loan) {
     estado.idDetalheAberto = loan.id;
     estado.itensEditando = loan.itens.map((item) => ({ ...item }));
+    estado.itensOriginais = loan.itens.map((item) => ({ ...item }));
 
     els.detalheResp.textContent = loan.responsavel;
     els.detalheAluno.textContent = loan.aluno;
@@ -62,6 +63,7 @@ export function popularSelectDetalheEquipamento(select, equipamentos) {
 export function fecharDetalhe(els, estado) {
     estado.idDetalheAberto = null;
     estado.itensEditando = [];
+    estado.itensOriginais = [];
     setModoEdicao(els, estado, false);
     els.detalheConteudo.style.display = 'none';
     els.detalheEmpty.style.display = 'flex';

@@ -1,6 +1,8 @@
 import { showToast, openModal } from '../../core/ui/index.js';
 import { adicionarOuIncrementarItem, removerItemPorId } from '../../core/utils/listaItens.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
+import { calcularDisponivelEfetivo } from '../../core/utils/estoqueDisponivel.js';
+import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { renderItens, renderModalItens } from './render.js';
 import { registrarEmprestimo } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
@@ -13,11 +15,21 @@ export function attachEmprestimoEvents(els, estado) {
             return;
         }
 
+        const equipamentoId = els.equipamentoSelect.value;
         const quantidade = Number(els.quantidadeInput.value) || 1;
         const nome = els.equipamentoSelect.options[els.equipamentoSelect.selectedIndex].text;
 
+        const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(equipamentoId));
+        const jaNaLista = estado.itens.find((item) => String(item.id) === String(equipamentoId))?.quantidade ?? 0;
+        const disponivel = calcularDisponivelEfetivo(equipamento);
+
+        if (jaNaLista + quantidade > disponivel) {
+            showToast(`Estoque insuficiente: ${nome} (disponível: ${disponivel}, já na lista: ${jaNaLista})`, 'warning');
+            return;
+        }
+
         estado.itens = adicionarOuIncrementarItem(estado.itens, {
-            id: els.equipamentoSelect.value,
+            id: equipamentoId,
             nome,
             quantidade
         });
