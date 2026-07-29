@@ -1,11 +1,20 @@
 .devolucao-layout {
     display: flex;
     align-items: flex-start;
-    gap: 38px;
+    gap: 24px;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1300px;
     margin-top: 24px;
-    margin: 28px auto 0 auto;
+    margin: 16px auto 0 auto;
+}
+
+.devolucao-tabela-header,
+.devolucao-item {
+    display: grid;
+    grid-template-columns: 1.8fr 1.6fr 1.4fr 90px 100px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
 }
 
 .devolucao-lista-wrap {
@@ -16,30 +25,13 @@
 }
 
 .devolucao-tabela-header {
-    display: grid;
-    grid-template-columns: 1.5fr 2fr 1.8fr 1fr 100px;
-    gap: 16px;
-    padding: 0 22px 12px 22px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 12px;
+    padding-top: 0;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
 }
 
 .devolucao-item {
-    display: grid;
-    grid-template-columns: 1.5fr 2fr 1.8fr 1fr 100px;
-    align-items: center;
-    background-color: var(--surface-white);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 12px;
-    padding: 16px 22px;
-    gap: 16px;
-    cursor: pointer;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 8px;
 }
 
 .devolucao-item:hover {
@@ -205,8 +197,8 @@
 
 .devolucao-papel-icon {
     flex-shrink: 0;
-    width: 48px;
-    height: 48px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -313,17 +305,16 @@
 }
 
 .devolucao-detalhe-painel {
-    flex: 0 0 380px;
-    min-height: 500px;
-    background-color: var(--surface-white);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: var(--shadow-sm);
-    padding: 24px;
+    flex: 0 0 340px;
+    max-height: calc(100vh - 40px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 16px;
     position: sticky;
-    top: 0;
+    top: 16px;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 .devolucao-detalhe-empty {
@@ -356,10 +347,11 @@
 }
 
 .devolucao-detalhe-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
+}
+
+.devolucao-detalhe-header .devolucao-detalhe-fechar {
+    display: inline-flex;
 }
 
 .devolucao-detalhe-header h3 {
@@ -394,14 +386,18 @@
     height: 18px;
 }
 
-.devolucao-detalhe-pessoa {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+.devolucao-detalhe-pessoa,
+.devolucao-detalhe-secao {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
 }
+
+.devolucao-detalhe-pessoa {
+    padding-bottom: 10px;
+    margin-bottom: 12px; 
+    gap: 10px;
+}
+
 
 .devolucao-detalhe-pessoa-info {
     display: flex;
@@ -431,7 +427,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -476,18 +472,21 @@
 .devolucao-detalhe-acoes {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     margin-top: auto;
-    padding-top: 4px;
+    padding-top: 8px;
 }
 
 .detalhe-emprestimo-lista {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    max-height: 280px;
+    gap: 8px;
+    max-height: 130px; 
     overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+    margin-bottom: 8px;
 }
 
 .detalhe-emprestimo-lista li {
@@ -509,6 +508,9 @@
 .detalhe-item-nome {
     flex: 1;
     min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .detalhe-item-status {
@@ -539,37 +541,63 @@
 }
 
 .devolucao-detalhe-painel .form-row {
+    display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 .devolucao-detalhe-painel .detalhe-qtd-group {
     flex: 1 1 auto;
 }
 
+.devolucao-detalhe-painel input,
+.devolucao-detalhe-painel select {
+    padding: 8px 10px; 
+    font-size: 0.88rem;
+}
+
 .detalhe-emprestimo-item-edit {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    width: 100%;
 }
 
 .detalhe-item-qtd {
-    width: 56px;
-    padding: 6px;
+    width: 48px;
+    padding: 4px;
     border: 1.5px solid var(--border-color);
     border-radius: 4px;
     text-align: center;
     font-weight: 700;
     color: var(--primary-color);
 }
-
 .detalhe-item-remover {
     margin-left: auto;
     position: static;
 }
 
 /* RESPONSIVINESS */
+
+@media (max-width: 1366px) {
+    .devolucao-col-resp {
+        gap: 8px;
+    }
+
+    .info-resp-nome {
+        font-size: 0.88rem;
+    }
+
+    .info-aluno-nome {
+        font-size: 0.78rem;
+    }
+
+    .devolucao-item-icon-pill {
+        padding: 4px 8px;
+        font-size: 0.76rem;
+    }
+}
 
 @media (max-width: 1024px) {
     .devolucao-detalhe-painel {
