@@ -9,12 +9,21 @@
 }
 
 .devolucao-tabela-header,
+.devolucao-tabela-header,
 .devolucao-item {
     display: grid;
-    grid-template-columns: 1.8fr 1.6fr 1.4fr 90px 100px;
+
+    /* 1ª coluna (Responsável): 1.6fr
+       2ª coluna (Equipamento): 1.4fr
+       3ª coluna (Data/Obs):    1.1fr
+       4ª coluna (Status):      80px fixos
+       5ª coluna (Ação):        100px fixos */
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.6fr) minmax(0, 1.2fr) 85px 100px;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 16px;
+    padding: 14px 18px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .devolucao-lista-wrap {
@@ -50,6 +59,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 0;
 }
 
 .devolucao-avatar {
@@ -69,18 +79,34 @@
 .devolucao-textos-resp {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     gap: 2px;
+    min-width: 0;
+    flex: 1;
 }
 
 .info-resp-nome {
     font-weight: 700;
     color: var(--primary-color);
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.2;
 }
 
 .info-aluno-nome {
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     color: var(--text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .devolucao-col-equip {
@@ -101,13 +127,14 @@
     flex-direction: column;
     gap: 4px;
     align-items: flex-start;
+    justify-content: center;
 }
 
 .info-data-completa {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: var(--text-primary);
     white-space: nowrap;
 }
@@ -118,11 +145,12 @@
 }
 
 .info-data-relativa {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--text-muted);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    white-space: nowrap;
 }
 
 .seta-svg {
@@ -147,16 +175,26 @@
     font-weight: 700;
 }
 
+.devolucao-col-acao {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+}
+
 .devolver-btn {
-    padding: 8px 16px;
-    font-size: 0.9rem;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
     background-color: var(--primary-color);
     color: var(--text-on-primary);
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
 }
 
 .devolucao-vazia {
@@ -394,7 +432,7 @@
 
 .devolucao-detalhe-pessoa {
     padding-bottom: 10px;
-    margin-bottom: 12px; 
+    margin-bottom: 12px;
     gap: 10px;
 }
 
@@ -482,7 +520,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 130px; 
+    max-height: 130px;
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 4px;
@@ -553,7 +591,7 @@
 
 .devolucao-detalhe-painel input,
 .devolucao-detalhe-painel select {
-    padding: 8px 10px; 
+    padding: 8px 10px;
     font-size: 0.88rem;
 }
 
@@ -573,6 +611,7 @@
     font-weight: 700;
     color: var(--primary-color);
 }
+
 .detalhe-item-remover {
     margin-left: auto;
     position: static;
@@ -581,21 +620,37 @@
 /* RESPONSIVINESS */
 
 @media (max-width: 1366px) {
-    .devolucao-col-resp {
-        gap: 8px;
+
+    .devolucao-tabela-header,
+    .devolucao-item {
+        grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.5fr) minmax(0, 1.2fr) 80px;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+
+    .devolucao-tabela-header span:nth-child(5) {
+        display: none;
+    }
+
+    .devolucao-item .devolucao-col-acao {
+        display: none;
     }
 
     .info-resp-nome {
-        font-size: 0.88rem;
+        font-size: 0.9rem;
     }
 
     .info-aluno-nome {
         font-size: 0.78rem;
     }
 
+    .devolucao-col-resp {
+        gap: 10px;
+    }
+
     .devolucao-item-icon-pill {
-        padding: 4px 8px;
-        font-size: 0.76rem;
+        padding: 4px 10px;
+        font-size: 0.78rem;
     }
 }
 
