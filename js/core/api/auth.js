@@ -7,3 +7,7 @@ export function login(login, senha) {
 export function fetchMe() {
     return http.get('/auth/me');
 }
+
+export function alterarSenha(senhaAtual, novaSenha) {
+    return http.patch('/auth/senha', { senhaAtual, novaSenha });
+}

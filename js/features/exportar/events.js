@@ -11,17 +11,21 @@ export function attachExportarEvents(els) {
             return;
         }
 
+        const equipamentoIds = Array.from(els.equipamentosSelect?.selectedOptions ?? []).map((opt) => opt.value);
+
         const filtros = {
             tipoDados: els.tipoDadosSelect.value,
             dataInicial: els.dataInicialInput.value,
             dataFinal: els.dataFinalInput.value,
-            formato: els.formatoSelect.value
+            formato: els.formatoSelect.value,
+            equipamentoIds,
+            observacao: els.observacaoInput?.value.trim() ?? ''
         };
 
         definirEstadoCarregando(els, true);
 
         try {
-            await exportarDados(filtros);
+            exportarDados(filtros);
             showToast('Exportação gerada com sucesso', 'success');
         } catch (erro) {
             showToast(erro instanceof Error ? erro.message : 'Erro ao exportar dados.', 'error');

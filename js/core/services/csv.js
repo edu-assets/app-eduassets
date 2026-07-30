@@ -1,5 +1,5 @@
-export function gerarLinhasCsv(cabecalho, linhas) {
-    return [cabecalho, ...linhas].map((linha) => linha.join(';')).join('\n');
+export function gerarLinhasCsv(cabecalho, linhas, linhasExtras = []) {
+    return [...linhasExtras, cabecalho, ...linhas].map((linha) => linha.join(';')).join('\n');
 }
 
 export function baixarArquivoCsv(csv, nomeArquivo) {

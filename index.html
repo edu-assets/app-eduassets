@@ -26,6 +26,13 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/pt.js"></script>
 
+    <!-- SheetJS (Excel export) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- jsPDF (PDF export) -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.js"></script>
+
     <!-- CSS -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -1377,10 +1384,31 @@
                             <div class="config-card">
                                 <div class="config-card-header">
                                     <span class="config-icon config-icon-secondary">
+                                        <span class="material-symbols-outlined">devices</span>
+                                    </span>
+                                    <div>
+                                        <h4 class="config-card-title">2. Equipamentos <span
+                                                class="form-label-optional">(opcional)</span></h4>
+                                        <p class="config-card-desc">Filtre por equipamentos específicos. Deixe vazio
+                                            para incluir todos.</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <select name="exportar-equipamentos" id="exportar-equipamentos" multiple
+                                        size="6"></select>
+                                    <span class="form-hint">Segure Ctrl (ou Cmd no Mac) para selecionar múltiplos
+                                        equipamentos.</span>
+                                </div>
+                            </div>
+
+                            <div class="config-card">
+                                <div class="config-card-header">
+                                    <span class="config-icon config-icon-secondary">
                                         <span class="material-symbols-outlined">calendar_month</span>
                                     </span>
                                     <div>
-                                        <h4 class="config-card-title">2. Período</h4>
+                                        <h4 class="config-card-title">3. Período</h4>
                                         <p class="config-card-desc">Defina o intervalo de datas para o filtro.</p>
                                     </div>
                                 </div>
@@ -1408,7 +1436,7 @@
                                         <span class="material-symbols-outlined">draft</span>
                                     </span>
                                     <div>
-                                        <h4 class="config-card-title">3. Formato de Exportação</h4>
+                                        <h4 class="config-card-title">4. Formato de Exportação</h4>
                                         <p class="config-card-desc">Escolha o formato do arquivo.</p>
                                     </div>
                                 </div>
@@ -1423,6 +1451,25 @@
                                             <option value="pdf">PDF</option>
                                         </select>
                                     </div>
+                                </div>
+                            </div>
+
+                            <div class="config-card">
+                                <div class="config-card-header">
+                                    <span class="config-icon config-icon-info">
+                                        <span class="material-symbols-outlined">notes</span>
+                                    </span>
+                                    <div>
+                                        <h4 class="config-card-title">5. Observação <span
+                                                class="form-label-optional">(opcional)</span></h4>
+                                        <p class="config-card-desc">Adicione uma nota de contexto que será incluída no
+                                            relatório.</p>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <textarea id="exportar-observacao" rows="3"
+                                        placeholder="Ex: Relatório gerado para auditoria trimestral..."></textarea>
                                 </div>
                             </div>
 
@@ -1476,6 +1523,43 @@
                                         <span class="material-symbols-outlined">dark_mode</span> Escuro (em breve)
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="config-card" data-requires-auth>
+                            <div class="config-card-header">
+                                <span class="config-icon config-icon-info">
+                                    <span class="material-symbols-outlined">lock</span>
+                                </span>
+                                <div>
+                                    <h4 class="config-card-title">Segurança</h4>
+                                    <p class="config-card-desc">Altere a senha da sua conta de administrador.</p>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="config-senha-atual">Senha atual</label>
+                                    <input type="password" id="config-senha-atual" autocomplete="current-password">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="config-senha-nova">Nova senha</label>
+                                    <input type="password" id="config-senha-nova" autocomplete="new-password"
+                                        placeholder="Mínimo 8 caracteres">
+                                </div>
+                                <div class="form-group">
+                                    <label for="config-senha-confirmar">Confirmar nova senha</label>
+                                    <input type="password" id="config-senha-confirmar" autocomplete="new-password">
+                                </div>
+                            </div>
+                            <p class="login-erro" id="config-senha-erro"></p>
+
+                            <div class="category-edit-actions">
+                                <button type="button" class="btn btn-primary" id="config-senha-salvar">
+                                    <span class="material-symbols-outlined">save</span> Alterar Senha
+                                </button>
                             </div>
                         </div>
 
