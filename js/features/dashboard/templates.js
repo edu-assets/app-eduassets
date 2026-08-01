@@ -19,33 +19,31 @@ export function renderDashboardCategoriaForm(dados) {
 
             <div class="category-summary-grid">
                 <div class="category-metric-col col-total">
-                    <div class="metric-icon-wrap">
-                        <span class="material-symbols-outlined">devices</span>
-                    </div>
+                    <div class="metric-icon-wrap"><span class="material-symbols-outlined">devices</span></div>
                     <div class="metric-readonly-value">${dados.total}</div>
                     <label>Total</label>
                 </div>
 
                 <div class="category-metric-col col-disponivel">
-                    <div class="metric-icon-wrap">
-                        <span class="material-symbols-outlined">check_circle</span>
-                    </div>
+                    <div class="metric-icon-wrap"><span class="material-symbols-outlined">check_circle</span></div>
                     <div class="metric-readonly-value">${dados.disponivel}</div>
                     <label>Disponíveis</label>
                 </div>
 
                 <div class="category-metric-col col-emprestado">
-                    <div class="metric-icon-wrap">
-                        <span class="material-symbols-outlined">schedule</span>
-                    </div>
+                    <div class="metric-icon-wrap"><span class="material-symbols-outlined">schedule</span></div>
                     <div class="metric-readonly-value">${dados.emprestado}</div>
                     <label>Emprestados</label>
                 </div>
 
+                <div class="category-metric-col col-manutencao">
+                    <div class="metric-icon-wrap"><span class="material-symbols-outlined">build</span></div>
+                    <div class="metric-readonly-value">${dados.manutencao}</div>
+                    <label>Manutenção</label>
+                </div>
+
                 <div class="category-metric-col col-quebrado">
-                    <div class="metric-icon-wrap">
-                        <span class="material-symbols-outlined">warning</span>
-                    </div>
+                    <div class="metric-icon-wrap"><span class="material-symbols-outlined">warning</span></div>
                     <div class="metric-readonly-value">${dados.quebrado}</div>
                     <label>Quebrados</label>
                 </div>

@@ -54,15 +54,15 @@
 .sidebar-nav {
     flex: 1;
     min-height: 0;
-    padding: clamp(12px, 2.5vh, 24px) 16px;
-    overflow: hidden;
+    padding: clamp(12px, 2 .5vh, 24px) 16px;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start; 
 }
 
 .nav-section {
-    margin-bottom: clamp(8px, 2vh, 24px);
+    margin-bottom: 24px;
 }
 
 .nav-section:last-child {
@@ -84,14 +84,13 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: clamp(0px, 0.4vh, 4px);
 }
 
 .sidebar-nav .nav-link {
     color: var(--text-on-primary);
     text-decoration: none;
     font-size: clamp(0.85rem, 1.5vh, 1rem);
-    padding: clamp(6px, 1.2vh, 10px) 16px;
+    padding: 10px 16px;
     margin: 0 -16px;
     border-radius: 0px;
     display: block;

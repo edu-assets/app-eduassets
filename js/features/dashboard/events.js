@@ -15,6 +15,7 @@ import {
     fecharDetalhe
 } from './render.js';
 import { exportarEstoqueCsv } from './service.js';
+import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
 
 export function attachDashboardEvents(els, estado) {
     els.estoqueContainer.addEventListener('click', (e) => {
@@ -78,5 +79,9 @@ export function attachDashboardEvents(els, estado) {
     subscribeLoans(() => {
         renderAndamento(els, getLoansAbertos());
         renderHistorico(els, [...getLoans()].sort((a, b) => b.createdAt - a.createdAt));
+    });
+
+    subscribeOcorrencias(() => {
+        renderResumo(els, getEquipamentos());
     });
 }

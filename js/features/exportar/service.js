@@ -1,6 +1,7 @@
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { getLoans } from '../../core/state/loanStore.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
+import { contarManutencaoPorEquipamento } from '../../core/utils/estoqueCalculado.js';
 import { gerarLinhasCsv, baixarArquivoCsv } from '../../core/services/csv.js';
 import { gerarArquivoXlsx, baixarArquivoXlsx } from '../../core/services/excel.js';
 import { gerarBaixarPdf } from '../../core/services/pdf.js';
@@ -15,16 +16,6 @@ export function prepararDadosEquipamentos() {
 
 export function prepararDadosEmprestimos() {
     return getLoans();
-}
-
-/** Quantidade de unidades em manutenção aberta, por equipamentoId. */
-function contarManutencaoPorEquipamento() {
-    const mapa = new Map();
-    getOcorrenciasPorTipo('manutencao').forEach((ocorrencia) => {
-        const id = String(ocorrencia.equipamentoId);
-        mapa.set(id, (mapa.get(id) ?? 0) + 1);
-    });
-    return mapa;
 }
 
 /* ===== 2. filtering ===== */
@@ -61,7 +52,7 @@ const CABECALHO_EQUIPAMENTOS = ['Categoria', 'Modelo', 'Total', 'Disponivel', 'E
 const CABECALHO_EMPRESTIMOS = ['Numero', 'Solicitante', 'Responsavel', 'Retirada', 'Devolucao', 'Status'];
 
 function linhasEquipamentos(equipamentos) {
-    const manutencaoPorEquipamento = contarManutencaoPorEquipamento();
+    const manutencaoPorEquipamento = contarManutencaoPorEquipamento(getOcorrenciasPorTipo('manutencao'));
 
     return equipamentos.map((equipamento) => [
         equipamento.categoria?.nome ?? '',

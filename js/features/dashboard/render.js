@@ -1,6 +1,6 @@
 import { openModal } from '../../core/ui/index.js';
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
-import { calcularResumo, calcularEmprestado, buscarEquipamentoPorId } from './service.js';
+import { calcularResumo, calcularEmprestado, calcularManutencao, buscarEquipamentoPorId } from './service.js';
 import {
     renderDashboardCategoriaForm,
     renderDashboardEstoqueContent,
@@ -73,8 +73,9 @@ function montarDadosFormularioCategoria(equipamento) {
         categoria: equipamento.categoria?.nome ?? '',
         total: equipamento.quantidadeTotal,
         disponivel: equipamento.quantidadeDisponivel,
-        quebrado: equipamento.quantidadeQuebrada,
-        emprestado: calcularEmprestado(equipamento)
+        emprestado: calcularEmprestado(equipamento),
+        manutencao: calcularManutencao(equipamento),
+        quebrado: equipamento.quantidadeQuebrada
     };
 }
 

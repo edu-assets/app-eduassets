@@ -30,7 +30,9 @@ export function initDashboard() {
         resumoQuebrado: document.getElementById('resumo-quebrado'),
         resumoDisponivelPct: document.getElementById('resumo-disponivel-pct'),
         resumoEmprestadoPct: document.getElementById('resumo-emprestado-pct'),
-        resumoQuebradoPct: document.getElementById('resumo-quebrado-pct')
+        resumoQuebradoPct: document.getElementById('resumo-quebrado-pct'),
+        resumoManutencao: document.getElementById('resumo-manutencao'),
+        resumoManutencaoPct: document.getElementById('resumo-manutencao-pct'),
     };
 
     const estado = {

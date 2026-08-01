@@ -11,6 +11,7 @@ import {
 } from './render.js';
 import { adicionarRegistro, editarRegistro, removerRegistro, resolverRegistro } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 
 export function attachControleEvents(els, estado) {
     document.querySelectorAll('.controle-tab-link').forEach((tabLink) => {
@@ -165,7 +166,7 @@ async function salvarModal(els, estado) {
             showToast('Registro criado com sucesso', 'success');
         }
     } catch (erro) {
-        showToast(erro instanceof Error ? erro.message : 'Erro ao salvar registro.', 'error');
+        showToast(formatarErroEstoque(erro, 'Erro ao salvar registro.'), 'error');
         return;
     }
 

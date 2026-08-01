@@ -17,7 +17,7 @@
 /* ===== Cards de resumo ===== */
 .dashboard-resumo-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
 }
 
@@ -66,6 +66,11 @@
 .dashboard-resumo-card-error .dashboard-resumo-icon {
     background-color: var(--error-bg);
     color: var(--error-color);
+}
+
+.dashboard-resumo-card-secondary .dashboard-resumo-icon {
+    background-color: var(--secondary-bg);
+    color: var(--secondary-color);
 }
 
 .dashboard-resumo-texto {
@@ -223,9 +228,14 @@
 
 .category-summary-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     align-items: flex-start;
+}
+
+.col-manutencao .metric-icon-wrap {
+    background-color: var(--secondary-bg);
+    color: var(--secondary-color);
 }
 
 .category-metric-col {
