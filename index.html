@@ -276,9 +276,23 @@
                     <div class="modal-overlay" id="modal-itens-emprestimo">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <h3>Itens do Empréstimo</h3>
+                                <div class="modal-heading">
+                                    <span class="modal-icon" aria-hidden="true">
+                                        <span class="material-symbols-outlined">inventory_2</span>
+                                    </span>
+                                    <div class="modal-heading-text">
+                                        <h3>Itens do Empréstimo</h3>
+                                        <p class="modal-description">Revise os itens selecionados antes de concluir o
+                                            empréstimo.</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-body">
+                                <div class="modal-callout modal-callout-info">
+                                    <span class="material-symbols-outlined">info</span>
+                                    <span><strong>Resumo:</strong> confira a lista final para evitar divergências na
+                                        retirada.</span>
+                                </div>
                                 <div class="itens-emprestimo-list" id="modal-itens-emprestimo-lista"></div>
                             </div>
                         </div>
@@ -387,9 +401,23 @@
                     <div class="modal-overlay" id="modal-confirmar-devolucao">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <h3>Confirmar Devolução</h3>
+                                <div class="modal-heading">
+                                    <span class="modal-icon" aria-hidden="true">
+                                        <span class="material-symbols-outlined">assignment_return</span>
+                                    </span>
+                                    <div class="modal-heading-text">
+                                        <h3>Confirmar Devolução</h3>
+                                        <p class="modal-description">Confirme a data e finalize o encerramento do
+                                            empréstimo.</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-body">
+                                <div class="modal-callout modal-callout-warning">
+                                    <span class="material-symbols-outlined">warning</span>
+                                    <span><strong>Atenção:</strong> ao confirmar, o equipamento voltará a ficar
+                                        disponível para novos empréstimos.</span>
+                                </div>
                                 <div class="form-group">
                                     <label for="modal-devolucao-data">Data e Hora da Devolução</label>
                                     <input type="text" id="modal-devolucao-data" class="input-auto">
@@ -519,7 +547,16 @@
                     <div class="modal-overlay" id="modal-dashboard-categoria">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <h3>Detalhes da categoria</h3>
+                                <div class="modal-heading">
+                                    <span class="modal-icon" aria-hidden="true">
+                                        <span class="material-symbols-outlined">category</span>
+                                    </span>
+                                    <div class="modal-heading-text">
+                                        <h3>Detalhes da categoria</h3>
+                                        <p class="modal-description">Consulte o resumo da categoria e os itens
+                                            relacionados.</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-body" id="modal-categoria-body"></div>
                             <div class="modal-footer">
@@ -732,9 +769,23 @@
                     <div class="modal-overlay" id="modal-controle-novo">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <h3 id="controle-modal-title">Novo Registro</h3>
+                                <div class="modal-heading">
+                                    <span class="modal-icon" aria-hidden="true">
+                                        <span class="material-symbols-outlined">build</span>
+                                    </span>
+                                    <div class="modal-heading-text">
+                                        <h3 id="controle-modal-title">Novo Registro</h3>
+                                        <p class="modal-description">Registre o equipamento, o problema e a informação
+                                            necessária para o acompanhamento.</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-body">
+                                <div class="modal-callout modal-callout-info">
+                                    <span class="material-symbols-outlined">info</span>
+                                    <span><strong>Orientação:</strong> preencha os campos principais para registrar a
+                                        ocorrência com o máximo de contexto.</span>
+                                </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="controle-modal-categoria">Categoria</label>
@@ -801,9 +852,23 @@
                     <div class="modal-overlay" id="modal-controle-resolver">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <h3>Resolver Registro</h3>
+                                <div class="modal-heading">
+                                    <span class="modal-icon" aria-hidden="true">
+                                        <span class="material-symbols-outlined">task_alt</span>
+                                    </span>
+                                    <div class="modal-heading-text">
+                                        <h3>Resolver Registro</h3>
+                                        <p class="modal-description">Descreva a solução aplicada e feche o registro com
+                                            clareza.</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-body">
+                                <div class="modal-callout modal-callout-success">
+                                    <span class="material-symbols-outlined">check_circle</span>
+                                    <span><strong>Finalização:</strong> registre as medidas tomadas para manter o
+                                        histórico do equipamento consistente.</span>
+                                </div>
                                 <div class="controle-resolver-resumo">
                                     <span class="config-item-title" id="controle-resolver-categoria-modelo">—</span>
                                     <span class="config-item-desc" id="controle-resolver-numero-problema">—</span>
@@ -1283,9 +1348,23 @@
                     <div class="modal-overlay" id="modal-cadastro">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <h3 id="cadastro-modal-title">Título</h3>
+                                <div class="modal-heading">
+                                    <span class="modal-icon" aria-hidden="true">
+                                        <span class="material-symbols-outlined">list_alt</span>
+                                    </span>
+                                    <div class="modal-heading-text">
+                                        <h3 id="cadastro-modal-title">Título</h3>
+                                        <p class="modal-description">Adicione ou edite os dados do módulo selecionado
+                                            para manter o cadastro atualizado.</p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-body">
+                                <div class="modal-callout modal-callout-info">
+                                    <span class="material-symbols-outlined">info</span>
+                                    <span><strong>Fluxo:</strong> preencha os campos e confirme para salvar as
+                                        alterações no cadastro.</span>
+                                </div>
                                 <div id="cadastro-modal-fields" class="modal-fields"></div>
 
                                 <div class="cadastro-modal-list-wrap">
@@ -1962,9 +2041,22 @@
     <div class="modal-overlay" id="modal-confirmar-exclusao">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 id="confirmar-exclusao-titulo">Confirmar exclusão</h3>
+                <div class="modal-heading">
+                    <span class="modal-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined">delete_forever</span>
+                    </span>
+                    <div class="modal-heading-text">
+                        <h3 id="confirmar-exclusao-titulo">Confirmar exclusão</h3>
+                        <p class="modal-description">Confirme a remoção antes de prosseguir com esta ação.</p>
+                    </div>
+                </div>
             </div>
             <div class="modal-body">
+                <div class="modal-callout modal-callout-warning">
+                    <span class="material-symbols-outlined">warning</span>
+                    <span><strong>Importante:</strong> esta ação remove o registro de forma permanente e não pode ser
+                        desfeita.</span>
+                </div>
                 <p id="confirmar-exclusao-mensagem">Esta ação não pode ser desfeita.</p>
             </div>
             <div class="modal-footer">
@@ -1979,9 +2071,23 @@
     <div class="modal-overlay" id="modal-login" data-close-on-overlay="false">
         <div class="modal-box">
             <div class="modal-header">
-                <h3>Login de Administrador</h3>
+                <div class="modal-heading">
+                    <span class="modal-icon" aria-hidden="true">
+                        <span class="material-symbols-outlined">lock</span>
+                    </span>
+                    <div class="modal-heading-text">
+                        <h3>Login de Administrador</h3>
+                        <p class="modal-description">Acesse o painel administrativo para continuar com as ações
+                            restritas.</p>
+                    </div>
+                </div>
             </div>
             <div class="modal-body">
+                <div class="modal-callout modal-callout-info">
+                    <span class="material-symbols-outlined">security</span>
+                    <span><strong>Segurança:</strong> use suas credenciais para manter o acesso ao sistema
+                        controlado.</span>
+                </div>
                 <div class="form-group">
                     <label for="login-email">E-mail / Login</label>
                     <input type="text" id="login-email" placeholder="usuario@escola.com" autocomplete="username">

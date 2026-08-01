@@ -246,9 +246,13 @@
 }
 
 .devolucao-papel-icon .material-symbols-outlined {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 24px;
     width: 24px;
     height: 24px;
+    line-height: 1;
 }
 
 .devolucao-papel-icon-sm {
@@ -385,7 +389,7 @@
 }
 
 .devolucao-detalhe-header {
-    margin-bottom: 8px;
+    margin-bottom: 28px;
 }
 
 .devolucao-detalhe-header .devolucao-detalhe-fechar {
@@ -431,6 +435,8 @@
 }
 
 .devolucao-detalhe-pessoa {
+    display: flex;
+    align-items: center;
     padding-bottom: 10px;
     margin-bottom: 12px;
     gap: 10px;
@@ -666,6 +672,9 @@
         left: 50%;
         transform: translate(-50%, -50%);
 
+        background-color: var(--surface-white);
+        border-radius: 8px;
+
         /* size adjustments */
         width: calc(100% - 32px);
         max-width: 440px;
@@ -741,5 +750,25 @@
 
     .devolucao-vazia-logo {
         width: 220px;
+    }
+
+    .devolucao-papel-icon-sm {
+        width: 36px;
+        height: 36px;
+    }
+
+    .devolucao-papel-icon-sm .material-symbols-outlined {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
+    .devolucao-detalhe-pessoa {
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .devolucao-detalhe-pessoa-info {
+        padding-top: 1px;
     }
 }

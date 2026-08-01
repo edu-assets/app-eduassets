@@ -40,7 +40,7 @@
 /* Success (verde) — Salvar */
 .btn-success {
     background-color: var(--success-color);
-    color: var(--white);
+    color: var(--text-on-primary);
 }
 
 .btn-success:hover:not(:disabled) {
