@@ -385,7 +385,7 @@
 
                     <!-- Modal: Confirmar Devolução (única janela pop-up que sobra neste painel) -->
                     <div class="modal-overlay" id="modal-confirmar-devolucao">
-                        <div class="modal-box modal-box--md">
+                        <div class="modal-box modal-box--lg modal-box-confirmar-devolucao">
                             <div class="modal-header">
                                 <span class="modal-header-icon modal-header-icon-success">
                                     <span class="material-symbols-outlined">assignment_turned_in</span>
@@ -414,12 +414,20 @@
                                             <span class="material-symbols-outlined">inventory_2</span>
                                             <span data-summary="itens"></span>
                                         </span>
+
+                                        <div class="modal-summary-items" data-summary="itens-lista">
+                                            <span class="modal-summary-label">Itens emprestados</span>
+                                            <div class="modal-summary-items-list"></div>
+                                        </div>
                                     </div>
 
-                                    <div class="form-group">
-                                        <label for="modal-devolucao-data">Data e Hora da Devolução</label>
-                                        <input type="text" id="modal-devolucao-data" class="input-auto">
-                                        <span class="form-hint">Preenchido automaticamente — clique para alterar</span>
+                                    <div class="modal-form-col modal-confirmar-devolucao-form">
+                                        <div class="form-group">
+                                            <label for="modal-devolucao-data">Data e Hora da Devolução</label>
+                                            <input type="text" id="modal-devolucao-data" class="input-auto">
+                                            <span class="form-hint">Preenchido automaticamente — clique para alterar</span>
+                                        </div>
+
                                         <div class="modal-callout modal-callout-info">
                                             <span class="material-symbols-outlined">info</span>
                                             <span>Os itens ficarão disponíveis novamente após a confirmação.</span>

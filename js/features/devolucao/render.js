@@ -108,12 +108,33 @@ function preencherResumoConfirmacao(els, loan) {
     if (!els.confirmarDevolucaoResumo || !loan) return;
 
     const campo = (nome) => els.confirmarDevolucaoResumo.querySelector(`[data-summary="${nome}"]`);
+    const itensLista = els.confirmarDevolucaoResumo.querySelector('[data-summary="itens-lista"] .modal-summary-items-list');
 
     campo('iniciais').textContent = gerarIniciais(loan.responsavel);
     campo('responsavel').textContent = loan.responsavel;
     campo('aluno').textContent = loan.aluno;
     campo('data').textContent = `Retirado em ${formatarDataCard(loan.createdAt)}`;
-    campo('itens').textContent = `${loan.itens.length} ${loan.itens.length === 1 ? 'item' : 'itens'} emprestado(s)`;
+
+    campo('itens').textContent = `${loan.itens.length} ${loan.itens.length === 1 ? 'item' : 'itens'}`;
+
+    if (itensLista) {
+        itensLista.replaceChildren();
+        loan.itens.forEach((item) => {
+            const chip = document.createElement('span');
+            chip.className = 'modal-summary-item';
+
+            const icon = document.createElement('span');
+            icon.className = 'material-symbols-outlined';
+            icon.textContent = 'inventory_2';
+
+            const texto = document.createElement('span');
+            texto.className = 'modal-summary-item-text';
+            texto.textContent = `${item.quantidade}x ${item.nome}`;
+
+            chip.append(icon, texto);
+            itensLista.appendChild(chip);
+        });
+    }
 }
 
 export function abrirModalConfirmacao(els, estado, id) {

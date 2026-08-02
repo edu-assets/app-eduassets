@@ -161,7 +161,11 @@
 }
 
 .modal-box--md { max-width: 640px; padding: 28px 32px; }
-.modal-box--lg { max-width: 800px; padding: 28px 32px; }
+.modal-box--lg { max-width: 860px; padding: 30px 34px; }
+
+.modal-box-confirmar-devolucao {
+    max-width: 760px;
+}
 
 .modal-callout {
     display: flex;
@@ -202,8 +206,8 @@
 
 .modal-summary-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 24px;
+    grid-template-columns: 1fr;
+    gap: 16px;
     align-items: start;
 }
 
@@ -211,11 +215,10 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
-    padding: 18px 20px;
+    padding: 20px;
     border: 1px solid var(--border-color);
     border-radius: 10px;
     background-color: var(--surface-2);
-    height: 100%;
     box-sizing: border-box;
 }
 
@@ -270,6 +273,48 @@
     gap: 10px;
 }
 
+.modal-summary-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 2px;
+}
+
+.modal-summary-items-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.modal-summary-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 16%, var(--border-color));
+    border-radius: 999px;
+    background-color: var(--surface-white);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    line-height: 1.2;
+}
+
+.modal-summary-item .material-symbols-outlined {
+    flex-shrink: 0;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--primary-color);
+}
+
+.modal-summary-item-text {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .modal-summary-row {
     display: flex;
     align-items: center;
@@ -290,18 +335,109 @@
 .modal-form-col {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    height: 100%;
+    gap: 18px;
+}
+
+.modal-confirmar-devolucao .modal-summary-panel,
+.modal-confirmar-devolucao .modal-form-col {
+    min-height: 0;
+}
+
+.modal-confirmar-devolucao .form-group {
+    margin-bottom: 0;
+}
+
+.modal-confirmar-devolucao .input-auto {
+    width: 100%;
+}
+
+.modal-confirmar-devolucao .form-hint {
+    display: block;
+    margin-top: 6px;
+    line-height: 1.35;
+}
+
+.modal-confirmar-devolucao .modal-callout {
+    margin-top: 0;
 }
 
 @media (max-width: 640px) {
     .modal-summary-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 14px;
     }
 
     .modal-summary-panel,
     .modal-form-col {
         height: auto;
+    }
+
+    .modal-summary-items-list {
+        gap: 6px;
+    }
+
+    .modal-summary-item {
+        padding: 6px 9px;
+        font-size: 0.8rem;
+    }
+
+    .modal-box--lg {
+        padding: 22px 18px 18px;
+    }
+
+    .modal-box-confirmar-devolucao {
+        max-width: calc(100vw - 24px);
+    }
+
+    .modal-confirmar-devolucao .modal-callout {
+        margin-top: 0;
+    }
+
+    .modal-confirmar-devolucao .modal-form-col {
+        gap: 14px;
+    }
+}
+
+@media (max-width: 440px) {
+    .modal-box--lg {
+        padding: 18px 14px 16px;
+    }
+
+    .modal-summary-grid {
+        gap: 16px;
+    }
+
+    .modal-box-confirmar-devolucao {
+        max-width: calc(100vw - 16px);
+    }
+
+    .modal-summary-panel {
+        padding: 16px;
+    }
+
+    .modal-summary-person {
+        gap: 10px;
+        padding-bottom: 12px;
+    }
+
+    .modal-summary-items {
+        gap: 6px;
+    }
+
+    .modal-summary-title {
+        font-size: 0.92rem;
+    }
+
+    .modal-summary-row {
+        font-size: 0.8rem;
+    }
+
+    .modal-footer {
+        flex-direction: column-reverse;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        justify-content: center;
     }
 }
