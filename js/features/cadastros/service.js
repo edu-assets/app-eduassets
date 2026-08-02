@@ -9,6 +9,9 @@ import {
 const CADASTRO_CONFIG = {
     equipamentos: {
         titulo: 'Equipamentos',
+        descricao: 'Adicione um novo equipamento à lista disponível para empréstimo.',
+        icone: 'devices',
+        iconeClasse: 'primary',
         listar: () => equipamentosApi.listarEquipamentos(),
         criar: (valores) => equipamentosApi.criarEquipamento({
             categoriaId: Number(valores['cad-categoria']),
@@ -30,6 +33,9 @@ const CADASTRO_CONFIG = {
     },
     responsaveis: {
         titulo: 'Responsáveis',
+        descricao: 'Cadastre um professor ou funcionário autorizado a retirar equipamentos.',
+        icone: 'badge',
+        iconeClasse: 'success',
         listar: () => responsaveisApi.listarResponsaveis(),
         criar: (valores) => responsaveisApi.criarResponsavel({
             nome: valores['cad-nome'],
@@ -43,6 +49,9 @@ const CADASTRO_CONFIG = {
     },
     usuarios: {
         titulo: 'Usuários do Sistema',
+        descricao: 'Adicione um novo usuário com acesso ao sistema.',
+        icone: 'admin_panel_settings',
+        iconeClasse: 'secondary',
         listar: () => usuariosApi.listarUsuarios(),
         criar: (valores) => usuariosApi.criarUsuario({
             nome: valores['cad-nome-usuario'],
@@ -68,6 +77,9 @@ const CADASTRO_CONFIG = {
     },
     categorias: {
         titulo: 'Categorias de Equipamentos',
+        descricao: 'Crie uma nova categoria para organizar os equipamentos.',
+        icone: 'category',
+        iconeClasse: 'info',
         listar: () => categoriasApi.listarCategorias(),
         criar: (valores) => categoriasApi.criarCategoria(valores['cad-nome-categoria']),
         formatarItem: (item) => item.nome,

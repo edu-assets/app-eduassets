@@ -11,6 +11,8 @@ export function initDevolucao() {
     const els = {
         lista,
         devolucaoDataInput: document.getElementById('modal-devolucao-data'),
+        confirmarDevolucaoResumo: document.getElementById('modal-confirmar-devolucao-resumo'),
+        btnCancelarDevolucao: document.getElementById('modal-confirmar-devolucao-cancelar'),
         btnConfirmarDevolucao: document.getElementById('btn-confirmar-devolucao'),
         detalheEmpty: document.getElementById('devolucao-detalhe-empty'),
         detalheConteudo: document.getElementById('devolucao-detalhe-conteudo'),

@@ -7,10 +7,26 @@ import {
     renderListaErro
 } from './templates.js';
 
+function agruparCamposEmLinhas(camposComOpcoes) {
+    const linhas = [];
+    for (let i = 0; i < camposComOpcoes.length; i += 2) {
+        linhas.push(camposComOpcoes.slice(i, i + 2));
+    }
+    return linhas;
+}
+
 export function abrirModalCadastro(els, config, camposComOpcoes) {
     els.titulo.textContent = config.titulo;
-    els.camposWrap.innerHTML = camposComOpcoes
-        .map(({ campo, opcoes }) => renderCampo(campo, opcoes))
+
+    if (els.subtitulo) els.subtitulo.textContent = config.descricao || '';
+    if (els.headerIcone) els.headerIcone.className = `modal-header-icon modal-header-icon-${config.iconeClasse || 'primary'}`;
+    if (els.headerIconeSymbol) els.headerIconeSymbol.textContent = config.icone || 'list_alt';
+
+    els.camposWrap.innerHTML = agruparCamposEmLinhas(camposComOpcoes)
+        .map((linha) => {
+            const camposHtml = linha.map(({ campo, opcoes }) => renderCampo(campo, opcoes)).join('');
+            return linha.length > 1 ? `<div class="form-row">${camposHtml}</div>` : camposHtml;
+        })
         .join('');
 
     openModal('modal-cadastro');

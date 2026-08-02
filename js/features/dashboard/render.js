@@ -104,6 +104,8 @@ export function abrirDetalheEstoque(els, estado, equipamentoId, ehLayoutEmpilhad
 
 export function abrirModalCategoria(els, estado, equipamento) {
     estado.equipamentoIdModalAtual = equipamento.id;
+    const painel = els.detalheConteudo?.closest('.devolucao-detalhe-painel');
+    if (painel) painel.classList.remove('dashboard-detalhe-overlay-open');
     els.modalCategoriaBody.innerHTML = renderDashboardCategoriaForm(montarDadosFormularioCategoria(equipamento));
     openModal('modal-dashboard-categoria');
 }
@@ -118,10 +120,18 @@ export function mostrarDetalhe(els) {
     if (els.detalheEmpty) els.detalheEmpty.style.display = 'none';
     els.detalheConteudo.style.display = 'block';
 
+    const painel = els.detalheConteudo?.closest('.devolucao-detalhe-painel');
+    if (painel && els.detalheBody && els.detalheBody.innerHTML.trim()) {
+        painel.classList.add('dashboard-detalhe-overlay-open');
+    }
+
     if (els.detalheContainer) els.detalheContainer.style.display = 'flex';
 }
 
 export function fecharDetalhe(els) {
     els.detalheConteudo.style.display = 'none';
     if (els.detalheEmpty) els.detalheEmpty.style.display = 'flex';
+
+    const painel = els.detalheConteudo?.closest('.devolucao-detalhe-painel');
+    if (painel) painel.classList.remove('dashboard-detalhe-overlay-open');
 }

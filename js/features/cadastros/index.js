@@ -8,6 +8,9 @@ export function initCadastros() {
     const els = {
         cards,
         titulo: document.getElementById('cadastro-modal-title'),
+        subtitulo: document.getElementById('cadastro-modal-subtitle'),
+        headerIcone: document.getElementById('cadastro-modal-icon'),
+        headerIconeSymbol: document.getElementById('cadastro-modal-icon-symbol'),
         camposWrap: document.getElementById('cadastro-modal-fields'),
         listaWrap: document.getElementById('cadastro-modal-list'),
         btnCancelar: document.getElementById('cadastro-modal-cancelar'),

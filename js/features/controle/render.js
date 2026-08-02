@@ -1,7 +1,7 @@
 import { openModal } from '../../core/ui/index.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
-import { renderControleLinha, renderControleEmptyState } from './templates.js';
+import { renderControleLinha, renderControleEmptyState, ICONE_POR_TIPO } from './templates.js';
 import { listarCategoriasDisponiveis, listarModelosPorCategoria } from './service.js';
 
 const TIPOS_VISIVEIS = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
@@ -11,6 +11,20 @@ const TITULOS_POR_TIPO = {
     manutencao: 'Nova Manutenção',
     quebrado: 'Registrar Quebra',
     resolvidos: 'Editar Registro Resolvido'
+};
+
+const SUBTITULOS_POR_TIPO = {
+    observacao: 'Registre uma ocorrência para acompanhamento.',
+    manutencao: 'Registre um equipamento que precisa de manutenção.',
+    quebrado: 'Registre um equipamento quebrado ou danificado.',
+    resolvidos: 'Atualize as informações deste registro resolvido.'
+};
+
+const COR_ICONE_POR_TIPO = {
+    observacao: 'info',
+    manutencao: 'warning',
+    quebrado: 'error',
+    resolvidos: 'success'
 };
 
 export function renderControle(els, estado) {
@@ -134,12 +148,25 @@ function alternarCampoMedidas(els, mostrar) {
     if (els.linhaMedidas) els.linhaMedidas.style.display = mostrar ? 'block' : 'none';
 }
 
+function atualizarHeaderModal(els, tipo) {
+    if (els.modalTitle) els.modalTitle.textContent = TITULOS_POR_TIPO[tipo] || 'Novo Registro';
+    if (els.modalSubtitle) els.modalSubtitle.textContent = SUBTITULOS_POR_TIPO[tipo] || '';
+
+    if (els.modalHeaderIcon) {
+        const cor = COR_ICONE_POR_TIPO[tipo] || 'info';
+        els.modalHeaderIcon.className = `modal-header-icon modal-header-icon-${cor}`;
+    }
+    if (els.modalHeaderIconSymbol) {
+        els.modalHeaderIconSymbol.textContent = ICONE_POR_TIPO[tipo] || 'chat_bubble';
+    }
+}
+
 export function abrirNovoRegistro(els, estado, tipo) {
     estado.tipoAtual = tipo;
     estado.idEditando = null;
     estado.linhaEditando = null;
 
-    if (els.modalTitle) els.modalTitle.textContent = TITULOS_POR_TIPO[tipo] || 'Novo Registro';
+    atualizarHeaderModal(els, tipo);
 
     popularSelectCategorias(els);
     popularSelectModelos(els, null);
@@ -158,6 +185,7 @@ export function abrirEdicaoRegistro(els, estado, row) {
     estado.idEditando = row.dataset.id;
     estado.linhaEditando = row;
 
+    atualizarHeaderModal(els, tipo);
     if (els.modalTitle) {
         els.modalTitle.textContent = tipo === 'resolvidos' ? 'Editar Registro Resolvido' : 'Editar Registro';
     }

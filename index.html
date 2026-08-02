@@ -276,23 +276,9 @@
                     <div class="modal-overlay" id="modal-itens-emprestimo">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <div class="modal-heading">
-                                    <span class="modal-icon" aria-hidden="true">
-                                        <span class="material-symbols-outlined">inventory_2</span>
-                                    </span>
-                                    <div class="modal-heading-text">
-                                        <h3>Itens do Empréstimo</h3>
-                                        <p class="modal-description">Revise os itens selecionados antes de concluir o
-                                            empréstimo.</p>
-                                    </div>
-                                </div>
+                                <h3>Itens do Empréstimo</h3>
                             </div>
                             <div class="modal-body">
-                                <div class="modal-callout modal-callout-info">
-                                    <span class="material-symbols-outlined">info</span>
-                                    <span><strong>Resumo:</strong> confira a lista final para evitar divergências na
-                                        retirada.</span>
-                                </div>
                                 <div class="itens-emprestimo-list" id="modal-itens-emprestimo-lista"></div>
                             </div>
                         </div>
@@ -399,35 +385,54 @@
 
                     <!-- Modal: Confirmar Devolução (única janela pop-up que sobra neste painel) -->
                     <div class="modal-overlay" id="modal-confirmar-devolucao">
-                        <div class="modal-box">
+                        <div class="modal-box modal-box--md">
                             <div class="modal-header">
-                                <div class="modal-heading">
-                                    <span class="modal-icon" aria-hidden="true">
-                                        <span class="material-symbols-outlined">assignment_return</span>
-                                    </span>
-                                    <div class="modal-heading-text">
-                                        <h3>Confirmar Devolução</h3>
-                                        <p class="modal-description">Confirme a data e finalize o encerramento do
-                                            empréstimo.</p>
-                                    </div>
+                                <span class="modal-header-icon modal-header-icon-success">
+                                    <span class="material-symbols-outlined">assignment_turned_in</span>
+                                </span>
+                                <div class="modal-header-titles">
+                                    <h3>Confirmar Devolução</h3>
+                                    <p class="modal-subtitle">Revise as informações antes de confirmar.</p>
                                 </div>
                             </div>
                             <div class="modal-body">
-                                <div class="modal-callout modal-callout-warning">
-                                    <span class="material-symbols-outlined">warning</span>
-                                    <span><strong>Atenção:</strong> ao confirmar, o equipamento voltará a ficar
-                                        disponível para novos empréstimos.</span>
-                                </div>
-                                <div class="form-group">
-                                    <label for="modal-devolucao-data">Data e Hora da Devolução</label>
-                                    <input type="text" id="modal-devolucao-data" class="input-auto">
-                                    <span class="form-hint">Preenchido automaticamente — clique para alterar</span>
+                                <div class="modal-summary-grid">
+                                    <div class="modal-summary-panel" id="modal-confirmar-devolucao-resumo">
+                                        <span class="modal-summary-label">Empréstimo</span>
+                                        <div class="modal-summary-person">
+                                            <span class="modal-summary-avatar" data-summary="iniciais"></span>
+                                            <div>
+                                                <div class="modal-summary-title" data-summary="responsavel"></div>
+                                                <div class="modal-summary-sub" data-summary="aluno"></div>
+                                            </div>
+                                        </div>
+                                        <span class="modal-summary-row">
+                                            <span class="material-symbols-outlined">schedule</span>
+                                            <span data-summary="data"></span>
+                                        </span>
+                                        <span class="modal-summary-row">
+                                            <span class="material-symbols-outlined">inventory_2</span>
+                                            <span data-summary="itens"></span>
+                                        </span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="modal-devolucao-data">Data e Hora da Devolução</label>
+                                        <input type="text" id="modal-devolucao-data" class="input-auto">
+                                        <span class="form-hint">Preenchido automaticamente — clique para alterar</span>
+                                        <div class="modal-callout modal-callout-info">
+                                            <span class="material-symbols-outlined">info</span>
+                                            <span>Os itens ficarão disponíveis novamente após a confirmação.</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button class="btn btn-success" id="btn-confirmar-devolucao"
-                                    data-requires-auth>Confirmar
-                                    Devolução</button>
+                                <button class="btn btn-neutral" id="modal-confirmar-devolucao-cancelar"
+                                    type="button">Cancelar</button>
+                                <button class="btn btn-success" id="btn-confirmar-devolucao" data-requires-auth>
+                                    <span class="material-symbols-outlined">check</span> Confirmar Devolução
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -547,16 +552,7 @@
                     <div class="modal-overlay" id="modal-dashboard-categoria">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <div class="modal-heading">
-                                    <span class="modal-icon" aria-hidden="true">
-                                        <span class="material-symbols-outlined">category</span>
-                                    </span>
-                                    <div class="modal-heading-text">
-                                        <h3>Detalhes da categoria</h3>
-                                        <p class="modal-description">Consulte o resumo da categoria e os itens
-                                            relacionados.</p>
-                                    </div>
-                                </div>
+                                <h3>Detalhes da categoria</h3>
                             </div>
                             <div class="modal-body" id="modal-categoria-body"></div>
                             <div class="modal-footer">
@@ -769,23 +765,15 @@
                     <div class="modal-overlay" id="modal-controle-novo">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <div class="modal-heading">
-                                    <span class="modal-icon" aria-hidden="true">
-                                        <span class="material-symbols-outlined">build</span>
-                                    </span>
-                                    <div class="modal-heading-text">
-                                        <h3 id="controle-modal-title">Novo Registro</h3>
-                                        <p class="modal-description">Registre o equipamento, o problema e a informação
-                                            necessária para o acompanhamento.</p>
-                                    </div>
+                                <span class="modal-header-icon modal-header-icon-info" id="controle-modal-icon">
+                                    <span class="material-symbols-outlined" id="controle-modal-icon-symbol">chat_bubble</span>
+                                </span>
+                                <div class="modal-header-titles">
+                                    <h3 id="controle-modal-title">Novo Registro</h3>
+                                    <p class="modal-subtitle" id="controle-modal-subtitle">Registre uma ocorrência para acompanhamento.</p>
                                 </div>
                             </div>
                             <div class="modal-body">
-                                <div class="modal-callout modal-callout-info">
-                                    <span class="material-symbols-outlined">info</span>
-                                    <span><strong>Orientação:</strong> preencha os campos principais para registrar a
-                                        ocorrência com o máximo de contexto.</span>
-                                </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="controle-modal-categoria">Categoria</label>
@@ -843,7 +831,7 @@
                                 <button class="btn btn-neutral" id="controle-modal-cancelar"
                                     type="button">Cancelar</button>
                                 <button class="btn btn-success" id="controle-modal-salvar" data-requires-auth
-                                    type="button">Salvar</button>
+                                    type="button"><span class="material-symbols-outlined">save</span> Salvar</button>
                             </div>
                         </div>
                     </div>
@@ -852,23 +840,9 @@
                     <div class="modal-overlay" id="modal-controle-resolver">
                         <div class="modal-box">
                             <div class="modal-header">
-                                <div class="modal-heading">
-                                    <span class="modal-icon" aria-hidden="true">
-                                        <span class="material-symbols-outlined">task_alt</span>
-                                    </span>
-                                    <div class="modal-heading-text">
-                                        <h3>Resolver Registro</h3>
-                                        <p class="modal-description">Descreva a solução aplicada e feche o registro com
-                                            clareza.</p>
-                                    </div>
-                                </div>
+                                <h3>Resolver Registro</h3>
                             </div>
                             <div class="modal-body">
-                                <div class="modal-callout modal-callout-success">
-                                    <span class="material-symbols-outlined">check_circle</span>
-                                    <span><strong>Finalização:</strong> registre as medidas tomadas para manter o
-                                        histórico do equipamento consistente.</span>
-                                </div>
                                 <div class="controle-resolver-resumo">
                                     <span class="config-item-title" id="controle-resolver-categoria-modelo">—</span>
                                     <span class="config-item-desc" id="controle-resolver-numero-problema">—</span>
@@ -1346,25 +1320,17 @@
                     <p class="panel-subtitle">Selecione um módulo para visualizar, adicionar ou editar informações.</p>
 
                     <div class="modal-overlay" id="modal-cadastro">
-                        <div class="modal-box">
+                        <div class="modal-box modal-box--md">
                             <div class="modal-header">
-                                <div class="modal-heading">
-                                    <span class="modal-icon" aria-hidden="true">
-                                        <span class="material-symbols-outlined">list_alt</span>
-                                    </span>
-                                    <div class="modal-heading-text">
-                                        <h3 id="cadastro-modal-title">Título</h3>
-                                        <p class="modal-description">Adicione ou edite os dados do módulo selecionado
-                                            para manter o cadastro atualizado.</p>
-                                    </div>
+                                <span class="modal-header-icon modal-header-icon-primary" id="cadastro-modal-icon">
+                                    <span class="material-symbols-outlined" id="cadastro-modal-icon-symbol">devices</span>
+                                </span>
+                                <div class="modal-header-titles">
+                                    <h3 id="cadastro-modal-title">Título</h3>
+                                    <p class="modal-subtitle" id="cadastro-modal-subtitle"></p>
                                 </div>
                             </div>
                             <div class="modal-body">
-                                <div class="modal-callout modal-callout-info">
-                                    <span class="material-symbols-outlined">info</span>
-                                    <span><strong>Fluxo:</strong> preencha os campos e confirme para salvar as
-                                        alterações no cadastro.</span>
-                                </div>
                                 <div id="cadastro-modal-fields" class="modal-fields"></div>
 
                                 <div class="cadastro-modal-list-wrap">
@@ -1375,7 +1341,8 @@
                             <div class="modal-footer">
                                 <button class="btn btn-neutral" id="cadastro-modal-cancelar"
                                     type="button">Cancelar</button>
-                                <button class="btn btn-success" id="cadastro-modal-salvar" type="button">Salvar</button>
+                                <button class="btn btn-success" id="cadastro-modal-salvar" type="button">
+                                    <span class="material-symbols-outlined">save</span> Salvar</button>
                             </div>
                         </div>
                     </div>
@@ -2041,22 +2008,9 @@
     <div class="modal-overlay" id="modal-confirmar-exclusao">
         <div class="modal-box">
             <div class="modal-header">
-                <div class="modal-heading">
-                    <span class="modal-icon" aria-hidden="true">
-                        <span class="material-symbols-outlined">delete_forever</span>
-                    </span>
-                    <div class="modal-heading-text">
-                        <h3 id="confirmar-exclusao-titulo">Confirmar exclusão</h3>
-                        <p class="modal-description">Confirme a remoção antes de prosseguir com esta ação.</p>
-                    </div>
-                </div>
+                <h3 id="confirmar-exclusao-titulo">Confirmar exclusão</h3>
             </div>
             <div class="modal-body">
-                <div class="modal-callout modal-callout-warning">
-                    <span class="material-symbols-outlined">warning</span>
-                    <span><strong>Importante:</strong> esta ação remove o registro de forma permanente e não pode ser
-                        desfeita.</span>
-                </div>
                 <p id="confirmar-exclusao-mensagem">Esta ação não pode ser desfeita.</p>
             </div>
             <div class="modal-footer">
@@ -2071,23 +2025,15 @@
     <div class="modal-overlay" id="modal-login" data-close-on-overlay="false">
         <div class="modal-box">
             <div class="modal-header">
-                <div class="modal-heading">
-                    <span class="modal-icon" aria-hidden="true">
-                        <span class="material-symbols-outlined">lock</span>
-                    </span>
-                    <div class="modal-heading-text">
-                        <h3>Login de Administrador</h3>
-                        <p class="modal-description">Acesse o painel administrativo para continuar com as ações
-                            restritas.</p>
-                    </div>
+                <span class="modal-header-icon modal-header-icon-primary">
+                    <span class="material-symbols-outlined">lock</span>
+                </span>
+                <div class="modal-header-titles">
+                    <h3>Login de Administrador</h3>
+                    <p class="modal-subtitle">Acesse sua conta para continuar.</p>
                 </div>
             </div>
             <div class="modal-body">
-                <div class="modal-callout modal-callout-info">
-                    <span class="material-symbols-outlined">security</span>
-                    <span><strong>Segurança:</strong> use suas credenciais para manter o acesso ao sistema
-                        controlado.</span>
-                </div>
                 <div class="form-group">
                     <label for="login-email">E-mail / Login</label>
                     <input type="text" id="login-email" placeholder="usuario@escola.com" autocomplete="username">
@@ -2097,6 +2043,10 @@
                     <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
                 </div>
                 <p class="login-erro" id="login-erro"></p>
+                <div class="modal-callout modal-callout-info">
+                    <span class="material-symbols-outlined">shield</span>
+                    <span>Acesso restrito ao administrador. Seus dados de login não são compartilhados.</span>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-neutral" id="login-continuar-convidado" type="button">Continuar como

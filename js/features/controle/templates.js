@@ -13,7 +13,7 @@ const PROBLEMA_ICONS = {
     outro: { label: 'Outro', icon: 'help' }
 };
 
-const ICONE_POR_TIPO = {
+export const ICONE_POR_TIPO = {
     observacao: 'chat_bubble',
     manutencao: 'build',
     quebrado: 'heart_broken',

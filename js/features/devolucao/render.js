@@ -1,5 +1,5 @@
 import { openModal } from '../../core/ui/index.js';
-import { formatarDataCard } from './utils.js';
+import { formatarDataCard, gerarIniciais } from './utils.js';
 import {
     renderDevolucaoTabelaHeader,
     renderDevolucaoCard,
@@ -9,6 +9,7 @@ import {
     renderDetalheObservacao
 } from './templates.js';
 import { renderOpcaoEquipamento } from '../emprestimo/templates.js';
+import { getLoansAbertos } from '../../core/state/loans.js';
 
 export function renderLista(els, estado, loans) {
     if (!loans.length) {
@@ -103,8 +104,24 @@ export function fecharPainelMobile(els) {
     els.backdrop.classList.remove('active');
 }
 
+function preencherResumoConfirmacao(els, loan) {
+    if (!els.confirmarDevolucaoResumo || !loan) return;
+
+    const campo = (nome) => els.confirmarDevolucaoResumo.querySelector(`[data-summary="${nome}"]`);
+
+    campo('iniciais').textContent = gerarIniciais(loan.responsavel);
+    campo('responsavel').textContent = loan.responsavel;
+    campo('aluno').textContent = loan.aluno;
+    campo('data').textContent = `Retirado em ${formatarDataCard(loan.createdAt)}`;
+    campo('itens').textContent = `${loan.itens.length} ${loan.itens.length === 1 ? 'item' : 'itens'} emprestado(s)`;
+}
+
 export function abrirModalConfirmacao(els, estado, id) {
     estado.idPendente = id;
+
+    const loan = getLoansAbertos().find((l) => String(l.id) === String(id));
+    preencherResumoConfirmacao(els, loan);
+
     els.devolucaoPicker.setDate(new Date(), false);
     els.devolucaoDataInput.classList.add('input-auto');
     openModal('modal-confirmar-devolucao');

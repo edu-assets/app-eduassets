@@ -38,6 +38,13 @@ export function attachDevolucaoEvents(els, estado) {
         if (loan) abrirDetalhe(els, estado, loan);
     });
 
+    if (els.btnCancelarDevolucao) {
+        els.btnCancelarDevolucao.addEventListener('click', () => {
+            estado.idPendente = null;
+            closeModal('modal-confirmar-devolucao');
+        });
+    }
+
     els.btnConfirmarDevolucao.addEventListener('click', async () => {
         if (bloquearSeConvidado()) return;
         if (!estado.idPendente) return;

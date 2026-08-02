@@ -217,6 +217,7 @@
     border-radius: 8px;
     padding: 18px;
     margin-bottom: 24px;
+    overflow: hidden;
 }
 
 .category-summary-box-title {
@@ -228,8 +229,8 @@
 
 .category-summary-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+    gap: 10px;
     align-items: flex-start;
 }
 
@@ -243,6 +244,8 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+    min-width: 0;
+    gap: 2px;
 }
 
 .category-metric-col input[type="number"],
@@ -257,6 +260,7 @@
     padding: 4px 0;
     margin-top: 4px;
     font-family: var(--font-heading);
+    line-height: 1.1;
 }
 
 .category-metric-col input[type="number"]::-webkit-inner-spin-button,
@@ -281,7 +285,9 @@
     font-weight: 500;
     color: var(--text-secondary);
     margin-top: 2px;
-    line-height: 1.2;
+    line-height: 1.25;
+    text-align: center;
+    white-space: normal;
 }
 
 .category-metric-col label .sub-label {
@@ -623,8 +629,7 @@
         display: none;
     }
 
-    .dashboard-layout .devolucao-detalhe-painel:has(#dashboard-detalhe-conteudo[style*="block"]),
-    .dashboard-layout .devolucao-detalhe-painel:has(#dashboard-detalhe-conteudo[style*="flex"]) {
+    .dashboard-layout .devolucao-detalhe-painel.dashboard-detalhe-overlay-open {
         display: flex !important;
         position: fixed;
         top: 50%;
@@ -643,6 +648,10 @@
 
         box-shadow: 0 0 0 9999px rgba(5, 11, 28, 0.55), 
                     0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .category-summary-box {
+        padding: 16px 14px;
     }
 
     .dashboard-detalhe-container {
@@ -920,7 +929,23 @@
 
     /* ----- edit modal ----- */
     .category-summary-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .category-summary-box {
+        padding: 14px 12px;
+    }
+
+    .category-summary-box-title {
+        margin-bottom: 12px;
+    }
+
+    .metric-readonly-value {
+        font-size: 1.2rem;
+    }
+
+    .category-metric-col label {
+        font-size: 0.78rem;
     }
 }
