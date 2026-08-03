@@ -10,6 +10,7 @@
 @import "components/status-badge.css";
 @import "components/auth.css";
 @import "components/toast.css";
+@import "components/scrollbar.css";
 
 /* layout */
 @import "layout/footer.css";
