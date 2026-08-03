@@ -610,7 +610,7 @@
     flex-direction: column;
     gap: 8px;
     margin-bottom: 8px;
-    
+
 }
 
 .devolucao-detalhe-painel .detalhe-qtd-group {
@@ -651,17 +651,19 @@
 
     .devolucao-tabela-header,
     .devolucao-item {
-        grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.5fr) minmax(0, 1.2fr) 80px;
-        gap: 12px;
-        padding: 14px 16px;
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.6fr) minmax(0, 1.5fr);
+        gap: 16px;
+        padding: 14px 24px;
     }
 
-    .devolucao-tabela-header span:nth-child(5) {
-        display: none;
+    .devolucao-tabela-header>*:nth-child(4),
+    .devolucao-tabela-header>*:nth-child(5) {
+        display: none !important;
     }
 
+    .devolucao-item .devolucao-col-status,
     .devolucao-item .devolucao-col-acao {
-        display: none;
+        display: none !important;
     }
 
     .info-resp-nome {
