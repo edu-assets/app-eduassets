@@ -518,7 +518,7 @@
     width: 100%;
 }
 
-.historico-row [data-col="status"] > * {
+.historico-row [data-col="status"]>* {
     min-width: 88px;
     width: 88px;
     display: inline-flex;
@@ -640,14 +640,14 @@
         max-height: 85vh;
         overflow-y: auto;
         z-index: 1000;
-        
+
         background-color: var(--surface-white, #ffffff);
         border: 1px solid var(--border-color);
         border-radius: 12px;
         padding: 24px;
 
-        box-shadow: 0 0 0 9999px rgba(5, 11, 28, 0.55), 
-                    0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 0 9999px rgba(5, 11, 28, 0.55),
+            0 20px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
     .category-summary-box {
@@ -687,7 +687,7 @@
         width: 100%;
     }
 
-    .historico-row [data-col="status"] > * {
+    .historico-row [data-col="status"]>* {
         min-width: 90px;
         width: 90px;
         display: inline-flex;
@@ -929,23 +929,52 @@
 
     /* ----- edit modal ----- */
     .category-summary-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
     }
 
     .category-summary-box {
-        padding: 14px 12px;
+        padding: 14px 6px;
+        margin-bottom: 16px;
     }
 
     .category-summary-box-title {
-        margin-bottom: 12px;
+        margin-bottom: 10px;
+        font-size: 0.82rem;
+        padding-left: 6px;
     }
 
     .metric-readonly-value {
-        font-size: 1.2rem;
+        font-size: 1rem;
+        margin-top: 2px;
     }
 
     .category-metric-col label {
-        font-size: 0.78rem;
+        font-size: 0.58rem;
+        line-height: 1.1;
+        word-wrap: break-word;
+    }
+
+    .metric-icon-wrap {
+        width: 24px;
+        height: 24px;
+    }
+
+    .metric-icon-wrap .material-symbols-outlined {
+        font-size: 13px;
+    }
+
+    .margin-bottom-lg {
+        margin-bottom: 16px;
+    }
+
+    .category-field-label {
+        font-size: 0.82rem;
+        margin-bottom: 4px;
+    }
+
+    .category-field-input {
+        padding: 8px 12px;
+        font-size: 0.88rem;
     }
 }

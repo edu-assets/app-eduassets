@@ -64,7 +64,13 @@ export function ativarAbaDashboard(els, tab) {
 export function atualizarVisibilidadeDetalhe(els, ehLayoutEmpilhadoAtual) {
     if (!els.detalheContainer) return;
     const abaAtiva = document.querySelector('.dashboard-tab-link.active')?.dataset.tab;
-    els.detalheContainer.style.display = ((abaAtiva === 'estoque' || abaAtiva === 'historico') && !ehLayoutEmpilhadoAtual) ? 'flex' : 'none';
+    const deveExibir = (abaAtiva === 'estoque' || abaAtiva === 'historico') && !ehLayoutEmpilhadoAtual;
+
+    els.detalheContainer.style.display = deveExibir ? 'flex' : 'none';
+
+    if (!deveExibir) {
+        fecharDetalhe(els);
+    }
 }
 
 function montarDadosFormularioCategoria(equipamento) {

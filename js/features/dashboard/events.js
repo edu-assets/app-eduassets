@@ -35,6 +35,7 @@ export function attachDashboardEvents(els, estado) {
     if (els.btnModalCategoriaFechar) {
         els.btnModalCategoriaFechar.addEventListener('click', () => {
             estado.equipamentoIdModalAtual = null;
+            closeModal('modal-dashboard-categoria');
         });
     }
 
