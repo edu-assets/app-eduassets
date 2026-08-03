@@ -13,12 +13,14 @@ export function adicionarOuIncrementarItem(itens, novoItem) {
 }
 
 export function removerItemPorId(itens, id) {
-    return itens.filter((item) => item.id !== id);
+    return itens.filter((item) => String(item.id) !== String(id));
 }
 
 export function atualizarQuantidadeItem(itens, id, quantidade) {
     const quantidadeValida = Math.max(1, Number(quantidade) || 1);
-    return itens.map((item) => item.id === id ? { ...item, quantidade: quantidadeValida } : item);
+    return itens.map((item) => 
+        String(item.id) === String(id) ? { ...item, quantidade: quantidadeValida } : item
+    );
 }
 
 export async function confirmarDevolucao(id) {

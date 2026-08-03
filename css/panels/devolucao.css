@@ -640,9 +640,9 @@
     color: var(--primary-color);
 }
 
-.detalhe-item-remover {
-    margin-left: auto;
+.item-emprestimo-remover.detalhe-item-remover {
     position: static;
+    margin-left: auto;
 }
 
 /* RESPONSIVINESS */

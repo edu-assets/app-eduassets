@@ -135,7 +135,7 @@ export function attachDevolucaoEvents(els, estado) {
         renderDetalheItens(els, estado.itensEditando, true);
     });
 
-    els.detalheLista.addEventListener('change', (e) => {
+    els.detalheLista.addEventListener('input', (e) => {
         if (!e.target.classList.contains('detalhe-item-qtd')) return;
 
         const id = e.target.dataset.id;
