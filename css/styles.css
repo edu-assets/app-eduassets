@@ -27,7 +27,11 @@
 @import "panels/inicio.css";
 @import "panels/cadastros.css";
 @import "panels/config.css";
+@import "panels/seguranca.css";
+@import "panels/perfil.css";
+
 @import "components/toast.css";
+
 
 /* utils */
 @import "utils/touch-reset.css";

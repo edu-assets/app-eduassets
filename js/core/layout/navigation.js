@@ -1,19 +1,19 @@
 export function initNavigation() {
-    const navLinks = document.querySelectorAll('.nav-link');
     const panels = document.querySelectorAll('.panel');
 
-    navLinks.forEach((link) => {
-        link.addEventListener('click', (event) => {
-            event.preventDefault();
-            const targetId = link.dataset.panel;
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest('.nav-link');
+        if (!link) return;
 
-            panels.forEach((panel) => panel.classList.remove('active'));
+        event.preventDefault();
+        const targetId = link.dataset.panel;
+        if (!targetId) return;
 
-            const targetPanel = document.getElementById(targetId);
-            if (targetPanel) targetPanel.classList.add('active');
+        panels.forEach((panel) => panel.classList.remove('active'));
+        document.getElementById(targetId)?.classList.add('active');
 
-            navLinks.forEach((item) => item.classList.remove('active'));
-            link.classList.add('active');
-        });
+        document.querySelectorAll('.nav-link').forEach((item) => item.classList.remove('active'));
+        document.querySelectorAll(`.nav-link[data-panel="${targetId}"]`)
+            .forEach((item) => item.classList.add('active'));
     });
 }

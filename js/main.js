@@ -9,6 +9,8 @@ import { initExportar } from './features/exportar/index.js';
 import { initConfig } from './features/config/index.js';
 import { carregarEquipamentos, carregarEmprestimos, carregarOcorrencias, carregarResponsaveis } from './core/state/index.js';
 import { initAuth } from './features/auth/index.js';
+import { initSeguranca } from './features/seguranca/index.js';
+import { initPerfil } from './features/perfil/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await initAuth();
@@ -37,7 +39,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         initEmprestimo,
         initDevolucao,
         initExportar,
-        initConfig
+        initConfig,
+        initSeguranca,
+        initPerfil
     ];
 
     inits.forEach((fn) => {

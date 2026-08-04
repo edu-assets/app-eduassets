@@ -3,14 +3,40 @@ import { entrar, sair, isAutenticado, subscribe } from '../../core/state/authSto
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
 
 export function attachAuthEvents(els) {
-    els.toggleBtn.addEventListener('click', () => {
-        if (isAutenticado()) {
+    els.sidebarFooter.addEventListener('click', (e) => {
+        const trigger = e.target.closest('#user-menu-trigger');
+        if (trigger) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('user-menu-dropdown');
+            const aberto = dropdown?.classList.toggle('active');
+            trigger.setAttribute('aria-expanded', String(!!aberto));
+            return;
+        }
+
+        if (e.target.closest('#btn-user-menu-sair')) {
+            fecharDropdown();
             sair();
             showToast('Sessão encerrada. Você voltou ao Modo Convidado.', 'success');
-        } else {
+            return;
+        }
+
+        if (e.target.closest('#btn-auth-toggle')) {
             mostrarErroLogin(els, '');
             openModal('modal-login');
+            return;
         }
+
+        if (e.target.closest('.user-menu-item.nav-link')) {
+            fecharDropdown();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!els.sidebarFooter.contains(e.target)) fecharDropdown();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') fecharDropdown();
     });
 
     els.btnHeroLogin?.addEventListener('click', () => {
@@ -25,6 +51,11 @@ export function attachAuthEvents(els) {
     });
 
     subscribe(({ autenticado, usuario }) => renderAuthStatus(els, autenticado, usuario));
+}
+
+function fecharDropdown() {
+    document.getElementById('user-menu-dropdown')?.classList.remove('active');
+    document.getElementById('user-menu-trigger')?.setAttribute('aria-expanded', 'false');
 }
 
 async function fazerLogin(els) {

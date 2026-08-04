@@ -129,11 +129,18 @@
 }
 
 .sidebar-footer {
-    padding: clamp(10px, 2vh, 16px) 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: clamp(10px, 2vh, 16px) 16px;
     font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.7);
     border-top: 1px solid var(--primary-dark);
     flex-shrink: 0;
+}
+
+.sidebar-footer.user-menu {
+    position: relative;
 }
 
 .main-content {

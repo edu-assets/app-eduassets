@@ -4,9 +4,7 @@ import { renderAuthStatus } from './render.js';
 
 export async function initAuth() {
     const els = {
-        badge: document.getElementById('auth-status-badge'),
-        badgeLabel: document.getElementById('auth-status-label'),
-        toggleBtn: document.getElementById('btn-auth-toggle'),
+        sidebarFooter: document.getElementById('sidebar-footer'),
         btnHeroLogin: document.getElementById('btn-abrir-login-hero'),
         emailInput: document.getElementById('login-email'),
         senhaInput: document.getElementById('login-senha'),
@@ -15,8 +13,7 @@ export async function initAuth() {
         btnContinuarConvidado: document.getElementById('login-continuar-convidado')
     };
 
-    // Check if the required elements exist
-    if (!els.toggleBtn) return;
+    if (!els.sidebarFooter) return;
 
     attachAuthEvents(els);
     await iniciarSessao();

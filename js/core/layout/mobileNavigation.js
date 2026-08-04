@@ -28,8 +28,8 @@ export function initMobileNavigation() {
 
     // fecha o menu ao navegar (senão o sidebar fica aberto cobrindo o painel escolhido)
     sidebar.querySelectorAll('.nav-link').forEach((link) => {
-        link.addEventListener('click', () => {
-            if (sidebar.classList.contains('open')) fecharMenu();
+        sidebar.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-link') && sidebar.classList.contains('open')) fecharMenu();
         });
     });
 }

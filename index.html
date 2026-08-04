@@ -141,15 +141,7 @@
                     </div>
                 </nav>
 
-                <div class="sidebar-footer">
-                    <div class="auth-status">
-                        <span class="auth-status-badge" id="auth-status-badge">
-                            <span class="material-symbols-outlined">person</span>
-                            <span id="auth-status-label">Modo Convidado</span>
-                        </span>
-                        <button type="button" class="auth-status-action" id="btn-auth-toggle"></button>
-                    </div>
-                </div>
+                <div class="sidebar-footer" id="sidebar-footer"></div>
             </aside>
 
             <main class="main-content">
@@ -424,7 +416,8 @@
                                         <div class="form-group">
                                             <label for="modal-devolucao-data">Data e Hora da Devolução</label>
                                             <input type="text" id="modal-devolucao-data" class="input-auto">
-                                            <span class="form-hint">Preenchido automaticamente — clique para alterar</span>
+                                            <span class="form-hint">Preenchido automaticamente — clique para
+                                                alterar</span>
                                         </div>
 
                                         <div class="modal-callout modal-callout-info">
@@ -773,11 +766,13 @@
                         <div class="modal-box">
                             <div class="modal-header">
                                 <span class="modal-header-icon modal-header-icon-info" id="controle-modal-icon">
-                                    <span class="material-symbols-outlined" id="controle-modal-icon-symbol">chat_bubble</span>
+                                    <span class="material-symbols-outlined"
+                                        id="controle-modal-icon-symbol">chat_bubble</span>
                                 </span>
                                 <div class="modal-header-titles">
                                     <h3 id="controle-modal-title">Novo Registro</h3>
-                                    <p class="modal-subtitle" id="controle-modal-subtitle">Registre uma ocorrência para acompanhamento.</p>
+                                    <p class="modal-subtitle" id="controle-modal-subtitle">Registre uma ocorrência para
+                                        acompanhamento.</p>
                                 </div>
                             </div>
                             <div class="modal-body">
@@ -1330,7 +1325,8 @@
                         <div class="modal-box modal-box--md">
                             <div class="modal-header">
                                 <span class="modal-header-icon modal-header-icon-primary" id="cadastro-modal-icon">
-                                    <span class="material-symbols-outlined" id="cadastro-modal-icon-symbol">devices</span>
+                                    <span class="material-symbols-outlined"
+                                        id="cadastro-modal-icon-symbol">devices</span>
                                 </span>
                                 <div class="modal-header-titles">
                                     <h3 id="cadastro-modal-title">Título</h3>
@@ -1588,43 +1584,6 @@
                                         <span class="material-symbols-outlined">dark_mode</span> Escuro (em breve)
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="config-card" data-requires-auth>
-                            <div class="config-card-header">
-                                <span class="config-icon config-icon-info">
-                                    <span class="material-symbols-outlined">lock</span>
-                                </span>
-                                <div>
-                                    <h4 class="config-card-title">Segurança</h4>
-                                    <p class="config-card-desc">Altere a senha da sua conta de administrador.</p>
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="config-senha-atual">Senha atual</label>
-                                    <input type="password" id="config-senha-atual" autocomplete="current-password">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="config-senha-nova">Nova senha</label>
-                                    <input type="password" id="config-senha-nova" autocomplete="new-password"
-                                        placeholder="Mínimo 8 caracteres">
-                                </div>
-                                <div class="form-group">
-                                    <label for="config-senha-confirmar">Confirmar nova senha</label>
-                                    <input type="password" id="config-senha-confirmar" autocomplete="new-password">
-                                </div>
-                            </div>
-                            <p class="login-erro" id="config-senha-erro"></p>
-
-                            <div class="category-edit-actions">
-                                <button type="button" class="btn btn-primary" id="config-senha-salvar">
-                                    <span class="material-symbols-outlined">save</span> Alterar Senha
-                                </button>
                             </div>
                         </div>
 
@@ -2008,6 +1967,127 @@
                     </div>
                 </section>
 
+                <!-- panel 9: seguranca -->
+                <section class="panel" id="panel-seguranca">
+                    <h2 class="panel-title"><span class="material-symbols-outlined">lock</span>Segurança</h2>
+                    <p class="panel-subtitle">Gerencie a segurança da sua conta.</p>
+
+                    <div class="seguranca-container">
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <span class="config-icon config-icon-info">
+                                    <span class="material-symbols-outlined">verified_user</span>
+                                </span>
+                                <div>
+                                    <h4 class="config-card-title">Segurança da conta</h4>
+                                    <p class="config-card-desc">Altere sua senha regularmente para manter sua conta
+                                        segura.</p>
+                                </div>
+                            </div>
+
+                            <div class="sobre-info-list">
+                                <div class="sobre-info-item">
+                                    <div class="sobre-info-label">
+                                        <span class="material-symbols-outlined">mail</span> E-mail
+                                    </div>
+                                    <span class="sobre-info-valor" id="seguranca-email">—</span>
+                                </div>
+                                <div class="sobre-info-item">
+                                    <div class="sobre-info-label">
+                                        <span class="material-symbols-outlined">password</span> Senha
+                                    </div>
+                                    <span class="sobre-info-valor">••••••••</span>
+                                </div>
+                                <div class="sobre-info-item">
+                                    <div class="sobre-info-label">
+                                        <span class="material-symbols-outlined">history</span> Última alteração
+                                    </div>
+                                    <span class="sobre-info-valor">Não disponível</span>
+                                </div>
+                            </div>
+
+                            <button type="button" class="seguranca-toggle-btn" id="seguranca-toggle-senha"
+                                aria-expanded="false" aria-controls="seguranca-form-senha" data-requires-auth>
+                                <span class="material-symbols-outlined">lock_reset</span>
+                                Alterar senha
+                                <span class="material-symbols-outlined seguranca-toggle-chevron">expand_more</span>
+                            </button>
+
+                            <div class="seguranca-form-senha" id="seguranca-form-senha" style="display:none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="seguranca-senha-atual">Senha atual</label>
+                                        <input type="password" id="seguranca-senha-atual"
+                                            autocomplete="current-password">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="seguranca-senha-nova">Nova senha</label>
+                                        <input type="password" id="seguranca-senha-nova" autocomplete="new-password"
+                                            placeholder="Mínimo de 8 caracteres">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="seguranca-senha-confirmar">Confirmar nova senha</label>
+                                        <input type="password" id="seguranca-senha-confirmar"
+                                            autocomplete="new-password" placeholder="Digite novamente a nova senha">
+                                    </div>
+                                </div>
+                                <p class="login-erro" id="seguranca-senha-erro"></p>
+
+                                <div class="category-edit-actions">
+                                    <button type="button" class="btn btn-neutral"
+                                        id="seguranca-senha-cancelar">Cancelar</button>
+                                    <button type="button" class="btn btn-primary" id="seguranca-senha-salvar">
+                                        <span class="material-symbols-outlined">save</span> Atualizar senha
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- panel 10: meu perfil -->
+                <section class="panel" id="panel-perfil">
+                    <h2 class="panel-title"><span class="material-symbols-outlined">person</span>Meu Perfil</h2>
+                    <p class="panel-subtitle">Informações da sua conta de administrador.</p>
+
+                    <div class="perfil-container">
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <span class="config-icon config-icon-info">
+                                    <span class="material-symbols-outlined">badge</span>
+                                </span>
+                                <div>
+                                    <h4 class="config-card-title">Informações da conta</h4>
+                                    <p class="config-card-desc">Dados vinculados à sua conta de acesso.</p>
+                                </div>
+                            </div>
+
+                            <div class="sobre-info-list">
+                                <div class="sobre-info-item">
+                                    <div class="sobre-info-label">
+                                        <span class="material-symbols-outlined">person</span> Nome completo
+                                    </div>
+                                    <span class="sobre-info-valor" id="perfil-nome">—</span>
+                                </div>
+                                <div class="sobre-info-item">
+                                    <div class="sobre-info-label">
+                                        <span class="material-symbols-outlined">mail</span> E-mail
+                                    </div>
+                                    <span class="sobre-info-valor" id="perfil-email">—</span>
+                                </div>
+                                <div class="sobre-info-item">
+                                    <div class="sobre-info-label">
+                                        <span class="material-symbols-outlined">shield</span> Nível de acesso
+                                    </div>
+                                    <span class="sobre-status-badge" id="perfil-nivel">—</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
             </main>
         </div>
     </div>
@@ -2056,9 +2136,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-neutral" id="login-continuar-convidado" type="button">Continuar como
-                    Convidado</button>
-                <button class="btn btn-primary" id="login-btn-entrar" type="button">Entrar</button>
+                <button class="btn btn-neutral" id="login-continuar-convidado" type="button"><span
+                        class="material-symbols-outlined">lock_reset</span>Esqueci minha senha</button>
+                <button class="btn btn-primary" id="login-btn-entrar" type="button"><span
+                        class="material-symbols-outlined">start</span>Entrar</button>
             </div>
         </div>
     </div>

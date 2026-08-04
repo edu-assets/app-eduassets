@@ -1,0 +1,67 @@
+.seguranca-container {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    margin-top: 38px;
+}
+
+.seguranca-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--surface-2);
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.seguranca-toggle-btn:hover {
+    background-color: var(--hover-light);
+    border-color: var(--primary-color);
+}
+
+.seguranca-toggle-chevron {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+}
+
+.seguranca-toggle-btn[aria-expanded="true"] {
+    border-color: var(--primary-color);
+    background-color: var(--primary-50);
+}
+
+.seguranca-toggle-btn[aria-expanded="true"] .seguranca-toggle-chevron {
+    transform: rotate(180deg);
+}
+
+.seguranca-form-senha {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-color);
+}
+
+.seguranca-form-senha .form-row {
+    margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+    .seguranca-container {
+        margin-top: 16px;
+        padding: 0 12px;
+    }
+
+    .seguranca-form-senha .form-row {
+        flex-direction: column;
+        gap: 16px;
+    }
+}

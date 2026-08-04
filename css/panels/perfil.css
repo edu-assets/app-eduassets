@@ -1,0 +1,13 @@
+.perfil-container {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    margin-top: 38px;
+}
+
+@media (max-width: 640px) {
+    .perfil-container {
+        margin-top: 16px;
+        padding: 0 12px;
+    }
+}
