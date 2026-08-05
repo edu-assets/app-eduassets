@@ -110,9 +110,9 @@
     height: 20px;
 }
 
-.sobre-card-icon-primary { background-color: var(--primary-50); color: var(--primary-color); }
+.sobre-card-icon-primary { background-color: var(--primary-bg); color: var(--primary-color); }
 .sobre-card-icon-info { background-color: var(--info-bg); color: var(--info-color); }
-.sobre-card-icon-neutral { background-color: var(--slate-100); color: var(--text-secondary); }
+.sobre-card-icon-neutral { background-color: var(--neutral-bg); color: var(--text-secondary); }
 
 .sobre-card-header h4 {
     font-size: 0.98rem;
@@ -171,7 +171,7 @@
 .sobre-recurso-icon-secondary { background-color: var(--secondary-bg); color: var(--secondary-color); }
 .sobre-recurso-icon-warning { background-color: var(--warning-bg); color: var(--warning-color); }
 .sobre-recurso-icon-error { background-color: var(--error-bg); color: var(--error-color); }
-.sobre-recurso-icon-neutral { background-color: var(--slate-100); color: var(--text-secondary); }
+.sobre-recurso-icon-neutral { background-color: var(--neutral-bg); color: var(--text-secondary); }
 
 .sobre-recurso-texto {
     flex: 1 1 auto;
@@ -259,7 +259,7 @@
 .sobre-tech-icon[data-tech="js"] { background-color: #FFF9DB; color: #D6A700; }
 .sobre-tech-icon[data-tech="node"] { background-color: #E5F8EB; color: #3C873A; }
 .sobre-tech-icon[data-tech="postgres"] { background-color: #E5F0FE; color: #336791; }
-.sobre-tech-icon[data-tech="prisma"] { background-color: var(--slate-100); color: #16192C; }
+.sobre-tech-icon[data-tech="prisma"] { background-color: var(--neutral-bg); color: #16192C; }
 
 .sobre-tech-texto {
     display: flex;

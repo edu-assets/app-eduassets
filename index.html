@@ -4,6 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- theme initialization -->
+    <script>
+        (function () {
+            try {
+                var pref = localStorage.getItem('eduassets_theme');
+                var sistemaEscuro = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var tema = (pref === 'light' || pref === 'dark') ? pref : (sistemaEscuro ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', tema);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
     <title>eduAssets</title>
 
     <!-- Favicon -->
@@ -1577,11 +1592,14 @@
                                     </div>
                                 </div>
                                 <div class="config-toggle-group" id="config-tema-group">
-                                    <button type="button" class="config-toggle-btn active" data-tema="claro">
+                                    <button type="button" class="config-toggle-btn" data-tema="light">
                                         <span class="material-symbols-outlined">light_mode</span> Claro
                                     </button>
-                                    <button type="button" class="config-toggle-btn" data-tema="escuro" disabled>
-                                        <span class="material-symbols-outlined">dark_mode</span> Escuro (em breve)
+                                    <button type="button" class="config-toggle-btn" data-tema="dark">
+                                        <span class="material-symbols-outlined">dark_mode</span> Escuro
+                                    </button>
+                                    <button type="button" class="config-toggle-btn" data-tema="system">
+                                        <span class="material-symbols-outlined">brightness_auto</span> Sistema
                                     </button>
                                 </div>
                             </div>
@@ -2136,6 +2154,7 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <!-- TODO: Implement the "Forgot Password" functionality -->
                 <button class="btn btn-neutral" id="login-continuar-convidado" type="button"><span
                         class="material-symbols-outlined">lock_reset</span>Esqueci minha senha</button>
                 <button class="btn btn-primary" id="login-btn-entrar" type="button"><span

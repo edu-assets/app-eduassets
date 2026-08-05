@@ -1,5 +1,6 @@
 import { initNavigation, initMobileNavigation } from './core/layout/index.js';
 import { initModals, initConfirm } from './core/ui/index.js';
+import { initTheme } from './core/state/themeStore.js';
 import { initDashboard } from './features/dashboard/index.js';
 import { initControle } from './features/controle/index.js';
 import { initCadastros } from './features/cadastros/index.js';
@@ -13,6 +14,7 @@ import { initSeguranca } from './features/seguranca/index.js';
 import { initPerfil } from './features/perfil/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    initTheme();
     await initAuth();
     const cargasIniciais = await Promise.allSettled([
         carregarEquipamentos(),

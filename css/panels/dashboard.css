@@ -212,7 +212,7 @@
 }
 
 .category-summary-box {
-    background-color: color-mix(in srgb, var(--primary-color) 3%, #f8fafc);
+    background-color: color-mix(in srgb, var(--primary-color) 4%, var(--surface-2));
     border: 1px solid color-mix(in srgb, var(--primary-color) 12%, var(--border-color));
     border-radius: 8px;
     padding: 18px;
