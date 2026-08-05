@@ -1,3 +1,10 @@
-export function calcularDisponivelEfetivo(equipamento, reservadoPeloRegistroAtual = 0) {
+export interface EquipamentoComDisponivel {
+    quantidadeDisponivel?: number;
+}
+
+export function calcularDisponivelEfetivo(
+    equipamento: EquipamentoComDisponivel | null | undefined,
+    reservadoPeloRegistroAtual: number = 0
+): number {
     return (equipamento?.quantidadeDisponivel ?? 0) + reservadoPeloRegistroAtual;
 }

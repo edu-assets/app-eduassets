@@ -1,4 +1,4 @@
-export function gerarIniciais(nome) {
+export function gerarIniciais(nome : string | null | undefined): string {
     if (!nome) return '';
     const partes = nome.trim().split(' ');
     if (partes.length === 1) return partes[0].substring(0, 2).toUpperCase();

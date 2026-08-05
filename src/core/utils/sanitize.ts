@@ -1,4 +1,4 @@
-export function escapeHtml(value) {
+export function escapeHtml(value: unknown): string {
     if (value === null || value === undefined) return '';
     return String(value)
         .replace(/&/g, '&amp;')
