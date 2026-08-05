@@ -8,7 +8,7 @@ import { gerarBaixarPdf } from '../../core/services/pdf.js';
 
 const FORMATOS_SUPORTADOS = ['csv', 'excel', 'pdf'];
 
-/* ===== 1. data preparation: fetch data from the store, without filtering ===== */
+/* ===== 1. data preparation ===== */
 
 export function prepararDadosEquipamentos() {
     return getEquipamentos();
@@ -40,12 +40,6 @@ export function filtrarEquipamentosPorIds(equipamentos, idsSelecionados) {
     return equipamentos.filter((equipamento) => idsSet.has(String(equipamento.id)));
 }
 
-export function filtrarEmprestimosPorEquipamentos(emprestimos, idsSelecionados) {
-    if (!idsSelecionados.length) return emprestimos;
-    const idsSet = new Set(idsSelecionados.map(String));
-    return emprestimos.filter((loan) => loan.itens.some((item) => idsSet.has(String(item.id))));
-}
-
 /* ===== 3. formatting ===== */
 
 const CABECALHO_EQUIPAMENTOS = ['Categoria', 'Modelo', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'];
@@ -75,7 +69,7 @@ function linhasEmprestimos(emprestimos) {
     ]);
 }
 
-/* ===== 4. orchestration: coordinate the export process ===== */
+/* ===== 4. orchestration ===== */
 
 export function exportarDados(filtros) {
     if (!FORMATOS_SUPORTADOS.includes(filtros.formato)) {
@@ -94,13 +88,12 @@ export function exportarDados(filtros) {
         prefixoArquivo = 'equipamentos';
         titulo = 'Relatório de Equipamentos — eduAssets';
     } else if (filtros.tipoDados === 'devolucoes') {
-        let emprestimosFiltrados = filtrarPorPeriodo(
+        const emprestimosFiltrados = filtrarPorPeriodo(
             prepararDadosEmprestimos(),
             filtros.dataInicial,
             filtros.dataFinal,
             (loan) => loan.createdAt
         );
-        emprestimosFiltrados = filtrarEmprestimosPorEquipamentos(emprestimosFiltrados, filtros.equipamentoIds);
         cabecalho = CABECALHO_EMPRESTIMOS;
         linhas = linhasEmprestimos(emprestimosFiltrados);
         prefixoArquivo = 'emprestimos';

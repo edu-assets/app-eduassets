@@ -1427,137 +1427,164 @@
                 </section>
 
                 <!-- PAINEL 6: Exportar -->
+                <!-- PAINEL 6: Exportar -->
                 <section class="panel" id="panel-exportar">
                     <h2 class="panel-title"><span class="material-symbols-outlined">download</span>Exportar</h2>
-                    <p class="panel-subtitle">Filtre os dados para visualização e exportação.</p>
+                    <p class="panel-subtitle">Gere relatórios e exporte os dados do sistema conforme sua necessidade.
+                    </p>
 
                     <div class="exportar-container">
                         <form id="form-exportar">
 
-                            <div class="config-card">
-                                <div class="config-card-header">
-                                    <span class="config-icon config-icon-info">
-                                        <span class="material-symbols-outlined">description</span>
+                            <div class="exportar-tipo-row">
+                                <button type="button" class="exportar-tipo-card active" data-tipo="devolucoes">
+                                    <span class="exportar-tipo-icon exportar-tipo-icon-primary">
+                                        <span class="material-symbols-outlined">swap_horiz</span>
                                     </span>
-                                    <div>
-                                        <h4 class="config-card-title">1. Tipo de Dados</h4>
-                                        <p class="config-card-desc">Selecione o tipo de dados que deseja exportar.</p>
+                                    <div class="exportar-tipo-texto">
+                                        <span class="exportar-tipo-titulo">Empréstimos e devoluções</span>
+                                        <span class="exportar-tipo-desc">Relatório de empréstimos e devoluções
+                                            registrados.</span>
                                     </div>
-                                </div>
+                                    <span class="material-symbols-outlined exportar-tipo-check">check_circle</span>
+                                </button>
 
-                                <div class="form-group">
-                                    <div class="select-icon-wrap">
-                                        <span class="material-symbols-outlined select-icon">swap_horiz</span>
-                                        <select name="tipo-dados" id="tipo-dados" required>
-                                            <option value="" disabled selected hidden>Selecionar tipo de dados</option>
-                                            <option value="devolucoes">Empréstimos e Devoluções</option>
-                                            <option value="equipamentos">Equipamentos</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="config-card">
-                                <div class="config-card-header">
-                                    <span class="config-icon config-icon-secondary">
+                                <button type="button" class="exportar-tipo-card" data-tipo="equipamentos">
+                                    <span class="exportar-tipo-icon exportar-tipo-icon-secondary">
                                         <span class="material-symbols-outlined">devices</span>
                                     </span>
-                                    <div>
-                                        <h4 class="config-card-title">2. Equipamentos <span
-                                                class="form-label-optional">(opcional)</span></h4>
-                                        <p class="config-card-desc">Filtre por equipamentos específicos. Deixe vazio
-                                            para incluir todos.</p>
+                                    <div class="exportar-tipo-texto">
+                                        <span class="exportar-tipo-titulo">Equipamentos</span>
+                                        <span class="exportar-tipo-desc">Estado atual do inventário de
+                                            equipamentos.</span>
                                     </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <select name="exportar-equipamentos" id="exportar-equipamentos" multiple
-                                        size="6"></select>
-                                    <span class="form-hint">Segure Ctrl (ou Cmd no Mac) para selecionar múltiplos
-                                        equipamentos.</span>
-                                </div>
-                            </div>
-
-                            <div class="config-card">
-                                <div class="config-card-header">
-                                    <span class="config-icon config-icon-secondary">
-                                        <span class="material-symbols-outlined">calendar_month</span>
-                                    </span>
-                                    <div>
-                                        <h4 class="config-card-title">3. Período</h4>
-                                        <p class="config-card-desc">Defina o intervalo de datas para o filtro.</p>
-                                    </div>
-                                </div>
-
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="data-inicial">Data Inicial</label>
-                                        <input type="date" id="data-inicial" name="data-inicial" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="data-final">Data Final</label>
-                                        <input type="date" id="data-final" name="data-final" required>
-                                    </div>
-                                </div>
-
-                                <div class="exportar-hint">
-                                    <span class="material-symbols-outlined">info</span>
-                                    <span>Selecione o período desejado para filtrar os dados.</span>
-                                </div>
-                            </div>
-
-                            <div class="config-card">
-                                <div class="config-card-header">
-                                    <span class="config-icon config-icon-info">
-                                        <span class="material-symbols-outlined">draft</span>
-                                    </span>
-                                    <div>
-                                        <h4 class="config-card-title">4. Formato de Exportação</h4>
-                                        <p class="config-card-desc">Escolha o formato do arquivo.</p>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="select-icon-wrap">
-                                        <span class="material-symbols-outlined select-icon">draft</span>
-                                        <select name="exportar-formato" id="exportar-formato" required>
-                                            <option value="" disabled selected hidden>Selecionar formato</option>
-                                            <option value="csv">CSV</option>
-                                            <option value="excel">Excel</option>
-                                            <option value="pdf">PDF</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="config-card">
-                                <div class="config-card-header">
-                                    <span class="config-icon config-icon-info">
-                                        <span class="material-symbols-outlined">notes</span>
-                                    </span>
-                                    <div>
-                                        <h4 class="config-card-title">5. Observação <span
-                                                class="form-label-optional">(opcional)</span></h4>
-                                        <p class="config-card-desc">Adicione uma nota de contexto que será incluída no
-                                            relatório.</p>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <textarea id="exportar-observacao" rows="3"
-                                        placeholder="Ex: Relatório gerado para auditoria trimestral..."></textarea>
-                                </div>
-                            </div>
-
-                            <div class="config-footer-bar">
-                                <div class="config-footer-info">
-                                    <span class="material-symbols-outlined">info</span>
-                                    <span><strong>Importante</strong><br>Revise os filtros antes de gerar o
-                                        relatório.</span>
-                                </div>
-                                <button class="btn btn-primary" type="submit">
-                                    <span class="material-symbols-outlined">download</span> Exportar Dados
+                                    <span class="material-symbols-outlined exportar-tipo-check">check_circle</span>
                                 </button>
+                            </div>
+
+                            <input type="hidden" id="tipo-dados" name="tipo-dados" value="devolucoes">
+
+                            <div class="exportar-equip-wrap" id="exportar-equip-wrap" style="display:none;">
+                                <div class="exportar-equip-header">
+                                    <label class="exportar-equip-selecionar-todos">
+                                        <input type="checkbox" id="exportar-equip-todos" checked>
+                                        <span>Selecionar todos</span>
+                                    </label>
+                                    <span class="exportar-equip-contagem" id="exportar-equip-contagem">0
+                                        selecionados</span>
+                                </div>
+                                <div class="exportar-equip-list" id="exportar-equip-list"></div>
+                            </div>
+
+                            <input type="hidden" id="tipo-dados" name="tipo-dados" value="devolucoes">
+
+                            <div class="exportar-grid">
+
+                                <div class="config-card exportar-card-periodo">
+                                    <div class="config-card-header">
+                                        <span class="config-icon config-icon-secondary">
+                                            <span class="material-symbols-outlined">calendar_month</span>
+                                        </span>
+                                        <div>
+                                            <h4 class="config-card-title">Período</h4>
+                                            <p class="config-card-desc" id="exportar-periodo-desc">Mês atual selecionado
+                                                por padrão. Ajuste se necessário.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row exportar-periodo-wrap" id="exportar-periodo-wrap">
+                                        <div class="form-group">
+                                            <label for="data-inicial">Data inicial</label>
+                                            <input type="date" id="data-inicial" name="data-inicial">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="data-final">Data final</label>
+                                            <input type="date" id="data-final" name="data-final">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="config-card exportar-card-formato">
+                                    <div class="config-card-header">
+                                        <span class="config-icon config-icon-info">
+                                            <span class="material-symbols-outlined">file_open</span>
+                                        </span>
+                                        <div>
+                                            <h4 class="config-card-title">Formato de exportação</h4>
+                                            <p class="config-card-desc">Escolha o formato do arquivo.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="exportar-formato-opcoes">
+                                        <button type="button" class="exportar-formato-btn active" data-formato="csv">
+                                            <span class="material-symbols-outlined">csv</span> CSV
+                                        </button>
+                                        <button type="button" class="exportar-formato-btn" data-formato="excel">
+                                            <span class="material-symbols-outlined">table_chart</span> Excel
+                                        </button>
+                                        <button type="button" class="exportar-formato-btn" data-formato="pdf">
+                                            <span class="material-symbols-outlined">picture_as_pdf</span> PDF
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="exportar-formato" name="exportar-formato" value="csv">
+                                </div>
+
+                                <div class="config-card exportar-card-observacao">
+                                    <div class="config-card-header">
+                                        <span class="config-icon config-icon-info">
+                                            <span class="material-symbols-outlined">notes</span>
+                                        </span>
+                                        <div>
+                                            <h4 class="config-card-title">Observação <span
+                                                    class="form-label-optional">(opcional)</span></h4>
+                                            <p class="config-card-desc">Nota incluída no relatório gerado.</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <textarea id="exportar-observacao" rows="3"
+                                            placeholder="Ex: Relatório gerado para auditoria trimestral..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="config-card exportar-card-resumo">
+                                    <div class="config-card-header">
+                                        <span class="config-icon config-icon-secondary">
+                                            <span class="material-symbols-outlined">receipt</span>
+                                        </span>
+                                        <div>
+                                            <h4 class="config-card-title">Resumo da exportação</h4>
+                                            <p class="config-card-desc">Confira os detalhes antes de exportar.</p>
+                                        </div>
+                                    </div>
+                                    <div class="exportar-resumo-lista">
+                                        <div class="exportar-resumo-item">
+                                            <span>Tipo de dados</span>
+                                            <strong id="resumo-tipo">Empréstimos e devoluções</strong>
+                                        </div>
+                                        <div class="exportar-resumo-item">
+                                            <span>Período</span>
+                                            <strong id="resumo-periodo">—</strong>
+                                        </div>
+                                        <div class="exportar-resumo-item">
+                                            <span>Formato</span>
+                                            <strong id="resumo-formato">CSV (.csv)</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="exportar-footer-row">
+                                    <div class="config-footer-bar">
+                                        <div class="config-footer-info">
+                                            <span class="material-symbols-outlined">info</span>
+                                            <span><strong>Importante</strong><br>Revise os filtros antes de exportar os
+                                                dados.</span>
+                                        </div>
+                                        <button class="btn btn-primary" type="submit">
+                                            <span class="material-symbols-outlined">download</span> Exportar Dados
+                                        </button>
+                                    </div>
+                                </div>
+
                             </div>
                         </form>
                     </div>

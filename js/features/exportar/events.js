@@ -1,23 +1,64 @@
 import { showToast } from '../../core/ui/index.js';
 import { exportarDados } from './service.js';
-import { definirEstadoCarregando } from './render.js';
+import {
+    definirEstadoCarregando,
+    selecionarTipo,
+    selecionarFormato,
+    habilitarPeriodo,
+    atualizarResumo,
+    atualizarContagemEquipamentos
+} from './render.js';
 
 export function attachExportarEvents(els) {
+    els.tipoCards.forEach((card) => {
+        card.addEventListener('click', () => selecionarTipo(els, card.dataset.tipo));
+    });
+
+    els.formatoBtns.forEach((btn) => {
+        btn.addEventListener('click', () => selecionarFormato(els, btn.dataset.formato));
+    });
+
+    if (els.periodoWrap) {
+        els.periodoWrap.addEventListener('click', () => {
+            if (els.periodoWrap.classList.contains('exportar-periodo-disabled')) {
+                habilitarPeriodo(els);
+            }
+        });
+    }
+
+    els.dataInicialInput.addEventListener('change', () => atualizarResumo(els));
+    els.dataFinalInput.addEventListener('change', () => atualizarResumo(els));
+
+    els.equipTodosCheckbox.addEventListener('change', () => {
+        const marcar = els.equipTodosCheckbox.checked;
+        els.equipListaContainer.querySelectorAll('.exportar-equip-checkbox').forEach((cb) => {
+            cb.checked = marcar;
+        });
+        atualizarContagemEquipamentos(els);
+    });
+
+    els.equipListaContainer.addEventListener('change', (e) => {
+        if (!e.target.classList.contains('exportar-equip-checkbox')) return;
+        atualizarContagemEquipamentos(els);
+    });
+
     els.form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        if (!els.form.checkValidity()) {
-            els.form.reportValidity();
+        const equipamentoIds = els.tipoDadosInput.value === 'equipamentos'
+            ? Array.from(els.equipListaContainer.querySelectorAll('.exportar-equip-checkbox:checked')).map((cb) => cb.value)
+            : [];
+
+        if (els.tipoDadosInput.value === 'equipamentos' && !equipamentoIds.length) {
+            showToast('Selecione ao menos um equipamento para exportar.', 'warning');
             return;
         }
 
-        const equipamentoIds = Array.from(els.equipamentosSelect?.selectedOptions ?? []).map((opt) => opt.value);
-
         const filtros = {
-            tipoDados: els.tipoDadosSelect.value,
-            dataInicial: els.dataInicialInput.value,
-            dataFinal: els.dataFinalInput.value,
-            formato: els.formatoSelect.value,
+            tipoDados: els.tipoDadosInput.value,
+            dataInicial: els.dataInicialInput.disabled ? '' : els.dataInicialInput.value,
+            dataFinal: els.dataFinalInput.disabled ? '' : els.dataFinalInput.value,
+            formato: els.formatoInput.value,
             equipamentoIds,
             observacao: els.observacaoInput?.value.trim() ?? ''
         };

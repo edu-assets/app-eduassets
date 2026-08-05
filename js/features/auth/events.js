@@ -40,6 +40,11 @@ export function attachAuthEvents(els) {
     });
 
     els.btnHeroLogin?.addEventListener('click', () => {
+        if (isAutenticado()) {
+            sair();
+            showToast('Sessão encerrada. Você voltou ao Modo Convidado.', 'success');
+            return;
+        }
         mostrarErroLogin(els, '');
         openModal('modal-login');
     });

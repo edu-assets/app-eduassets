@@ -150,6 +150,7 @@
     padding: 32px;
     overflow-y: auto;
     overflow-x: hidden;
+    transition: background-color 0.25s ease;
     background-color: var(--bg-light); 
     position: relative;
 }

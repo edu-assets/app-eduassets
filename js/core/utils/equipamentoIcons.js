@@ -1,11 +1,15 @@
-const EQUIPAMENTO_ICONS = {
-    eq1: 'laptop',
-    eq2: 'tablet',
-    eq3: 'headphones',
-    eq4: 'bolt',
-    eq5: 'usb'
+import { getEquipamentos } from '../state/equipamentoStore.js';
+
+const ICONES_POR_CATEGORIA = {
+    'notebook': 'laptop',
+    'tablet': 'tablet',
+    'fone de ouvido': 'headphones',
+    'fonte de carregamento': 'bolt',
+    'carregador usb': 'usb'
 };
 
 export function getEquipamentoIcon(equipamentoId) {
-    return EQUIPAMENTO_ICONS[equipamentoId] || 'devices_other';
+    const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(equipamentoId));
+    const categoria = String(equipamento?.categoria?.nome ?? '').trim().toLowerCase();
+    return ICONES_POR_CATEGORIA[categoria] || 'devices_other';
 }

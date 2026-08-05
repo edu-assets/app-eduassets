@@ -1,9 +1,10 @@
 import { html } from '../../core/utils/html.js';
 
-export function renderOpcaoSubtipo(subtipo) {
-    return html`<option value="${subtipo.value}">${subtipo.label}</option>`;
-}
-
-export function renderOpcaoEquipamentoFiltro(equipamento) {
-    return html`<option value="${equipamento.id}">${equipamento.modelo} — ${equipamento.categoria?.nome ?? ''}</option>`;
+export function renderEquipamentoChecklistItem(equipamento) {
+    return html`
+        <label class="exportar-equip-item">
+            <input type="checkbox" class="exportar-equip-checkbox" value="${equipamento.id}" checked>
+            <span>${equipamento.modelo} — ${equipamento.categoria?.nome ?? ''}</span>
+        </label>
+    `;
 }
