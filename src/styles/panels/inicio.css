@@ -113,7 +113,7 @@
             color-mix(in srgb, var(--surface-white) 35%, transparent) 0%,
             color-mix(in srgb, var(--surface-white) 8%, transparent) 45%,
             color-mix(in srgb, var(--surface-white) 22%, transparent) 100%),
-        url("../../assets/img/eduAssets_banner.png");
+        url("../../public/assets/img/eduAssets_banner.png");
     background-size: cover;
     background-position: center;
     border-radius: 10px;
