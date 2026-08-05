@@ -24,7 +24,6 @@ export function renderDevolucaoTabelaHeader() {
             <span>Responsável</span>
             <span>Equipamentos</span>
             <span>Empréstimo</span>
-            <span>Status</span>
             <span>Ações</span>
         </div>
     `;
@@ -56,9 +55,6 @@ export function renderDevolucaoCard(loan) {
                     ${formatarHora(loan.createdAt)}
                 </span>
                 ${raw(temObservacao)}
-            </div>
-            <div class="devolucao-col-status">
-                ${raw(renderStatusBadge('aberto'))}
             </div>
             <div class="devolucao-col-acao">
                 <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}" data-requires-auth>Devolver</button>

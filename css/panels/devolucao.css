@@ -8,16 +8,15 @@
 }
 
 .devolucao-tabela-header,
-.devolucao-tabela-header,
 .devolucao-item {
     display: grid;
 
-    /* 1ª coluna (Responsável): 1.6fr
-       2ª coluna (Equipamento): 1.4fr
-       3ª coluna (Data/Obs):    1.1fr
-       4ª coluna (Status):      80px fixos
-       5ª coluna (Ação):        100px fixos */
-    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.6fr) minmax(0, 1.2fr) 85px 100px;
+    /* Ajustado para 4 colunas:
+       1ª (Responsável): 1.8fr
+       2ª (Equipamento): 1.6fr
+       3ª (Data/Obs):    1.2fr
+       4ª (Ação):        100px fixos */
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.6fr) minmax(0, 1.2fr) 100px;
     align-items: center;
     gap: 16px;
     padding: 14px 18px;
@@ -539,7 +538,6 @@
     gap: 10px;
     margin-top: auto;
     padding-top: 12px;
-    border-top: 1px solid var(--border-color);
 }
 
 .detalhe-emprestimo-lista {
@@ -677,11 +675,6 @@
     .devolucao-col-resp {
         gap: 10px;
     }
-
-    .devolucao-item-icon-pill {
-        padding: 4px 10px;
-        font-size: 0.78rem;
-    }
 }
 
 @media (max-width: 1024px) {
@@ -734,14 +727,13 @@
     }
 
     .devolucao-item {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr;
         grid-template-areas:
-            "pessoa pessoa"
-            "equip equip"
-            "data status"
-            "acao acao";
+            "pessoa"
+            "equip"
+            "data"
+            "acao";
         row-gap: 12px;
-        column-gap: 10px;
         padding: 16px;
     }
 
@@ -755,7 +747,7 @@
 
     .devolucao-col-data {
         grid-area: data;
-        align-self: center;
+        align-self: flex-start;
     }
 
     .devolucao-col-status {
