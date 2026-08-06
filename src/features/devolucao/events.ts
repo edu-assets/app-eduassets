@@ -21,17 +21,57 @@ import {
     salvarItensEmprestimo
 } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import type { LoanItemUI } from '../../types/index.js';
+import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
 
-export function attachDevolucaoEvents(els, estado) {
+interface DevolucaoEstado {
+    idPendente: string | number | null;
+    idDetalheAberto: number | null;
+    itensEditando: LoanItemUI[];
+    itensOriginais: LoanItemUI[];
+    modoEdicaoAtivo: boolean;
+}
+
+interface DevolucaoEls {
+    lista: HTMLElement;
+    devolucaoDataInput: HTMLInputElement;
+    confirmarDevolucaoResumo: HTMLElement | null;
+    btnCancelarDevolucao: HTMLElement | null;
+    btnConfirmarDevolucao: HTMLButtonElement;
+    detalheEmpty: HTMLElement;
+    detalheConteudo: HTMLElement;
+    detalheResp: HTMLElement;
+    detalheAluno: HTMLElement;
+    detalheData: HTMLElement;
+    detalheObs: HTMLElement;
+    detalheLista: HTMLElement;
+    detalheItensContagem: HTMLElement;
+    detalheEditWrap: HTMLElement;
+    detalheEquipamentoSelect: HTMLSelectElement;
+    detalheQuantidadeInput: HTMLInputElement;
+    btnDetalheAdicionarItem: HTMLButtonElement;
+    btnDetalheEditar: HTMLElement;
+    btnDetalheSalvar: HTMLButtonElement;
+    btnDetalheFechar: HTMLElement;
+    btnDetalheCancelar: HTMLElement;
+    btnConfirmarDevolucaoPainel: HTMLElement;
+    painel: HTMLElement | null;
+    backdrop: HTMLElement | null;
+    devolucaoPicker: FlatpickrInstance;
+}
+
+export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado): void {
     els.lista.addEventListener('click', (e) => {
-        const btnDevolver = e.target.closest('.devolver-btn');
+        const target = e.target as HTMLElement;
+
+        const btnDevolver = target.closest<HTMLElement>('.devolver-btn');
         if (btnDevolver) {
             if (bloquearSeConvidado()) return;
-            abrirModalConfirmacao(els, estado, btnDevolver.dataset.id);
+            abrirModalConfirmacao(els, estado, btnDevolver.dataset.id ?? '');
             return;
         }
 
-        const card = e.target.closest('.devolucao-item');
+        const card = target.closest<HTMLElement>('.devolucao-item');
         if (!card) return;
 
         const loan = getLoansAbertos().find((l) => String(l.id) === String(card.dataset.id));
@@ -51,7 +91,7 @@ export function attachDevolucaoEvents(els, estado) {
 
         els.btnConfirmarDevolucao.disabled = true;
         try {
-            await confirmarDevolucao(estado.idPendente);
+            await confirmarDevolucao(Number(estado.idPendente));
             showToast(`Devolução registrada para ${els.devolucaoDataInput.value}`, 'success');
             closeModal('modal-confirmar-devolucao');
             estado.idPendente = null;
@@ -108,7 +148,7 @@ export function attachDevolucaoEvents(els, estado) {
         const nome = els.detalheEquipamentoSelect.options[els.detalheEquipamentoSelect.selectedIndex].text;
 
         const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(equipamentoId));
-        const reservadoOriginal = estado.itensOriginais?.find((item) => String(item.id) === String(equipamentoId))?.quantidade ?? 0;
+        const reservadoOriginal = estado.itensOriginais.find((item) => String(item.id) === String(equipamentoId))?.quantidade ?? 0;
         const jaNoRascunho = estado.itensEditando.find((item) => String(item.id) === String(equipamentoId))?.quantidade ?? 0;
         const disponivelEfetivo = calcularDisponivelEfetivo(equipamento, reservadoOriginal);
 
@@ -117,48 +157,52 @@ export function attachDevolucaoEvents(els, estado) {
             return;
         }
 
-        estado.itensEditando = adicionarOuIncrementarItem(estado.itensEditando, {
+        estado.itensEditando = adicionarOuIncrementarItem(estado.itensEditando as any[], {
             id: equipamentoId,
             nome,
             quantidade
-        });
+        } as any) as LoanItemUI[];
 
         renderDetalheItens(els, estado.itensEditando, true);
         els.detalheEquipamentoSelect.value = '';
-        els.detalheQuantidadeInput.value = 1;
+        els.detalheQuantidadeInput.value = '1';
     });
 
     els.detalheLista.addEventListener('click', (e) => {
-        const btnRemover = e.target.closest('.detalhe-item-remover');
+        const target = e.target as HTMLElement;
+        const btnRemover = target.closest<HTMLElement>('.detalhe-item-remover');
         if (!btnRemover) return;
-        estado.itensEditando = removerItemPorId(estado.itensEditando, btnRemover.dataset.id);
+        estado.itensEditando = removerItemPorId(estado.itensEditando as any[], btnRemover.dataset.id ?? '') as LoanItemUI[];
         renderDetalheItens(els, estado.itensEditando, true);
     });
 
     els.detalheLista.addEventListener('input', (e) => {
-        if (!e.target.classList.contains('detalhe-item-qtd')) return;
+        const target = e.target as HTMLInputElement;
+        if (!target.classList.contains('detalhe-item-qtd')) return;
 
-        const id = e.target.dataset.id;
-        const quantidadeDesejada = Math.max(1, Number(e.target.value) || 1);
+        const id = target.dataset.id ?? '';
+        const quantidadeDesejada = Math.max(1, Number(target.value) || 1);
 
         const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(id));
-        const reservadoOriginal = estado.itensOriginais?.find((item) => String(item.id) === String(id))?.quantidade ?? 0;
+        const reservadoOriginal = estado.itensOriginais.find((item) => String(item.id) === String(id))?.quantidade ?? 0;
         const disponivelEfetivo = calcularDisponivelEfetivo(equipamento, reservadoOriginal);
 
         if (quantidadeDesejada > disponivelEfetivo) {
             showToast(`Estoque insuficiente: apenas ${disponivelEfetivo} unidade(s) disponível(is) para este equipamento.`, 'warning');
             const itemAtual = estado.itensEditando.find((i) => String(i.id) === String(id));
-            e.target.value = itemAtual?.quantidade ?? 1;
+            target.value = String(itemAtual?.quantidade ?? 1);
             return;
         }
 
-        estado.itensEditando = atualizarQuantidadeItem(estado.itensEditando, id, quantidadeDesejada);
+        estado.itensEditando = atualizarQuantidadeItem(estado.itensEditando as any[], id, quantidadeDesejada) as LoanItemUI[];
         const item = estado.itensEditando.find((i) => String(i.id) === String(id));
-        if (item) e.target.value = item.quantidade;
+        if (item) target.value = String(item.quantidade);
     });
 
     els.btnDetalheSalvar.addEventListener('click', async () => {
         if (bloquearSeConvidado()) return;
+        if (!estado.idDetalheAberto) return;
+
         els.btnDetalheSalvar.disabled = true;
         try {
             await salvarItensEmprestimo(estado.idDetalheAberto, estado.itensEditando);

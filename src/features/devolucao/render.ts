@@ -10,8 +10,72 @@ import {
 } from './templates.js';
 import { renderOpcaoEquipamento } from '../emprestimo/templates.js';
 import { getLoansAbertos } from '../../core/state/loans.js';
+import type { LoanItemUI, LoanUI, Equipamento } from '../../types/index.js';
+import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
 
-export function renderLista(els, estado, loans) {
+interface DevolucaoEstado {
+    idPendente: string | number | null;
+    idDetalheAberto: number | null;
+    itensEditando: LoanItemUI[];
+    itensOriginais: LoanItemUI[];
+    modoEdicaoAtivo: boolean;
+}
+
+interface ListaEls {
+    lista: HTMLElement;
+}
+
+interface DetalheItensEls {
+    detalheItensContagem: HTMLElement;
+    detalheLista: HTMLElement;
+}
+
+interface ObservacaoEls {
+    detalheObs: HTMLElement;
+}
+
+interface AbrirDetalheEls extends DetalheItensEls, ObservacaoEls, ListaEls {
+    detalheResp: HTMLElement;
+    detalheAluno: HTMLElement;
+    detalheData: HTMLElement;
+    detalheEditWrap: HTMLElement;
+    btnDetalheEditar: HTMLElement;
+    btnDetalheSalvar: HTMLElement;
+    btnConfirmarDevolucaoPainel: HTMLElement;
+    btnDetalheCancelar: HTMLElement;
+    detalheConteudo: HTMLElement;
+    detalheEmpty: HTMLElement;
+    painel: HTMLElement | null;
+    backdrop: HTMLElement | null;
+}
+
+interface SetModoEdicaoEls {
+    detalheEditWrap: HTMLElement;
+    btnDetalheEditar: HTMLElement;
+    btnDetalheSalvar: HTMLElement;
+    btnConfirmarDevolucaoPainel: HTMLElement;
+    btnDetalheCancelar: HTMLElement;
+}
+
+interface FecharDetalheEls extends SetModoEdicaoEls, ListaEls {
+    detalheConteudo: HTMLElement;
+    detalheEmpty: HTMLElement;
+    painel: HTMLElement | null;
+    backdrop: HTMLElement | null;
+}
+
+interface PainelMobileEls {
+    painel: HTMLElement | null;
+    backdrop: HTMLElement | null;
+}
+
+interface ModalConfirmacaoEls {
+    confirmarDevolucaoResumo: HTMLElement | null;
+    devolucaoPicker: FlatpickrInstance;
+    devolucaoDataInput: HTMLInputElement;
+}
+
+export function renderLista(els: ListaEls & FecharDetalheEls, estado: DevolucaoEstado, loans: LoanUI[]): void {
     if (!loans.length) {
         els.lista.innerHTML = renderDevolucaoEmptyState();
         fecharDetalhe(els, estado);
@@ -26,18 +90,18 @@ export function renderLista(els, estado, loans) {
     }
 }
 
-export function renderDetalheItens(els, itens, editMode) {
+export function renderDetalheItens(els: DetalheItensEls, itens: LoanItemUI[], editMode: boolean): void {
     els.detalheItensContagem.textContent = `(${itens.length})`;
     els.detalheLista.innerHTML = editMode ? renderDetalheItensEdit(itens) : renderDetalheItensView(itens);
 }
 
-export function renderObservacao(els, observacao) {
+export function renderObservacao(els: ObservacaoEls, observacao: string | null | undefined): void {
     const conteudo = renderDetalheObservacao(observacao);
     els.detalheObs.style.display = conteudo ? 'block' : 'none';
     els.detalheObs.innerHTML = conteudo;
 }
 
-export function abrirDetalhe(els, estado, loan) {
+export function abrirDetalhe(els: AbrirDetalheEls, estado: DevolucaoEstado, loan: LoanUI): void {
     estado.idDetalheAberto = loan.id;
     estado.itensEditando = loan.itens.map((item) => ({ ...item }));
     estado.itensOriginais = loan.itens.map((item) => ({ ...item }));
@@ -56,12 +120,12 @@ export function abrirDetalhe(els, estado, loan) {
     if (window.matchMedia('(max-width: 1024px)').matches) abrirPainelMobile(els);
 }
 
-export function popularSelectDetalheEquipamento(select, equipamentos) {
+export function popularSelectDetalheEquipamento(select: HTMLSelectElement, equipamentos: Equipamento[]): void {
     const placeholder = '<option value="" disabled selected hidden>Selecionar equipamento</option>';
     select.innerHTML = placeholder + equipamentos.map(renderOpcaoEquipamento).join('');
 }
 
-export function fecharDetalhe(els, estado) {
+export function fecharDetalhe(els: FecharDetalheEls, estado: DevolucaoEstado): void {
     estado.idDetalheAberto = null;
     estado.itensEditando = [];
     estado.itensOriginais = [];
@@ -72,12 +136,12 @@ export function fecharDetalhe(els, estado) {
     fecharPainelMobile(els);
 }
 
-export function mostrarDetalhe(els) {
+export function mostrarDetalhe(els: { detalheEmpty: HTMLElement; detalheConteudo: HTMLElement }): void {
     els.detalheEmpty.style.display = 'none';
     els.detalheConteudo.style.display = 'flex';
 }
 
-export function setModoEdicao(els, estado, ativo) {
+export function setModoEdicao(els: SetModoEdicaoEls, estado: DevolucaoEstado, ativo: boolean): void {
     estado.modoEdicaoAtivo = ativo;
     els.detalheEditWrap.style.display = ativo ? 'block' : 'none';
     els.btnDetalheEditar.style.display = ativo ? 'none' : 'inline-flex';
@@ -86,36 +150,43 @@ export function setModoEdicao(els, estado, ativo) {
     els.btnDetalheCancelar.textContent = ativo ? 'Cancelar edição' : 'Cancelar';
 }
 
-export function marcarLinhaSelecionada(els, id) {
-    els.lista.querySelectorAll('.devolucao-item').forEach((el) => {
+export function marcarLinhaSelecionada(els: ListaEls, id: number | string | null): void {
+    els.lista.querySelectorAll<HTMLElement>('.devolucao-item').forEach((el) => {
         el.classList.toggle('selected', String(el.dataset.id) === String(id));
     });
 }
 
-export function abrirPainelMobile(els) {
+export function abrirPainelMobile(els: PainelMobileEls): void {
     if (!els.painel || !els.backdrop) return;
     els.painel.classList.add('mobile-aberto');
     els.backdrop.classList.add('active');
 }
 
-export function fecharPainelMobile(els) {
+export function fecharPainelMobile(els: PainelMobileEls): void {
     if (!els.painel || !els.backdrop) return;
     els.painel.classList.remove('mobile-aberto');
     els.backdrop.classList.remove('active');
 }
 
-function preencherResumoConfirmacao(els, loan) {
+function preencherResumoConfirmacao(els: ModalConfirmacaoEls, loan: LoanUI | undefined): void {
     if (!els.confirmarDevolucaoResumo || !loan) return;
 
-    const campo = (nome) => els.confirmarDevolucaoResumo.querySelector(`[data-summary="${nome}"]`);
-    const itensLista = els.confirmarDevolucaoResumo.querySelector('[data-summary="itens-lista"] .modal-summary-items-list');
+    const resumo = els.confirmarDevolucaoResumo;
+    const campo = (nome: string) => resumo.querySelector<HTMLElement>(`[data-summary="${nome}"]`);
+    const itensLista = resumo.querySelector<HTMLElement>('[data-summary="itens-lista"] .modal-summary-items-list');
 
-    campo('iniciais').textContent = gerarIniciais(loan.responsavel);
-    campo('responsavel').textContent = loan.responsavel;
-    campo('aluno').textContent = loan.aluno;
-    campo('data').textContent = `Retirado em ${formatarDataCard(loan.createdAt)}`;
+    const camposEsperados: Array<[string, string]> = [
+        ['iniciais', gerarIniciais(loan.responsavel)],
+        ['responsavel', loan.responsavel],
+        ['aluno', loan.aluno],
+        ['data', `Retirado em ${formatarDataCard(loan.createdAt)}`],
+        ['itens', `${loan.itens.length} ${loan.itens.length === 1 ? 'item' : 'itens'}`]
+    ];
 
-    campo('itens').textContent = `${loan.itens.length} ${loan.itens.length === 1 ? 'item' : 'itens'}`;
+    camposEsperados.forEach(([nome, valor]) => {
+        const el = campo(nome);
+        if (el) el.textContent = valor;
+    });
 
     if (itensLista) {
         itensLista.replaceChildren();
@@ -137,7 +208,7 @@ function preencherResumoConfirmacao(els, loan) {
     }
 }
 
-export function abrirModalConfirmacao(els, estado, id) {
+export function abrirModalConfirmacao(els: ModalConfirmacaoEls, estado: DevolucaoEstado, id: string | number): void {
     estado.idPendente = id;
 
     const loan = getLoansAbertos().find((l) => String(l.id) === String(id));

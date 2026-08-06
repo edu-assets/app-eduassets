@@ -2,11 +2,11 @@ import { html, raw } from '../../core/utils/html.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { gerarIniciais, formatarHora } from './utils.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
-import { renderStatusBadge } from '../../shared/components/statusBadge.js';
+import type { LoanItemUI, LoanUI } from '../../types/index.js';
 
 const LIMITE_ICONES_CARD = 3;
 
-export function renderDevolucaoEmptyState() {
+export function renderDevolucaoEmptyState(): string {
     return renderEmptyState({
         containerClass: 'devolucao-vazia',
         imageSrc: 'public/assets/logos/eduAssets_logo-empty-state.webp',
@@ -18,7 +18,7 @@ export function renderDevolucaoEmptyState() {
     });
 }
 
-export function renderDevolucaoTabelaHeader() {
+export function renderDevolucaoTabelaHeader(): string {
     return html`
         <div class="devolucao-tabela-header">
             <span>Responsável</span>
@@ -29,7 +29,7 @@ export function renderDevolucaoTabelaHeader() {
     `;
 }
 
-export function renderDevolucaoCard(loan) {
+export function renderDevolucaoCard(loan: LoanUI): string {
     const temObservacao = loan.observacao ? html`
         <span class="info-data-relativa">
             <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.7;">sticky_note_2</span>
@@ -63,7 +63,7 @@ export function renderDevolucaoCard(loan) {
     `;
 }
 
-export function renderItensIcons(itens) {
+export function renderItensIcons(itens: LoanItemUI[]): string {
     if (itens.length <= LIMITE_ICONES_CARD) {
         return itens.map(renderItemIconPill).join('');
     }
@@ -75,7 +75,7 @@ export function renderItensIcons(itens) {
         `<div class="devolucao-item-icon-pill devolucao-item-icon-mais" title="+${restantes} ${restantes > 1 ? 'itens' : 'item'}">...</div>`;
 }
 
-export function renderItemIconPill(item) {
+export function renderItemIconPill(item: LoanItemUI): string {
     return html`
         <div class="devolucao-item-icon-pill" data-eq="${item.id}" title="${item.quantidade}x ${item.nome}">
             <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
@@ -84,7 +84,7 @@ export function renderItemIconPill(item) {
     `;
 }
 
-export function renderDetalheItensView(itens) {
+export function renderDetalheItensView(itens: LoanItemUI[]): string {
     return itens.map((item) => html`
         <li>
             <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
@@ -94,7 +94,7 @@ export function renderDetalheItensView(itens) {
     `).join('');
 }
 
-export function renderDetalheItensEdit(itens) {
+export function renderDetalheItensEdit(itens: LoanItemUI[]): string {
     return itens.map((item) => html`
         <li class="detalhe-emprestimo-item-edit">
             <input type="number" min="1" class="detalhe-item-qtd" value="${item.quantidade}" data-id="${item.id}">
@@ -106,7 +106,7 @@ export function renderDetalheItensEdit(itens) {
     `).join('');
 }
 
-export function renderDetalheObservacao(observacao) {
+export function renderDetalheObservacao(observacao: string | null | undefined): string {
     if (!observacao) return '';
     return html`<span class="detalhe-emprestimo-obs-label">Observação</span><p>${observacao}</p>`;
 }
