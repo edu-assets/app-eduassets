@@ -1,22 +1,27 @@
 import { openModal, closeModal } from './modal.js';
 
-let resolverAtual = null;
+interface ConfirmarExclusaoOpcoes {
+    titulo?: string;
+    mensagem?: string;
+}
 
-export function initConfirm() {
+let resolverAtual: ((valor: boolean) => void) | null = null;
+
+export function initConfirm(): void {
     const overlay = document.getElementById('modal-confirmar-exclusao');
     if (!overlay) return;
 
     const btnConfirmar = document.getElementById('confirmar-exclusao-btn');
     const btnCancelar = document.getElementById('confirmar-exclusao-cancelar');
 
-    btnConfirmar.addEventListener('click', () => finalizar(true));
-    btnCancelar.addEventListener('click', () => finalizar(false));
+    btnConfirmar?.addEventListener('click', () => finalizar(true));
+    btnCancelar?.addEventListener('click', () => finalizar(false));
 
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) finalizar(false);
     });
 
-    function finalizar(valor) {
+    function finalizar(valor: boolean): void {
         closeModal('modal-confirmar-exclusao');
         if (resolverAtual) {
             resolverAtual(valor);
@@ -25,24 +30,28 @@ export function initConfirm() {
     }
 }
 
-export function confirmarExclusao({ titulo = 'Confirmar exclusão', mensagem = 'Esta ação não pode ser desfeita.' } = {}) {
+export function confirmarExclusao(
+    { titulo = 'Confirmar exclusão', mensagem = 'Esta ação não pode ser desfeita.' }: ConfirmarExclusaoOpcoes = {}
+): Promise<boolean> {
     const overlay = document.getElementById('modal-confirmar-exclusao');
     if (!overlay) return Promise.resolve(window.confirm(mensagem));
 
-    document.getElementById('confirmar-exclusao-titulo').textContent = titulo;
-    document.getElementById('confirmar-exclusao-mensagem').textContent = mensagem;
+    const tituloEl = document.getElementById('confirmar-exclusao-titulo');
+    const mensagemEl = document.getElementById('confirmar-exclusao-mensagem');
+    if (tituloEl) tituloEl.textContent = titulo;
+    if (mensagemEl) mensagemEl.textContent = mensagem;
 
     openModal('modal-confirmar-exclusao');
 
     return new Promise((resolve) => {
-        const onKeydown = (e) => {
+        const onKeydown = (e: KeyboardEvent) => {
             if (e.key !== 'Escape') return;
             document.removeEventListener('keydown', onKeydown);
             resolve(false);
         };
         document.addEventListener('keydown', onKeydown);
 
-        resolverAtual = (valor) => {
+        resolverAtual = (valor: boolean) => {
             document.removeEventListener('keydown', onKeydown);
             resolve(valor);
         };

@@ -1,8 +1,9 @@
-export function initNavigation() {
-    const panels = document.querySelectorAll('.panel');
+export function initNavigation(): void {
+    const panels = document.querySelectorAll<HTMLElement>('.panel');
 
-    document.addEventListener('click', (event) => {
-        const link = event.target.closest('.nav-link');
+    document.addEventListener('click', (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+        const link = target.closest<HTMLElement>('.nav-link');
         if (!link) return;
 
         event.preventDefault();

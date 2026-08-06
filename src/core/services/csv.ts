@@ -1,8 +1,12 @@
-export function gerarLinhasCsv(cabecalho, linhas, linhasExtras = []) {
+export function gerarLinhasCsv(
+    cabecalho: string[],
+    linhas: Array<Array<string | number>>,
+    linhasExtras: Array<Array<string | number>> = []
+): string {
     return [...linhasExtras, cabecalho, ...linhas].map((linha) => linha.join(';')).join('\n');
 }
 
-export function baixarArquivoCsv(csv, nomeArquivo) {
+export function baixarArquivoCsv(csv: string, nomeArquivo: string): void {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
 

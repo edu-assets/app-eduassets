@@ -1,12 +1,14 @@
-const ICONS = {
+type ToastType = 'success' | 'error' | 'warning';
+
+const ICONS: Record<ToastType, string> = {
     success: 'check_circle',
     error: 'error',
     warning: 'warning'
 };
 
-let container = null;
+let container: HTMLDivElement | null = null;
 
-function getContainer() {
+function getContainer(): HTMLDivElement {
     if (!container) {
         container = document.createElement('div');
         container.className = 'toast-container';
@@ -15,7 +17,7 @@ function getContainer() {
     return container;
 }
 
-export function showToast(message, type = 'success', duration = 3500) {
+export function showToast(message: string, type: ToastType = 'success', duration: number = 3500): void {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `<span class="material-symbols-outlined">${ICONS[type] || ICONS.success}</span><span>${message}</span>`;

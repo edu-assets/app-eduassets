@@ -1,5 +1,5 @@
-export function initModals() {
-    document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+export function initModals(): void {
+    document.querySelectorAll<HTMLElement>('.modal-overlay').forEach((overlay) => {
         const header = overlay.querySelector('.modal-header');
 
         if (header && !header.querySelector('.modal-close-btn')) {
@@ -28,17 +28,17 @@ export function initModals() {
 
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
-        const activeModal = document.querySelector('.modal-overlay.active');
+        const activeModal = document.querySelector<HTMLElement>('.modal-overlay.active');
         if (activeModal && activeModal.dataset.closeOnOverlay !== 'false') closeModal(activeModal.id);
     });
 }
 
-export function openModal(id) {
+export function openModal(id: string): void {
     const modal = document.getElementById(id);
     if (modal) modal.classList.add('active');
 }
 
-export function closeModal(id) {
+export function closeModal(id: string): void {
     const modal = document.getElementById(id);
     if (modal) modal.classList.remove('active');
 }
