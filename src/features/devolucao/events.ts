@@ -157,11 +157,14 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
             return;
         }
 
-        estado.itensEditando = adicionarOuIncrementarItem(estado.itensEditando as any[], {
-            id: equipamentoId,
-            nome,
-            quantidade
-        } as any) as LoanItemUI[];
+        estado.itensEditando = adicionarOuIncrementarItem(
+            estado.itensEditando,
+            {
+                id: equipamentoId,
+                nome,
+                quantidade
+            }
+        );
 
         renderDetalheItens(els, estado.itensEditando, true);
         els.detalheEquipamentoSelect.value = '';
@@ -172,7 +175,10 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         const target = e.target as HTMLElement;
         const btnRemover = target.closest<HTMLElement>('.detalhe-item-remover');
         if (!btnRemover) return;
-        estado.itensEditando = removerItemPorId(estado.itensEditando as any[], btnRemover.dataset.id ?? '') as LoanItemUI[];
+        estado.itensEditando = removerItemPorId(
+            estado.itensEditando,
+            btnRemover.dataset.id ?? ''
+        );
         renderDetalheItens(els, estado.itensEditando, true);
     });
 
@@ -194,7 +200,11 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
             return;
         }
 
-        estado.itensEditando = atualizarQuantidadeItem(estado.itensEditando as any[], id, quantidadeDesejada) as LoanItemUI[];
+        estado.itensEditando = atualizarQuantidadeItem(
+            estado.itensEditando,
+            id,
+            quantidadeDesejada
+        );
         const item = estado.itensEditando.find((i) => String(i.id) === String(id));
         if (item) target.value = String(item.quantidade);
     });

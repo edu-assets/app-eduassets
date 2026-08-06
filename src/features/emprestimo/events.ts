@@ -49,11 +49,11 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             return;
         }
 
-        estado.itens = adicionarOuIncrementarItem(estado.itens as any[], {
+        estado.itens = adicionarOuIncrementarItem(estado.itens, {
             id: equipamentoId,
             nome,
             quantidade
-        } as any) as LoanItemUI[];
+        });
 
         renderItens(els, estado.itens);
         els.equipamentoSelect.value = '';
@@ -71,7 +71,10 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
 
         const btnRemover = target.closest<HTMLElement>('.item-emprestimo-remover');
         if (btnRemover) {
-            estado.itens = removerItemPorId(estado.itens as any[], btnRemover.dataset.id ?? '') as LoanItemUI[];
+            estado.itens = removerItemPorId(
+                estado.itens,
+                btnRemover.dataset.id ?? ''
+            );
             renderItens(els, estado.itens);
         }
     });
@@ -80,7 +83,10 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
         const target = e.target as HTMLElement;
         const btnRemover = target.closest<HTMLElement>('.item-emprestimo-remover');
         if (!btnRemover) return;
-        estado.itens = removerItemPorId(estado.itens as any[], btnRemover.dataset.id ?? '') as LoanItemUI[];
+        estado.itens = removerItemPorId(
+            estado.itens,
+            btnRemover.dataset.id ?? ''
+        );
         renderItens(els, estado.itens);
         renderModalItens(els, estado.itens);
     });

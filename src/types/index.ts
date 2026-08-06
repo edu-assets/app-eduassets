@@ -141,11 +141,11 @@ export interface OcorrenciaUpdatePayload {
 
 /* UI formats */
 
-export interface LoanItemUI {
+export type LoanItemUI = {
     id: string | number;
     nome: string;
     quantidade: number;
-}
+};
 
 export type StatusLoanUI = 'aberto' | 'devolvido';
 
