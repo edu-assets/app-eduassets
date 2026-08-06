@@ -138,3 +138,62 @@ export interface OcorrenciaUpdatePayload {
     numero?: string;
     medidasTomadas?: string;
 }
+
+/* UI formats */
+
+export interface LoanItemUI {
+    id: string | number;
+    nome: string;
+    quantidade: number;
+}
+
+export type StatusLoanUI = 'aberto' | 'devolvido';
+
+export interface LoanUI {
+    id: number;
+    numero: number;
+    aluno: string;
+    responsavel: string;
+    responsavelId: number;
+    status: StatusLoanUI;
+    data: string;
+    dataDevolucao: string | null;
+    observacao: string;
+    createdAt: Date;
+    itens: LoanItemUI[];
+}
+
+// loan draft is a temporary representation of a loan that is being created or edited, before it is finalized and sent to the backend.
+export interface LoanDraft {
+    aluno: string;
+    responsavelId: string | number;
+    dataRetiradaISO: string;
+    observacao?: string;
+    itens: LoanItemUI[];
+}
+
+export interface LoanUpdate {
+    itens?: LoanItemUI[];
+}
+
+export type StatusOcorrenciaUI = 'aberto' | 'resolvidos';
+
+export interface OcorrenciaUI {
+    id: number;
+    equipamentoId: number;
+    tipo: string;
+    status: StatusOcorrenciaUI;
+    categoria: string;
+    modelo: string;
+    numero: string;
+    problema: string;
+    descricao: string;
+    registradoEm: string;
+    resolvidoEm: string;
+    medidas: string;
+}
+
+export interface AuthState {
+    autenticado: boolean;
+    usuario: AuthUser | null;
+}

@@ -1,24 +1,27 @@
 import { listarEmprestimos, criarEmprestimo, atualizarItensEmprestimo, devolverEmprestimo } from '../api/emprestimos.js';
+import type { Emprestimo, LoanUI, LoanDraft, LoanUpdate } from '../../types/index.js';
 
-let emprestimos = [];
-let listeners = [];
+type LoanListener = (emprestimos: LoanUI[]) => void;
 
-export async function carregarEmprestimos() {
+let emprestimos: LoanUI[] = [];
+let listeners: LoanListener[] = [];
+
+export async function carregarEmprestimos(): Promise<LoanUI[]> {
     const dados = await listarEmprestimos();
     emprestimos = dados.map(mapEmprestimo);
     notify();
     return emprestimos;
 }
 
-export function getLoans() {
+export function getLoans(): LoanUI[] {
     return emprestimos;
 }
 
-export function getLoansAbertos() {
+export function getLoansAbertos(): LoanUI[] {
     return emprestimos.filter((loan) => loan.status === 'aberto');
 }
 
-export async function addLoan(loan) {
+export async function addLoan(loan: LoanDraft): Promise<void> {
     await criarEmprestimo({
         solicitanteNome: loan.aluno,
         responsavelId: Number(loan.responsavelId),
@@ -29,12 +32,12 @@ export async function addLoan(loan) {
     await carregarEmprestimos();
 }
 
-export async function returnLoan(id) {
+export async function returnLoan(id: number): Promise<void> {
     await devolverEmprestimo(id);
     await carregarEmprestimos();
 }
 
-export async function updateLoan(id, updates) {
+export async function updateLoan(id: number, updates: LoanUpdate): Promise<void> {
     if (updates.itens) {
         await atualizarItensEmprestimo(id, updates.itens.map((item) => ({
             equipamentoId: Number(item.id), // Number("eq1") = NaN
@@ -44,18 +47,18 @@ export async function updateLoan(id, updates) {
     await carregarEmprestimos();
 }
 
-export function subscribe(callback) {
+export function subscribe(callback: LoanListener): () => void {
     listeners.push(callback);
     return () => {
         listeners = listeners.filter((listener) => listener !== callback);
     };
 }
 
-function notify() {
+function notify(): void {
     listeners.forEach((callback) => callback(emprestimos));
 }
 
-function mapEmprestimo(loan) {
+function mapEmprestimo(loan: Emprestimo): LoanUI {
     return {
         id: loan.id,
         numero: loan.id,

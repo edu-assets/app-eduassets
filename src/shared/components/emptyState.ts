@@ -1,9 +1,26 @@
 import { escapeHtml } from '../../core/utils/sanitize.js';
 
-function renderTexto(texto, tag, classe) {
+type TagOuNulo = string | null;
+
+function renderTexto(texto: string | undefined, tag: TagOuNulo, classe: string | undefined): string {
     if (!texto) return '';
     if (!tag) return escapeHtml(texto);
     return `<${tag} class="${escapeHtml(classe || '')}">${escapeHtml(texto)}</${tag}>`;
+}
+
+export interface EmptyStateOpcoes {
+    containerClass?: string;
+    icon?: string;
+    imageSrc?: string;
+    imageAlt?: string;
+    imageClass?: string;
+    iconClass?: string;
+    titulo?: string;
+    tituloTag?: TagOuNulo;
+    tituloClass?: string;
+    subtitulo?: string;
+    subtituloTag?: TagOuNulo;
+    subtituloClass?: string;
 }
 
 export function renderEmptyState({
@@ -19,7 +36,7 @@ export function renderEmptyState({
     subtitulo,
     subtituloTag = 'p',
     subtituloClass = ''
-}) {
+}: EmptyStateOpcoes): string {
     const midia = imageSrc
         ? `<img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" class="${escapeHtml(imageClass)}">`
         : icon
