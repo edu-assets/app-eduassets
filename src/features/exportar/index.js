@@ -27,7 +27,7 @@ export function initExportar() {
         resumoPeriodo: document.getElementById('resumo-periodo'),
         resumoFormato: document.getElementById('resumo-formato'),
         btnSubmit,
-        textoOriginalBtn: btnSubmit.textContent
+        textoOriginalBtn: btnSubmit.innerHTML
     };
 
     definirPeriodoPadrao(els);
