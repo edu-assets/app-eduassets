@@ -6,9 +6,30 @@ import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { renderItens, renderModalItens } from './render.js';
 import { registrarEmprestimo } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import type { LoanItemUI, LoanDraft } from '../../types/index.js';
+import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
 
+interface EmprestimoEventosEls {
+    form: HTMLFormElement;
+    dataInput: HTMLInputElement;
+    equipamentoSelect: HTMLSelectElement;
+    quantidadeInput: HTMLInputElement;
+    btnAdicionar: HTMLButtonElement;
+    itensList: HTMLElement;
+    itensCount: HTMLElement | null;
+    modalItensLista: HTMLElement;
+    responsavelSelect: HTMLSelectElement;
+    solicitanteInput: HTMLInputElement;
+    observacaoInput: HTMLTextAreaElement;
+    btnSubmit: HTMLButtonElement;
+    picker: FlatpickrInstance;
+}
 
-export function attachEmprestimoEvents(els, estado) {
+interface EmprestimoEventosEstado {
+    itens: LoanItemUI[];
+}
+
+export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: EmprestimoEventosEstado): void {
     els.btnAdicionar.addEventListener('click', () => {
         if (!els.equipamentoSelect.value) {
             els.equipamentoSelect.reportValidity();
@@ -28,35 +49,38 @@ export function attachEmprestimoEvents(els, estado) {
             return;
         }
 
-        estado.itens = adicionarOuIncrementarItem(estado.itens, {
+        estado.itens = adicionarOuIncrementarItem(estado.itens as any[], {
             id: equipamentoId,
             nome,
             quantidade
-        });
+        } as any) as LoanItemUI[];
 
         renderItens(els, estado.itens);
         els.equipamentoSelect.value = '';
-        els.quantidadeInput.value = 1;
+        els.quantidadeInput.value = '1';
     });
 
     els.itensList.addEventListener('click', (e) => {
-        if (e.target.closest('.itens-emprestimo-mais')) {
+        const target = e.target as HTMLElement;
+
+        if (target.closest('.itens-emprestimo-mais')) {
             renderModalItens(els, estado.itens);
             openModal('modal-itens-emprestimo');
             return;
         }
 
-        const btnRemover = e.target.closest('.item-emprestimo-remover');
+        const btnRemover = target.closest<HTMLElement>('.item-emprestimo-remover');
         if (btnRemover) {
-            estado.itens = removerItemPorId(estado.itens, btnRemover.dataset.id);
+            estado.itens = removerItemPorId(estado.itens as any[], btnRemover.dataset.id ?? '') as LoanItemUI[];
             renderItens(els, estado.itens);
         }
     });
 
     els.modalItensLista.addEventListener('click', (e) => {
-        const btnRemover = e.target.closest('.item-emprestimo-remover');
+        const target = e.target as HTMLElement;
+        const btnRemover = target.closest<HTMLElement>('.item-emprestimo-remover');
         if (!btnRemover) return;
-        estado.itens = removerItemPorId(estado.itens, btnRemover.dataset.id);
+        estado.itens = removerItemPorId(estado.itens as any[], btnRemover.dataset.id ?? '') as LoanItemUI[];
         renderItens(els, estado.itens);
         renderModalItens(els, estado.itens);
     });
@@ -72,7 +96,7 @@ export function attachEmprestimoEvents(els, estado) {
 
         const dataSelecionada = els.picker.selectedDates[0] || new Date();
 
-        const dados = {
+        const dados: LoanDraft = {
             aluno: els.solicitanteInput.value,
             responsavelId: els.responsavelSelect.value,
             itens: estado.itens,

@@ -1,7 +1,8 @@
 import { html } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
+import type { LoanItemUI, Equipamento, Responsavel } from '../../types/index.js';
 
-export function renderItemRow(item) {
+export function renderItemRow(item: LoanItemUI): string {
     return html`
         <div class="item-emprestimo-row">
             <div class="item-emprestimo-info">
@@ -15,7 +16,7 @@ export function renderItemRow(item) {
     `;
 }
 
-export function renderItensEmptyState() {
+export function renderItensEmptyState(): string {
     return renderEmptyState({
         containerClass: 'itens-emprestimo-empty',
         icon: 'inventory_2',
@@ -28,10 +29,10 @@ export function renderItensEmptyState() {
     });
 }
 
-export function renderOpcaoEquipamento(equipamento) {
+export function renderOpcaoEquipamento(equipamento: Equipamento): string {
     return html`<option value="${equipamento.id}">${equipamento.modelo} — ${equipamento.categoria?.nome ?? ''}</option>`;
 }
 
-export function renderOpcaoResponsavel(responsavel) {
+export function renderOpcaoResponsavel(responsavel: Responsavel): string {
     return html`<option value="${responsavel.id}">${responsavel.nome}</option>`;
 }

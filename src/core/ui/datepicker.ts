@@ -1,4 +1,4 @@
-interface FlatpickrInstance {
+export interface FlatpickrInstance {
     selectedDates: Date[];
     setDate: (date: Date, triggerChange?: boolean) => void;
 }
