@@ -113,12 +113,31 @@
             color-mix(in srgb, var(--surface-white) 35%, transparent) 0%,
             color-mix(in srgb, var(--surface-white) 8%, transparent) 45%,
             color-mix(in srgb, var(--surface-white) 22%, transparent) 100%),
-        url("../../public/assets/img/eduAssets_banner.png");
+        url("../../public/assets/img/notebook_home.webp");
     background-size: cover;
     background-position: center;
     border-radius: 10px;
 
     z-index: 0;
+}
+
+.inicio-hero-img-placeholder::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            rgba(36, 87, 214, 0.22),
+            rgba(10, 18, 40, 0.28)
+        );
+
+    pointer-events: none;
+    z-index: 1;
+    filter:
+    brightness(.82)
+    contrast(1.08)
+    saturate(.80);
 }
 
 .inicio-hero-img-placeholder>* {
