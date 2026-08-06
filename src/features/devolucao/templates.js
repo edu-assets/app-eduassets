@@ -9,7 +9,7 @@ const LIMITE_ICONES_CARD = 3;
 export function renderDevolucaoEmptyState() {
     return renderEmptyState({
         containerClass: 'devolucao-vazia',
-        imageSrc: 'public/assets/logos/eduAssets_logo-empty-state.png',
+        imageSrc: 'public/assets/logos/eduAssets_logo-empty-state.webp',
         imageClass: 'devolucao-vazia-logo',
         titulo: 'Empréstimos aparecerão aqui',
         tituloClass: 'devolucao-vazia-texto',
