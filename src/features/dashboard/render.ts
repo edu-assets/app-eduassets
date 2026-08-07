@@ -36,11 +36,13 @@ export interface DashboardEls {
     resumoQuebradoPct: HTMLElement;
     resumoManutencao: HTMLElement;
     resumoManutencaoPct: HTMLElement;
+    inputBusca: HTMLInputElement | null;
 }
 
 export interface DashboardEstado {
     equipamentoIdModalAtual: number | null;
     equipamentoIdPainelAtual: number | null;
+    termoBusca: string;
 }
 
 export function renderEstoque(els: DashboardEls, equipamentos: Equipamento[]): void {

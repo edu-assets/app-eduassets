@@ -1,6 +1,6 @@
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { addOcorrencia, updateOcorrencia, deleteOcorrencia, resolveOcorrencia } from '../../core/state/ocorrenciasStore.js';
-import type { TipoOcorrencia, ControleRegistroDados, OcorrenciaUpdatePayload } from '../../types/index.js';
+import type { TipoOcorrencia, ControleRegistroDados, OcorrenciaUpdatePayload, OcorrenciaUI } from '../../types/index.js';
 
 const TIPO_API_MAP: Record<string, TipoOcorrencia> = {
     observacao: 'OBSERVACAO',
@@ -79,4 +79,19 @@ export function listarModelosPorCategoria(categoriaNome: string | null): string[
             if (!modelosUnicos.has(equipamento.modelo)) modelosUnicos.set(equipamento.modelo, true);
         });
     return [...modelosUnicos.keys()].sort();
+}
+
+/* ===== Filtering ===== */
+
+export function filtrarOcorrencias(ocorrencias: OcorrenciaUI[], termo: string): OcorrenciaUI[] {
+    if (!termo.trim()) return ocorrencias;
+    const termoMin = termo.toLowerCase();
+    
+    return ocorrencias.filter((o) => 
+        (o.categoria || '').toLowerCase().includes(termoMin) ||
+        (o.modelo || '').toLowerCase().includes(termoMin) ||
+        String(o.numero).toLowerCase().includes(termoMin) ||
+        (o.descricao || '').toLowerCase().includes(termoMin) ||
+        (o.problema || '').toLowerCase().includes(termoMin)
+    );
 }

@@ -15,8 +15,9 @@ import {
     fecharDetalhe
 } from './render.js';
 import type { DashboardEls, DashboardEstado } from './render.js';
-import { exportarEstoqueCsv } from './service.js';
+import { exportarEstoqueCsv, filtrarEquipamentos, filtrarHistorico } from './service.js';
 import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
+
 
 export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado): void {
     els.estoqueContainer.addEventListener('click', (e) => {
@@ -32,6 +33,20 @@ export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado
             if (target.closest('#btn-detalhe-estoque-fechar')) {
                 fecharDetalhe(els);
             }
+        });
+    }
+
+    if (els.inputBusca) {
+        els.inputBusca.addEventListener('input', (e) => {
+            const target = e.target as HTMLInputElement;
+            estado.termoBusca = target.value;
+
+            const equipamentosFiltrados = filtrarEquipamentos(getEquipamentos(), estado.termoBusca);
+            renderEstoque(els, equipamentosFiltrados);
+
+            const loansOrdenados = [...getLoans()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+            const loansFiltrados = filtrarHistorico(loansOrdenados, estado.termoBusca);
+            renderHistorico(els, loansFiltrados);
         });
     }
 
@@ -77,13 +92,15 @@ export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado
     window.addEventListener('resize', () => atualizarVisibilidadeDetalhe(els, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT)));
 
     subscribeEquipamentos(() => {
-        renderEstoque(els, getEquipamentos());
-        renderResumo(els, getEquipamentos());
+        const equipamentos = getEquipamentos();
+        renderEstoque(els, filtrarEquipamentos(equipamentos, estado.termoBusca));
+        renderResumo(els, equipamentos); 
     });
 
     subscribeLoans(() => {
         renderAndamento(els, getLoansAbertos());
-        renderHistorico(els, [...getLoans()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
+        const loansOrdenados = [...getLoans()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        renderHistorico(els, filtrarHistorico(loansOrdenados, estado.termoBusca));
     });
 
     subscribeOcorrencias(() => {

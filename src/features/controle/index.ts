@@ -33,7 +33,8 @@ export function initControle(): void {
         resolverDescricao: document.getElementById('controle-resolver-descricao'),
         resolverMedidas: document.getElementById('controle-resolver-medidas') as HTMLTextAreaElement | null,
         btnResolverCancelar: document.getElementById('controle-resolver-cancelar'),
-        btnResolverConfirmar: document.getElementById('controle-resolver-confirmar')
+        btnResolverConfirmar: document.getElementById('controle-resolver-confirmar'),
+        inputBusca: document.getElementById('controle-busca') as HTMLInputElement | null
     };
 
     const estado: ControleEstado = {
@@ -41,7 +42,8 @@ export function initControle(): void {
         tipoAtual: null,
         idEditando: null,
         linhaEditando: null,
-        idResolvendo: null
+        idResolvendo: null,
+        termoBusca: ''
     };
 
     attachControleEvents(els, estado);

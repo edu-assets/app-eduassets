@@ -2,7 +2,7 @@ import { openModal } from '../../core/ui/index.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
 import { renderControleLinha, renderControleEmptyState, ICONE_POR_TIPO } from './templates.js';
-import { listarCategoriasDisponiveis, listarModelosPorCategoria } from './service.js';
+import { listarCategoriasDisponiveis, listarModelosPorCategoria, filtrarOcorrencias } from './service.js';
 
 const TIPOS_VISIVEIS = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
 
@@ -54,6 +54,7 @@ export interface ControleEls {
     resolverMedidas: HTMLTextAreaElement | null;
     btnResolverCancelar: HTMLElement | null;
     btnResolverConfirmar: HTMLElement | null;
+    inputBusca: HTMLInputElement | null;
 }
 
 export interface ControleEstado {
@@ -62,6 +63,7 @@ export interface ControleEstado {
     idEditando: string | null;
     linhaEditando: HTMLElement | null;
     idResolvendo: string | null;
+    termoBusca: string;
 }
 
 export function renderControle(els: ControleEls, estado: ControleEstado): void {
@@ -74,8 +76,11 @@ export function renderControle(els: ControleEls, estado: ControleEstado): void {
             || '';
 
         const registros = getOcorrenciasPorTipo(tipo);
-        const rows = registros.length
-            ? registros.map((registro) => renderControleLinha(tipo, registro)).join('')
+        // NOVO: Aplica o filtro antes de renderizar
+        const registrosFiltrados = filtrarOcorrencias(registros, estado.termoBusca);
+        
+        const rows = registrosFiltrados.length
+            ? registrosFiltrados.map((registro) => renderControleLinha(tipo, registro)).join('')
             : renderControleEmptyState();
 
         tabContent.innerHTML = header + rows;

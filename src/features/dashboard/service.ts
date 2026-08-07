@@ -83,3 +83,25 @@ export function exportarEstoqueCsv(equipamentos: Equipamento[]): void {
     const nomeArquivo = `estoque-eduassets-${new Date().toISOString().slice(0, 10)}.csv`;
     baixarArquivoCsv(csv, nomeArquivo);
 }
+
+/* ===== Filtering ===== */
+
+export function filtrarEquipamentos(equipamentos: Equipamento[], termo: string): Equipamento[] {
+    if (!termo.trim()) return equipamentos;
+    const termoMin = termo.toLowerCase();
+    
+    return equipamentos.filter((eq) => 
+        (eq.categoria?.nome || '').toLowerCase().includes(termoMin)
+    );
+}
+
+export function filtrarHistorico(loans: LoanUI[], termo: string): LoanUI[] {
+    if (!termo.trim()) return loans;
+    const termoMin = termo.toLowerCase();
+    
+    return loans.filter((loan) => 
+        String(loan.numero).includes(termoMin) ||
+        (loan.aluno || '').toLowerCase().includes(termoMin) ||
+        (loan.responsavel || '').toLowerCase().includes(termoMin)
+    );
+}

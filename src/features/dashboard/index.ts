@@ -33,12 +33,15 @@ export function initDashboard(): void {
         resumoEmprestadoPct: document.getElementById('resumo-emprestado-pct') as HTMLElement,
         resumoQuebradoPct: document.getElementById('resumo-quebrado-pct') as HTMLElement,
         resumoManutencao: document.getElementById('resumo-manutencao') as HTMLElement,
-        resumoManutencaoPct: document.getElementById('resumo-manutencao-pct') as HTMLElement
+        resumoManutencaoPct: document.getElementById('resumo-manutencao-pct') as HTMLElement,
+        inputBusca: document.getElementById('dashboard-busca') as HTMLInputElement | null
+        
     };
 
     const estado: DashboardEstado = {
         equipamentoIdModalAtual: null,
-        equipamentoIdPainelAtual: null
+        equipamentoIdPainelAtual: null,
+        termoBusca: ''
     };
 
     attachDashboardEvents(els, estado);
