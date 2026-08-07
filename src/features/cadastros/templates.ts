@@ -1,11 +1,12 @@
 import { html, raw } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
+import type { CampoCadastro, CampoOpcao } from './service.js';
 
-export function renderCampo(campo, opcoes) {
+export function renderCampo(campo: CampoCadastro, opcoes: CampoOpcao[] | null): string {
     return campo.type === 'select' ? renderCampoSelect(campo, opcoes || []) : renderCampoTexto(campo);
 }
 
-function renderCampoTexto(campo) {
+function renderCampoTexto(campo: CampoCadastro): string {
     return html`
         <div class="form-group">
             <label for="${campo.id}">${campo.label}</label>
@@ -14,7 +15,7 @@ function renderCampoTexto(campo) {
     `;
 }
 
-function renderCampoSelect(campo, opcoes) {
+function renderCampoSelect(campo: CampoCadastro, opcoes: CampoOpcao[]): string {
     const opcoesHtml = opcoes.map((op) => html`<option value="${op.value}">${op.label}</option>`).join('');
 
     return html`
@@ -28,11 +29,11 @@ function renderCampoSelect(campo, opcoes) {
     `;
 }
 
-export function renderItemRegistro(texto) {
+export function renderItemRegistro(texto: string): string {
     return html`<div class="cadastro-modal-item">${texto}</div>`;
 }
 
-export function renderListaVazia() {
+export function renderListaVazia(): string {
     return renderEmptyState({
         containerClass: 'cadastro-modal-empty',
         titulo: 'Nenhum registro cadastrado.',
@@ -40,10 +41,10 @@ export function renderListaVazia() {
     });
 }
 
-export function renderListaCarregando() {
+export function renderListaCarregando(): string {
     return html`<div class="cadastro-modal-empty">Carregando...</div>`;
 }
 
-export function renderListaErro() {
+export function renderListaErro(): string {
     return html`<div class="cadastro-modal-empty">Não foi possível carregar os registros.</div>`;
 }

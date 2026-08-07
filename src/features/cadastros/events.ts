@@ -8,13 +8,30 @@ import {
     limparCamposFormulario
 } from './render.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import type { CampoComOpcoes } from './render.js';
 
-export function attachCadastrosEvents(els, estado) {
+export interface CadastrosEls {
+    cards: NodeListOf<HTMLElement>;
+    titulo: HTMLElement;
+    subtitulo: HTMLElement | null;
+    headerIcone: HTMLElement | null;
+    headerIconeSymbol: HTMLElement | null;
+    camposWrap: HTMLElement;
+    listaWrap: HTMLElement;
+    btnCancelar: HTMLElement | null;
+    btnSalvar: HTMLButtonElement | null;
+}
+
+export interface CadastrosEstado {
+    tipoAtual: string | null;
+}
+
+export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado): void {
     els.cards.forEach((card) => {
         card.addEventListener('click', (e) => {
             e.preventDefault();
             if (bloquearSeConvidado('Cadastros disponível apenas para administradores. Faça login para continuar.')) return;
-            abrirCadastro(els, estado, card.dataset.cadastro);
+            abrirCadastro(els, estado, card.dataset.cadastro ?? null);
         });
     });
 
@@ -27,13 +44,13 @@ export function attachCadastrosEvents(els, estado) {
     }
 }
 
-async function abrirCadastro(els, estado, tipo) {
+async function abrirCadastro(els: CadastrosEls, estado: CadastrosEstado, tipo: string | null): Promise<void> {
     const config = getConfig(tipo);
     if (!config) return;
 
     estado.tipoAtual = tipo;
 
-    let camposComOpcoes;
+    let camposComOpcoes: CampoComOpcoes[];
     try {
         camposComOpcoes = await Promise.all(
             config.campos.map(async (campo) => ({ campo, opcoes: await carregarOpcoesCampo(campo) }))
@@ -47,7 +64,7 @@ async function abrirCadastro(els, estado, tipo) {
     await recarregarLista(els, estado);
 }
 
-async function recarregarLista(els, estado) {
+async function recarregarLista(els: CadastrosEls, estado: CadastrosEstado): Promise<void> {
     exibirListaCarregando(els);
 
     try {
@@ -55,18 +72,18 @@ async function recarregarLista(els, estado) {
         renderListaRegistros(els, itens.map((item) => formatarItem(estado.tipoAtual, item)));
     } catch (erro) {
         exibirListaErro(els);
-        showToast(erro.message, 'error');
+        showToast(erro instanceof Error ? erro.message : 'Erro ao carregar registros.', 'error');
     }
 }
 
-async function salvarRegistro(els, estado) {
+async function salvarRegistro(els: CadastrosEls, estado: CadastrosEstado): Promise<void> {
     if (bloquearSeConvidado()) return;
     const config = getConfig(estado.tipoAtual);
     if (!config) return;
 
-    const valores = {};
+    const valores: Record<string, string> = {};
     config.campos.forEach((campo) => {
-        const el = document.getElementById(campo.id);
+        const el = document.getElementById(campo.id) as HTMLInputElement | HTMLSelectElement | null;
         valores[campo.id] = el ? el.value.trim() : '';
     });
 
@@ -76,15 +93,15 @@ async function salvarRegistro(els, estado) {
         return;
     }
 
-    els.btnSalvar.disabled = true;
+    if (els.btnSalvar) els.btnSalvar.disabled = true;
     try {
         await criarRegistro(estado.tipoAtual, valores);
         showToast('Registro criado com sucesso', 'success');
         limparCamposFormulario(config.campos);
         await recarregarLista(els, estado);
     } catch (erro) {
-        showToast(erro.message, 'error');
+        showToast(erro instanceof Error ? erro.message : 'Erro ao salvar registro.', 'error');
     } finally {
-        els.btnSalvar.disabled = false;
+        if (els.btnSalvar) els.btnSalvar.disabled = false;
     }
 }

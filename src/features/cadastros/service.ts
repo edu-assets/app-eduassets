@@ -5,8 +5,36 @@ import {
     usuariosApi,
     ApiError
 } from '../../core/api/index.js';
+import type { Categoria, Equipamento, Responsavel, Usuario } from '../../types/index.js';
 
-const CADASTRO_CONFIG = {
+export interface CampoOpcao {
+    value: string | number;
+    label: string;
+}
+
+export interface CampoCadastro {
+    id: string;
+    label: string;
+    type: string;
+    placeholder?: string;
+    options?: Array<CampoOpcao | string>;
+    carregarOpcoes?: () => Promise<CampoOpcao[]>;
+}
+
+export interface CadastroConfig<T = unknown> {
+    titulo: string;
+    descricao: string;
+    icone: string;
+    iconeClasse: string;
+    listar: () => Promise<T[]>;
+    criar: (valores: Record<string, string>) => Promise<unknown>;
+    formatarItem: (item: T) => string;
+    campos: CampoCadastro[];
+}
+
+export type TipoCadastro = 'equipamentos' | 'responsaveis' | 'usuarios' | 'categorias';
+
+const CADASTRO_CONFIG: Record<TipoCadastro, CadastroConfig<any>> = {
     equipamentos: {
         titulo: 'Equipamentos',
         descricao: 'Adicione um novo equipamento à lista disponível para empréstimo.',
@@ -18,7 +46,7 @@ const CADASTRO_CONFIG = {
             modelo: valores['cad-modelo'],
             quantidadeTotal: Number(valores['cad-quantidade'])
         }),
-        formatarItem: (item) => `${item.categoria?.nome ?? '—'} — ${item.modelo} (${item.quantidadeDisponivel}/${item.quantidadeTotal})`,
+        formatarItem: (item: Equipamento) => `${item.categoria?.nome ?? '—'} — ${item.modelo} (${item.quantidadeDisponivel}/${item.quantidadeTotal})`,
         campos: [
             {
                 id: 'cad-categoria',
@@ -41,7 +69,7 @@ const CADASTRO_CONFIG = {
             nome: valores['cad-nome'],
             cargo: valores['cad-cargo']
         }),
-        formatarItem: (item) => `${item.nome} — ${item.cargo}`,
+        formatarItem: (item: Responsavel) => `${item.nome} — ${item.cargo}`,
         campos: [
             { id: 'cad-nome', label: 'Nome', type: 'text', placeholder: 'Nome completo' },
             { id: 'cad-cargo', label: 'Cargo', type: 'text', placeholder: 'Ex: Professor' }
@@ -57,9 +85,9 @@ const CADASTRO_CONFIG = {
             nome: valores['cad-nome-usuario'],
             login: valores['cad-login-usuario'],
             senha: valores['cad-senha-usuario'],
-            nivelAcesso: valores['cad-nivel-acesso']
+            nivelAcesso: valores['cad-nivel-acesso'] as Usuario['nivelAcesso']
         }),
-        formatarItem: (item) => `${item.nome} — ${item.login} · ${item.nivelAcesso === 'ADMINISTRADOR' ? 'Administrador' : 'Editor'}`,
+        formatarItem: (item: Usuario) => `${item.nome} — ${item.login} · ${item.nivelAcesso === 'ADMINISTRADOR' ? 'Administrador' : 'Editor'}`,
         campos: [
             { id: 'cad-nome-usuario', label: 'Nome', type: 'text', placeholder: 'Nome completo' },
             { id: 'cad-login-usuario', label: 'E-mail / Login', type: 'text', placeholder: 'usuario@escola.com' },
@@ -82,18 +110,19 @@ const CADASTRO_CONFIG = {
         iconeClasse: 'info',
         listar: () => categoriasApi.listarCategorias(),
         criar: (valores) => categoriasApi.criarCategoria(valores['cad-nome-categoria']),
-        formatarItem: (item) => item.nome,
+        formatarItem: (item: Categoria) => item.nome,
         campos: [
             { id: 'cad-nome-categoria', label: 'Nome da Categoria', type: 'text', placeholder: 'Ex: Notebook' }
         ]
     }
 };
 
-export function getConfig(tipo) {
-    return CADASTRO_CONFIG[tipo] ?? null;
+export function getConfig(tipo: string | null | undefined): CadastroConfig | null {
+    if (!tipo || !(tipo in CADASTRO_CONFIG)) return null;
+    return CADASTRO_CONFIG[tipo as TipoCadastro];
 }
 
-export async function listarRegistros(tipo) {
+export async function listarRegistros(tipo: string | null): Promise<unknown[]> {
     const config = getConfig(tipo);
     if (!config) return [];
 
@@ -104,7 +133,7 @@ export async function listarRegistros(tipo) {
     }
 }
 
-export async function criarRegistro(tipo, valores) {
+export async function criarRegistro(tipo: string | null, valores: Record<string, string>): Promise<void> {
     const config = getConfig(tipo);
     if (!config) throw new Error('Tipo de cadastro inválido.');
 
@@ -115,14 +144,17 @@ export async function criarRegistro(tipo, valores) {
     }
 }
 
-export async function carregarOpcoesCampo(campo) {
+export async function carregarOpcoesCampo(campo: CampoCadastro): Promise<CampoOpcao[] | null> {
     if (campo.type !== 'select') return null;
 
-    const opcoesBrutas = campo.carregarOpcoes ? await campo.carregarOpcoes() : campo.options;
+    const opcoesBrutas: Array<CampoOpcao | string> = campo.carregarOpcoes
+        ? await campo.carregarOpcoes()
+        : (campo.options ?? []);
+
     return opcoesBrutas.map((op) => (typeof op === 'object' ? op : { value: op, label: op }));
 }
 
-export function formatarItem(tipo, item) {
+export function formatarItem(tipo: string | null, item: unknown): string {
     const config = getConfig(tipo);
     return config ? config.formatarItem(item) : '';
 }
