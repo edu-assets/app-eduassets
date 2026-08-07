@@ -212,10 +212,32 @@ async function excluirRegistro(els: ControleEls, estado: ControleEstado, row: HT
     if (!row) return;
     if (bloquearSeConvidado()) return;
 
+    // Resgata os dados da linha para exibir no modal
+    const categoria = row.dataset.categoria || '';
+    const modelo = row.dataset.modelo || '';
+    const numero = row.dataset.numero || '';
+    const descricao = row.dataset.descricao || '';
+
+    const detalhesHtml = `
+        <div class="modal-summary-panel">
+            <div class="modal-summary-person">
+                <span class="modal-summary-avatar"><span class="material-symbols-outlined">devices</span></span>
+                <div>
+                    <div class="modal-summary-title">${categoria} — ${modelo}</div>
+                    <div class="modal-summary-sub">Nº ${numero}</div>
+                </div>
+            </div>
+            <p class="controle-resolver-descricao" style="margin: 0; padding-top: 8px;">${descricao}</p>
+        </div>
+    `;
+
     const confirmado = await confirmarExclusao({
         titulo: 'Excluir registro',
-        mensagem: 'Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.'
+        mensagem: 'Esta ação não pode ser desfeita.',
+        detalhesHtml: detalhesHtml,
+        textoAtencao: 'Ao excluir este registro, todas as informações relacionadas serão removidas permanentemente do sistema.'
     });
+    
     if (!confirmado) return;
 
     if (row === estado.linhaSelecionada) limparSelecao(els, estado);

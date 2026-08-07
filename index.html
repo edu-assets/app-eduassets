@@ -168,8 +168,8 @@
                         <div class="inicio-hero-grid">
                             <div class="inicio-hero-textos">
                                 <span class="inicio-tag">Bem-vindo ao</span>
-                                <img class="inicio-logo-img" src="public/assets/logos/eduAssets_logo-hero-transparent.webp"
-                                    alt="EduAssets Logo">
+                                <img class="inicio-logo-img"
+                                    src="public/assets/logos/eduAssets_logo-hero-transparent.webp" alt="EduAssets Logo">
 
                                 <span class="inicio-divider"></span>
 
@@ -854,20 +854,46 @@
 
                     <!-- Modal de resolver registro -->
                     <div class="modal-overlay" id="modal-controle-resolver">
-                        <div class="modal-box">
+                        <div class="modal-box modal-box--md">
                             <div class="modal-header">
-                                <h3>Resolver Registro</h3>
+                                <!-- Ícone verde em destaque -->
+                                <span class="modal-header-icon modal-header-icon-success">
+                                    <span class="material-symbols-outlined">build</span>
+                                </span>
+                                <div class="modal-header-titles">
+                                    <h3>Resolver registro</h3>
+                                    <p class="modal-subtitle">Informe as medidas tomadas para concluir este registro.
+                                    </p>
+                                </div>
                             </div>
                             <div class="modal-body">
-                                <div class="controle-resolver-resumo">
-                                    <span class="config-item-title" id="controle-resolver-categoria-modelo">—</span>
-                                    <span class="config-item-desc" id="controle-resolver-numero-problema">—</span>
-                                    <p class="controle-resolver-descricao" id="controle-resolver-descricao"></p>
+                                <!-- Painel de resumo do item -->
+                                <div class="modal-summary-panel">
+                                    <div class="modal-summary-person">
+                                        <span class="modal-summary-avatar"><span
+                                                class="material-symbols-outlined">devices</span></span>
+                                        <div>
+                                            <div class="modal-summary-title" id="controle-resolver-categoria-modelo">—
+                                            </div>
+                                            <div class="modal-summary-sub" id="controle-resolver-numero-problema">—
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="controle-resolver-descricao" id="controle-resolver-descricao"
+                                        style="margin: 0; padding-top: 8px;"></p>
                                 </div>
-                                <div class="form-group">
+
+                                <div class="form-group" style="margin-bottom: 0;">
                                     <label for="controle-resolver-medidas">Medidas tomadas</label>
-                                    <textarea id="controle-resolver-medidas" rows="3"
-                                        placeholder="Descreva a resolução aplicada..."></textarea>
+                                    <textarea id="controle-resolver-medidas" rows="4"
+                                        placeholder="Descreva a resolução aplicada para este registro..."></textarea>
+                                </div>
+
+                                <!-- Caixa de alerta (Callout) -->
+                                <div class="modal-callout modal-callout-info">
+                                    <span class="material-symbols-outlined">info</span>
+                                    <span><strong>Importante:</strong> Ao confirmar, o registro será marcado como
+                                        resolvido e não poderá ser editado novamente.</span>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -875,7 +901,41 @@
                                     type="button">Cancelar</button>
                                 <button class="btn btn-success" id="controle-resolver-confirmar" data-requires-auth
                                     type="button">
-                                    <span class="material-symbols-outlined">task_alt</span> Confirmar Resolução
+                                    <span class="material-symbols-outlined">task_alt</span> Confirmar resolução
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal de confirmar exclusão -->
+                    <div class="modal-overlay" id="modal-confirmar-exclusao">
+                        <div class="modal-box modal-box--md">
+                            <div class="modal-header">
+                                <!-- Ícone vermelho em destaque -->
+                                <span class="modal-header-icon modal-header-icon-error">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </span>
+                                <div class="modal-header-titles">
+                                    <h3 id="confirmar-exclusao-titulo">Excluir registro</h3>
+                                    <p class="modal-subtitle" id="confirmar-exclusao-mensagem">Esta ação não pode ser
+                                        desfeita.</p>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Container para injetar os detalhes do item dinamicamente -->
+                                <div id="confirmar-exclusao-detalhes" style="display: none;"></div>
+
+                                <div class="modal-callout modal-callout-error" id="confirmar-exclusao-callout"
+                                    style="display: none;">
+                                    <span class="material-symbols-outlined">warning</span>
+                                    <span id="confirmar-exclusao-callout-text"></span>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-neutral" id="confirmar-exclusao-cancelar"
+                                    type="button">Cancelar</button>
+                                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button">
+                                    <span class="material-symbols-outlined">delete</span> Excluir registro
                                 </button>
                             </div>
                         </div>

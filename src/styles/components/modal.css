@@ -361,6 +361,12 @@
     margin-top: 0;
 }
 
+.modal-callout-error {
+    background-color: var(--error-bg);
+    color: var(--error-color);
+    border-color: color-mix(in srgb, var(--error-color) 25%, transparent);
+}
+
 @media (max-width: 640px) {
     .modal-summary-grid {
         grid-template-columns: 1fr;
