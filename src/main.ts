@@ -16,6 +16,7 @@ import { initPerfil } from './features/perfil/index.js';
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     await initAuth();
+
     const cargasIniciais = await Promise.allSettled([
         carregarEquipamentos(),
         carregarResponsaveis(),
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const inits = [
+    const inits: Array<() => void> = [
         initNavigation,
         initMobileNavigation,
         initModals,
