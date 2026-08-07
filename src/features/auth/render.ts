@@ -1,8 +1,19 @@
 import { renderUserMenuAutenticado, renderUserMenuConvidado } from './templates.js';
+import type { AuthUser } from '../../types/index.js';
 
-export function renderAuthStatus(els, autenticado, usuario) {
+export interface AuthEls {
+    sidebarFooter: HTMLElement;
+    btnHeroLogin: HTMLElement | null;
+    emailInput: HTMLInputElement;
+    senhaInput: HTMLInputElement;
+    erro: HTMLElement;
+    btnEntrar: HTMLButtonElement;
+    btnContinuarConvidado: HTMLElement;
+}
+
+export function renderAuthStatus(els: AuthEls, autenticado: boolean, usuario: AuthUser | null): void {
     els.sidebarFooter.classList.toggle('user-menu', autenticado);
-    els.sidebarFooter.innerHTML = autenticado
+    els.sidebarFooter.innerHTML = autenticado && usuario
         ? renderUserMenuAutenticado(usuario)
         : renderUserMenuConvidado();
 
@@ -11,7 +22,7 @@ export function renderAuthStatus(els, autenticado, usuario) {
     renderHeroButton(els, autenticado);
 }
 
-export function renderHeroButton(els, autenticado) {
+export function renderHeroButton(els: AuthEls, autenticado: boolean): void {
     if (!els.btnHeroLogin) return;
 
     els.btnHeroLogin.classList.toggle('btn-primary', !autenticado);
@@ -22,7 +33,7 @@ export function renderHeroButton(els, autenticado) {
         : '<span class="material-symbols-outlined">login</span> Login';
 }
 
-export function mostrarErroLogin(els, mensagem) {
+export function mostrarErroLogin(els: AuthEls, mensagem: string): void {
     els.erro.textContent = mensagem;
     els.erro.style.display = mensagem ? 'block' : 'none';
 }

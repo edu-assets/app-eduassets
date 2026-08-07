@@ -8,14 +8,16 @@ import {
     atualizarResumo,
     atualizarContagemEquipamentos
 } from './render.js';
+import type { ExportarEls } from './render.js';
+import type { FiltrosExportacao } from '../../types/index.js';
 
-export function attachExportarEvents(els) {
+export function attachExportarEvents(els: ExportarEls): void {
     els.tipoCards.forEach((card) => {
-        card.addEventListener('click', () => selecionarTipo(els, card.dataset.tipo));
+        card.addEventListener('click', () => selecionarTipo(els, card.dataset.tipo ?? ''));
     });
 
     els.formatoBtns.forEach((btn) => {
-        btn.addEventListener('click', () => selecionarFormato(els, btn.dataset.formato));
+        btn.addEventListener('click', () => selecionarFormato(els, btn.dataset.formato ?? ''));
     });
 
     if (els.periodoWrap) {
@@ -31,14 +33,15 @@ export function attachExportarEvents(els) {
 
     els.equipTodosCheckbox.addEventListener('change', () => {
         const marcar = els.equipTodosCheckbox.checked;
-        els.equipListaContainer.querySelectorAll('.exportar-equip-checkbox').forEach((cb) => {
+        els.equipListaContainer.querySelectorAll<HTMLInputElement>('.exportar-equip-checkbox').forEach((cb) => {
             cb.checked = marcar;
         });
         atualizarContagemEquipamentos(els);
     });
 
     els.equipListaContainer.addEventListener('change', (e) => {
-        if (!e.target.classList.contains('exportar-equip-checkbox')) return;
+        const target = e.target as HTMLElement;
+        if (!target.classList.contains('exportar-equip-checkbox')) return;
         atualizarContagemEquipamentos(els);
     });
 
@@ -46,7 +49,7 @@ export function attachExportarEvents(els) {
         e.preventDefault();
 
         const equipamentoIds = els.tipoDadosInput.value === 'equipamentos'
-            ? Array.from(els.equipListaContainer.querySelectorAll('.exportar-equip-checkbox:checked')).map((cb) => cb.value)
+            ? Array.from(els.equipListaContainer.querySelectorAll<HTMLInputElement>('.exportar-equip-checkbox:checked')).map((cb) => cb.value)
             : [];
 
         if (els.tipoDadosInput.value === 'equipamentos' && !equipamentoIds.length) {
@@ -54,7 +57,7 @@ export function attachExportarEvents(els) {
             return;
         }
 
-        const filtros = {
+        const filtros: FiltrosExportacao = {
             tipoDados: els.tipoDadosInput.value,
             dataInicial: els.dataInicialInput.disabled ? '' : els.dataInicialInput.value,
             dataFinal: els.dataFinalInput.disabled ? '' : els.dataFinalInput.value,

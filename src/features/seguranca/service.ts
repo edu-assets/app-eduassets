@@ -1,7 +1,7 @@
 import { alterarSenha } from '../../core/api/auth.js';
 import { ApiError } from '../../core/api/index.js';
 
-export async function trocarSenha(senhaAtual, novaSenha, confirmarSenha) {
+export async function trocarSenha(senhaAtual: string, novaSenha: string, confirmarSenha: string): Promise<void> {
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
         throw new Error('Preencha todos os campos de senha.');
     }

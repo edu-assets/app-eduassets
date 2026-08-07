@@ -1,10 +1,13 @@
 import { closeModal, openModal, showToast } from '../../core/ui/index.js';
 import { entrar, sair, isAutenticado, subscribe } from '../../core/state/authStore.js';
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
+import type { AuthEls } from './render.js';
 
-export function attachAuthEvents(els) {
+export function attachAuthEvents(els: AuthEls): void {
     els.sidebarFooter.addEventListener('click', (e) => {
-        const trigger = e.target.closest('#user-menu-trigger');
+        const target = e.target as HTMLElement;
+
+        const trigger = target.closest<HTMLElement>('#user-menu-trigger');
         if (trigger) {
             e.stopPropagation();
             const dropdown = document.getElementById('user-menu-dropdown');
@@ -13,26 +16,27 @@ export function attachAuthEvents(els) {
             return;
         }
 
-        if (e.target.closest('#btn-user-menu-sair')) {
+        if (target.closest('#btn-user-menu-sair')) {
             fecharDropdown();
             sair();
             showToast('Sessão encerrada. Você voltou ao Modo Convidado.', 'success');
             return;
         }
 
-        if (e.target.closest('#btn-auth-toggle')) {
+        if (target.closest('#btn-auth-toggle')) {
             mostrarErroLogin(els, '');
             openModal('modal-login');
             return;
         }
 
-        if (e.target.closest('.user-menu-item.nav-link')) {
+        if (target.closest('.user-menu-item.nav-link')) {
             fecharDropdown();
         }
     });
 
     document.addEventListener('click', (e) => {
-        if (!els.sidebarFooter.contains(e.target)) fecharDropdown();
+        const target = e.target as Node;
+        if (!els.sidebarFooter.contains(target)) fecharDropdown();
     });
 
     document.addEventListener('keydown', (e) => {
@@ -58,12 +62,12 @@ export function attachAuthEvents(els) {
     subscribe(({ autenticado, usuario }) => renderAuthStatus(els, autenticado, usuario));
 }
 
-function fecharDropdown() {
+function fecharDropdown(): void {
     document.getElementById('user-menu-dropdown')?.classList.remove('active');
     document.getElementById('user-menu-trigger')?.setAttribute('aria-expanded', 'false');
 }
 
-async function fazerLogin(els) {
+async function fazerLogin(els: AuthEls): Promise<void> {
     const login = els.emailInput.value.trim();
     const senha = els.senhaInput.value;
 

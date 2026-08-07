@@ -5,22 +5,28 @@ import { contarManutencaoPorEquipamento } from '../../core/utils/estoqueCalculad
 import { gerarLinhasCsv, baixarArquivoCsv } from '../../core/services/csv.js';
 import { gerarArquivoXlsx, baixarArquivoXlsx } from '../../core/services/excel.js';
 import { gerarBaixarPdf } from '../../core/services/pdf.js';
+import type { Equipamento, LoanUI, FiltrosExportacao } from '../../types/index.js';
 
 const FORMATOS_SUPORTADOS = ['csv', 'excel', 'pdf'];
 
 /* ===== 1. data preparation ===== */
 
-export function prepararDadosEquipamentos() {
+export function prepararDadosEquipamentos(): Equipamento[] {
     return getEquipamentos();
 }
 
-export function prepararDadosEmprestimos() {
+export function prepararDadosEmprestimos(): LoanUI[] {
     return getLoans();
 }
 
 /* ===== 2. filtering ===== */
 
-export function filtrarPorPeriodo(itens, dataInicial, dataFinal, obterData) {
+export function filtrarPorPeriodo<T>(
+    itens: T[],
+    dataInicial: string,
+    dataFinal: string,
+    obterData: (item: T) => Date
+): T[] {
     if (!dataInicial && !dataFinal) return itens;
 
     const inicio = dataInicial ? new Date(dataInicial) : null;
@@ -34,7 +40,7 @@ export function filtrarPorPeriodo(itens, dataInicial, dataFinal, obterData) {
     });
 }
 
-export function filtrarEquipamentosPorIds(equipamentos, idsSelecionados) {
+export function filtrarEquipamentosPorIds(equipamentos: Equipamento[], idsSelecionados: string[]): Equipamento[] {
     if (!idsSelecionados.length) return equipamentos;
     const idsSet = new Set(idsSelecionados.map(String));
     return equipamentos.filter((equipamento) => idsSet.has(String(equipamento.id)));
@@ -45,7 +51,7 @@ export function filtrarEquipamentosPorIds(equipamentos, idsSelecionados) {
 const CABECALHO_EQUIPAMENTOS = ['Categoria', 'Modelo', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'];
 const CABECALHO_EMPRESTIMOS = ['Numero', 'Solicitante', 'Responsavel', 'Retirada', 'Devolucao', 'Status'];
 
-function linhasEquipamentos(equipamentos) {
+function linhasEquipamentos(equipamentos: Equipamento[]): Array<Array<string | number>> {
     const manutencaoPorEquipamento = contarManutencaoPorEquipamento(getOcorrenciasPorTipo('manutencao'));
 
     return equipamentos.map((equipamento) => [
@@ -58,7 +64,7 @@ function linhasEquipamentos(equipamentos) {
     ]);
 }
 
-function linhasEmprestimos(emprestimos) {
+function linhasEmprestimos(emprestimos: LoanUI[]): Array<Array<string | number>> {
     return emprestimos.map((loan) => [
         loan.numero,
         loan.aluno,
@@ -71,15 +77,15 @@ function linhasEmprestimos(emprestimos) {
 
 /* ===== 4. orchestration ===== */
 
-export function exportarDados(filtros) {
+export function exportarDados(filtros: FiltrosExportacao): void {
     if (!FORMATOS_SUPORTADOS.includes(filtros.formato)) {
         throw new Error('Formato de exportação inválido.');
     }
 
-    let cabecalho;
-    let linhas;
-    let prefixoArquivo;
-    let titulo;
+    let cabecalho: string[];
+    let linhas: Array<Array<string | number>>;
+    let prefixoArquivo: string;
+    let titulo: string;
 
     if (filtros.tipoDados === 'equipamentos') {
         const equipamentosFiltrados = filtrarEquipamentosPorIds(prepararDadosEquipamentos(), filtros.equipamentoIds);
@@ -107,7 +113,7 @@ export function exportarDados(filtros) {
     }
 
     const nomeBase = `${prefixoArquivo}-eduassets-${new Date().toISOString().slice(0, 10)}`;
-    const linhasExtras = filtros.observacao ? [[`Observação: ${filtros.observacao}`], []] : [];
+    const linhasExtras: Array<Array<string | number>> = filtros.observacao ? [[`Observação: ${filtros.observacao}`], []] : [];
 
     if (filtros.formato === 'csv') {
         baixarArquivoCsv(gerarLinhasCsv(cabecalho, linhas, linhasExtras), `${nomeBase}.csv`);

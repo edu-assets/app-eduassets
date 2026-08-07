@@ -1,7 +1,8 @@
 import { html } from '../../core/utils/html.js';
 import { gerarIniciais } from '../../core/utils/iniciais.js';
+import type { AuthUser } from '../../types/index.js';
 
-export function renderUserMenuAutenticado(usuario) {
+export function renderUserMenuAutenticado(usuario: AuthUser): string {
     const nivelLabel = usuario.nivelAcesso === 'ADMINISTRADOR' ? 'Administrador' : 'Editor';
 
     return html`
@@ -28,7 +29,7 @@ export function renderUserMenuAutenticado(usuario) {
     `;
 }
 
-export function renderUserMenuConvidado() {
+export function renderUserMenuConvidado(): string {
     return html`
         <span class="user-menu-avatar user-menu-avatar-guest">
             <span class="material-symbols-outlined">person</span>

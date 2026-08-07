@@ -2,8 +2,9 @@ import { showToast } from '../../core/ui/index.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import { trocarSenha } from './service.js';
 import { alternarFormSenha, mostrarErro } from './render.js';
+import type { SegurancaEls, SegurancaEstado } from './render.js';
 
-export function attachSegurancaEvents(els, estado) {
+export function attachSegurancaEvents(els: SegurancaEls, estado: SegurancaEstado): void {
     els.btnToggleSenha.addEventListener('click', () => {
         if (bloquearSeConvidado()) return;
         alternarFormSenha(els, estado, !estado.formAberto);

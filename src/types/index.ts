@@ -228,3 +228,15 @@ export interface ControleRegistroDados {
     descricao: string;
     medidas?: string;
 }
+
+export type FormatoExportacao = 'csv' | 'excel' | 'pdf';
+export type TipoDadosExportacao = 'equipamentos' | 'devolucoes';
+
+export interface FiltrosExportacao {
+    tipoDados: string;
+    dataInicial: string;
+    dataFinal: string;
+    formato: string;
+    equipamentoIds: string[];
+    observacao: string;
+}
