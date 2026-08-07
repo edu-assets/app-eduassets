@@ -14,19 +14,22 @@ import {
     abrirDetalheHistorico,
     fecharDetalhe
 } from './render.js';
+import type { DashboardEls, DashboardEstado } from './render.js';
 import { exportarEstoqueCsv } from './service.js';
 import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
 
-export function attachDashboardEvents(els, estado) {
+export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado): void {
     els.estoqueContainer.addEventListener('click', (e) => {
-        const row = e.target.closest('.estoque-row');
+        const target = e.target as HTMLElement;
+        const row = target.closest<HTMLElement>('.estoque-row');
         if (!row) return;
-        abrirDetalheEstoque(els, estado, row.dataset.equipamentoId, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
+        abrirDetalheEstoque(els, estado, row.dataset.equipamentoId ?? '', ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
     });
 
     if (els.detalheBody) {
         els.detalheBody.addEventListener('click', (e) => {
-            if (e.target.closest('#btn-detalhe-estoque-fechar')) {
+            const target = e.target as HTMLElement;
+            if (target.closest('#btn-detalhe-estoque-fechar')) {
                 fecharDetalhe(els);
             }
         });
@@ -39,9 +42,9 @@ export function attachDashboardEvents(els, estado) {
         });
     }
 
-    document.querySelectorAll('.dashboard-tab-link').forEach((tabLink) => {
+    document.querySelectorAll<HTMLElement>('.dashboard-tab-link').forEach((tabLink) => {
         tabLink.addEventListener('click', () => {
-            ativarAbaDashboard(els, tabLink.dataset.tab);
+            ativarAbaDashboard(els, tabLink.dataset.tab ?? '');
             atualizarVisibilidadeDetalhe(els, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
             fecharDetalhe(els);
         });
@@ -51,10 +54,10 @@ export function attachDashboardEvents(els, estado) {
 
     if (els.btnExportar) {
         els.btnExportar.addEventListener('click', () => {
-            const abaAtiva = document.querySelector('.dashboard-tab-link.active')?.dataset.tab;
+            const abaAtiva = document.querySelector<HTMLElement>('.dashboard-tab-link.active')?.dataset.tab;
 
             if (abaAtiva === 'historico') {
-                document.querySelector('.nav-link[data-panel="panel-exportar"]')?.click();
+                document.querySelector<HTMLElement>('.nav-link[data-panel="panel-exportar"]')?.click();
                 return;
             }
 
@@ -64,7 +67,8 @@ export function attachDashboardEvents(els, estado) {
     }
 
     els.historicoLista.addEventListener('click', (e) => {
-        const btn = e.target.closest('.historico-detalhes-btn');
+        const target = e.target as HTMLElement;
+        const btn = target.closest<HTMLElement>('.historico-detalhes-btn');
         if (!btn) return;
         const loan = getLoans().find((l) => String(l.id) === String(btn.dataset.id));
         if (loan) abrirDetalheHistorico(els, loan);
@@ -79,7 +83,7 @@ export function attachDashboardEvents(els, estado) {
 
     subscribeLoans(() => {
         renderAndamento(els, getLoansAbertos());
-        renderHistorico(els, [...getLoans()].sort((a, b) => b.createdAt - a.createdAt));
+        renderHistorico(els, [...getLoans()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
     });
 
     subscribeOcorrencias(() => {

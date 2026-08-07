@@ -3,10 +3,11 @@ import { getLoansAbertos } from '../../core/state/loanStore.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
 import { gerarLinhasCsv, baixarArquivoCsv } from '../../core/services/csv.js';
 import { contarEmprestadoPorEquipamento, contarManutencaoPorEquipamento } from '../../core/utils/estoqueCalculado.js';
+import type { Equipamento, LoanUI, OcorrenciaUI, ResumoDashboard } from '../../types/index.js';
 
 /* ===== Data processing: calculations, data transformations ===== */
 
-export function calcularResumo(equipamentos) {
+export function calcularResumo(equipamentos: Equipamento[]): ResumoDashboard {
     const emprestadoPorEquipamento = contarEmprestadoPorEquipamento(getLoansAbertos());
     const manutencaoPorEquipamento = contarManutencaoPorEquipamento(getOcorrenciasPorTipo('manutencao'));
 
@@ -38,19 +39,25 @@ export function calcularResumo(equipamentos) {
     };
 }
 
-export function calcularEmprestado(equipamento, loansAbertos = getLoansAbertos()) {
+export function calcularEmprestado(equipamento: Equipamento, loansAbertos: LoanUI[] = getLoansAbertos()): number {
     return contarEmprestadoPorEquipamento(loansAbertos).get(String(equipamento.id)) ?? 0;
 }
 
-export function calcularManutencao(equipamento, ocorrenciasManutencao = getOcorrenciasPorTipo('manutencao')) {
+export function calcularManutencao(
+    equipamento: Equipamento,
+    ocorrenciasManutencao: OcorrenciaUI[] = getOcorrenciasPorTipo('manutencao')
+): number {
     return contarManutencaoPorEquipamento(ocorrenciasManutencao).get(String(equipamento.id)) ?? 0;
 }
 
-export function buscarEquipamentoPorId(id, equipamentos = getEquipamentos()) {
+export function buscarEquipamentoPorId(
+    id: string | number,
+    equipamentos: Equipamento[] = getEquipamentos()
+): Equipamento | null {
     return equipamentos.find((equipamento) => String(equipamento.id) === String(id)) ?? null;
 }
 
-export function gerarCsvEstoque(equipamentos) {
+export function gerarCsvEstoque(equipamentos: Equipamento[]): string {
     const manutencaoPorEquipamento = contarManutencaoPorEquipamento(getOcorrenciasPorTipo('manutencao'));
 
     const linhas = equipamentos.map((equipamento) => [
@@ -64,14 +71,14 @@ export function gerarCsvEstoque(equipamentos) {
     return gerarLinhasCsv(['Categoria', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'], linhas);
 }
 
-function formatarPct(valor, total) {
+function formatarPct(valor: number, total: number): string {
     if (!total) return '0%';
     return `${(valor / total * 100).toFixed(1).replace('.', ',')}%`;
 }
 
 /* ===== Actions ===== */
 
-export function exportarEstoqueCsv(equipamentos) {
+export function exportarEstoqueCsv(equipamentos: Equipamento[]): void {
     const csv = gerarCsvEstoque(equipamentos);
     const nomeArquivo = `estoque-eduassets-${new Date().toISOString().slice(0, 10)}.csv`;
     baixarArquivoCsv(csv, nomeArquivo);

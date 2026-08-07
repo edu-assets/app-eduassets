@@ -2,10 +2,11 @@ import { html, raw } from '../../core/utils/html.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { renderStatusBadge } from '../../shared/components/statusBadge.js';
+import type { Equipamento, LoanUI, LoanItemUI, CategoriaResumoDados } from '../../types/index.js';
 
 const LIMITE_CHIPS_HISTORICO_PADRAO = 2;
 
-export function renderDashboardCategoriaForm(dados) {
+export function renderDashboardCategoriaForm(dados: CategoriaResumoDados): string {
     return html`
         <p class="category-edit-subtitle">Resumo somente leitura da categoria.</p>
 
@@ -52,7 +53,7 @@ export function renderDashboardCategoriaForm(dados) {
     `;
 }
 
-function renderDashboardEstoqueLinha(equipamento) {
+function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
     return html`
         <div class="estoque-row" data-id="${equipamento.id}" data-equipamento-id="${equipamento.id}">
             <span data-col="categoria">${equipamento.categoria?.nome ?? ''}</span>
@@ -63,7 +64,7 @@ function renderDashboardEstoqueLinha(equipamento) {
     `;
 }
 
-export function renderDashboardEstoqueContent(equipamentos) {
+export function renderDashboardEstoqueContent(equipamentos: Equipamento[]): string {
     const header = html`
         <div class="estoque-header">
             <span>Categoria</span>
@@ -80,7 +81,7 @@ export function renderDashboardEstoqueContent(equipamentos) {
     return header + linhas;
 }
 
-export function renderDashboardAndamentoContent(loans) {
+export function renderDashboardAndamentoContent(loans: LoanUI[]): string {
     if (!loans.length) return '';
 
     return loans.map((loan) => {
@@ -94,7 +95,7 @@ export function renderDashboardAndamentoContent(loans) {
     }).join('');
 }
 
-export function renderDashboardChip(item) {
+export function renderDashboardChip(item: LoanItemUI): string {
     const titulo = `${item.quantidade}x ${escapeHtml(item.nome)}`;
     return html`
         <span class="historico-item-chip" title="${raw(titulo)}">
@@ -103,7 +104,7 @@ export function renderDashboardChip(item) {
     `;
 }
 
-export function renderDashboardChipsItens(itens, limiteChips = LIMITE_CHIPS_HISTORICO_PADRAO) {
+export function renderDashboardChipsItens(itens: LoanItemUI[], limiteChips: number = LIMITE_CHIPS_HISTORICO_PADRAO): string {
     if (itens.length <= limiteChips) {
         return itens.map(renderDashboardChip).join('');
     }
@@ -115,7 +116,7 @@ export function renderDashboardChipsItens(itens, limiteChips = LIMITE_CHIPS_HIST
         html`<span class="historico-item-chip historico-item-chip-mais">+${restantes}</span>`;
 }
 
-export function renderDashboardHistoricoContent(loans, limiteChips = LIMITE_CHIPS_HISTORICO_PADRAO) {
+export function renderDashboardHistoricoContent(loans: LoanUI[], limiteChips: number = LIMITE_CHIPS_HISTORICO_PADRAO): string {
     if (!loans.length) return '';
 
     return loans.map((loan) => html`
@@ -132,7 +133,7 @@ export function renderDashboardHistoricoContent(loans, limiteChips = LIMITE_CHIP
     `).join('');
 }
 
-export function renderDashboardHistoricoDetalheBody(loan) {
+export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
     const itensHtml = loan.itens.map((item) => html`
         <li>
             <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>

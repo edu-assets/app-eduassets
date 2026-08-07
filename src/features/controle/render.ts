@@ -6,28 +6,65 @@ import { listarCategoriasDisponiveis, listarModelosPorCategoria } from './servic
 
 const TIPOS_VISIVEIS = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
 
-const TITULOS_POR_TIPO = {
+const TITULOS_POR_TIPO: Record<string, string> = {
     observacao: 'Nova Observação',
     manutencao: 'Nova Manutenção',
     quebrado: 'Registrar Quebra',
     resolvidos: 'Editar Registro Resolvido'
 };
 
-const SUBTITULOS_POR_TIPO = {
+const SUBTITULOS_POR_TIPO: Record<string, string> = {
     observacao: 'Registre uma ocorrência para acompanhamento.',
     manutencao: 'Registre um equipamento que precisa de manutenção.',
     quebrado: 'Registre um equipamento quebrado ou danificado.',
     resolvidos: 'Atualize as informações deste registro resolvido.'
 };
 
-const COR_ICONE_POR_TIPO = {
+const COR_ICONE_POR_TIPO: Record<string, string> = {
     observacao: 'info',
     manutencao: 'warning',
     quebrado: 'error',
     resolvidos: 'success'
 };
 
-export function renderControle(els, estado) {
+export interface ControleEls {
+    registrosContainer: HTMLElement;
+    btnNovo: HTMLElement | null;
+    menuNovo: HTMLElement | null;
+    btnResolver: HTMLButtonElement | null;
+    btnEditar: HTMLButtonElement | null;
+    btnDeletar: HTMLButtonElement | null;
+    paginacaoTexto: HTMLElement | null;
+    modalTitle: HTMLElement | null;
+    modalSubtitle: HTMLElement | null;
+    modalHeaderIcon: HTMLElement | null;
+    modalHeaderIconSymbol: HTMLElement | null;
+    campoCategoria: HTMLSelectElement;
+    campoModelo: HTMLSelectElement;
+    campoNumero: HTMLInputElement;
+    campoProblema: HTMLSelectElement;
+    campoDescricao: HTMLTextAreaElement;
+    linhaMedidas: HTMLElement | null;
+    campoMedidas: HTMLTextAreaElement | null;
+    btnModalCancelar: HTMLElement | null;
+    btnModalSalvar: HTMLElement | null;
+    resolverCategoriaModelo: HTMLElement | null;
+    resolverNumeroProblema: HTMLElement | null;
+    resolverDescricao: HTMLElement | null;
+    resolverMedidas: HTMLTextAreaElement | null;
+    btnResolverCancelar: HTMLElement | null;
+    btnResolverConfirmar: HTMLElement | null;
+}
+
+export interface ControleEstado {
+    linhaSelecionada: HTMLElement | null;
+    tipoAtual: string | null;
+    idEditando: string | null;
+    linhaEditando: HTMLElement | null;
+    idResolvendo: string | null;
+}
+
+export function renderControle(els: ControleEls, estado: ControleEstado): void {
     TIPOS_VISIVEIS.forEach((tipo) => {
         const tabContent = document.getElementById(`tab-${tipo}`);
         if (!tabContent) return;
@@ -45,10 +82,10 @@ export function renderControle(els, estado) {
     });
 
     TIPOS_VISIVEIS.slice(0, 3).forEach(atualizarContagem);
-    atualizarPaginacaoTexto(els, document.querySelector('.controle-tab-content.active'));
+    atualizarPaginacaoTexto(els, document.querySelector<HTMLElement>('.controle-tab-content.active'));
 
     if (estado.linhaSelecionada) {
-        const selecionadaAtual = buscarLinhaPorId(estado.linhaSelecionada.dataset.id);
+        const selecionadaAtual = buscarLinhaPorId(estado.linhaSelecionada.dataset.id ?? '');
         if (selecionadaAtual) {
             selecionarLinha(els, estado, selecionadaAtual);
         } else {
@@ -57,19 +94,19 @@ export function renderControle(els, estado) {
     }
 }
 
-export function buscarLinhaPorId(id) {
-    return document.querySelector(`.registros-row[data-id="${CSS.escape(String(id))}"]`);
+export function buscarLinhaPorId(id: string): HTMLElement | null {
+    return document.querySelector<HTMLElement>(`.registros-row[data-id="${CSS.escape(String(id))}"]`);
 }
 
-export function atualizarContagem(tipo) {
+export function atualizarContagem(tipo: string): void {
     const contadorEl = document.getElementById(`contagem-${tipo}`);
     const tabContent = document.getElementById(`tab-${tipo}`);
     if (contadorEl && tabContent) {
-        contadorEl.textContent = tabContent.querySelectorAll('.registros-row').length;
+        contadorEl.textContent = String(tabContent.querySelectorAll('.registros-row').length);
     }
 }
 
-export function atualizarPaginacaoTexto(els, tabContent) {
+export function atualizarPaginacaoTexto(els: ControleEls, tabContent: HTMLElement | null): void {
     if (!tabContent || !els.paginacaoTexto) return;
     const total = tabContent.querySelectorAll('.registros-row').length;
     els.paginacaoTexto.textContent = total > 0
@@ -77,7 +114,7 @@ export function atualizarPaginacaoTexto(els, tabContent) {
         : 'Nenhum registro encontrado';
 }
 
-export function ativarAba(els, estado, tab) {
+export function ativarAba(els: ControleEls, estado: ControleEstado, tab: string): void {
     document.querySelectorAll('.controle-tab-link').forEach((t) => t.classList.remove('active'));
     document.querySelectorAll('.controle-tab-content').forEach((c) => c.classList.remove('active'));
 
@@ -92,28 +129,28 @@ export function ativarAba(els, estado, tab) {
     atualizarPaginacaoTexto(els, targetTab);
 }
 
-export function fecharTodosMenus(exceto = null) {
+export function fecharTodosMenus(exceto: Element | null = null): void {
     document.querySelectorAll('.registros-row-menu.active').forEach((menu) => {
         if (menu !== exceto) menu.classList.remove('active');
     });
 }
 
-export function selecionarLinha(els, estado, row) {
+export function selecionarLinha(els: ControleEls, estado: ControleEstado, row: HTMLElement): void {
     if (estado.linhaSelecionada) estado.linhaSelecionada.classList.remove('selected');
     estado.linhaSelecionada = row;
     row.classList.add('selected');
     atualizarToolbar(els, estado);
 }
 
-export function limparSelecao(els, estado) {
+export function limparSelecao(els: ControleEls, estado: ControleEstado): void {
     if (estado.linhaSelecionada) estado.linhaSelecionada.classList.remove('selected');
     estado.linhaSelecionada = null;
     atualizarToolbar(els, estado);
 }
 
-export function atualizarToolbar(els, estado) {
+export function atualizarToolbar(els: ControleEls, estado: ControleEstado): void {
     const temSelecao = estado.linhaSelecionada !== null;
-    const tipoSelecionado = estado.linhaSelecionada?.closest('.controle-tab-content')?.dataset.tipo;
+    const tipoSelecionado = estado.linhaSelecionada?.closest<HTMLElement>('.controle-tab-content')?.dataset.tipo;
     const podeResolver = temSelecao && (tipoSelecionado === 'manutencao' || tipoSelecionado === 'quebrado');
 
     if (els.btnEditar) els.btnEditar.disabled = !temSelecao;
@@ -121,7 +158,7 @@ export function atualizarToolbar(els, estado) {
     if (els.btnResolver) els.btnResolver.disabled = !podeResolver;
 }
 
-export function popularSelectCategorias(els) {
+export function popularSelectCategorias(els: ControleEls): void {
     const categorias = listarCategoriasDisponiveis();
     const placeholder = '<option value="" disabled selected hidden>Selecionar categoria</option>';
     els.campoCategoria.innerHTML = placeholder + categorias
@@ -129,7 +166,7 @@ export function popularSelectCategorias(els) {
         .join('');
 }
 
-export function popularSelectModelos(els, categoriaNome) {
+export function popularSelectModelos(els: ControleEls, categoriaNome: string | null): void {
     const modelos = categoriaNome ? listarModelosPorCategoria(categoriaNome) : [];
     const placeholder = '<option value="" disabled selected hidden>Selecionar modelo</option>';
     els.campoModelo.innerHTML = placeholder + modelos
@@ -137,18 +174,18 @@ export function popularSelectModelos(els, categoriaNome) {
         .join('');
 }
 
-function limparCamposModal(els) {
+function limparCamposModal(els: ControleEls): void {
     [els.campoNumero, els.campoDescricao, els.campoMedidas].forEach((campo) => {
         if (campo) campo.value = '';
     });
     if (els.campoProblema) els.campoProblema.value = '';
 }
 
-function alternarCampoMedidas(els, mostrar) {
+function alternarCampoMedidas(els: ControleEls, mostrar: boolean): void {
     if (els.linhaMedidas) els.linhaMedidas.style.display = mostrar ? 'block' : 'none';
 }
 
-function atualizarHeaderModal(els, tipo) {
+function atualizarHeaderModal(els: ControleEls, tipo: string): void {
     if (els.modalTitle) els.modalTitle.textContent = TITULOS_POR_TIPO[tipo] || 'Novo Registro';
     if (els.modalSubtitle) els.modalSubtitle.textContent = SUBTITULOS_POR_TIPO[tipo] || '';
 
@@ -161,7 +198,7 @@ function atualizarHeaderModal(els, tipo) {
     }
 }
 
-export function abrirNovoRegistro(els, estado, tipo) {
+export function abrirNovoRegistro(els: ControleEls, estado: ControleEstado, tipo: string): void {
     estado.tipoAtual = tipo;
     estado.idEditando = null;
     estado.linhaEditando = null;
@@ -176,13 +213,13 @@ export function abrirNovoRegistro(els, estado, tipo) {
     openModal('modal-controle-novo');
 }
 
-export function abrirEdicaoRegistro(els, estado, row) {
-    const tabContent = row.closest('.controle-tab-content');
+export function abrirEdicaoRegistro(els: ControleEls, estado: ControleEstado, row: HTMLElement): void {
+    const tabContent = row.closest<HTMLElement>('.controle-tab-content');
     const tipo = tabContent ? tabContent.dataset.tipo : null;
     if (!tipo) return;
 
     estado.tipoAtual = tipo;
-    estado.idEditando = row.dataset.id;
+    estado.idEditando = row.dataset.id ?? null;
     estado.linhaEditando = row;
 
     atualizarHeaderModal(els, tipo);
@@ -192,7 +229,7 @@ export function abrirEdicaoRegistro(els, estado, row) {
 
     popularSelectCategorias(els);
     els.campoCategoria.value = row.dataset.categoria || '';
-    popularSelectModelos(els, row.dataset.categoria);
+    popularSelectModelos(els, row.dataset.categoria ?? null);
     els.campoModelo.value = row.dataset.modelo || '';
     els.campoNumero.value = row.dataset.numero || '';
     els.campoProblema.value = row.dataset.problema || '';
@@ -205,12 +242,12 @@ export function abrirEdicaoRegistro(els, estado, row) {
     openModal('modal-controle-novo');
 }
 
-export function abrirResolverRegistro(els, estado, row) {
-    const tabContent = row.closest('.controle-tab-content');
+export function abrirResolverRegistro(els: ControleEls, estado: ControleEstado, row: HTMLElement): void {
+    const tabContent = row.closest<HTMLElement>('.controle-tab-content');
     const tipo = tabContent ? tabContent.dataset.tipo : null;
     if (tipo !== 'manutencao' && tipo !== 'quebrado') return;
 
-    estado.idResolvendo = row.dataset.id;
+    estado.idResolvendo = row.dataset.id ?? null;
 
     if (els.resolverCategoriaModelo) {
         els.resolverCategoriaModelo.textContent = `${row.dataset.categoria} — ${row.dataset.modelo}`;

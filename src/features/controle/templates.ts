@@ -1,7 +1,13 @@
 import { html, raw } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
+import type { OcorrenciaUI } from '../../types/index.js';
 
-const PROBLEMA_ICONS = {
+interface ProblemaInfo {
+    label: string;
+    icon: string;
+}
+
+const PROBLEMA_ICONS: Record<string, ProblemaInfo> = {
     tela: { label: 'Tela', icon: 'monitor' },
     audio: { label: 'Áudio', icon: 'headphones' },
     bateria: { label: 'Bateria', icon: 'battery_alert' },
@@ -13,14 +19,14 @@ const PROBLEMA_ICONS = {
     outro: { label: 'Outro', icon: 'help' }
 };
 
-export const ICONE_POR_TIPO = {
+export const ICONE_POR_TIPO: Record<string, string> = {
     observacao: 'chat_bubble',
     manutencao: 'build',
     quebrado: 'heart_broken',
     resolvidos: 'task_alt'
 };
 
-export function renderControleMenuAcoes(tipo) {
+export function renderControleMenuAcoes(tipo: string): string {
     const opcaoResolver = (tipo === 'manutencao' || tipo === 'quebrado')
         ? html`<span class="registros-row-menu-opcao" data-acao="resolver" data-requires-auth>Resolver</span>`
         : '';
@@ -39,7 +45,7 @@ export function renderControleMenuAcoes(tipo) {
     `;
 }
 
-export function renderControleLinha(tipo, dados) {
+export function renderControleLinha(tipo: string, dados: OcorrenciaUI): string {
     const problemaInfo = PROBLEMA_ICONS[dados.problema] || PROBLEMA_ICONS.outro;
     const iconeLinha = ICONE_POR_TIPO[tipo] || 'chat_bubble';
     const ehResolvido = tipo === 'resolvidos';
@@ -67,7 +73,7 @@ export function renderControleLinha(tipo, dados) {
     `;
 }
 
-export function renderControleEmptyState() {
+export function renderControleEmptyState(): string {
     return renderEmptyState({
         containerClass: 'controle-empty-state',
         icon: 'inbox',

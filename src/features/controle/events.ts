@@ -9,39 +9,45 @@ import {
     abrirResolverRegistro,
     popularSelectModelos
 } from './render.js';
+import type { ControleEls, ControleEstado } from './render.js';
 import { adicionarRegistro, editarRegistro, removerRegistro, resolverRegistro } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
+import type { ControleRegistroDados } from '../../types/index.js';
 
-export function attachControleEvents(els, estado) {
-    document.querySelectorAll('.controle-tab-link').forEach((tabLink) => {
-        tabLink.addEventListener('click', () => ativarAba(els, estado, tabLink.dataset.controleTab));
+export function attachControleEvents(els: ControleEls, estado: ControleEstado): void {
+    document.querySelectorAll<HTMLElement>('.controle-tab-link').forEach((tabLink) => {
+        tabLink.addEventListener('click', () => ativarAba(els, estado, tabLink.dataset.controleTab ?? ''));
     });
 
-    document.querySelectorAll('.controle-resumo-card').forEach((card) => {
-        card.addEventListener('click', () => ativarAba(els, estado, card.dataset.controleTab));
+    document.querySelectorAll<HTMLElement>('.controle-resumo-card').forEach((card) => {
+        card.addEventListener('click', () => ativarAba(els, estado, card.dataset.controleTab ?? ''));
     });
 
     if (els.btnNovo && els.menuNovo) {
-        els.btnNovo.addEventListener('click', (e) => {
+        const btnNovo = els.btnNovo;
+        const menuNovo = els.menuNovo;
+
+        btnNovo.addEventListener('click', (e) => {
             e.stopPropagation();
             if (bloquearSeConvidado()) return;
-            els.menuNovo.classList.toggle('active');
+            menuNovo.classList.toggle('active');
         });
 
-        els.menuNovo.querySelectorAll('.novo-registro-opcao').forEach((opcao) => {
+        menuNovo.querySelectorAll<HTMLElement>('.novo-registro-opcao').forEach((opcao) => {
             opcao.addEventListener('click', () => {
-                els.menuNovo.classList.remove('active');
-                abrirNovoRegistro(els, estado, opcao.dataset.tipo);
+                menuNovo.classList.remove('active');
+                abrirNovoRegistro(els, estado, opcao.dataset.tipo ?? '');
             });
         });
     }
 
     document.addEventListener('click', (e) => {
-        if (els.menuNovo && !els.menuNovo.contains(e.target) && e.target !== els.btnNovo) {
+        const target = e.target as Node;
+        if (els.menuNovo && !els.menuNovo.contains(target) && target !== els.btnNovo) {
             els.menuNovo.classList.remove('active');
         }
-        fecharTodosMenus(e.target);
+        fecharTodosMenus(target as Element);
     });
 
     if (els.btnModalCancelar) {
@@ -63,20 +69,24 @@ export function attachControleEvents(els, estado) {
     }
 
     els.registrosContainer.addEventListener('click', (e) => {
-        const menuBtn = e.target.closest('.registros-row-menu-btn');
+        const target = e.target as HTMLElement;
+
+        const menuBtn = target.closest<HTMLElement>('.registros-row-menu-btn');
         if (menuBtn) {
             e.stopPropagation();
-            const menu = menuBtn.nextElementSibling;
+            const menu = menuBtn.nextElementSibling as HTMLElement | null;
+            if (!menu) return;
             const jaAberto = menu.classList.contains('active');
             fecharTodosMenus();
             if (!jaAberto) menu.classList.add('active');
             return;
         }
 
-        const opcaoMenu = e.target.closest('.registros-row-menu-opcao');
+        const opcaoMenu = target.closest<HTMLElement>('.registros-row-menu-opcao');
         if (opcaoMenu) {
-            const row = opcaoMenu.closest('.registros-row');
+            const row = opcaoMenu.closest<HTMLElement>('.registros-row');
             fecharTodosMenus();
+            if (!row) return;
 
             if (opcaoMenu.dataset.acao === 'excluir') {
                 excluirRegistro(els, estado, row);
@@ -91,7 +101,7 @@ export function attachControleEvents(els, estado) {
             return;
         }
 
-        const row = e.target.closest('.registros-row');
+        const row = target.closest<HTMLElement>('.registros-row');
         if (!row) return;
 
         if (estado.linhaSelecionada === row) {
@@ -133,7 +143,7 @@ export function attachControleEvents(els, estado) {
     }
 }
 
-async function salvarModal(els, estado) {
+async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<void> {
     if (bloquearSeConvidado()) return;
     if (!estado.tipoAtual) return;
 
@@ -142,19 +152,19 @@ async function salvarModal(els, estado) {
         return;
     }
 
-    if (estado.tipoAtual === 'resolvidos' && !els.campoMedidas.value.trim()) {
+    if (estado.tipoAtual === 'resolvidos' && !els.campoMedidas?.value.trim()) {
         showToast('Descreva as medidas tomadas antes de salvar', 'warning');
-        els.campoMedidas.focus();
+        els.campoMedidas?.focus();
         return;
     }
 
-    const dados = {
+    const dados: ControleRegistroDados = {
         categoria: els.campoCategoria.value,
         modelo: els.campoModelo.value,
         numero: els.campoNumero.value,
         problema: els.campoProblema.value,
         descricao: els.campoDescricao.value || '—',
-        medidas: estado.tipoAtual === 'resolvidos' ? els.campoMedidas.value : undefined
+        medidas: estado.tipoAtual === 'resolvidos' ? els.campoMedidas?.value : undefined
     };
 
     try {
@@ -175,7 +185,7 @@ async function salvarModal(els, estado) {
     estado.linhaEditando = null;
 }
 
-async function salvarResolucao(els, estado) {
+async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promise<void> {
     if (bloquearSeConvidado()) return;
     if (!estado.idResolvendo) return;
 
@@ -198,7 +208,7 @@ async function salvarResolucao(els, estado) {
     estado.idResolvendo = null;
 }
 
-async function excluirRegistro(els, estado, row) {
+async function excluirRegistro(els: ControleEls, estado: ControleEstado, row: HTMLElement | null): Promise<void> {
     if (!row) return;
     if (bloquearSeConvidado()) return;
 
@@ -211,7 +221,7 @@ async function excluirRegistro(els, estado, row) {
     if (row === estado.linhaSelecionada) limparSelecao(els, estado);
 
     try {
-        await removerRegistro(row.dataset.id);
+        await removerRegistro(row.dataset.id ?? '');
         showToast('Registro excluído com sucesso', 'success');
     } catch (erro) {
         showToast(erro instanceof Error ? erro.message : 'Erro ao excluir registro.', 'error');

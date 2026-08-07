@@ -197,3 +197,34 @@ export interface AuthState {
     autenticado: boolean;
     usuario: AuthUser | null;
 }
+
+export interface CategoriaResumoDados {
+    id: number;
+    categoria: string;
+    total: number;
+    disponivel: number;
+    emprestado: number;
+    manutencao: number;
+    quebrado: number;
+}
+
+export interface ResumoDashboard {
+    total: number;
+    disponivel: number;
+    emprestado: number;
+    manutencao: number;
+    quebrado: number;
+    disponivelPct: string;
+    emprestadoPct: string;
+    manutencaoPct: string;
+    quebradoPct: string;
+}
+
+export interface ControleRegistroDados {
+    categoria: string;
+    modelo: string;
+    numero: string;
+    problema: string;
+    descricao: string;
+    medidas?: string;
+}
