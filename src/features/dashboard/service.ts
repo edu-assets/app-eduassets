@@ -68,7 +68,7 @@ export function gerarCsvEstoque(equipamentos: Equipamento[]): string {
         equipamento.quantidadeQuebrada
     ]);
 
-    return gerarLinhasCsv(['Categoria', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'], linhas);
+    return gerarLinhasCsv([['Categoria', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'], ...linhas]);
 }
 
 function formatarPct(valor: number, total: number): string {

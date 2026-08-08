@@ -7,13 +7,8 @@ declare const XLSX: {
     writeFile: (workbook: unknown, nomeArquivo: string) => void;
 };
 
-export function gerarArquivoXlsx(
-    cabecalho: string[],
-    linhas: Array<Array<string | number>>,
-    nomeAba: string = 'Dados',
-    linhasExtras: Array<Array<string | number>> = []
-): unknown {
-    const worksheet = XLSX.utils.aoa_to_sheet([...linhasExtras, cabecalho, ...linhas]);
+export function gerarArquivoXlsx(matriz: Array<Array<string | number>>, nomeAba: string = 'Dados'): unknown {
+    const worksheet = XLSX.utils.aoa_to_sheet(matriz);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, nomeAba);
     return workbook;

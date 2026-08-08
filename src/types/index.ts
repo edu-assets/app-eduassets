@@ -240,3 +240,4 @@ export interface FiltrosExportacao {
     equipamentoIds: string[];
     observacao: string;
 }
+

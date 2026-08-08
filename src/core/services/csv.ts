@@ -1,9 +1,5 @@
-export function gerarLinhasCsv(
-    cabecalho: string[],
-    linhas: Array<Array<string | number>>,
-    linhasExtras: Array<Array<string | number>> = []
-): string {
-    return [...linhasExtras, cabecalho, ...linhas].map((linha) => linha.join(';')).join('\n');
+export function gerarLinhasCsv(matriz: Array<Array<string | number>>): string {
+    return matriz.map((linha) => linha.join(';')).join('\n');
 }
 
 export function baixarArquivoCsv(csv: string, nomeArquivo: string): void {
