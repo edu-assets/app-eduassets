@@ -39,8 +39,9 @@ export async function returnLoan(id: number): Promise<void> {
 
 export async function updateLoan(id: number, updates: LoanUpdate): Promise<void> {
     if (updates.itens) {
+        // Conversão para number é necessária: a API espera equipamentoId numérico.
         await atualizarItensEmprestimo(id, updates.itens.map((item) => ({
-            equipamentoId: Number(item.id), // Number("eq1") = NaN
+            equipamentoId: Number(item.id),
             quantidade: item.quantidade
         })));
     }

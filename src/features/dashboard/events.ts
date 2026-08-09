@@ -10,22 +10,26 @@ import {
     renderHistorico,
     ativarAbaDashboard,
     atualizarVisibilidadeDetalhe,
-    abrirDetalheEstoque,
+    exibirDetalheEstoque,
     abrirDetalheHistorico,
     fecharDetalhe
 } from './render.js';
 import type { DashboardEls, DashboardEstado } from './render.js';
-import { exportarEstoqueCsv, filtrarEquipamentos, filtrarHistorico } from './service.js';
+import { exportarEstoqueCsv, filtrarEquipamentos, filtrarHistorico, buscarEquipamentoPorId } from './service.js';
 import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
 
 
 export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado): void {
     els.estoqueContainer.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        const row = target.closest<HTMLElement>('.estoque-row');
-        if (!row) return;
-        abrirDetalheEstoque(els, estado, row.dataset.equipamentoId ?? '', ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
-    });
+    const target = e.target as HTMLElement;
+    const row = target.closest<HTMLElement>('.estoque-row');
+    if (!row) return;
+
+    const equipamento = buscarEquipamentoPorId(row.dataset.equipamentoId ?? '', getEquipamentos());
+    if (!equipamento) return;
+
+    exibirDetalheEstoque(els, estado, equipamento, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
+});
 
     if (els.detalheBody) {
         els.detalheBody.addEventListener('click', (e) => {

@@ -1,3 +1,5 @@
+import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overlayPanel.js';
+
 export function initMobileNavigation(): void {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
@@ -6,15 +8,15 @@ export function initMobileNavigation(): void {
 
     if (!sidebar || !btnAbrir) return;
 
+    const els = { painel: sidebar, backdrop };
+
     function abrirMenu(): void {
-        sidebar!.classList.add('open');
-        if (backdrop) backdrop.classList.add('active');
+        abrirPainelOverlay(els, 'open', 'active');
         btnAbrir!.setAttribute('aria-expanded', 'true');
     }
 
     function fecharMenu(): void {
-        sidebar!.classList.remove('open');
-        if (backdrop) backdrop.classList.remove('active');
+        fecharPainelOverlay(els, 'open', 'active');
         btnAbrir!.setAttribute('aria-expanded', 'false');
     }
 

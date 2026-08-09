@@ -12,23 +12,22 @@ export function mapTipoApi(tipo: string): TipoOcorrencia {
     return TIPO_API_MAP[tipo] || 'OBSERVACAO';
 }
 
-export function resolverEquipamentoId(categoria: string, modelo: string): number | null {
-    const categoriaNormalizada = String(categoria || '').trim().toLowerCase();
-    const modeloNormalizado = String(modelo || '').trim().toLowerCase();
+export interface EquipamentoOpcao {
+    id: number;
+    modelo: string;
+}
 
-    const equipamento = getEquipamentos().find((item) => {
-        const categoriaItem = String(item.categoria?.nome ?? '').trim().toLowerCase();
-        const modeloItem = String(item.modelo ?? '').trim().toLowerCase();
-        return categoriaItem === categoriaNormalizada && modeloItem === modeloNormalizado;
-    });
-
-    return equipamento?.id ?? null;
+export function listarEquipamentosPorCategoria(categoriaNome: string | null): EquipamentoOpcao[] {
+    if (!categoriaNome) return [];
+    return getEquipamentos()
+        .filter((item) => item.categoria?.nome === categoriaNome)
+        .map((item) => ({ id: item.id, modelo: item.modelo }));
 }
 
 export async function adicionarRegistro(tipo: string, dados: ControleRegistroDados): Promise<void> {
-    const equipamentoId = resolverEquipamentoId(dados.categoria, dados.modelo);
+    const equipamentoId = Number(dados.equipamentoId);
     if (!equipamentoId) {
-        throw new Error('Não foi possível localizar um equipamento correspondente para salvar o registro.');
+        throw new Error('Selecione um equipamento válido para salvar o registro.');
     }
 
     await addOcorrencia({
@@ -71,23 +70,13 @@ export function listarCategoriasDisponiveis(): string[] {
     return [...categoriasUnicas.keys()].sort();
 }
 
-export function listarModelosPorCategoria(categoriaNome: string | null): string[] {
-    const modelosUnicos = new Map<string, boolean>();
-    getEquipamentos()
-        .filter((equipamento) => equipamento.categoria?.nome === categoriaNome)
-        .forEach((equipamento) => {
-            if (!modelosUnicos.has(equipamento.modelo)) modelosUnicos.set(equipamento.modelo, true);
-        });
-    return [...modelosUnicos.keys()].sort();
-}
-
 /* ===== Filtering ===== */
 
 export function filtrarOcorrencias(ocorrencias: OcorrenciaUI[], termo: string): OcorrenciaUI[] {
     if (!termo.trim()) return ocorrencias;
     const termoMin = termo.toLowerCase();
-    
-    return ocorrencias.filter((o) => 
+
+    return ocorrencias.filter((o) =>
         (o.categoria || '').toLowerCase().includes(termoMin) ||
         (o.modelo || '').toLowerCase().includes(termoMin) ||
         String(o.numero).toLowerCase().includes(termoMin) ||

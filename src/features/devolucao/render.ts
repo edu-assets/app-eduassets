@@ -8,8 +8,9 @@ import {
     renderDetalheItensEdit,
     renderDetalheObservacao
 } from './templates.js';
-import { renderOpcaoEquipamento } from '../emprestimo/templates.js';
-import { getLoansAbertos } from '../../core/state/loans.js';
+import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
+import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect.js';
+import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overlayPanel.js';
 import type { LoanItemUI, LoanUI, Equipamento } from '../../types/index.js';
 import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
 
@@ -121,8 +122,8 @@ export function abrirDetalhe(els: AbrirDetalheEls, estado: DevolucaoEstado, loan
 }
 
 export function popularSelectDetalheEquipamento(select: HTMLSelectElement, equipamentos: Equipamento[]): void {
-    const placeholder = '<option value="" disabled selected hidden>Selecionar equipamento</option>';
-    select.innerHTML = placeholder + equipamentos.map(renderOpcaoEquipamento).join('');
+    const opcoes = equipamentos.map((eq) => ({ id: eq.id, label: `${eq.modelo} — ${eq.categoria?.nome ?? ''}` }));
+    fillSelect(select, renderPlaceholderOption('Selecionar equipamento'), renderOpcoesSelect(opcoes));
 }
 
 export function fecharDetalhe(els: FecharDetalheEls, estado: DevolucaoEstado): void {
@@ -157,15 +158,11 @@ export function marcarLinhaSelecionada(els: ListaEls, id: number | string | null
 }
 
 export function abrirPainelMobile(els: PainelMobileEls): void {
-    if (!els.painel || !els.backdrop) return;
-    els.painel.classList.add('mobile-aberto');
-    els.backdrop.classList.add('active');
+    abrirPainelOverlay(els);
 }
 
 export function fecharPainelMobile(els: PainelMobileEls): void {
-    if (!els.painel || !els.backdrop) return;
-    els.painel.classList.remove('mobile-aberto');
-    els.backdrop.classList.remove('active');
+    fecharPainelOverlay(els);
 }
 
 function preencherResumoConfirmacao(els: ModalConfirmacaoEls, loan: LoanUI | undefined): void {

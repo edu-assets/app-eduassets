@@ -1,8 +1,9 @@
 import { openModal } from '../../core/ui/index.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
-import { escapeHtml } from '../../core/utils/sanitize.js';
 import { renderControleLinha, renderControleEmptyState, ICONE_POR_TIPO } from './templates.js';
-import { listarCategoriasDisponiveis, listarModelosPorCategoria, filtrarOcorrencias } from './service.js';
+import { listarCategoriasDisponiveis,filtrarOcorrencias, listarEquipamentosPorCategoria } from './service.js';
+import { fillSelect, renderPlaceholderOption  } from '../../shared/dom/fillSelect.js';
+import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
 
 const TIPOS_VISIVEIS = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
 
@@ -165,18 +166,14 @@ export function atualizarToolbar(els: ControleEls, estado: ControleEstado): void
 
 export function popularSelectCategorias(els: ControleEls): void {
     const categorias = listarCategoriasDisponiveis();
-    const placeholder = '<option value="" disabled selected hidden>Selecionar categoria</option>';
-    els.campoCategoria.innerHTML = placeholder + categorias
-        .map((categoria) => `<option value="${escapeHtml(categoria)}">${escapeHtml(categoria)}</option>`)
-        .join('');
+    const opcoes = categorias.map((c) => ({ id: c, label: c }));
+    fillSelect(els.campoCategoria, renderPlaceholderOption('Selecionar categoria'), renderOpcoesSelect(opcoes));
 }
 
 export function popularSelectModelos(els: ControleEls, categoriaNome: string | null): void {
-    const modelos = categoriaNome ? listarModelosPorCategoria(categoriaNome) : [];
-    const placeholder = '<option value="" disabled selected hidden>Selecionar modelo</option>';
-    els.campoModelo.innerHTML = placeholder + modelos
-        .map((modelo) => `<option value="${escapeHtml(modelo)}">${escapeHtml(modelo)}</option>`)
-        .join('');
+    const equipamentos = listarEquipamentosPorCategoria(categoriaNome);
+    const opcoes = equipamentos.map((eq) => ({ id: eq.id, label: eq.modelo }));
+    fillSelect(els.campoModelo, renderPlaceholderOption('Selecionar modelo'), renderOpcoesSelect(opcoes));
 }
 
 function limparCamposModal(els: ControleEls): void {
@@ -235,7 +232,7 @@ export function abrirEdicaoRegistro(els: ControleEls, estado: ControleEstado, ro
     popularSelectCategorias(els);
     els.campoCategoria.value = row.dataset.categoria || '';
     popularSelectModelos(els, row.dataset.categoria ?? null);
-    els.campoModelo.value = row.dataset.modelo || '';
+    els.campoModelo.value = row.dataset.equipamentoId || '';
     els.campoNumero.value = row.dataset.numero || '';
     els.campoProblema.value = row.dataset.problema || '';
     els.campoDescricao.value = row.dataset.descricao || '';

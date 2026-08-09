@@ -1,10 +1,8 @@
 import { showToast, closeModal } from '../../core/ui/index.js';
-import { getLoansAbertos } from '../../core/state/loans.js';
-import { getEquipamentos } from '../../core/state/equipamentoStore.js';
+import { getLoansAbertos } from '../../core/state/loanStore.js';
 import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
 import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
-import { calcularDisponivelEfetivo } from '../../core/utils/estoqueDisponivel.js';
 import {
     renderDetalheItens,
     abrirDetalhe,
@@ -14,9 +12,9 @@ import {
     fecharPainelMobile
 } from './render.js';
 import {
-    adicionarOuIncrementarItem,
     removerItemPorId,
-    atualizarQuantidadeItem,
+    adicionarItemDetalheComValidacao,
+    atualizarQuantidadeComValidacao,
     confirmarDevolucao,
     salvarItensEmprestimo
 } from './service.js';
@@ -147,25 +145,18 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         const quantidade = Number(els.detalheQuantidadeInput.value) || 1;
         const nome = els.detalheEquipamentoSelect.options[els.detalheEquipamentoSelect.selectedIndex].text;
 
-        const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(equipamentoId));
-        const reservadoOriginal = estado.itensOriginais.find((item) => String(item.id) === String(equipamentoId))?.quantidade ?? 0;
-        const jaNoRascunho = estado.itensEditando.find((item) => String(item.id) === String(equipamentoId))?.quantidade ?? 0;
-        const disponivelEfetivo = calcularDisponivelEfetivo(equipamento, reservadoOriginal);
+        const resultado = adicionarItemDetalheComValidacao(
+            estado.itensEditando,
+            estado.itensOriginais,
+            { id: equipamentoId, nome, quantidade }
+        );
 
-        if (jaNoRascunho + quantidade > disponivelEfetivo) {
-            showToast(`Estoque insuficiente: ${nome} (disponível: ${disponivelEfetivo}, já neste empréstimo: ${jaNoRascunho})`, 'warning');
+        if (!resultado.ok) {
+            showToast(resultado.erro ?? 'Estoque insuficiente.', 'warning');
             return;
         }
 
-        estado.itensEditando = adicionarOuIncrementarItem(
-            estado.itensEditando,
-            {
-                id: equipamentoId,
-                nome,
-                quantidade
-            }
-        );
-
+        estado.itensEditando = resultado.itens;
         renderDetalheItens(els, estado.itensEditando, true);
         els.detalheEquipamentoSelect.value = '';
         els.detalheQuantidadeInput.value = '1';
@@ -175,10 +166,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         const target = e.target as HTMLElement;
         const btnRemover = target.closest<HTMLElement>('.detalhe-item-remover');
         if (!btnRemover) return;
-        estado.itensEditando = removerItemPorId(
-            estado.itensEditando,
-            btnRemover.dataset.id ?? ''
-        );
+        estado.itensEditando = removerItemPorId(estado.itensEditando, btnRemover.dataset.id ?? '');
         renderDetalheItens(els, estado.itensEditando, true);
     });
 
@@ -187,24 +175,18 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         if (!target.classList.contains('detalhe-item-qtd')) return;
 
         const id = target.dataset.id ?? '';
-        const quantidadeDesejada = Math.max(1, Number(target.value) || 1);
+        const quantidadeDesejada = Number(target.value) || 1;
 
-        const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(id));
-        const reservadoOriginal = estado.itensOriginais.find((item) => String(item.id) === String(id))?.quantidade ?? 0;
-        const disponivelEfetivo = calcularDisponivelEfetivo(equipamento, reservadoOriginal);
+        const resultado = atualizarQuantidadeComValidacao(estado.itensEditando, estado.itensOriginais, id, quantidadeDesejada);
 
-        if (quantidadeDesejada > disponivelEfetivo) {
-            showToast(`Estoque insuficiente: apenas ${disponivelEfetivo} unidade(s) disponível(is) para este equipamento.`, 'warning');
+        if (!resultado.ok) {
+            showToast(resultado.erro ?? 'Estoque insuficiente.', 'warning');
             const itemAtual = estado.itensEditando.find((i) => String(i.id) === String(id));
             target.value = String(itemAtual?.quantidade ?? 1);
             return;
         }
 
-        estado.itensEditando = atualizarQuantidadeItem(
-            estado.itensEditando,
-            id,
-            quantidadeDesejada
-        );
+        estado.itensEditando = resultado.itens;
         const item = estado.itensEditando.find((i) => String(i.id) === String(id));
         if (item) target.value = String(item.quantidade);
     });

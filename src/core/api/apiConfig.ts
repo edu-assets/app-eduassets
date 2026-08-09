@@ -1,1 +1,1 @@
-export const API_BASE_URL: string = 'http://localhost:3000';
+export const API_BASE_URL: string = (import.meta as any).env?.VITE_API_BASE_URL ?? '';

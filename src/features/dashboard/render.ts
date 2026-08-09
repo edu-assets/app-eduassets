@@ -121,15 +121,12 @@ function montarDadosFormularioCategoria(equipamento: Equipamento): CategoriaResu
     };
 }
 
-export function abrirDetalheEstoque(
+export function exibirDetalheEstoque(
     els: DashboardEls,
     estado: DashboardEstado,
-    equipamentoId: string | number,
+    equipamento: Equipamento,
     ehLayoutEmpilhadoAtual: boolean
 ): void {
-    const equipamento = buscarEquipamentoPorId(equipamentoId, getEquipamentos());
-    if (!equipamento) return;
-
     if (ehLayoutEmpilhadoAtual) {
         abrirModalCategoria(els, estado, equipamento);
         return;

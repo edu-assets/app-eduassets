@@ -1,8 +1,61 @@
-import { returnLoan, updateLoan } from '../../core/state/loans.js';
+import { returnLoan, updateLoan } from '../../core/state/loanStore.js';
+import { getEquipamentos } from '../../core/state/equipamentoStore.js';
+import { calcularDisponivelEfetivo } from '../../core/utils/estoqueDisponivel.js';
 import { adicionarOuIncrementarItem, removerItemPorId, atualizarQuantidadeItem } from '../../core/utils/listaItens.js';
 import type { LoanItemUI } from '../../types/index.js';
 
-export { adicionarOuIncrementarItem, removerItemPorId, atualizarQuantidadeItem };
+export { removerItemPorId };
+
+export interface ResultadoAjusteItem {
+    ok: boolean;
+    itens: LoanItemUI[];
+    erro?: string;
+}
+
+export function adicionarItemDetalheComValidacao(
+    itensAtuais: LoanItemUI[],
+    itensOriginais: LoanItemUI[],
+    novoItemBruto: LoanItemUI
+): ResultadoAjusteItem {
+    const novoItem: LoanItemUI = { ...novoItemBruto, quantidade: Math.max(1, Number(novoItemBruto.quantidade) || 1) };
+
+    const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(novoItem.id));
+    const reservadoOriginal = itensOriginais.find((item) => String(item.id) === String(novoItem.id))?.quantidade ?? 0;
+    const jaNoRascunho = itensAtuais.find((item) => String(item.id) === String(novoItem.id))?.quantidade ?? 0;
+    const disponivelEfetivo = calcularDisponivelEfetivo(equipamento, reservadoOriginal);
+
+    if (jaNoRascunho + novoItem.quantidade > disponivelEfetivo) {
+        return {
+            ok: false,
+            itens: itensAtuais,
+            erro: `Estoque insuficiente: ${novoItem.nome} (disponível: ${disponivelEfetivo}, já neste empréstimo: ${jaNoRascunho})`
+        };
+    }
+
+    return { ok: true, itens: adicionarOuIncrementarItem(itensAtuais, novoItem) };
+}
+
+export function atualizarQuantidadeComValidacao(
+    itensAtuais: LoanItemUI[],
+    itensOriginais: LoanItemUI[],
+    id: string | number,
+    quantidadeDesejada: number
+): ResultadoAjusteItem {
+    const equipamento = getEquipamentos().find((eq) => String(eq.id) === String(id));
+    const reservadoOriginal = itensOriginais.find((item) => String(item.id) === String(id))?.quantidade ?? 0;
+    const disponivelEfetivo = calcularDisponivelEfetivo(equipamento, reservadoOriginal);
+    const quantidadeValida = Math.max(1, Number(quantidadeDesejada) || 1);
+
+    if (quantidadeValida > disponivelEfetivo) {
+        return {
+            ok: false,
+            itens: itensAtuais,
+            erro: `Estoque insuficiente: apenas ${disponivelEfetivo} unidade(s) disponível(is) para este equipamento.`
+        };
+    }
+
+    return { ok: true, itens: atualizarQuantidadeItem(itensAtuais, id, quantidadeValida) };
+}
 
 export async function confirmarDevolucao(id: number): Promise<void> {
     await returnLoan(id);

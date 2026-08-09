@@ -1,6 +1,7 @@
 import { html } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
-import type { LoanItemUI, Equipamento, Responsavel } from '../../types/index.js';
+import type { LoanItemUI } from '../../types/index.js';
+
 
 export function renderItemRow(item: LoanItemUI): string {
     return html`

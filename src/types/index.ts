@@ -241,3 +241,20 @@ export interface FiltrosExportacao {
     observacao: string;
 }
 
+export interface ControleRegistroDados {
+    categoria: string;
+    modelo: string;
+    equipamentoId?: string | number;
+    numero: string;
+    problema: string;
+    descricao: string;
+    medidas?: string;
+}
+
+export interface ItemEstoqueInsuficiente {
+    equipamentoId: number;
+    nome: string;
+    categoria: string;
+    solicitado: number;
+    disponivel: number;
+}

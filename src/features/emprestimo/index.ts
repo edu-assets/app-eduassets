@@ -9,7 +9,16 @@ export function initEmprestimo(): void {
     const form = document.querySelector<HTMLFormElement>('#panel-emprestimo form');
     if (!form) return;
 
-    const dataInput = document.getElementById('data-emprestimo') as HTMLInputElement;
+     const dataInput = document.getElementById('data-emprestimo') as HTMLInputElement | null;
+    const equipamentoSelect = document.getElementById('equipamento') as HTMLSelectElement | null;
+    const responsavelSelect = document.getElementById('responsavel') as HTMLSelectElement | null;
+    const btnSubmit = form.querySelector<HTMLButtonElement>('.registrar-emprestimo');
+
+    if (!dataInput || !equipamentoSelect || !responsavelSelect || !btnSubmit) {
+        console.error('[eduAssets] initEmprestimo: elementos essenciais do formulário não encontrados.');
+        return;
+    }
+    
 
     const els = {
         form,

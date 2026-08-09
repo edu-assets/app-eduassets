@@ -1,12 +1,6 @@
-import { escapeHtml } from '../../core/utils/sanitize.js';
+import { html, raw } from '../../core/utils/html.js';
 
 type TagOuNulo = string | null;
-
-function renderTexto(texto: string | undefined, tag: TagOuNulo, classe: string | undefined): string {
-    if (!texto) return '';
-    if (!tag) return escapeHtml(texto);
-    return `<${tag} class="${escapeHtml(classe || '')}">${escapeHtml(texto)}</${tag}>`;
-}
 
 export interface EmptyStateOpcoes {
     containerClass?: string;
@@ -23,6 +17,28 @@ export interface EmptyStateOpcoes {
     subtituloClass?: string;
 }
 
+function renderTexto(texto: string | undefined, tag: TagOuNulo, classe: string | undefined): string {
+    if (!texto) return '';
+    if (!tag) return html`${texto}`;
+    return html`<${raw(tag)} class="${classe || ''}">${texto}</${raw(tag)}>`;
+}
+
+function renderMidia(
+    imageSrc: string | undefined,
+    imageAlt: string,
+    imageClass: string,
+    icon: string | undefined,
+    iconClass: string
+): string {
+    if (imageSrc) {
+        return html`<img src="${imageSrc}" alt="${imageAlt}" class="${imageClass}">`;
+    }
+    if (icon) {
+        return html`<span class="material-symbols-outlined ${iconClass}">${icon}</span>`;
+    }
+    return '';
+}
+
 export function renderEmptyState({
     containerClass = '',
     icon,
@@ -37,17 +53,15 @@ export function renderEmptyState({
     subtituloTag = 'p',
     subtituloClass = ''
 }: EmptyStateOpcoes): string {
-    const midia = imageSrc
-        ? `<img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" class="${escapeHtml(imageClass)}">`
-        : icon
-            ? `<span class="material-symbols-outlined ${escapeHtml(iconClass)}">${escapeHtml(icon)}</span>`
-            : '';
+    const midia = renderMidia(imageSrc, imageAlt, imageClass, icon, iconClass);
+    const tituloHtml = renderTexto(titulo, tituloTag, tituloClass);
+    const subtituloHtml = renderTexto(subtitulo, subtituloTag, subtituloClass);
 
-    return `
-        <div class="${escapeHtml(containerClass)}">
-            ${midia}
-            ${renderTexto(titulo, tituloTag, tituloClass)}
-            ${renderTexto(subtitulo, subtituloTag, subtituloClass)}
+    return html`
+        <div class="${containerClass}">
+            ${raw(midia)}
+            ${raw(tituloHtml)}
+            ${raw(subtituloHtml)}
         </div>
     `;
 }

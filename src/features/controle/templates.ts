@@ -80,3 +80,25 @@ export function renderControleEmptyState(): string {
         titulo: 'Nenhum registro encontrado.'
     });
 }
+
+export interface DetalhesExclusaoDados {
+    categoria: string;
+    modelo: string;
+    numero: string;
+    descricao: string;
+}
+
+export function renderDetalhesExclusao(dados: DetalhesExclusaoDados): string {
+    return html`
+        <div class="modal-summary-panel">
+            <div class="modal-summary-person">
+                <span class="modal-summary-avatar"><span class="material-symbols-outlined">devices</span></span>
+                <div>
+                    <div class="modal-summary-title">${dados.categoria} — ${dados.modelo}</div>
+                    <div class="modal-summary-sub">Nº ${dados.numero}</div>
+                </div>
+            </div>
+            <p class="controle-resolver-descricao" style="margin: 0; padding-top: 8px;">${dados.descricao}</p>
+        </div>
+    `;
+}

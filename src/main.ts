@@ -15,14 +15,7 @@ import { initPerfil } from './features/perfil/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
-    await initAuth();
-
-    const cargasIniciais = await Promise.allSettled([
-        carregarEquipamentos(),
-        carregarResponsaveis(),
-        carregarEmprestimos(),
-        carregarOcorrencias()
-    ]);
+    const [_, ...cargasIniciais] = await Promise.allSettled([initAuth(), carregarEquipamentos(), carregarResponsaveis(), carregarEmprestimos(), carregarOcorrencias()]);
 
     cargasIniciais.forEach((resultado, indice) => {
         if (resultado.status === 'rejected') {

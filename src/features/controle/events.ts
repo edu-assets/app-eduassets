@@ -11,6 +11,7 @@ import {
 } from './render.js';
 import type { ControleEls, ControleEstado } from './render.js';
 import { adicionarRegistro, editarRegistro, removerRegistro, resolverRegistro } from './service.js';
+import { renderDetalhesExclusao } from './templates.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 import type { ControleRegistroDados } from '../../types/index.js';
@@ -158,9 +159,13 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
         return;
     }
 
+    // campoModelo.value agora é o equipamentoId (ver render.ts / issue #3)
+    const nomeModelo = els.campoModelo.selectedOptions[0]?.textContent ?? '';
+
     const dados: ControleRegistroDados = {
         categoria: els.campoCategoria.value,
-        modelo: els.campoModelo.value,
+        modelo: nomeModelo,
+        equipamentoId: els.campoModelo.value,
         numero: els.campoNumero.value,
         problema: els.campoProblema.value,
         descricao: els.campoDescricao.value || '—',
@@ -212,32 +217,20 @@ async function excluirRegistro(els: ControleEls, estado: ControleEstado, row: HT
     if (!row) return;
     if (bloquearSeConvidado()) return;
 
-    // Resgata os dados da linha para exibir no modal
-    const categoria = row.dataset.categoria || '';
-    const modelo = row.dataset.modelo || '';
-    const numero = row.dataset.numero || '';
-    const descricao = row.dataset.descricao || '';
-
-    const detalhesHtml = `
-        <div class="modal-summary-panel">
-            <div class="modal-summary-person">
-                <span class="modal-summary-avatar"><span class="material-symbols-outlined">devices</span></span>
-                <div>
-                    <div class="modal-summary-title">${categoria} — ${modelo}</div>
-                    <div class="modal-summary-sub">Nº ${numero}</div>
-                </div>
-            </div>
-            <p class="controle-resolver-descricao" style="margin: 0; padding-top: 8px;">${descricao}</p>
-        </div>
-    `;
+    const detalhesHtml = renderDetalhesExclusao({
+        categoria: row.dataset.categoria || '',
+        modelo: row.dataset.modelo || '',
+        numero: row.dataset.numero || '',
+        descricao: row.dataset.descricao || ''
+    });
 
     const confirmado = await confirmarExclusao({
         titulo: 'Excluir registro',
         mensagem: 'Esta ação não pode ser desfeita.',
-        detalhesHtml: detalhesHtml,
+        detalhesHtml,
         textoAtencao: 'Ao excluir este registro, todas as informações relacionadas serão removidas permanentemente do sistema.'
     });
-    
+
     if (!confirmado) return;
 
     if (row === estado.linhaSelecionada) limparSelecao(els, estado);
