@@ -1,10 +1,17 @@
-els.estoqueContainer.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const row = target.closest<HTMLElement>('.estoque-row');
-    if (!row) return;
+import type { AuthUser } from '../../types/index.js';
 
-    const equipamento = buscarEquipamentoPorId(row.dataset.equipamentoId ?? '', getEquipamentos());
-    if (!equipamento) return;
+export interface PerfilEls {
+    nomeEl: HTMLElement | null;
+    emailEl: HTMLElement | null;
+    nivelEl: HTMLElement | null;
+}
 
-    exibirDetalheEstoque(els, estado, equipamento, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
-});
+export function renderPerfil(els: PerfilEls, usuario: AuthUser | null): void {
+    if (els.nomeEl) els.nomeEl.textContent = usuario?.nome ?? '—';
+    if (els.emailEl) els.emailEl.textContent = usuario?.login ?? '—';
+    if (els.nivelEl) {
+        els.nivelEl.textContent = usuario?.nivelAcesso === 'ADMINISTRADOR'
+            ? 'Administrador'
+            : (usuario?.nivelAcesso === 'EDITOR' ? 'Editor' : '—');
+    }
+}

@@ -13,6 +13,7 @@ import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect
 import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overlayPanel.js';
 import type { LoanItemUI, LoanUI, Equipamento } from '../../types/index.js';
 import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
+import { getLoansAbertos } from '../../core/state/loanStore.js';
 
 interface DevolucaoEstado {
     idPendente: string | number | null;
