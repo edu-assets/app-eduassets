@@ -35,11 +35,28 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
     });
 
     const temConteudo = response.status !== 204;
-    const payload: ApiErrorPayload | null = temConteudo ? await response.json().catch(() => null) : null;
+    let payload: ApiErrorPayload | null = null;
+    let respostaInvalida = false;
+
+    if (temConteudo) {
+        try {
+            payload = await response.json();
+        } catch {
+            respostaInvalida = true;
+        }
+    }
 
     if (!response.ok) {
         const mensagem = payload?.erro || `Erro ${response.status} ao comunicar com a API`;
         throw new ApiError(mensagem, response.status, payload);
+    }
+
+    if (respostaInvalida) {
+        throw new ApiError(
+            `Resposta inválida da API em "${path}". Verifique se VITE_API_BASE_URL aponta para o backend correto.`,
+            response.status,
+            null
+        );
     }
 
     return payload as T;
@@ -51,3 +68,4 @@ export const http = {
     patch: <T>(path: string, body?: unknown): Promise<T> => request<T>(path, { method: 'PATCH', body }),
     delete: <T>(path: string): Promise<T> => request<T>(path, { method: 'DELETE' })
 };
+
