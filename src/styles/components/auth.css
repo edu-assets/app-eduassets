@@ -169,7 +169,9 @@
 }
 
 /* Guest mode disables interactive elements (works via CSS) */
-body.guest-mode [data-requires-auth] {
+body.guest-mode [data-requires-auth],
+body.editor-mode [data-requires-admin],
+body.guest-mode [data-requires-admin] {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;

@@ -18,6 +18,7 @@ export function renderAuthStatus(els: AuthEls, autenticado: boolean, usuario: Au
         : renderUserMenuConvidado();
 
     document.body.classList.toggle('guest-mode', !autenticado);
+    document.body.classList.toggle('editor-mode', autenticado && usuario?.nivelAcesso === 'EDITOR');
 
     renderHeroButton(els, autenticado);
 }

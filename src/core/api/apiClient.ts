@@ -47,6 +47,9 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
     }
 
     if (!response.ok) {
+        if (response.status === 401 && (payload as any)?.sessaoExpirada) {
+            window.dispatchEvent(new Event('eduassets:sessao-expirada'));
+        }
         const mensagem = payload?.erro || `Erro ${response.status} ao comunicar com a API`;
         throw new ApiError(mensagem, response.status, payload);
     }

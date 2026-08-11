@@ -1,5 +1,5 @@
 import { showToast } from '../../core/ui/index.js';
-import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { getPreferenciaTema, definirTema } from '../../core/state/themeStore.js';
 import { marcarTemaAtivo } from './render.js';
 import type { TemaPreferencia } from './render.js';
@@ -15,7 +15,7 @@ export function attachConfigEvents(btnSalvar: HTMLElement): void {
     });
 
     btnSalvar.addEventListener('click', () => {
-        if (bloquearSeConvidado()) return;
+        if (bloquearSeNaoAdmin('Salvamento de configurações disponível apenas para administradores.')) return;
         showToast('Configurações salvas com sucesso', 'success');
     });
 }

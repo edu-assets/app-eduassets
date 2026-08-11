@@ -877,7 +877,7 @@
                             <div class="modal-footer">
                                 <button class="btn btn-neutral" id="confirmar-exclusao-cancelar"
                                     type="button">Cancelar</button>
-                                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button">
+                                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button" data-requires-admin disabled>
                                     <span class="material-symbols-outlined">delete</span> Excluir registro
                                 </button>
                             </div>
@@ -958,7 +958,7 @@
                                         disabled>
                                         <span class="material-symbols-outlined">edit</span> Editar
                                     </button>
-                                    <button class="btn btn-danger btn-sm" id="btn-deletar-registro" data-requires-auth
+                                    <button class="btn btn-danger btn-sm" id="btn-deletar-registro" data-requires-admin
                                         disabled>
                                         <span class="material-symbols-outlined">delete</span> Deletar
                                     </button>
@@ -1105,7 +1105,7 @@
                     <div class="cadastros-container">
 
                         <div class="cadastros-grid">
-                            <a href="#" class="cadastro-card" data-cadastro="equipamentos" data-requires-auth>
+                            <a href="#" class="cadastro-card" data-cadastro="equipamentos" data-requires-admin>
                                 <div class="cadastro-card-top">
                                     <span class="cadastro-card-icon cadastro-card-icon-primary">
                                         <span class="material-symbols-outlined">devices</span>
@@ -1118,7 +1118,7 @@
                                     para empréstimo.</p>
                             </a>
 
-                            <a href="#" class="cadastro-card" data-cadastro="responsaveis" data-requires-auth>
+                            <a href="#" class="cadastro-card" data-cadastro="responsaveis" data-requires-admin>
                                 <div class="cadastro-card-top">
                                     <span class="cadastro-card-icon cadastro-card-icon-success">
                                         <span class="material-symbols-outlined">badge</span>
@@ -1131,7 +1131,7 @@
                                 </p>
                             </a>
 
-                            <a href="#" class="cadastro-card" data-cadastro="usuarios" data-requires-auth>
+                            <a href="#" class="cadastro-card" data-cadastro="usuarios" data-requires-admin>
                                 <div class="cadastro-card-top">
                                     <span class="cadastro-card-icon cadastro-card-icon-secondary">
                                         <span class="material-symbols-outlined">admin_panel_settings</span>
@@ -1144,7 +1144,7 @@
                                     sistema.</p>
                             </a>
 
-                            <a href="#" class="cadastro-card" data-cadastro="categorias" data-requires-auth>
+                            <a href="#" class="cadastro-card" data-cadastro="categorias" data-requires-admin>
                                 <div class="cadastro-card-top">
                                     <span class="cadastro-card-icon cadastro-card-icon-info">
                                         <span class="material-symbols-outlined">category</span>
@@ -1420,7 +1420,7 @@
                                 <span class="material-symbols-outlined">info</span>
                                 <span>Alterações salvam automaticamente assim que você clicar em salvar.</span>
                             </div>
-                            <button class="btn btn-primary" id="config-salvar" data-requires-auth>
+                            <button class="btn btn-primary" id="config-salvar" data-requires-admin>
                                 <span class="material-symbols-outlined">save</span> Salvar Configurações
                             </button>
                         </div>

@@ -12,6 +12,7 @@ import { carregarEquipamentos, carregarEmprestimos, carregarOcorrencias, carrega
 import { initAuth } from './features/auth/index.js';
 import { initSeguranca } from './features/seguranca/index.js';
 import { initPerfil } from './features/perfil/index.js';
+import { initSessionTimeout } from './core/auth/sessionTimeout.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         initMobileNavigation,
         initModals,
         initConfirm,
+        initSessionTimeout,
         initDashboard,
         initControle,
         initCadastros,

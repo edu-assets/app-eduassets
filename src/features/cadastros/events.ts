@@ -7,7 +7,7 @@ import {
     renderListaRegistros,
     limparCamposFormulario
 } from './render.js';
-import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import type { CampoComOpcoes } from './render.js';
 
 export interface CadastrosEls {
@@ -30,7 +30,7 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
     els.cards.forEach((card) => {
         card.addEventListener('click', (e) => {
             e.preventDefault();
-            if (bloquearSeConvidado('Cadastros disponível apenas para administradores. Faça login para continuar.')) return;
+            if (bloquearSeNaoAdmin('Cadastros disponível apenas para administradores.')) return;
             abrirCadastro(els, estado, card.dataset.cadastro ?? null);
         });
     });
@@ -77,7 +77,7 @@ async function recarregarLista(els: CadastrosEls, estado: CadastrosEstado): Prom
 }
 
 async function salvarRegistro(els: CadastrosEls, estado: CadastrosEstado): Promise<void> {
-    if (bloquearSeConvidado()) return;
+    if (bloquearSeNaoAdmin('Salvamento de registros disponível apenas para administradores.')) return;
     const config = getConfig(estado.tipoAtual);
     if (!config) return;
 

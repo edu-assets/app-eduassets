@@ -12,7 +12,7 @@ import {
 import type { ControleEls, ControleEstado } from './render.js';
 import { adicionarRegistro, editarRegistro, removerRegistro, resolverRegistro } from './service.js';
 import { renderDetalhesExclusao } from './templates.js';
-import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import { bloquearSeConvidado, bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 import type { ControleRegistroDados } from '../../types/index.js';
 
@@ -215,7 +215,7 @@ async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promis
 
 async function excluirRegistro(els: ControleEls, estado: ControleEstado, row: HTMLElement | null): Promise<void> {
     if (!row) return;
-    if (bloquearSeConvidado()) return;
+    if (bloquearSeNaoAdmin('Exclusão de registros disponível apenas para administradores.')) return;
 
     const detalhesHtml = renderDetalhesExclusao({
         categoria: row.dataset.categoria || '',
