@@ -1,0 +1,188 @@
+.notfound-container {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    margin-top: 38px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    text-align: center;
+}
+
+.notfound-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.notfound-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: var(--primary-bg);
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+
+.notfound-icon-wrap .material-symbols-outlined {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+}
+
+.notfound-code {
+    font-size: 5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+}
+
+.notfound-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    margin-top: 8px;
+}
+
+.notfound-title-destaque {
+    color: var(--primary-color);
+}
+
+.notfound-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    max-width: 460px;
+    line-height: 1.6;
+}
+
+.notfound-acoes-card {
+    width: 100%;
+    background-color: var(--surface-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    padding: 26px;
+    text-align: left;
+}
+
+.notfound-acoes-titulo {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    margin-bottom: 18px;
+}
+
+.notfound-acoes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.notfound-acao-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notfound-acao-item:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
+    box-shadow: var(--shadow-sm);
+}
+
+.notfound-acao-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+}
+
+.notfound-acao-icon .material-symbols-outlined {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.notfound-acao-icon-primary { background-color: var(--primary-bg); color: var(--primary-color); }
+.notfound-acao-icon-secondary { background-color: var(--secondary-bg); color: var(--secondary-color); }
+.notfound-acao-icon-success { background-color: var(--success-bg); color: var(--success-color); }
+
+.notfound-acao-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.notfound-acao-titulo {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.notfound-acao-desc {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.notfound-acao-chevron {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted);
+}
+
+.notfound-info-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 18px;
+    background-color: var(--info-bg);
+    border: 1px solid color-mix(in srgb, var(--info-color) 25%, transparent);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--info-color);
+    text-align: left;
+}
+
+.notfound-info-banner .material-symbols-outlined {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* RESPONSIVENESS */
+@media (max-width: 1024px) {
+    .notfound-container { max-width: 100%; padding: 0 16px; }
+}
+
+@media (max-width: 640px) {
+    .notfound-container { margin-top: 16px; gap: 18px; }
+    .notfound-code { font-size: 3.6rem; }
+    .notfound-title { font-size: 1.25rem; }
+    .notfound-acoes-grid { grid-template-columns: 1fr; }
+    .notfound-acoes-card { padding: 18px; }
+}

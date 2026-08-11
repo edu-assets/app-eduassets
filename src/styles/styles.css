@@ -11,6 +11,7 @@
 @import "components/auth.css";
 @import "components/toast.css";
 @import "components/scrollbar.css";
+@import "components/toast.css";
 
 /* layout */
 @import "layout/footer.css";
@@ -29,8 +30,7 @@
 @import "panels/config.css";
 @import "panels/seguranca.css";
 @import "panels/perfil.css";
-
-@import "components/toast.css";
+@import "panels/notFound.css";
 
 
 /* utils */

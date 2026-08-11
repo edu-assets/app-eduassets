@@ -877,7 +877,8 @@
                             <div class="modal-footer">
                                 <button class="btn btn-neutral" id="confirmar-exclusao-cancelar"
                                     type="button">Cancelar</button>
-                                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button" data-requires-admin disabled>
+                                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button"
+                                    data-requires-admin disabled>
                                     <span class="material-symbols-outlined">delete</span> Excluir registro
                                 </button>
                             </div>
@@ -1867,6 +1868,70 @@
                     </div>
                 </section>
 
+                <!-- PAINEL 404: Não encontrada -->
+                <section class="panel" id="panel-404">
+                    <div class="notfound-container">
+
+                        <div class="notfound-hero">
+                            <span class="notfound-icon-wrap">
+                                <span class="material-symbols-outlined">travel_explore</span>
+                            </span>
+                            <span class="notfound-code">404</span>
+                            <h2 class="notfound-title">Página <span class="notfound-title-destaque">não
+                                    encontrada</span></h2>
+                            <p class="notfound-desc">
+                                A página que você está procurando pode ter sido movida, excluída
+                                ou o endereço digitado está incorreto.
+                            </p>
+                        </div>
+
+                        <div class="notfound-acoes-card">
+                            <h3 class="notfound-acoes-titulo">O que você pode fazer?</h3>
+                            <div class="notfound-acoes-grid">
+                                <a href="#" class="notfound-acao-item nav-link" data-panel="panel-inicio">
+                                    <span class="notfound-acao-icon notfound-acao-icon-primary">
+                                        <span class="material-symbols-outlined">home</span>
+                                    </span>
+                                    <div class="notfound-acao-texto">
+                                        <span class="notfound-acao-titulo">Ir para o início</span>
+                                        <span class="notfound-acao-desc">Acesse a página inicial do sistema.</span>
+                                    </div>
+                                    <span class="material-symbols-outlined notfound-acao-chevron">arrow_forward</span>
+                                </a>
+
+                                <a href="#" class="notfound-acao-item nav-link" data-panel="panel-dashboard">
+                                    <span class="notfound-acao-icon notfound-acao-icon-secondary">
+                                        <span class="material-symbols-outlined">dashboard</span>
+                                    </span>
+                                    <div class="notfound-acao-texto">
+                                        <span class="notfound-acao-titulo">Ver dashboard</span>
+                                        <span class="notfound-acao-desc">Veja um resumo geral do sistema.</span>
+                                    </div>
+                                    <span class="material-symbols-outlined notfound-acao-chevron">arrow_forward</span>
+                                </a>
+
+                                <a href="#" class="notfound-acao-item nav-link" data-panel="panel-controle">
+                                    <span class="notfound-acao-icon notfound-acao-icon-success">
+                                        <span class="material-symbols-outlined">browse_activity</span>
+                                    </span>
+                                    <div class="notfound-acao-texto">
+                                        <span class="notfound-acao-titulo">Consultar registros</span>
+                                        <span class="notfound-acao-desc">Acesse e gerencie os registros do
+                                            sistema.</span>
+                                    </div>
+                                    <span class="material-symbols-outlined notfound-acao-chevron">arrow_forward</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="notfound-info-banner">
+                            <span class="material-symbols-outlined">info</span>
+                            <span>Se você acredita que isso é um erro, entre em contato com o administrador do
+                                sistema.</span>
+                        </div>
+
+                    </div>
+
             </main>
         </div>
     </div>
@@ -1907,6 +1972,7 @@
             </div>
         </div>
     </div>
+    </section>
 
     <script type="module" src="src/main.ts"></script>
 </body>

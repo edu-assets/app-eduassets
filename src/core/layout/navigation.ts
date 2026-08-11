@@ -10,11 +10,18 @@ export function initNavigation(): void {
         const targetId = link.dataset.panel;
         if (!targetId) return;
 
-        panels.forEach((panel) => panel.classList.remove('active'));
-        document.getElementById(targetId)?.classList.add('active');
-
-        document.querySelectorAll('.nav-link').forEach((item) => item.classList.remove('active'));
-        document.querySelectorAll(`.nav-link[data-panel="${targetId}"]`)
-            .forEach((item) => item.classList.add('active'));
+        ativarPanel(panels, targetId);
     });
+}
+
+function ativarPanel(panels: NodeListOf<HTMLElement>, targetId: string): void {
+    const alvoExiste = document.getElementById(targetId) !== null;
+    const idFinal = alvoExiste ? targetId : 'panel-404';
+
+    panels.forEach((panel) => panel.classList.remove('active'));
+    document.getElementById(idFinal)?.classList.add('active');
+
+    document.querySelectorAll('.nav-link').forEach((item) => item.classList.remove('active'));
+    document.querySelectorAll(`.nav-link[data-panel="${idFinal}"]`)
+        .forEach((item) => item.classList.add('active'));
 }
