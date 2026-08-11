@@ -3,6 +3,7 @@ import { getToken } from '../state/tokenStore.js';
 
 export interface ApiErrorPayload {
     erro?: string;
+    sessaoExpirada?: boolean;
     [key: string]: unknown;
 }
 
@@ -47,7 +48,7 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
     }
 
     if (!response.ok) {
-        if (response.status === 401 && (payload as any)?.sessaoExpirada) {
+        if (response.status === 401 && payload?.sessaoExpirada) {
             window.dispatchEvent(new Event('eduassets:sessao-expirada'));
         }
         const mensagem = payload?.erro || `Erro ${response.status} ao comunicar com a API`;
@@ -71,4 +72,3 @@ export const http = {
     patch: <T>(path: string, body?: unknown): Promise<T> => request<T>(path, { method: 'PATCH', body }),
     delete: <T>(path: string): Promise<T> => request<T>(path, { method: 'DELETE' })
 };
-

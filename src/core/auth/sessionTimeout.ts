@@ -21,6 +21,7 @@ function registrarAtividade(): void {
 
 export function initSessionTimeout(): void {
     EVENTOS_ATIVIDADE.forEach((evento) => document.addEventListener(evento, registrarAtividade, { passive: true }));
+    
     window.addEventListener('eduassets:sessao-expirada', expirarSessaoAdmin);
 
     registrarAtividade();

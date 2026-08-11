@@ -77,7 +77,7 @@ async function recarregarLista(els: CadastrosEls, estado: CadastrosEstado): Prom
 }
 
 async function salvarRegistro(els: CadastrosEls, estado: CadastrosEstado): Promise<void> {
-    if (bloquearSeNaoAdmin('Salvamento de registros disponível apenas para administradores.')) return;
+    if (bloquearSeNaoAdmin()) return;
     const config = getConfig(estado.tipoAtual);
     if (!config) return;
 

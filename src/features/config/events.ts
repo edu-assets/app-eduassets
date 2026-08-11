@@ -15,7 +15,7 @@ export function attachConfigEvents(btnSalvar: HTMLElement): void {
     });
 
     btnSalvar.addEventListener('click', () => {
-        if (bloquearSeNaoAdmin('Salvamento de configurações disponível apenas para administradores.')) return;
+        if (bloquearSeNaoAdmin()) return;
         showToast('Configurações salvas com sucesso', 'success');
     });
 }

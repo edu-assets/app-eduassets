@@ -159,7 +159,6 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
         return;
     }
 
-    // campoModelo.value agora é o equipamentoId (ver render.ts / issue #3)
     const nomeModelo = els.campoModelo.selectedOptions[0]?.textContent ?? '';
 
     const dados: ControleRegistroDados = {
@@ -215,7 +214,7 @@ async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promis
 
 async function excluirRegistro(els: ControleEls, estado: ControleEstado, row: HTMLElement | null): Promise<void> {
     if (!row) return;
-    if (bloquearSeNaoAdmin('Exclusão de registros disponível apenas para administradores.')) return;
+    if (bloquearSeNaoAdmin()) return;
 
     const detalhesHtml = renderDetalhesExclusao({
         categoria: row.dataset.categoria || '',

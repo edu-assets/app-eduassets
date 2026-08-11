@@ -39,7 +39,7 @@ export function renderControleMenuAcoes(tipo: string): string {
             <div class="registros-row-menu">
                 ${raw(opcaoResolver)}
                 <span class="registros-row-menu-opcao" data-acao="editar"data-requires-auth>Editar</span>
-                <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir"data-requires-auth>Excluir</span>
+                <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir" data-requires-admin>Excluir</span>
             </div>
         </span>
     `;
