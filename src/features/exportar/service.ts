@@ -171,7 +171,7 @@ function montarMatrizCompleta(
 
 /* ===== 5. orchestration ===== */
 
-export function exportarDados(filtros: FiltrosExportacao): void {
+export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
     if (!FORMATOS_SUPORTADOS.includes(filtros.formato)) {
         throw new Error('Formato de exportação inválido.');
     }
@@ -210,15 +210,17 @@ export function exportarDados(filtros: FiltrosExportacao): void {
 
     const nomeBase = `${prefixoArquivo}-eduassets-${new Date().toISOString().slice(0, 10)}`;
 
-    if (filtros.formato === 'csv') {
+    if (filtros.formato === 'excel') {
         const matriz = montarMatrizCompleta(cabecalho, linhas, secoes, filtros.observacao);
-        baixarArquivoCsv(gerarLinhasCsv(matriz), `${nomeBase}.csv`);
+        const buffer = await gerarArquivoXlsx(matriz, 'Dados');
+        baixarArquivoXlsx(buffer, `${nomeBase}.xlsx`);
         return;
     }
 
     if (filtros.formato === 'excel') {
         const matriz = montarMatrizCompleta(cabecalho, linhas, secoes, filtros.observacao);
-        baixarArquivoXlsx(gerarArquivoXlsx(matriz, 'Dados'), `${nomeBase}.xlsx`);
+        const buffer = await gerarArquivoXlsx(matriz, 'Dados');
+        baixarArquivoXlsx(buffer, `${nomeBase}.xlsx`);
         return;
     }
 

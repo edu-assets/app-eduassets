@@ -68,8 +68,8 @@ export function attachExportarEvents(els: ExportarEls): void {
 
         definirEstadoCarregando(els, true);
 
-        try {
-            exportarDados(filtros);
+       try {
+            await exportarDados(filtros);
             showToast('Exportação gerada com sucesso', 'success');
         } catch (erro) {
             showToast(erro instanceof Error ? erro.message : 'Erro ao exportar dados.', 'error');

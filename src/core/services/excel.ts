@@ -1,19 +1,26 @@
-declare const XLSX: {
-    utils: {
-        aoa_to_sheet: (data: unknown[][]) => unknown;
-        book_new: () => unknown;
-        book_append_sheet: (workbook: unknown, worksheet: unknown, nome: string) => void;
-    };
-    writeFile: (workbook: unknown, nomeArquivo: string) => void;
-};
+import ExcelJS from 'exceljs';
 
-export function gerarArquivoXlsx(matriz: Array<Array<string | number>>, nomeAba: string = 'Dados'): unknown {
-    const worksheet = XLSX.utils.aoa_to_sheet(matriz);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, nomeAba);
-    return workbook;
+export async function gerarArquivoXlsx(matriz: Array<Array<string | number>>, nomeAba: string = 'Dados'): Promise<ExcelJS.Buffer> {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(nomeAba);
+
+    worksheet.addRows(matriz);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer;
 }
 
-export function baixarArquivoXlsx(workbook: unknown, nomeArquivo: string): void {
-    XLSX.writeFile(workbook, nomeArquivo);
+export function baixarArquivoXlsx(buffer: ExcelJS.Buffer, nomeArquivo: string): void {
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomeArquivo;
+    
+    document.body.appendChild(a); 
+    a.click();
+    
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url); 
 }

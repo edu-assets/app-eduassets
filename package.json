@@ -20,6 +20,10 @@
     "vite": "^8.2.0"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "flatpickr": "^4.6.13"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }
