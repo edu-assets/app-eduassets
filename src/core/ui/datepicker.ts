@@ -1,25 +1,17 @@
-export interface FlatpickrInstance {
-    selectedDates: Date[];
-    setDate: (date: Date, triggerChange?: boolean) => void;
-}
+/// <reference types="flatpickr" />
 
-interface FlatpickrOptions {
-    enableTime?: boolean;
-    time_24hr?: boolean;
-    dateFormat?: string;
-    locale?: string;
-    defaultDate?: Date;
-    onChange?: () => void;
-}
+import flatpickr from 'flatpickr';
+import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
+import 'flatpickr/dist/flatpickr.min.css';
 
-declare function flatpickr(input: HTMLElement, options: FlatpickrOptions): FlatpickrInstance;
+export type FlatpickrInstance = flatpickr.Instance;
 
 export function criarDataAutoPicker(input: HTMLElement): FlatpickrInstance {
     return flatpickr(input, {
         enableTime: true,
         time_24hr: true,
         dateFormat: 'd/m/Y à\\s H:i',
-        locale: 'pt',
+        locale: Portuguese,
         defaultDate: new Date(),
         onChange: () => input.classList.remove('input-auto')
     });

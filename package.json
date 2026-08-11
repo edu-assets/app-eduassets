@@ -15,7 +15,11 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@types/flatpickr": "^3.0.2",
     "typescript": "^7.0.2",
     "vite": "^8.2.0"
+  },
+  "dependencies": {
+    "flatpickr": "^4.6.13"
   }
 }

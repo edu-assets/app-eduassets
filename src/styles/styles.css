@@ -1,6 +1,7 @@
 /* base */
 @import "base/reset.css";
 @import "base/variables.css";
+@import "base/fonts.css";
 
 /* components */
 @import "components/forms.css";
