@@ -1,35 +1,5 @@
-interface AutoTableOptions {
-    head: string[][];
-    body: Array<Array<string | number>>;
-    startY: number;
-    margin?: { left?: number; right?: number };
-    styles?: { fontSize?: number };
-    headStyles?: { fillColor: [number, number, number] };
-    alternateRowStyles?: { fillColor: [number, number, number] };
-    columnStyles?: Record<number, { cellWidth?: number }>;
-}
-
-interface JsPdfDoc {
-    setFontSize: (size: number) => void;
-    setFont: (fontName: string, fontStyle?: string) => void;
-    setTextColor: (r: number, g: number, b: number) => void;
-    setFillColor: (r: number, g: number, b: number) => void;
-    rect: (x: number, y: number, w: number, h: number, style?: string) => void;
-    text: (texto: string | string[], x: number, y: number) => void;
-    splitTextToSize: (texto: string, largura: number) => string[];
-    autoTable: (opcoes: AutoTableOptions) => void;
-    addPage: () => void;
-    lastAutoTable?: { finalY: number };
-    save: (nomeArquivo: string) => void;
-}
-
-declare global {
-    interface Window {
-        jspdf: {
-            jsPDF: new () => JsPdfDoc;
-        };
-    }
-}
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export interface PdfTabelaSecao {
     titulo: string;
@@ -53,10 +23,8 @@ export function gerarBaixarPdf(
     observacao: string = '',
     secoes: PdfTabelaSecao[] = []
 ): void {
-    const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // ===== Cabeçalho colorido =====
     doc.setFillColor(...COR_PRIMARIA);
     doc.rect(0, 0, LARGURA_PAGINA, 24, 'F');
 
@@ -72,7 +40,6 @@ export function gerarBaixarPdf(
 
     let cursorY = 32;
 
-    // ===== Callout de observação =====
     if (observacao) {
         const linhasObs = doc.splitTextToSize(observacao, LARGURA_UTIL - 8);
         const alturaBox = linhasObs.length * 4.2 + 9;
@@ -95,8 +62,7 @@ export function gerarBaixarPdf(
         cursorY += alturaBox + 7;
     }
 
-    // ===== Tabela principal =====
-    doc.autoTable({
+    autoTable(doc, {
         head: [cabecalhoPrincipal],
         body: linhasPrincipal,
         startY: cursorY,
@@ -106,9 +72,8 @@ export function gerarBaixarPdf(
         alternateRowStyles: { fillColor: [244, 246, 251] }
     });
 
-    cursorY = (doc.lastAutoTable?.finalY ?? cursorY) + 10;
+    cursorY = ((doc as any).lastAutoTable?.finalY ?? cursorY) + 10;
 
-    // ===== Seções detalhadas (Manutenção / Quebrado / Observações abertas) =====
     secoes.forEach((secao) => {
         if (cursorY > 258) {
             doc.addPage();
@@ -125,7 +90,7 @@ export function gerarBaixarPdf(
 
         cursorY += 4;
 
-        doc.autoTable({
+        autoTable(doc, {
             head: [secao.cabecalho],
             body: secao.linhas,
             startY: cursorY,
@@ -142,7 +107,7 @@ export function gerarBaixarPdf(
             }
         });
 
-        cursorY = (doc.lastAutoTable?.finalY ?? cursorY) + 10;
+        cursorY = ((doc as any).lastAutoTable?.finalY ?? cursorY) + 10;
     });
 
     doc.save(nomeArquivo);

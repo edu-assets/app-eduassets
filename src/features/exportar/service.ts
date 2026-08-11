@@ -210,10 +210,9 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
 
     const nomeBase = `${prefixoArquivo}-eduassets-${new Date().toISOString().slice(0, 10)}`;
 
-    if (filtros.formato === 'excel') {
+    if (filtros.formato === 'csv') {
         const matriz = montarMatrizCompleta(cabecalho, linhas, secoes, filtros.observacao);
-        const buffer = await gerarArquivoXlsx(matriz, 'Dados');
-        baixarArquivoXlsx(buffer, `${nomeBase}.xlsx`);
+        baixarArquivoCsv(gerarLinhasCsv(matriz), `${nomeBase}.csv`);
         return;
     }
 
