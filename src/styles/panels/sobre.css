@@ -12,10 +12,11 @@
     gap: 24px;
 }
 
-/* ===== Hero (imagem + textos) ===== */
+/* ===== Hero ===== */
 .sobre-hero {
     display: flex;
     flex-direction: row-reverse;
+    justify-content: space-between;
     gap: 48px;
     align-items: center;
     background-color: var(--surface-white);
@@ -66,12 +67,11 @@
     max-width: 580px;
 }
 
-/* ===== Grid de 3 cards ===== */
-.sobre-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+/* ===== Seções (Documentação + Sistema) ===== */
+.sobre-secoes {
+    display: flex;
+    flex-direction: column;
     gap: 20px;
-    align-items: stretch;
 }
 
 .sobre-card {
@@ -79,7 +79,7 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: var(--shadow-sm);
-    padding: 22px;
+    padding: 24px 26px;
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -87,10 +87,10 @@
 
 .sobre-card-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
     padding-bottom: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -115,142 +115,130 @@
 .sobre-card-icon-neutral { background-color: var(--neutral-bg); color: var(--text-secondary); }
 
 .sobre-card-header h4 {
-    font-size: 0.98rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text-primary);
     font-family: var(--font-heading);
-    margin-bottom: 3px;
 }
 
-.sobre-card-header p {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    line-height: 1.4;
+/* ===== Documentação: grid de tiles em destaque ===== */
+.sobre-doc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
 }
 
-/* ===== Documentação ===== */
-.sobre-recursos-list {
+.sobre-doc-tile {
+    position: relative;
     display: flex;
     flex-direction: column;
-}
-
-.sobre-recurso-item {
-    display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-color);
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    padding: 16px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: var(--surface-2);
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.sobre-recurso-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+.sobre-doc-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: color-mix(in srgb, var(--primary-color) 35%, transparent);
+    background-color: var(--surface-white);
 }
 
-.sobre-recurso-item-pendente {
-    opacity: 0.65;
-}
-
-.sobre-recurso-icon {
-    flex-shrink: 0;
-    width: 34px;
-    height: 34px;
-    border-radius: 7px;
+.sobre-doc-tile-icon {
+    width: 42px; 
+    height: 42px; 
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.sobre-recurso-icon .material-symbols-outlined {
-    font-size: 17px;
-    width: 17px;
-    height: 17px;
+.sobre-doc-tile-icon .material-symbols-outlined {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
 }
 
-.sobre-recurso-icon-primary { background-color: var(--primary-50); color: var(--primary-color); }
-.sobre-recurso-icon-secondary { background-color: var(--secondary-bg); color: var(--secondary-color); }
-.sobre-recurso-icon-warning { background-color: var(--warning-bg); color: var(--warning-color); }
-.sobre-recurso-icon-error { background-color: var(--error-bg); color: var(--error-color); }
-.sobre-recurso-icon-neutral { background-color: var(--neutral-bg); color: var(--text-secondary); }
+.sobre-doc-tile-icon-primary { background-color: var(--primary-bg); color: var(--primary-color); }
+.sobre-doc-tile-icon-info { background-color: var(--info-bg); color: var(--info-color); }
+.sobre-doc-tile-icon-secondary { background-color: var(--secondary-bg); color: var(--secondary-color); }
+.sobre-doc-tile-icon-warning { background-color: var(--warning-bg); color: var(--warning-color); }
+.sobre-doc-tile-icon-error { background-color: var(--error-bg); color: var(--error-color); }
+.sobre-doc-tile-icon-neutral { background-color: var(--neutral-bg); color: var(--text-secondary); }
 
-.sobre-recurso-texto {
-    flex: 1 1 auto;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.sobre-recurso-nome {
-    font-size: 0.85rem;
-    font-weight: 600;
+.sobre-doc-tile-nome {
+    font-size: 0.88rem;
+    font-weight: 700;
     color: var(--text-primary);
 }
 
-.sobre-recurso-desc {
-    font-size: 0.74rem;
+.sobre-doc-tile-pendente {
+    opacity: 0.75;
+}
+
+.sobre-doc-tile-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     color: var(--text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.sobre-recurso-btn {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 5px 10px;
-    font-size: 0.76rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background-color: var(--surface-2);
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.sobre-recurso-btn .material-symbols-outlined {
-    font-size: 13px;
-    width: 13px;
-    height: 13px;
-}
-
-.sobre-recurso-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-/* ===== Tecnologias ===== */
-.sobre-tech-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.sobre-tech-card {
+/* ===== Sistema: versão + descrição + tecnologias ===== */
+.sobre-sistema-topo {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 7px;
-    min-width: 0;
+    margin-bottom: 10px;
+}
+
+.sobre-sistema-status {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.sobre-sistema-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    max-width: 680px;
+}
+
+.sobre-tech-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-color);
 }
 
 .sobre-tech-icon {
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
-    border-radius: 7px;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+.sobre-tech-icon:last-child {
+    border:1px solid var(--border-color);
+}
+
 .sobre-tech-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     fill: currentColor;
 }
 
@@ -259,30 +247,9 @@
 .sobre-tech-icon[data-tech="js"] { background-color: #FFF9DB; color: #D6A700; }
 .sobre-tech-icon[data-tech="node"] { background-color: #E5F8EB; color: #3C873A; }
 .sobre-tech-icon[data-tech="postgres"] { background-color: #E5F0FE; color: #336791; }
-.sobre-tech-icon[data-tech="prisma"] { background-color: var(--neutral-bg); color: #16192C; }
+.sobre-tech-icon[data-tech="prisma"] { background-color: var(--neutral-bg); color: var(--text-primary); }
 
-.sobre-tech-texto {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-}
-
-.sobre-tech-nome {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.sobre-tech-desc {
-    font-size: 0.73rem;
-    color: var(--text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* ===== Informações do sistema ===== */
+/* ===== Informações do sistema / Sobre (reutilizado por Perfil e Segurança) ===== */
 .sobre-info-list {
     display: flex;
     flex-direction: column;
@@ -385,7 +352,7 @@
     opacity: 1;
 }
 
-/*RESPONSIVINESS */
+/* RESPONSIVENESS */
 
 @media (max-width: 1024px) {
     .sobre-container {
@@ -400,11 +367,6 @@
 }
 
 @media (max-width: 768px) {
-    .sobre-cards-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
     .sobre-hero {
         flex-direction: column;
         text-align: center;
@@ -421,6 +383,10 @@
     .sobre-img {
         max-width: 280px;
     }
+
+    .sobre-doc-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 640px) {
@@ -434,11 +400,22 @@
     }
 
     .sobre-card {
-        padding: 16px;
+        padding: 18px;
     }
 
-    .sobre-tech-grid {
-        grid-template-columns: 1fr;
+    .sobre-doc-tile {
+        padding: 16px 10px;
+    }
+
+    .sobre-doc-tile-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .sobre-doc-tile-icon .material-symbols-outlined {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
     }
 
     .sobre-footer {
@@ -462,5 +439,10 @@
 @media (max-width: 440px) {
     .sobre-container {
         padding: 0 8px;
+    }
+
+    .sobre-doc-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 }
