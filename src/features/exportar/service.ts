@@ -230,5 +230,5 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
         linhas: linhasSecaoParaMatriz(secao)
     }));
 
-    gerarBaixarPdf(titulo, cabecalho, linhas, `${nomeBase}.pdf`, filtros.observacao, secoesPdf);
+    await gerarBaixarPdf(titulo, cabecalho, linhas, `${nomeBase}.pdf`, filtros.observacao, secoesPdf);
 }

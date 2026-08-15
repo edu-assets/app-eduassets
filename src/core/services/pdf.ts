@@ -1,5 +1,4 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import type { jsPDF as JsPDFInstance } from 'jspdf';
 
 export interface PdfTabelaSecao {
     titulo: string;
@@ -15,15 +14,20 @@ const LARGURA_PAGINA = 210;
 const MARGEM = 14;
 const LARGURA_UTIL = LARGURA_PAGINA - MARGEM * 2;
 
-export function gerarBaixarPdf(
+export async function gerarBaixarPdf(
     titulo: string,
     cabecalhoPrincipal: string[],
     linhasPrincipal: Array<Array<string | number>>,
     nomeArquivo: string,
     observacao: string = '',
     secoes: PdfTabelaSecao[] = []
-): void {
-    const doc = new jsPDF();
+): Promise<void> {
+    const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+    ]);
+
+    const doc: JsPDFInstance = new jsPDF();
 
     doc.setFillColor(...COR_PRIMARIA);
     doc.rect(0, 0, LARGURA_PAGINA, 24, 'F');
