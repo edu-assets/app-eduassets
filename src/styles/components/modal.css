@@ -447,3 +447,7 @@
         justify-content: center;
     }
 }
+
+#modal-confirmar-exclusao {
+    z-index: 400;
+}

@@ -826,41 +826,6 @@
                         </div>
                     </div>
 
-                    <!-- Modal de confirmar exclusão -->
-                    <div class="modal-overlay" id="modal-confirmar-exclusao">
-                        <div class="modal-box modal-box--md">
-                            <div class="modal-header">
-                                <!-- Ícone vermelho em destaque -->
-                                <span class="modal-header-icon modal-header-icon-error">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </span>
-                                <div class="modal-header-titles">
-                                    <h3 id="confirmar-exclusao-titulo">Excluir registro</h3>
-                                    <p class="modal-subtitle" id="confirmar-exclusao-mensagem">Esta ação não pode ser
-                                        desfeita.</p>
-                                </div>
-                            </div>
-                            <div class="modal-body">
-                                <!-- Container para injetar os detalhes do item dinamicamente -->
-                                <div id="confirmar-exclusao-detalhes" style="display: none;"></div>
-
-                                <div class="modal-callout modal-callout-error" id="confirmar-exclusao-callout"
-                                    style="display: none;">
-                                    <span class="material-symbols-outlined">warning</span>
-                                    <span id="confirmar-exclusao-callout-text"></span>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-neutral" id="confirmar-exclusao-cancelar"
-                                    type="button">Cancelar</button>
-                                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button"
-                                    data-requires-admin disabled>
-                                    <span class="material-symbols-outlined">delete</span> Excluir registro
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="controle-container">
 
                         <!-- Cards de resumo -->
@@ -1135,6 +1100,11 @@
                                         <span>Cartão vinculado. O login automático já está ativo para este
                                             usuário.</span>
                                     </div>
+                                    <button type="button" class="btn btn-neutral btn-block" id="btn-rfid-regerar"
+                                        data-requires-admin>
+                                        <span class="material-symbols-outlined">autorenew</span> Gerar novo token
+                                        (substitui o atual)
+                                    </button>
                                     <button type="button" class="btn btn-danger btn-block" id="btn-rfid-revogar"
                                         data-requires-admin>
                                         <span class="material-symbols-outlined">link_off</span> Revogar cartão
@@ -1895,6 +1865,41 @@
         </div>
     </div>
     </section>
+
+                        <!-- Modal de confirmar exclusão -->
+                    <div class="modal-overlay" id="modal-confirmar-exclusao">
+                        <div class="modal-box modal-box--md">
+                            <div class="modal-header">
+                                <!-- Ícone vermelho em destaque -->
+                                <span class="modal-header-icon modal-header-icon-error">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </span>
+                                <div class="modal-header-titles">
+                                    <h3 id="confirmar-exclusao-titulo">Excluir registro</h3>
+                                    <p class="modal-subtitle" id="confirmar-exclusao-mensagem">Esta ação não pode ser
+                                        desfeita.</p>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Container para injetar os detalhes do item dinamicamente -->
+                                <div id="confirmar-exclusao-detalhes" style="display: none;"></div>
+
+                                <div class="modal-callout modal-callout-error" id="confirmar-exclusao-callout"
+                                    style="display: none;">
+                                    <span class="material-symbols-outlined">warning</span>
+                                    <span id="confirmar-exclusao-callout-text"></span>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-neutral" id="confirmar-exclusao-cancelar"
+                                    type="button">Cancelar</button>
+                                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button"
+                                    data-requires-admin>
+                                    <span class="material-symbols-outlined">delete</span> Excluir registro
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
     <script type="module" src="src/main.ts"></script>
 </body>

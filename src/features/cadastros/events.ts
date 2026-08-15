@@ -74,21 +74,8 @@ function attachRfidModalEvents(els: CadastrosEls): void {
 
     rfidModal.btnFechar.addEventListener('click', () => fecharModalRfid());
 
-    rfidModal.btnGerar.addEventListener('click', async () => {
-        if (bloquearSeNaoAdmin() || !usuarioRfidAtual) return;
-
-        rfidModal.btnGerar.disabled = true;
-        try {
-            const { token } = await gerarCartaoRfid(usuarioRfidAtual.id);
-            exibirTokenGerado(rfidModal, token);
-            usuarioRfidAtual = { ...usuarioRfidAtual, possuiCartaoRfid: true };
-            atualizarCacheUsuario(usuarioRfidAtual);
-        } catch (erro) {
-            showToast(erro instanceof Error ? erro.message : 'Erro ao gerar token.', 'error');
-        } finally {
-            rfidModal.btnGerar.disabled = false;
-        }
-    });
+    rfidModal.btnGerar.addEventListener('click', () => gerarOuRegerarToken(els));
+    rfidModal.btnRegerar.addEventListener('click', () => gerarOuRegerarToken(els));
 
     rfidModal.btnCopiar.addEventListener('click', async () => {
         const valor = rfidModal.tokenValor.textContent ?? '';
@@ -96,7 +83,7 @@ function attachRfidModalEvents(els: CadastrosEls): void {
             await navigator.clipboard.writeText(valor);
             showToast('Token copiado.', 'success');
         } catch {
-            showToast('Não foi possível copiar automaticamente.', 'warning');
+            showToast('Não foi possível copiar automaticamente. Selecione e copie manualmente.', 'warning');
         }
     });
 
@@ -110,20 +97,43 @@ function attachRfidModalEvents(els: CadastrosEls): void {
         });
         if (!confirmado) return;
 
+        rfidModal.btnRevogar.disabled = true;
         try {
             await revogarCartaoRfid(usuarioRfidAtual.id);
             exibirCartaoRevogado(rfidModal);
-            usuarioRfidAtual = { ...usuarioRfidAtual, possuiCartaoRfid: false };
-            atualizarCacheUsuario(usuarioRfidAtual);
+            atualizarUsuarioLocal(els, { ...usuarioRfidAtual, possuiCartaoRfid: false });
             showToast('Cartão revogado com sucesso.', 'success');
         } catch (erro) {
             showToast(erro instanceof Error ? erro.message : 'Erro ao revogar cartão.', 'error');
+        } finally {
+            rfidModal.btnRevogar.disabled = false;
         }
     });
 }
 
-function atualizarCacheUsuario(usuario: Usuario): void {
-    usuariosCache = usuariosCache.map((u) => (u.id === usuario.id ? usuario : u));
+async function gerarOuRegerarToken(els: CadastrosEls): Promise<void> {
+    const { rfidModal } = els;
+    if (bloquearSeNaoAdmin() || !usuarioRfidAtual) return;
+
+    rfidModal.btnGerar.disabled = true;
+    rfidModal.btnRegerar.disabled = true;
+    try {
+        const { token } = await gerarCartaoRfid(usuarioRfidAtual.id);
+        exibirTokenGerado(rfidModal, token);
+        atualizarUsuarioLocal(els, { ...usuarioRfidAtual, possuiCartaoRfid: true });
+    } catch (erro) {
+        showToast(erro instanceof Error ? erro.message : 'Erro ao gerar token.', 'error');
+    } finally {
+        rfidModal.btnGerar.disabled = false;
+        rfidModal.btnRegerar.disabled = false;
+    }
+}
+
+/** Mantém a lista por trás do modal sincronizada em tempo real com o estado do cartão. */
+function atualizarUsuarioLocal(els: CadastrosEls, usuarioAtualizado: Usuario): void {
+    usuarioRfidAtual = usuarioAtualizado;
+    usuariosCache = usuariosCache.map((u) => (u.id === usuarioAtualizado.id ? usuarioAtualizado : u));
+    renderListaUsuarios(els, usuariosCache);
 }
 
 async function abrirCadastro(els: CadastrosEls, estado: CadastrosEstado, tipo: string | null): Promise<void> {

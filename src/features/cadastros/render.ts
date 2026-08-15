@@ -38,6 +38,7 @@ export interface RfidModalEls {
     estadoVinculado: HTMLElement;
     tokenValor: HTMLElement;
     btnGerar: HTMLButtonElement;
+    btnRegerar: HTMLButtonElement;
     btnRevogar: HTMLButtonElement;
     btnCopiar: HTMLButtonElement;
     btnFechar: HTMLElement;

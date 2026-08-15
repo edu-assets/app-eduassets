@@ -43,6 +43,9 @@ export function confirmarExclusao(
     const detalhesEl = document.getElementById('confirmar-exclusao-detalhes');
     const calloutEl = document.getElementById('confirmar-exclusao-callout');
     const calloutText = document.getElementById('confirmar-exclusao-callout-text');
+    const btnConfirmar = document.getElementById('confirmar-exclusao-btn') as HTMLButtonElement | null;
+
+     if (btnConfirmar) btnConfirmar.disabled = false;
 
     if (tituloEl) tituloEl.textContent = titulo;
     if (mensagemEl) mensagemEl.textContent = mensagem;
