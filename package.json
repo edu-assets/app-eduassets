@@ -16,6 +16,7 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/flatpickr": "^3.0.2",
+    "subset-font": "^2.5.0",
     "typescript": "^7.0.2",
     "vite": "^8.2.0"
   },
