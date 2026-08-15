@@ -1,14 +1,20 @@
-import { closeModal, showToast } from '../../core/ui/index.js';
-import { getConfig, listarRegistros, criarRegistro, carregarOpcoesCampo, formatarItem } from './service.js';
+import { closeModal, showToast, confirmarExclusao } from '../../core/ui/index.js';
+import { getConfig, listarRegistros, criarRegistro, carregarOpcoesCampo, formatarItem, gerarCartaoRfid, revogarCartaoRfid } from './service.js';
 import {
     abrirModalCadastro,
     exibirListaCarregando,
     exibirListaErro,
     renderListaRegistros,
-    limparCamposFormulario
+    renderListaUsuarios,
+    limparCamposFormulario,
+    abrirModalRfid,
+    exibirTokenGerado,
+    exibirCartaoRevogado,
+    fecharModalRfid
 } from './render.js';
 import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
-import type { CampoComOpcoes } from './render.js';
+import type { CampoComOpcoes, RfidModalEls } from './render.js';
+import type { Usuario } from '../../types/index.js';
 
 export interface CadastrosEls {
     cards: NodeListOf<HTMLElement>;
@@ -20,11 +26,15 @@ export interface CadastrosEls {
     listaWrap: HTMLElement;
     btnCancelar: HTMLElement | null;
     btnSalvar: HTMLButtonElement | null;
+    rfidModal: RfidModalEls;
 }
 
 export interface CadastrosEstado {
     tipoAtual: string | null;
 }
+
+let usuariosCache: Usuario[] = [];
+let usuarioRfidAtual: Usuario | null = null;
 
 export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado): void {
     els.cards.forEach((card) => {
@@ -42,6 +52,78 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
     if (els.btnSalvar) {
         els.btnSalvar.addEventListener('click', () => salvarRegistro(els, estado));
     }
+
+    els.listaWrap.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const chip = target.closest<HTMLElement>('[data-rfid-usuario-id]');
+        if (!chip) return;
+        if (bloquearSeNaoAdmin()) return;
+
+        const usuario = usuariosCache.find((u) => String(u.id) === chip.dataset.rfidUsuarioId);
+        if (!usuario) return;
+
+        usuarioRfidAtual = usuario;
+        abrirModalRfid(els.rfidModal, usuario);
+    });
+
+    attachRfidModalEvents(els);
+}
+
+function attachRfidModalEvents(els: CadastrosEls): void {
+    const { rfidModal } = els;
+
+    rfidModal.btnFechar.addEventListener('click', () => fecharModalRfid());
+
+    rfidModal.btnGerar.addEventListener('click', async () => {
+        if (bloquearSeNaoAdmin() || !usuarioRfidAtual) return;
+
+        rfidModal.btnGerar.disabled = true;
+        try {
+            const { token } = await gerarCartaoRfid(usuarioRfidAtual.id);
+            exibirTokenGerado(rfidModal, token);
+            usuarioRfidAtual = { ...usuarioRfidAtual, possuiCartaoRfid: true };
+            atualizarCacheUsuario(usuarioRfidAtual);
+        } catch (erro) {
+            showToast(erro instanceof Error ? erro.message : 'Erro ao gerar token.', 'error');
+        } finally {
+            rfidModal.btnGerar.disabled = false;
+        }
+    });
+
+    rfidModal.btnCopiar.addEventListener('click', async () => {
+        const valor = rfidModal.tokenValor.textContent ?? '';
+        try {
+            await navigator.clipboard.writeText(valor);
+            showToast('Token copiado.', 'success');
+        } catch {
+            showToast('Não foi possível copiar automaticamente.', 'warning');
+        }
+    });
+
+    rfidModal.btnRevogar.addEventListener('click', async () => {
+        if (bloquearSeNaoAdmin() || !usuarioRfidAtual) return;
+
+        const confirmado = await confirmarExclusao({
+            titulo: 'Revogar cartão RFID',
+            mensagem: 'O cartão físico deixará de permitir login automático para este usuário.',
+            textoAtencao: 'Esta ação não pode ser desfeita — será necessário gerar um novo token e regravar o cartão.'
+        });
+        if (!confirmado) return;
+
+        try {
+            await revogarCartaoRfid(usuarioRfidAtual.id);
+            exibirCartaoRevogado(rfidModal);
+            usuarioRfidAtual = { ...usuarioRfidAtual, possuiCartaoRfid: false };
+            atualizarCacheUsuario(usuarioRfidAtual);
+            showToast('Cartão revogado com sucesso.', 'success');
+        } catch (erro) {
+            showToast(erro instanceof Error ? erro.message : 'Erro ao revogar cartão.', 'error');
+        }
+    });
+}
+
+function atualizarCacheUsuario(usuario: Usuario): void {
+    usuariosCache = usuariosCache.map((u) => (u.id === usuario.id ? usuario : u));
 }
 
 async function abrirCadastro(els: CadastrosEls, estado: CadastrosEstado, tipo: string | null): Promise<void> {
@@ -69,7 +151,13 @@ async function recarregarLista(els: CadastrosEls, estado: CadastrosEstado): Prom
 
     try {
         const itens = await listarRegistros(estado.tipoAtual);
-        renderListaRegistros(els, itens.map((item) => formatarItem(estado.tipoAtual, item)));
+
+        if (estado.tipoAtual === 'usuarios') {
+            usuariosCache = itens as Usuario[];
+            renderListaUsuarios(els, usuariosCache);
+        } else {
+            renderListaRegistros(els, itens.map((item) => formatarItem(estado.tipoAtual, item)));
+        }
     } catch (erro) {
         exibirListaErro(els);
         showToast(erro instanceof Error ? erro.message : 'Erro ao carregar registros.', 'error');

@@ -1079,6 +1079,74 @@
                         </div>
                     </div>
 
+                    <div class="modal-overlay" id="modal-cadastro-rfid">
+                        <div class="modal-box modal-box--md">
+                            <div class="modal-header">
+                                <span class="modal-header-icon modal-header-icon-secondary">
+                                    <span class="material-symbols-outlined">contactless</span>
+                                </span>
+                                <div class="modal-header-titles">
+                                    <h3>Cartão RFID</h3>
+                                    <p class="modal-subtitle">Vincule um cartão físico para login rápido de
+                                        administrador.</p>
+                                </div>
+                            </div>
+                            <div class="modal-body">
+                                <div class="modal-summary-panel">
+                                    <div class="modal-summary-person">
+                                        <span class="modal-summary-avatar" id="rfid-modal-avatar"></span>
+                                        <div>
+                                            <div class="modal-summary-title" id="rfid-modal-nome"></div>
+                                            <div class="modal-summary-sub" id="rfid-modal-login"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="rfid-estado-vazio" class="cadastro-rfid-estado">
+                                    <div class="modal-callout modal-callout-info">
+                                        <span class="material-symbols-outlined">info</span>
+                                        <span>Nenhum cartão vinculado a este usuário ainda.</span>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-block" id="btn-rfid-gerar"
+                                        data-requires-admin>
+                                        <span class="material-symbols-outlined">add_card</span> Gerar token e vincular
+                                        cartão
+                                    </button>
+                                </div>
+
+                                <div id="rfid-estado-token" class="cadastro-rfid-estado" style="display:none;">
+                                    <div class="modal-callout modal-callout-warning">
+                                        <span class="material-symbols-outlined">warning</span>
+                                        <span>Este código é exibido apenas uma vez. Grave-o no cartão agora com
+                                            <code>provision_card.py</code>.</span>
+                                    </div>
+                                    <div class="cadastro-rfid-token-box">
+                                        <code id="rfid-token-valor"></code>
+                                        <button type="button" class="cadastro-rfid-copiar-btn" id="btn-rfid-copiar"
+                                            aria-label="Copiar token">
+                                            <span class="material-symbols-outlined">content_copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="rfid-estado-vinculado" class="cadastro-rfid-estado" style="display:none;">
+                                    <div class="modal-callout modal-callout-success">
+                                        <span class="material-symbols-outlined">verified</span>
+                                        <span>Cartão vinculado. O login automático já está ativo para este
+                                            usuário.</span>
+                                    </div>
+                                    <button type="button" class="btn btn-danger btn-block" id="btn-rfid-revogar"
+                                        data-requires-admin>
+                                        <span class="material-symbols-outlined">link_off</span> Revogar cartão
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-neutral" id="rfid-modal-fechar" type="button">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="cadastros-container">
 
                         <div class="cadastros-grid">

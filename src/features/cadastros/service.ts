@@ -158,3 +158,19 @@ export function formatarItem(tipo: string | null, item: unknown): string {
     const config = getConfig(tipo);
     return config ? config.formatarItem(item) : '';
 }
+
+export async function gerarCartaoRfid(usuarioId: number): Promise<{ token: string }> {
+    try {
+        return await usuariosApi.gerarTokenRfid(usuarioId);
+    } catch (erro) {
+        throw new Error(erro instanceof ApiError ? erro.message : 'Erro ao gerar token do cartão.');
+    }
+}
+
+export async function revogarCartaoRfid(usuarioId: number): Promise<void> {
+    try {
+        await usuariosApi.revogarTokenRfid(usuarioId);
+    } catch (erro) {
+        throw new Error(erro instanceof ApiError ? erro.message : 'Erro ao revogar cartão.');
+    }
+}

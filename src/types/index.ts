@@ -36,6 +36,7 @@ export interface Usuario {
     login: string;
     nivelAcesso: NivelAcesso;
     createdAt: string;
+    possuiCartaoRfid: boolean;
 }
 
 export interface ItemEmprestimo {

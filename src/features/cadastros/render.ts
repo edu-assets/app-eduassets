@@ -1,12 +1,15 @@
-import { openModal } from '../../core/ui/index.js';
+import { openModal, closeModal } from '../../core/ui/index.js';
+import { gerarIniciais } from '../../core/utils/iniciais.js';
 import {
     renderCampo,
     renderItemRegistro,
+    renderItemRegistroUsuario,
     renderListaVazia,
     renderListaCarregando,
     renderListaErro
 } from './templates.js';
 import type { CadastroConfig, CampoCadastro, CampoOpcao } from './service.js';
+import type { Usuario } from '../../types/index.js';
 
 export interface CampoComOpcoes {
     campo: CampoCadastro;
@@ -23,6 +26,21 @@ export interface CadastroModalEls {
 
 export interface CadastroListaEls {
     listaWrap: HTMLElement;
+}
+
+export interface RfidModalEls {
+    overlay: HTMLElement;
+    avatar: HTMLElement;
+    nome: HTMLElement;
+    login: HTMLElement;
+    estadoVazio: HTMLElement;
+    estadoToken: HTMLElement;
+    estadoVinculado: HTMLElement;
+    tokenValor: HTMLElement;
+    btnGerar: HTMLButtonElement;
+    btnRevogar: HTMLButtonElement;
+    btnCopiar: HTMLButtonElement;
+    btnFechar: HTMLElement;
 }
 
 function agruparCamposEmLinhas(camposComOpcoes: CampoComOpcoes[]): CampoComOpcoes[][] {
@@ -68,9 +86,45 @@ export function renderListaRegistros(els: CadastroListaEls, itensTexto: string[]
         : renderListaVazia();
 }
 
+export function renderListaUsuarios(els: CadastroListaEls, usuarios: Usuario[]): void {
+    els.listaWrap.innerHTML = usuarios.length
+        ? usuarios.map(renderItemRegistroUsuario).join('')
+        : renderListaVazia();
+}
+
 export function limparCamposFormulario(campos: CampoCadastro[]): void {
     campos.forEach((campo) => {
         const el = document.getElementById(campo.id) as HTMLInputElement | HTMLSelectElement | null;
         if (el) el.value = '';
     });
+}
+
+/* ===== Modal Cartão RFID ===== */
+
+function mostrarEstadoRfid(els: RfidModalEls, estado: 'vazio' | 'token' | 'vinculado'): void {
+    els.estadoVazio.style.display = estado === 'vazio' ? 'flex' : 'none';
+    els.estadoToken.style.display = estado === 'token' ? 'flex' : 'none';
+    els.estadoVinculado.style.display = estado === 'vinculado' ? 'flex' : 'none';
+}
+
+export function abrirModalRfid(els: RfidModalEls, usuario: Usuario): void {
+    els.avatar.textContent = gerarIniciais(usuario.nome);
+    els.nome.textContent = usuario.nome;
+    els.login.textContent = usuario.login;
+
+    mostrarEstadoRfid(els, usuario.possuiCartaoRfid ? 'vinculado' : 'vazio');
+    openModal('modal-cadastro-rfid');
+}
+
+export function exibirTokenGerado(els: RfidModalEls, token: string): void {
+    els.tokenValor.textContent = token;
+    mostrarEstadoRfid(els, 'token');
+}
+
+export function exibirCartaoRevogado(els: RfidModalEls): void {
+    mostrarEstadoRfid(els, 'vazio');
+}
+
+export function fecharModalRfid(): void {
+    closeModal('modal-cadastro-rfid');
 }

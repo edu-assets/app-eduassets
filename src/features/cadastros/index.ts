@@ -15,7 +15,21 @@ export function initCadastros(): void {
         camposWrap: document.getElementById('cadastro-modal-fields') as HTMLElement,
         listaWrap: document.getElementById('cadastro-modal-list') as HTMLElement,
         btnCancelar: document.getElementById('cadastro-modal-cancelar'),
-        btnSalvar: document.getElementById('cadastro-modal-salvar') as HTMLButtonElement | null
+        btnSalvar: document.getElementById('cadastro-modal-salvar') as HTMLButtonElement | null,
+        rfidModal: {
+            overlay: document.getElementById('modal-cadastro-rfid') as HTMLElement,
+            avatar: document.getElementById('rfid-modal-avatar') as HTMLElement,
+            nome: document.getElementById('rfid-modal-nome') as HTMLElement,
+            login: document.getElementById('rfid-modal-login') as HTMLElement,
+            estadoVazio: document.getElementById('rfid-estado-vazio') as HTMLElement,
+            estadoToken: document.getElementById('rfid-estado-token') as HTMLElement,
+            estadoVinculado: document.getElementById('rfid-estado-vinculado') as HTMLElement,
+            tokenValor: document.getElementById('rfid-token-valor') as HTMLElement,
+            btnGerar: document.getElementById('btn-rfid-gerar') as HTMLButtonElement,
+            btnRevogar: document.getElementById('btn-rfid-revogar') as HTMLButtonElement,
+            btnCopiar: document.getElementById('btn-rfid-copiar') as HTMLButtonElement,
+            btnFechar: document.getElementById('rfid-modal-fechar') as HTMLElement
+        }
     };
 
     const estado: CadastrosEstado = { tipoAtual: null };
