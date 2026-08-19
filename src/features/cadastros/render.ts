@@ -117,8 +117,23 @@ export function abrirModalRfid(els: RfidModalEls, usuario: Usuario): void {
     openModal('modal-cadastro-rfid');
 }
 
-export function exibirTokenGerado(els: RfidModalEls, token: string): void {
-    els.tokenValor.textContent = token;
+// AQUI: Substituição da função `exibirTokenGerado` por `exibirModoGravacao`[cite: 21]
+export function exibirModoGravacao(els: RfidModalEls): void {
+    // Esconde o botão de cópia manual[cite: 21]
+    els.btnCopiar.style.display = 'none'; 
+    
+    // Injerta o contêiner de aviso visual animado na tela[cite: 21]
+    els.estadoToken.innerHTML = `
+        <div class="flex flex-col items-center justify-center p-4 border rounded-md border-blue-200 bg-blue-50 w-full mt-4">
+            <svg class="animate-pulse w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <p class="text-sm font-medium text-blue-800 text-center">
+                Modo de gravação ativo.<br>
+                Aproxime o cartão do Raspberry Pi nos próximos <span class="font-bold">30 segundos</span>.
+            </p>
+        </div>
+    `;
     mostrarEstadoRfid(els, 'token');
 }
 
