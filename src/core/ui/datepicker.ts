@@ -1,12 +1,31 @@
-/// <reference types="flatpickr" />
+import type Flatpickr from 'flatpickr';
 
-import flatpickr from 'flatpickr';
-import { Portuguese } from 'flatpickr/dist/l10n/pt.js';
-import 'flatpickr/dist/flatpickr.min.css';
+export type FlatpickrInstance = Flatpickr.Instance;
 
-export type FlatpickrInstance = flatpickr.Instance;
+interface FlatpickrModulo {
+    flatpickr: typeof Flatpickr;
+    Portuguese: Flatpickr.CustomLocale;
+}
 
-export function criarDataAutoPicker(input: HTMLElement): FlatpickrInstance {
+let modulePromise: Promise<FlatpickrModulo> | null = null;
+
+function carregarFlatpickr(): Promise<FlatpickrModulo> {
+    if (!modulePromise) {
+        modulePromise = Promise.all([
+            import('flatpickr'),
+            import('flatpickr/dist/l10n/pt.js'),
+            import('flatpickr/dist/flatpickr.min.css')
+        ]).then(([flatpickrMod, l10nMod]) => ({
+            flatpickr: flatpickrMod.default,
+            Portuguese: l10nMod.Portuguese
+        }));
+    }
+    return modulePromise;
+}
+
+export async function criarDataAutoPicker(input: HTMLElement): Promise<FlatpickrInstance> {
+    const { flatpickr, Portuguese } = await carregarFlatpickr();
+
     return flatpickr(input, {
         enableTime: true,
         time_24hr: true,

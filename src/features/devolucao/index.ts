@@ -5,7 +5,7 @@ import { attachDevolucaoEvents } from './events.js';
 import { getLoansAbertos, subscribe } from '../../core/state/loanStore.js';
 import type { LoanItemUI } from '../../types/index.js';
 
-export function initDevolucao(): void {
+export async function initDevolucao(): Promise<void> {
     const lista = document.getElementById('lista-devolucoes-items');
     if (!lista) return;
 
@@ -38,7 +38,7 @@ export function initDevolucao(): void {
         btnConfirmarDevolucaoPainel: document.getElementById('btn-confirmar-devolucao-painel') as HTMLElement,
         painel: document.querySelector('.devolucao-detalhe-painel') as HTMLElement | null,
         backdrop: document.getElementById('devolucao-detalhe-backdrop'),
-        devolucaoPicker: criarDataAutoPicker(devolucaoDataInput)
+        devolucaoPicker: await criarDataAutoPicker(devolucaoDataInput)
     };
 
     popularSelectDetalheEquipamento(els.detalheEquipamentoSelect, getEquipamentos());

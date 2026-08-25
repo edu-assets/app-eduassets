@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const inits: Array<() => void> = [
+    const inits: Array<() => void | Promise<void>> = [
         initNavigation,
         initMobileNavigation,
         initModals,
@@ -46,7 +46,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     inits.forEach((fn) => {
         try {
-            fn();
+            const resultado = fn();
+            if (resultado instanceof Promise) {
+                resultado.catch((err) => {
+                    console.error(`[eduAssets] Fail to initialize "${fn.name}":`, err);
+                });
+            }
         } catch (err) {
             console.error(`[eduAssets] Fail to initialize "${fn.name}":`, err);
         }

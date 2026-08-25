@@ -5,7 +5,7 @@ import { attachEmprestimoEvents } from './events.js';
 import { renderItens, popularSelectEquipamentos, popularSelectResponsaveis } from './render.js';
 import type { LoanItemUI } from '../../types/index.js';
 
-export function initEmprestimo(): void {
+export async function initEmprestimo(): Promise<void> {
     const form = document.querySelector<HTMLFormElement>('#panel-emprestimo form');
     if (!form) return;
 
@@ -18,7 +18,6 @@ export function initEmprestimo(): void {
         console.error('[eduAssets] initEmprestimo: elementos essenciais do formulário não encontrados.');
         return;
     }
-    
 
     const els = {
         form,
@@ -33,7 +32,7 @@ export function initEmprestimo(): void {
         solicitanteInput: document.getElementById('solicitante') as HTMLInputElement,
         observacaoInput: document.getElementById('observacao') as HTMLTextAreaElement,
         btnSubmit: form.querySelector('.registrar-emprestimo') as HTMLButtonElement,
-        picker: criarDataAutoPicker(dataInput)
+        picker: await criarDataAutoPicker(dataInput)
     };
 
     const estado: { itens: LoanItemUI[] } = { itens: [] };
