@@ -14,6 +14,7 @@ import { initAuth } from './features/auth/index.js';
 import { initSeguranca } from './features/seguranca/index.js';
 import { initPerfil } from './features/perfil/index.js';
 import { initRfidListener } from './core/rfid/rfidListener.js';
+import { initDocumentation } from './features/sobre/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
@@ -41,7 +42,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         initConfig,
         initSeguranca,
         initRfidListener,
-        initPerfil
+        initPerfil,
+        initDocumentation
     ];
 
     inits.forEach((fn) => {

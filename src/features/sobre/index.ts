@@ -1,0 +1,1 @@
+export { initDocumentation, abrirDocumentacao } from './documentationModal.js';
