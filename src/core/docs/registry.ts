@@ -18,7 +18,7 @@ export const DOCS_REGISTRY: DocRegistryItem[] = [
         id: 'manual-usuario',
         title: 'Manual do Usuário',
         icon: 'auto_stories',
-        file: '/docs/ManualUsuario.md',
+        file: '/docs/MANUAL_USUARIO.md',
         category: 'geral',
         version: 'v0.9.9',
         updatedAt: '2026-08-25'
@@ -36,7 +36,7 @@ export const DOCS_REGISTRY: DocRegistryItem[] = [
         id: 'architecture',
         title: 'Arquitetura',
         icon: 'account_tree',
-        file: '/docs/Architecture.md',
+        file: '/docs/ARQUITETURA.md',
         category: 'tecnico',
         version: 'v0.9.9',
         updatedAt: '2026-08-25'
@@ -45,7 +45,7 @@ export const DOCS_REGISTRY: DocRegistryItem[] = [
         id: 'database-model',
         title: 'Modelo de Dados',
         icon: 'schema',
-        file: '/docs/DatabaseModel.md',
+        file: '/docs/MODELO_DE_DADOS.md',
         category: 'tecnico',
         version: 'v0.9.9',
         updatedAt: '2026-08-25'
@@ -54,7 +54,7 @@ export const DOCS_REGISTRY: DocRegistryItem[] = [
         id: 'roadmap',
         title: 'Roadmap',
         icon: 'route',
-        file: '/docs/Roadmap.md',
+        file: '/docs/ROADMAP.md',
         category: 'geral',
         version: 'v0.9.9',
         updatedAt: '2026-08-25'
@@ -63,7 +63,7 @@ export const DOCS_REGISTRY: DocRegistryItem[] = [
         id: 'changelog',
         title: 'Changelog',
         icon: 'history',
-        file: '/docs/Changelog.md',
+        file: '/docs/CHANGELOG.md',
         category: 'geral',
         version: 'v0.9.9',
         updatedAt: '2026-08-25'
