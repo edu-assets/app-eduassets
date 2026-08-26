@@ -9,7 +9,9 @@ const IDIOMAS_VALIDOS: Idioma[] = ['pt', 'en'];
 
 const DICIONARIOS: Record<Idioma, Record<string, string>> = { pt, en };
 const ATRIBUTOS_TRADUZIVEIS = ['placeholder', 'title', 'aria-label', 'alt'] as const;
-const CHAVE_POR_TEXTO_PT = new Map(Object.entries(pt).map(([chave, texto]) => [texto, chave]));
+const CHAVE_POR_TEXTO_PT = new Map(
+    Object.entries(pt).map(([chave, texto]) => [normalizarEspacos(texto), chave])
+);
 const CHAVES_DE_BOTOES: Record<string, string> = {
     '#modal-categoria-fechar': 'dashboard.fechar',
     '#btn-dashboard-exportar': 'shell.exportar',
@@ -75,16 +77,11 @@ export function subscribe(callback: I18nListener): () => void {
     };
 }
 
-/**
- * Traduz uma chave para o idioma ativo. Se a chave não existir no
- * dicionário do idioma atual, cai para o dicionário em português; se
- * também não existir lá, retorna a própria chave (nunca quebra a UI).
- */
+
 export function t(chave: string): string {
     return DICIONARIOS[idioma][chave] ?? DICIONARIOS.pt[chave] ?? chave;
 }
 
-/** Traduz uma mensagem legada em português quando ela existe no dicionário. */
 export function traduzirTexto(texto: string): string {
     return t(CHAVE_POR_TEXTO_PT.get(texto) ?? texto);
 }
@@ -92,19 +89,13 @@ export function traduzirTexto(texto: string): string {
 function aplicarIdioma(): void {
     document.documentElement.setAttribute('lang', idioma === 'en' ? 'en' : 'pt-BR');
     traduzirDocumento();
+    traduzirElemento(document.body);
     notify();
 }
 
 function notify(): void {
     listeners.forEach((callback) => callback(idioma));
 }
-
-/**
- * Traduz o markup estático do index.html e qualquer conteúdo inserido por
- * componentes legados. Ao encontrar texto em português conhecido, guardamos a
- * chave no próprio nó/atributo; assim as próximas trocas de idioma não
- * dependem do texto que estiver atualmente exibido.
- */
 function traduzirDocumento(): void {
     Object.entries(CHAVES_DE_BOTOES).forEach(([seletor, chave]) => {
         document.querySelectorAll<HTMLElement>(seletor).forEach((elemento) => {
@@ -129,7 +120,8 @@ function traduzirElemento(raiz: Node | null): void {
     while (walker.nextNode()) textos.push(walker.currentNode as Text);
 
     textos.forEach((no) => {
-        const chave = no.parentElement?.dataset.i18nKey ?? CHAVE_POR_TEXTO_PT.get(no.textContent?.trim() ?? '');
+        const textoNormalizado = normalizarEspacos(no.textContent ?? '');
+        const chave = no.parentElement?.dataset.i18nKey ?? CHAVE_POR_TEXTO_PT.get(textoNormalizado);
         if (!chave || !no.parentElement) return;
         no.parentElement.dataset.i18nKey = chave;
         no.textContent = preservarEspacos(no.textContent ?? '', t(chave));
@@ -140,12 +132,24 @@ function traduzirElemento(raiz: Node | null): void {
         : raiz instanceof Element
             ? Array.from(raiz.querySelectorAll<HTMLElement>('*'))
             : [];
+
     elementos.forEach((elemento) => {
         ATRIBUTOS_TRADUZIVEIS.forEach((atributo) => {
             const dataKey = `i18n${atributo.replace(/-([a-z])/g, (_, letra: string) => letra.toUpperCase())}` as keyof DOMStringMap;
             const valor = elemento.getAttribute(atributo);
-            const chave = elemento.dataset[dataKey] ?? (valor ? CHAVE_POR_TEXTO_PT.get(valor) : undefined);
-            if (!chave) return;
+            const chaveArmazenada = elemento.dataset[dataKey];
+
+            const chaveAindaValida = chaveArmazenada
+                ? Object.values(DICIONARIOS).some((dic) => dic[chaveArmazenada] === valor)
+                : false;
+
+            const chave = chaveAindaValida ? chaveArmazenada : (valor ? CHAVE_POR_TEXTO_PT.get(valor) : undefined);
+
+            if (!chave) {
+                if (chaveArmazenada) delete elemento.dataset[dataKey];
+                return;
+            }
+
             elemento.dataset[dataKey] = chave;
             elemento.setAttribute(atributo, t(chave));
         });
@@ -166,4 +170,8 @@ function observarConteudoNovo(): void {
         });
     });
     observador.observe(document.body, { childList: true, subtree: true });
+}
+
+function normalizarEspacos(texto: string): string {
+    return texto.replace(/\s+/g, ' ').trim();
 }

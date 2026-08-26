@@ -217,6 +217,13 @@
 
 #panel-emprestimo .form-group.col-md {
     flex: 0 0 200px;
+    min-width: 0;
+}
+
+#panel-emprestimo .form-group.col-md input {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.92rem;
 }
 
 #panel-emprestimo .form-group-align-btn {
@@ -321,6 +328,10 @@
         gap: 10px;
         align-items: flex-end;
     }
+
+    #panel-emprestimo .form-row:has(#data-emprestimo) .col-md {
+    flex: 1 1 220px;
+}
 
     #panel-emprestimo .form-group.col-sm {
         flex: unset;

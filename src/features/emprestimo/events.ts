@@ -6,6 +6,7 @@ import { adicionarItemComValidacao, registrarEmprestimo } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import type { LoanItemUI, LoanDraft } from '../../types/index.js';
 import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
+import { t } from '../../core/state/i18nStore.js';
 
 interface EmprestimoEventosEls {
     form: HTMLFormElement;
@@ -106,7 +107,9 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             estado.itens = [];
             renderItens(els, estado.itens);
         } catch (erro) {
-            showToast(formatarErroEstoque(erro, 'Erro ao registrar empréstimo.'), 'error');
+            const chave = erro instanceof Error ? erro.message : null;
+            const mensagem = chave && chave.includes('.') ? t(chave) : formatarErroEstoque(erro, 'Erro ao registrar empréstimo.');
+            showToast(mensagem, 'error');
         } finally {
             els.btnSubmit.disabled = false;
         }

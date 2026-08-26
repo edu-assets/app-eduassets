@@ -33,8 +33,7 @@ export function adicionarItemComValidacao(
 
 export async function registrarEmprestimo(dados: LoanDraft): Promise<void> {
     if (!dados.itens.length) {
-        throw new Error('Adicione ao menos um equipamento ao empréstimo');
+        throw new Error('validation.emprestimo.sem_itens');
     }
-
     await addLoan(dados);
 }

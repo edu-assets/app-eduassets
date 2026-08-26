@@ -16,6 +16,8 @@
   "auth.sair": "Log out",
   "feedback.configuracoes_salvas": "Settings saved successfully",
   "feedback.emprestimo_registrado": "Loan registered successfully",
+  "feedback.emprestimo_nao_registrado": "Loan not registered.",
+  "emprestimo.registrar_emprestimo": "Register Loan",
   "feedback.emprestimo_atualizado": "Loan updated successfully",
   "feedback.devolucao_registrada": "Return registered for {data}",
   "feedback.estoque_insuficiente": "Insufficient stock.",
@@ -331,5 +333,7 @@
   "shell.ver_emprestimos_em_aberto_e_registrar_de": "View open loans and register returns",
   "shell.ver_estatisticas_e_registros_do_sistema": "View system statistics and records",
   "shell.vincule_um_cartao_fisico_para_login_rapi": "Link a physical card for quick administrator login.",
-  "shell.visao_geral_do_estoque_com_estatisticas_": "Stock overview with statistics and latest records."
+  "shell.visao_geral_do_estoque_com_estatisticas_": "Stock overview with statistics and latest records.",
+  "emprestimo.dados_do_emprestimo": "Loan Details",
+  "shell.clique_para_alterar": "(Click to change)"
 }

@@ -16,6 +16,8 @@
   "auth.sair": "Sair",
   "feedback.configuracoes_salvas": "Configurações salvas com sucesso",
   "feedback.emprestimo_registrado": "Empréstimo registrado com sucesso",
+  "feedback.emprestimo_nao_registrado": "Empréstimo não registrado.",
+  "emprestimo.registrar_emprestimo": "Registrar Empréstimo",
   "feedback.emprestimo_atualizado": "Empréstimo atualizado com sucesso",
   "feedback.devolucao_registrada": "Devolução registrada para {data}",
   "feedback.estoque_insuficiente": "Estoque insuficiente.",
@@ -331,5 +333,7 @@
   "shell.ver_emprestimos_em_aberto_e_registrar_de": "Ver empréstimos em aberto e registrar devoluções",
   "shell.ver_estatisticas_e_registros_do_sistema": "Ver estatísticas e registros do sistema",
   "shell.vincule_um_cartao_fisico_para_login_rapi": "Vincule um cartão físico para login rápido de administrador.",
-  "shell.visao_geral_do_estoque_com_estatisticas_": "Visão geral do estoque com estatísticas e últimos registros."
+  "shell.visao_geral_do_estoque_com_estatisticas_": "Visão geral do estoque com estatísticas e últimos registros.",
+  "emprestimo.dados_do_emprestimo": "Dados do Empréstimo",
+  "shell.clique_para_alterar": "(Clique para alterar)"
 }

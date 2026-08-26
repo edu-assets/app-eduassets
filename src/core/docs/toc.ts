@@ -15,7 +15,8 @@ export function iniciarScrollSpy(
     tocEl: HTMLElement,
     headings: HeadingItem[]
 ): () => void {
-    if (!headings.length) return () => {};
+    if (!headings.length) return () => { };
+    const root = conteudoEl.closest<HTMLElement>('.doc-content') ?? conteudoEl;
 
     const observer = new IntersectionObserver(
         (entries) => {
@@ -28,7 +29,7 @@ export function iniciarScrollSpy(
                 });
             });
         },
-        { root: conteudoEl, rootMargin: '0px 0px -70% 0px', threshold: 0 }
+        { root, rootMargin: '0px 0px -70% 0px', threshold: 0 }
     );
 
     headings.forEach((h) => {

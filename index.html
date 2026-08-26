@@ -157,12 +157,13 @@
                                 </p>
 
                                 <div class="inicio-botoes">
-                                    <a href="#" class="btn btn-primary inicio-cta nav-link" data-i18n-key="shell.comecar"
-                                        data-panel="panel-emprestimo">
+                                    <a href="#" class="btn btn-primary inicio-cta nav-link"
+                                        data-i18n-key="shell.comecar" data-panel="panel-emprestimo">
                                         <span class="material-symbols-outlined">open_in_new</span> Começar
                                     </a>
 
-                                    <button type="button" class="btn btn-primary inicio-cta" id="btn-abrir-login-hero" data-i18n-key="auth.login">
+                                    <button type="button" class="btn btn-primary inicio-cta" id="btn-abrir-login-hero"
+                                        data-i18n-key="auth.login">
                                         <span class="material-symbols-outlined">login</span> Login
                                     </button>
                                 </div>
@@ -268,10 +269,13 @@
 
                                 <div class="form-section">
                                     <p class="form-label"><span class="material-symbols-outlined">person</span><span
-                                            class="form-label-number">1.</span> Dados do Empréstimo</p>
-                                    <span class="form-label-description">Informe quem está solicitando e os detalhes
-                                        gerais
-                                        do empréstimo.</span>
+                                            class="form-label-number">1.</span> <span
+                                            data-i18n-key="emprestimo.dados_do_emprestimo">Dados do Empréstimo</span>
+                                    </p>
+                                    <span class="form-label-description"
+                                        data-i18n-key="shell.informe_quem_esta_solicitando_e_os_detal">Informe quem está
+                                        solicitando e os detalhes
+                                        gerais do empréstimo.</span>
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="solicitante">Solicitante</label>
@@ -284,8 +288,10 @@
                                         </div>
 
                                         <div class="form-group col-md">
-                                            <label for="data-emprestimo">Data e Hora <span
-                                                    class="form-label-optional">(Clique para alterar)</span></label>
+                                            <label for="data-emprestimo"><span data-i18n-key="shell.data_e_hora">Data e
+                                                    Hora</span> <span class="form-label-optional"
+                                                    data-i18n-key="shell.clique_para_alterar">(Clique para
+                                                    alterar)</span></label>
                                             <input type="text" id="data-emprestimo" name="data-emprestimo"
                                                 class="input-auto" required>
                                         </div>
@@ -312,7 +318,8 @@
 
                                         <div class="form-group form-group-align-btn">
                                             <label class="invisible-label">Ação</label>
-                                            <button type="button" class="btn btn-neutral" id="btn-adicionar-item" data-i18n-key="shell.adicionar">
+                                            <button type="button" class="btn btn-neutral" id="btn-adicionar-item"
+                                                data-i18n-key="shell.adicionar">
                                                 <span class="material-symbols-outlined">add</span> Adicionar
                                             </button>
                                         </div>
@@ -342,10 +349,10 @@
                                 </div>
 
                                 <div class="form-actions">
-                                    <button class="btn btn-primary registrar-emprestimo" type="submit" data-i18n-key="shell.registrar_um_novo_emprestimo_de_equipame"
-                                        data-requires-auth> <span
-                                            class="material-symbols-outlined">check</span>Registrar
-                                        Empréstimo</button>
+                                    <button class="btn btn-primary registrar-emprestimo" type="submit"
+                                        data-i18n-key="emprestimo.registrar_emprestimo" data-requires-auth>
+                                        <span class="material-symbols-outlined">check</span>Registrar Empréstimo
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -411,9 +418,10 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button class="btn btn-neutral" id="modal-confirmar-devolucao-cancelar" data-i18n-key="shell.cancelar"
-                                    type="button">Cancelar</button>
-                                <button class="btn btn-success" id="btn-confirmar-devolucao" data-requires-auth data-i18n-key="shell.confirmar_devolucao">
+                                <button class="btn btn-neutral" id="modal-confirmar-devolucao-cancelar"
+                                    data-i18n-key="shell.cancelar" type="button">Cancelar</button>
+                                <button class="btn btn-success" id="btn-confirmar-devolucao" data-requires-auth
+                                    data-i18n-key="shell.confirmar_devolucao">
                                     <span class="material-symbols-outlined">check</span> Confirmar Devolução
                                 </button>
                             </div>
@@ -491,8 +499,8 @@
                                             </div>
                                         </div>
 
-                                        <button type="button" class="btn btn-neutral btn-block" data-i18n-key="shell.adicionar"
-                                            id="btn-detalhe-adicionar-item">
+                                        <button type="button" class="btn btn-neutral btn-block"
+                                            data-i18n-key="shell.adicionar" id="btn-detalhe-adicionar-item">
                                             <span class="material-symbols-outlined">add</span> Adicionar
                                         </button>
                                     </div>
@@ -502,12 +510,12 @@
                                 </div>
 
                                 <div class="devolucao-detalhe-acoes">
-                                    <button class="btn btn-success btn-block" id="btn-detalhe-salvar" data-requires-auth data-i18n-key="shell.salvar_alteracoes"
-                                        style="display:none;">
+                                    <button class="btn btn-success btn-block" id="btn-detalhe-salvar" data-requires-auth
+                                        data-i18n-key="shell.salvar_alteracoes" style="display:none;">
                                         Salvar Alterações
                                     </button>
-                                    <button class="btn btn-primary btn-block" id="btn-confirmar-devolucao-painel" data-i18n-key="shell.confirmar_devolucao"
-                                        data-requires-auth>
+                                    <button class="btn btn-primary btn-block" id="btn-confirmar-devolucao-painel"
+                                        data-i18n-key="shell.confirmar_devolucao" data-requires-auth>
                                         <span class="material-symbols-outlined">check</span> Confirmar Devolução
                                     </button>
                                     <button class="btn btn-neutral btn-block" data-i18n-key="shell.cancelar"
