@@ -1,8 +1,9 @@
 import { showToast } from '../../core/ui/index.js';
 import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { getPreferenciaTema, definirTema } from '../../core/state/themeStore.js';
-import { marcarTemaAtivo } from './render.js';
-import type { TemaPreferencia } from './render.js';
+import { getIdioma, definirIdioma } from '../../core/state/i18nStore.js';
+import { marcarTemaAtivo, marcarIdiomaAtivo } from './render.js';
+import type { TemaPreferencia, IdiomaPreferencia } from './render.js';
 
 export function attachConfigEvents(btnSalvar: HTMLElement): void {
     document.querySelectorAll<HTMLElement>('.config-switch').forEach((switchEl) => {
@@ -29,6 +30,19 @@ export function attachTemaToggle(grupoTema: HTMLElement): void {
             const tema = btn.dataset.tema as TemaPreferencia;
             definirTema(tema);
             marcarTemaAtivo(grupoTema, tema);
+        });
+    });
+}
+
+export function attachIdiomaToggle(grupoIdioma: HTMLElement): void {
+    const botoes = grupoIdioma.querySelectorAll<HTMLElement>('.config-toggle-btn');
+    marcarIdiomaAtivo(grupoIdioma, getIdioma());
+
+    botoes.forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const idioma = btn.dataset.idioma as IdiomaPreferencia;
+            definirIdioma(idioma);
+            marcarIdiomaAtivo(grupoIdioma, idioma);
         });
     });
 }

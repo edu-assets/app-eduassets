@@ -3,3 +3,4 @@ export { carregarEmprestimos, getLoans, getLoansAbertos, addLoan, returnLoan, up
 export { carregarOcorrencias, getOcorrencias, getOcorrenciasPorTipo, addOcorrencia, updateOcorrencia, resolveOcorrencia, deleteOcorrencia, subscribe as subscribeOcorrencias } from './ocorrenciasStore.js';
 export { carregarResponsaveis, getResponsaveis, subscribe as subscribeResponsaveis } from './responsavelStore.js';
 export { initTheme, getPreferenciaTema, getTemaResolvido, definirTema, subscribe as subscribeTheme } from './themeStore.js';
+export { initI18n, getIdioma, definirIdioma, t, subscribe as subscribeI18n } from './i18nStore.js';

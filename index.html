@@ -1379,6 +1379,25 @@
                                     </button>
                                 </div>
                             </div>
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <span class="config-item-icon config-item-icon-neutral">
+                                        <span class="material-symbols-outlined">language</span>
+                                    </span>
+                                    <div class="config-item-text">
+                                        <span class="config-item-title">Idioma / Language</span>
+                                        <span class="config-item-desc">Escolha o idioma da interface.</span>
+                                    </div>
+                                </div>
+                                <div class="config-toggle-group" id="config-idioma-group">
+                                    <button type="button" class="config-toggle-btn" data-idioma="pt">
+                                        <span class="material-symbols-outlined">translate</span> Português
+                                    </button>
+                                    <button type="button" class="config-toggle-btn" data-idioma="en">
+                                        <span class="material-symbols-outlined">translate</span> English
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="config-card">
@@ -1527,7 +1546,8 @@
                                         <span class="sobre-doc-tile-nome">Changelog</span>
                                     </button>
 
-                                    <button type="button" class="sobre-doc-tile sobre-doc-tile-pendente" data-abrir-doc="roadmap">
+                                    <button type="button" class="sobre-doc-tile sobre-doc-tile-pendente"
+                                        data-abrir-doc="roadmap">
                                         <span class="sobre-doc-tile-icon sobre-doc-tile-icon-neutral">
                                             <span class="material-symbols-outlined">route</span>
                                         </span>
@@ -1865,40 +1885,37 @@
     </div>
     </section>
 
-                        <!-- Modal de confirmar exclusão -->
-                    <div class="modal-overlay" id="modal-confirmar-exclusao">
-                        <div class="modal-box modal-box--md">
-                            <div class="modal-header">
-                                <!-- Ícone vermelho em destaque -->
-                                <span class="modal-header-icon modal-header-icon-error">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </span>
-                                <div class="modal-header-titles">
-                                    <h3 id="confirmar-exclusao-titulo">Excluir registro</h3>
-                                    <p class="modal-subtitle" id="confirmar-exclusao-mensagem">Esta ação não pode ser
-                                        desfeita.</p>
-                                </div>
-                            </div>
-                            <div class="modal-body">
-                                <!-- Container para injetar os detalhes do item dinamicamente -->
-                                <div id="confirmar-exclusao-detalhes" style="display: none;"></div>
+    <!-- Modal de confirmar exclusão -->
+    <div class="modal-overlay" id="modal-confirmar-exclusao">
+        <div class="modal-box modal-box--md">
+            <div class="modal-header">
+                <!-- Ícone vermelho em destaque -->
+                <span class="modal-header-icon modal-header-icon-error">
+                    <span class="material-symbols-outlined">delete</span>
+                </span>
+                <div class="modal-header-titles">
+                    <h3 id="confirmar-exclusao-titulo">Excluir registro</h3>
+                    <p class="modal-subtitle" id="confirmar-exclusao-mensagem">Esta ação não pode ser
+                        desfeita.</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <!-- Container para injetar os detalhes do item dinamicamente -->
+                <div id="confirmar-exclusao-detalhes" style="display: none;"></div>
 
-                                <div class="modal-callout modal-callout-error" id="confirmar-exclusao-callout"
-                                    style="display: none;">
-                                    <span class="material-symbols-outlined">warning</span>
-                                    <span id="confirmar-exclusao-callout-text"></span>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn btn-neutral" id="confirmar-exclusao-cancelar"
-                                    type="button">Cancelar</button>
-                                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button"
-                                    data-requires-admin>
-                                    <span class="material-symbols-outlined">delete</span> Excluir registro
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="modal-callout modal-callout-error" id="confirmar-exclusao-callout" style="display: none;">
+                    <span class="material-symbols-outlined">warning</span>
+                    <span id="confirmar-exclusao-callout-text"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-neutral" id="confirmar-exclusao-cancelar" type="button">Cancelar</button>
+                <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button" data-requires-admin>
+                    <span class="material-symbols-outlined">delete</span> Excluir registro
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="src/main.ts"></script>
 </body>

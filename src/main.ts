@@ -1,6 +1,7 @@
 import { initNavigation, initMobileNavigation } from './core/layout/index.js';
 import { initModals, initConfirm } from './core/ui/index.js';
 import { initTheme } from './core/state/themeStore.js';
+import { initI18n } from './core/state/i18nStore.js';
 import { initSessionTimeout } from './core/auth/sessionTimeout.js';
 import { initDashboard } from './features/dashboard/index.js';
 import { initControle } from './features/controle/index.js';
@@ -14,10 +15,10 @@ import { initAuth } from './features/auth/index.js';
 import { initSeguranca } from './features/seguranca/index.js';
 import { initPerfil } from './features/perfil/index.js';
 import { initRfidListener } from './core/rfid/rfidListener.js';
-import { initDocumentation } from './features/sobre/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
+    initI18n();
     const [_, ...cargasIniciais] = await Promise.allSettled([initAuth(), carregarEquipamentos(), carregarResponsaveis(), carregarEmprestimos(), carregarOcorrencias()]);
 
     cargasIniciais.forEach((resultado, indice) => {
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const inits: Array<() => void | Promise<void>> = [
+    const inits: Array<() => void> = [
         initNavigation,
         initMobileNavigation,
         initModals,
@@ -42,18 +43,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         initConfig,
         initSeguranca,
         initRfidListener,
-        initPerfil,
-        initDocumentation
+        initPerfil
     ];
 
     inits.forEach((fn) => {
         try {
-            const resultado = fn();
-            if (resultado instanceof Promise) {
-                resultado.catch((err) => {
-                    console.error(`[eduAssets] Fail to initialize "${fn.name}":`, err);
-                });
-            }
+            fn();
         } catch (err) {
             console.error(`[eduAssets] Fail to initialize "${fn.name}":`, err);
         }
