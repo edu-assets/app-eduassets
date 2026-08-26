@@ -1,7 +1,9 @@
 # eduAssets
 
 <div align="center">
-  <img src="frontend/public/assets/img/eduAssets_banner.png" alt="EduAssets banner" width="100%">
+  <a href="#">
+    <img src="../assets/img/eduAssets_banner.png" alt="EduAssets banner" width="100%">
+  </a>
 </div>
 
 > **Status: Beta (v0.9.9).** Core functionality — including authentication with two access levels, RFID-based physical card login, Guest Mode, Dark Mode, and data export — is implemented end-to-end across a fully TypeScript frontend and backend. The project is in final polish before its first public deployment. Minor adjustments and hardening are still expected before a stable 1.0 release.

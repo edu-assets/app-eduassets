@@ -6,8 +6,6 @@
 - [ ] Configuração adequada de CORS para produção (hoje permissivo por padrão quando `CORS_ORIGIN` não está definida).
 - [ ] Testes de ponta a ponta do fluxo RFID direto no hardware do Raspberry Pi 5.
 - [ ] Ajustes finais de Nginx: compressão gzip/brotli, cache headers, HTTP/2.
-- [ ] Reversão de todas as expansões `// PROVISORIO-SENAC` do Modo Convidado após a feira do Senac.
-- [ ] Estabilidade de IP na rede do Senac (reserva DHCP via TI, mDNS/Avahi, ou hotspot pessoal como contingência).
 - [ ] Primeiro deploy público (frontend na Vercel, backend no Render).
 
 ## v1.0.0 — Release estável
@@ -26,4 +24,3 @@ Marco de estabilidade: todas as funcionalidades essenciais completas, testadas e
 
 - Relatórios agendados (exportação automática periódica por e-mail).
 - App mobile companion para leitura de QR code como alternativa ao RFID.
-- Modo multi-unidade/multi-escola (hoje o sistema assume uma única instalação).

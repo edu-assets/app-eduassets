@@ -1511,6 +1511,8 @@
                                 </div>
 
                                 <div class="sobre-doc-grid">
+                                    <!-- Substituir os 6 botões dentro de .sobre-doc-grid por estes (adiciona data-abrir-doc) -->
+
                                     <button type="button" class="sobre-doc-tile" data-abrir-doc="readme">
                                         <span class="sobre-doc-tile-icon sobre-doc-tile-icon-primary">
                                             <span class="material-symbols-outlined">article</span>
@@ -1913,6 +1915,42 @@
                 <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button" data-requires-admin>
                     <span class="material-symbols-outlined">delete</span> Excluir registro
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-documentacao">
+        <div class="modal-box modal-box--lg">
+            <div class="doc-header">
+                <div class="modal-header-titles">
+                    <h3>Central de Documentação</h3>
+                </div>
+                <button type="button" class="modal-close-btn" id="doc-fechar" aria-label="Fechar">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="doc-layout">
+                <nav class="doc-sidebar" id="doc-sidebar"></nav>
+
+                <div class="doc-main">
+                    <div class="doc-search-wrap">
+                        <span class="material-symbols-outlined doc-search-icon">search</span>
+                        <input type="text" id="doc-search-input" placeholder="Buscar na documentação...">
+                        <div class="doc-search-results" id="doc-search-results"></div>
+                    </div>
+
+                    <div class="doc-body-row">
+                        <article class="doc-content">
+                            <h2 id="doc-content-title" style="margin-top:0;"></h2>
+                            <div id="doc-content-body"></div>
+                        </article>
+
+                        <aside class="doc-toc-wrap" id="doc-toc-wrap"></aside>
+                    </div>
+
+                    <div class="doc-footer" id="doc-footer-wrap"></div>
+                </div>
             </div>
         </div>
     </div>

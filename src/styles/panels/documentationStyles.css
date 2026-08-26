@@ -6,6 +6,7 @@
     max-width: 1100px;
     width: 100%;
     height: 82vh;
+    height: 82dvh;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -85,6 +86,7 @@
 .doc-main {
     flex: 1;
     min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
 }
@@ -188,8 +190,10 @@
 .doc-content {
     flex: 1;
     min-width: 0;
+    min-height: 0;
     overflow-y: auto;
     padding: 24px 32px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .doc-content h1 { font-family: var(--font-heading); font-size: 1.6rem; margin-bottom: 12px; color: var(--text-primary); }
@@ -223,6 +227,7 @@
     white-space: pre;
     font-family: 'Courier New', monospace;
     font-size: 0.82rem;
+    -webkit-overflow-scrolling: touch;
 }
 
 .doc-code-copy-btn {
@@ -232,8 +237,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border: none;
     border-radius: 6px;
     background-color: rgba(255, 255, 255, 0.08);
@@ -244,7 +249,7 @@
 .doc-code-copy-btn:hover { background-color: rgba(255, 255, 255, 0.16); }
 
 /* ===== Tables ===== */
-.doc-table-wrap { overflow-x: auto; margin-bottom: 16px; }
+.doc-table-wrap { overflow-x: auto; margin-bottom: 16px; -webkit-overflow-scrolling: touch; }
 .doc-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .doc-table th, .doc-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); text-align: left; }
 .doc-table thead th { background-color: var(--surface-2); position: sticky; top: 0; font-weight: 700; color: var(--text-primary); }
@@ -321,16 +326,122 @@
     flex-shrink: 0;
 }
 
-/* ===== Responsiviness (kiosk / touch / mobile) ===== */
+/* ==========================================================
+   RESPONSIVIDADE
+   ========================================================== */
+
+/* Tablet: esconde a TOC lateral (fica só sidebar + conteúdo) */
 @media (max-width: 1024px) {
-    .doc-toc-wrap { display: none; }
+    .doc-toc-wrap {
+        display: none;
+    }
 }
 
+/* Mobile / kiosk touch: empilha tudo verticalmente.
+   ESSENCIAL: .doc-layout precisa virar coluna aqui, senão a sidebar
+   (que passa a ser uma faixa horizontal) continua sendo tratada como
+   item lateral do flex row e espreme o conteúdo a largura zero. */
 @media (max-width: 768px) {
-    #modal-documentacao .modal-box { height: 92vh; max-width: calc(100vw - 16px); }
-    .doc-sidebar { flex: 0 0 auto; flex-direction: row; overflow-x: auto; padding: 10px; }
-    .doc-sidebar-item { flex-shrink: 0; }
-    .doc-sidebar-item-label { white-space: nowrap; }
-    .doc-body-row { flex-direction: column; }
-    .doc-content { padding: 18px; }
+    .modal-overlay:has(#modal-documentacao) ,
+    #modal-documentacao {
+        padding: 0;
+    }
+
+    #modal-documentacao .modal-box {
+        height: 100vh;
+        height: 100dvh;
+        max-width: 100vw;
+        max-height: none;
+        width: 100vw;
+        border-radius: 0;
+    }
+
+    .doc-header {
+        padding: 14px 16px;
+    }
+
+    .doc-header h3 {
+        font-size: 1rem;
+    }
+
+    /* chave da correção: layout vira coluna no mobile */
+    .doc-layout {
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .doc-sidebar {
+        flex: 0 0 auto;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 10px 12px;
+        gap: 6px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .doc-sidebar-item {
+        flex: 0 0 auto;
+        width: auto;
+        padding: 8px 12px;
+        white-space: nowrap;
+    }
+
+    .doc-sidebar-item-label {
+        white-space: nowrap;
+    }
+
+    .doc-main {
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    .doc-search-wrap {
+        padding: 12px 16px;
+    }
+
+    .doc-search-results {
+        left: 16px;
+        right: 16px;
+    }
+
+    .doc-body-row {
+        flex: 1;
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .doc-content {
+        padding: 16px;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .doc-footer {
+        padding: 10px 16px;
+        font-size: 0.7rem;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 440px) {
+    .doc-sidebar-item .doc-sidebar-item-label {
+        display: none;
+    }
+
+    .doc-sidebar-item {
+        padding: 10px;
+    }
+
+    .doc-content h1 { font-size: 1.3rem; }
+    .doc-content h2 { font-size: 1.1rem; margin-top: 20px; }
+    .doc-content h3 { font-size: 0.98rem; }
+
+    .doc-footer {
+        flex-direction: column;
+        gap: 4px;
+    }
 }
