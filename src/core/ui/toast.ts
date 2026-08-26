@@ -1,3 +1,5 @@
+import { traduzirTexto } from '../state/i18nStore.js';
+
 type ToastType = 'success' | 'error' | 'warning';
 
 const ICONS: Record<ToastType, string> = {
@@ -18,6 +20,7 @@ function getContainer(): HTMLDivElement {
 }
 
 export function showToast(message: string, type: ToastType = 'success', duration: number = 3500): void {
+    message = traduzirTexto(message);
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.innerHTML = `<span class="material-symbols-outlined">${ICONS[type] || ICONS.success}</span><span>${message}</span>`;

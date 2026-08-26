@@ -9,6 +9,7 @@ import {
     renderDashboardHistoricoDetalheBody
 } from './templates.js';
 import type { Equipamento, LoanUI, CategoriaResumoDados } from '../../types/index.js';
+import { t } from '../../core/state/i18nStore.js';
 
 const LIMITE_CHIPS_HISTORICO = 2;
 
@@ -134,10 +135,10 @@ export function exibirDetalheEstoque(
 
     const dadosFormulario = montarDadosFormularioCategoria(equipamento);
 
-    els.detalheTitulo.textContent = 'Detalhes da categoria';
+    els.detalheTitulo.textContent = t('shell.detalhes_da_categoria');
     els.detalheBody.innerHTML = renderDashboardCategoriaForm(dadosFormulario) + `
         <div class="category-edit-actions">
-            <button type="button" class="btn btn-neutral" id="btn-detalhe-estoque-fechar">Fechar</button>
+            <button type="button" class="btn btn-neutral" id="btn-detalhe-estoque-fechar">${t('dashboard.fechar')}</button>
         </div>
     `;
 

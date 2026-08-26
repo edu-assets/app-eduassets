@@ -4,6 +4,7 @@ import { getAllDocuments, loadDocument, preloadAllDocuments, searchDocuments } f
 import type { LoadedDocument } from '../../core/docs/docsService.js';
 import { iniciarScrollSpy, scrollParaSecao } from '../../core/docs/toc.js';
 import { renderSidebar, renderFooterMetadata, renderToc, renderSearchResults } from './documentationTemplates.js';
+import { subscribe as subscribeI18n, t } from '../../core/state/i18nStore.js';
 
 const MODAL_ID = 'modal-documentacao';
 
@@ -87,8 +88,8 @@ function attachEvents(e: DocumentationEls): void {
         const pre = btnCopiar.closest('pre');
         const codigo = pre?.querySelector('code')?.textContent ?? '';
         navigator.clipboard.writeText(codigo)
-            .then(() => showToast('Código copiado', 'success'))
-            .catch(() => showToast('Não foi possível copiar', 'warning'));
+            .then(() => showToast(t('docs.codigo_copiado'), 'success'))
+            .catch(() => showToast(t('docs.nao_foi_possivel_copiar'), 'warning'));
     });
 
     if (e.btnFechar) {
@@ -103,7 +104,7 @@ async function abrirDocumento(id: string): Promise<void> {
     docAtivoId = id;
     e.sidebar.innerHTML = renderSidebar(getAllDocuments(), docAtivoId);
 
-    e.title.textContent = 'Carregando...';
+    // e.title.textContent = 'Carregando...';
     e.conteudo.innerHTML = '<div class="doc-loading">Carregando documento...</div>';
     e.toc.innerHTML = '';
     e.footer.innerHTML = '';
@@ -112,7 +113,7 @@ async function abrirDocumento(id: string): Promise<void> {
     try {
         doc = await loadDocument(id);
     } catch (erro) {
-        e.conteudo.innerHTML = `<div class="doc-error">Não foi possível carregar este documento.</div>`;
+        e.conteudo.innerHTML = `<div class="doc-error">${t('docs.nao_foi_possivel_carregar')}</div>`;
         showToast(erro instanceof Error ? erro.message : 'Erro ao carregar documento.', 'error');
         return;
     }
@@ -160,5 +161,10 @@ export function initDocumentation(): void {
             e.preventDefault();
             abrirDocumentacao(el.dataset.abrirDoc || 'manual-usuario');
         });
+    });
+
+    subscribeI18n(() => {
+        preloadAllDocuments();
+        if (docAtivoId && els?.overlay.classList.contains('active')) abrirDocumento(docAtivoId);
     });
 }

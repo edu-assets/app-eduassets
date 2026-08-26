@@ -1,8 +1,11 @@
 import { renderEquipamentoChecklistItem } from './templates.js';
 import type { Equipamento } from '../../types/index.js';
+import { t } from '../../core/state/i18nStore.js';
 
 const FORMATOS_LABEL: Record<string, string> = { csv: 'CSV (.csv)', excel: 'Excel (.xlsx)', pdf: 'PDF (.pdf)' };
-const TIPO_LABEL: Record<string, string> = { devolucoes: 'Empréstimos e devoluções', equipamentos: 'Equipamentos' };
+function tipoLabel(tipo: string): string {
+    return tipo === 'devolucoes' ? t('exportar.emprestimos_e_devolucoes') : t('exportar.equipamentos');
+}
 
 export interface ExportarEls {
     form: HTMLFormElement;
@@ -41,7 +44,7 @@ function paraInputDate(date: Date): string {
 
 export function definirEstadoCarregando(els: ExportarEls, carregando: boolean): void {
     els.btnSubmit.disabled = carregando;
-    els.btnSubmit.innerHTML = carregando ? 'Gerando arquivo...' : els.textoOriginalBtn;
+    els.btnSubmit.innerHTML = carregando ? t('exportar.gerando_arquivo') : els.textoOriginalBtn;
 }
 
 export function popularChecklistEquipamentos(els: ExportarEls, equipamentos: Equipamento[]): void {
@@ -59,8 +62,8 @@ export function selecionarTipo(els: ExportarEls, tipo: string): void {
     els.dataFinalInput.disabled = ehEquipamentos;
     els.periodoWrap.classList.toggle('exportar-periodo-disabled', ehEquipamentos);
     els.periodoDesc.textContent = ehEquipamentos
-        ? 'Exportação representa o estado atual do inventário. Clique para filtrar por período de cadastro.'
-        : 'Mês atual selecionado por padrão. Ajuste se necessário.';
+        ? t('exportar.estado_atual_do_inventario')
+        : t('shell.mes_atual_selecionado_por_padrao_ajuste_');
 
     els.equipWrap.style.display = ehEquipamentos ? 'flex' : 'none';
 
@@ -83,7 +86,9 @@ export function atualizarContagemEquipamentos(els: ExportarEls): void {
     const checkboxes = els.equipListaContainer.querySelectorAll<HTMLInputElement>('.exportar-equip-checkbox');
     const marcados = els.equipListaContainer.querySelectorAll<HTMLInputElement>('.exportar-equip-checkbox:checked');
 
-    els.equipContagem.textContent = `${marcados.length} de ${checkboxes.length} selecionados`;
+    els.equipContagem.textContent = t('exportar.selecionados_de_total')
+        .replace('{selecionados}', String(marcados.length))
+        .replace('{total}', String(checkboxes.length));
     els.equipTodosCheckbox.checked = checkboxes.length > 0 && marcados.length === checkboxes.length;
     els.equipTodosCheckbox.indeterminate = marcados.length > 0 && marcados.length < checkboxes.length;
 
@@ -99,14 +104,14 @@ export function atualizarResumo(els: ExportarEls): void {
     if (tipo === 'equipamentos') {
         const total = els.equipListaContainer.querySelectorAll('.exportar-equip-checkbox').length;
         const marcados = els.equipListaContainer.querySelectorAll('.exportar-equip-checkbox:checked').length;
-        els.resumoTipo.textContent = `${TIPO_LABEL[tipo]} (${marcados}/${total})`;
+        els.resumoTipo.textContent = `${tipoLabel(tipo)} (${marcados}/${total})`;
         els.resumoPeriodo.textContent = els.dataInicialInput.disabled
-            ? 'Estado atual do sistema'
+            ? t('exportar.estado_atual_do_sistema')
             : `${formatarDataBR(els.dataInicialInput.value)} a ${formatarDataBR(els.dataFinalInput.value)}`;
         return;
     }
 
-    els.resumoTipo.textContent = TIPO_LABEL[tipo] || '—';
+    els.resumoTipo.textContent = tipoLabel(tipo) || '—';
     const inicio = els.dataInicialInput.value ? formatarDataBR(els.dataInicialInput.value) : '—';
     const fim = els.dataFinalInput.value ? formatarDataBR(els.dataFinalInput.value) : '—';
     els.resumoPeriodo.textContent = `${inicio} a ${fim}`;

@@ -1,4 +1,5 @@
 import { openModal, closeModal } from './modal.js';
+import { traduzirTexto } from '../state/i18nStore.js';
 
 interface ConfirmarExclusaoOpcoes {
     titulo?: string;
@@ -36,6 +37,9 @@ export function confirmarExclusao(
     { titulo = 'Confirmar exclusão', mensagem = 'Esta ação não pode ser desfeita.', detalhesHtml, textoAtencao }: ConfirmarExclusaoOpcoes = {}
 ): Promise<boolean> {
     const overlay = document.getElementById('modal-confirmar-exclusao');
+    titulo = traduzirTexto(titulo);
+    mensagem = traduzirTexto(mensagem);
+    textoAtencao = textoAtencao ? traduzirTexto(textoAtencao) : textoAtencao;
     if (!overlay) return Promise.resolve(window.confirm(mensagem));
 
     const tituloEl = document.getElementById('confirmar-exclusao-titulo');

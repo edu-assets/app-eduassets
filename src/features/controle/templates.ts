@@ -1,5 +1,6 @@
 import { html, raw } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
+import { t } from '../../core/state/i18nStore.js';
 import type { OcorrenciaUI } from '../../types/index.js';
 
 interface ProblemaInfo {
@@ -8,15 +9,15 @@ interface ProblemaInfo {
 }
 
 const PROBLEMA_ICONS: Record<string, ProblemaInfo> = {
-    tela: { label: 'Tela', icon: 'monitor' },
-    audio: { label: 'Áudio', icon: 'headphones' },
-    bateria: { label: 'Bateria', icon: 'battery_alert' },
-    cabo: { label: 'Cabo', icon: 'cable' },
-    touch: { label: 'Touch', icon: 'touch_app' },
-    teclado: { label: 'Teclado', icon: 'keyboard' },
-    botao: { label: 'Botão', icon: 'smart_button' },
-    carcaca: { label: 'Carcaça', icon: 'construction' },
-    outro: { label: 'Outro', icon: 'help' }
+    tela: { label: 'controle.tela', icon: 'monitor' },
+    audio: { label: 'controle.audio', icon: 'headphones' },
+    bateria: { label: 'controle.bateria', icon: 'battery_alert' },
+    cabo: { label: 'controle.cabo', icon: 'cable' },
+    touch: { label: 'controle.touch', icon: 'touch_app' },
+    teclado: { label: 'controle.teclado', icon: 'keyboard' },
+    botao: { label: 'controle.botao', icon: 'smart_button' },
+    carcaca: { label: 'controle.carcaca', icon: 'construction' },
+    outro: { label: 'controle.outro', icon: 'help' }
 };
 
 export const ICONE_POR_TIPO: Record<string, string> = {
@@ -28,18 +29,18 @@ export const ICONE_POR_TIPO: Record<string, string> = {
 
 export function renderControleMenuAcoes(tipo: string): string {
     const opcaoResolver = (tipo === 'manutencao' || tipo === 'quebrado')
-        ? html`<span class="registros-row-menu-opcao" data-acao="resolver" data-requires-auth>Resolver</span>`
+        ? html`<span class="registros-row-menu-opcao" data-acao="resolver" data-requires-auth>${t('controle.resolver')}</span>`
         : '';
 
     return html`
         <span class="registros-row-menu-wrap">
-            <button type="button" class="registros-row-menu-btn" aria-label="Mais opções">
+            <button type="button" class="registros-row-menu-btn" aria-label="${t('controle.mais_opcoes')}">
                 <span class="material-symbols-outlined">more_vert</span>
             </button>
             <div class="registros-row-menu">
                 ${raw(opcaoResolver)}
-                <span class="registros-row-menu-opcao" data-acao="editar"data-requires-auth>Editar</span>
-                <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir" data-requires-admin>Excluir</span>
+                <span class="registros-row-menu-opcao" data-acao="editar"data-requires-auth>${t('controle.editar')}</span>
+                <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir" data-requires-admin>${t('controle.excluir')}</span>
             </div>
         </span>
     `;
@@ -64,7 +65,7 @@ export function renderControleLinha(tipo: string, dados: OcorrenciaUI): string {
         <span data-col="categoria">${dados.categoria}</span>
         <span data-col="modelo">${dados.modelo}</span>
         <span class="registros-numero" data-col="numero">${dados.numero}</span>
-        <span class="controle-problema-badge"><span class="material-symbols-outlined">${problemaInfo.icon}</span>${problemaInfo.label}</span>
+        <span class="controle-problema-badge"><span class="material-symbols-outlined">${problemaInfo.icon}</span>${t(problemaInfo.label)}</span>
         <span data-col="descricao">${dados.descricao}</span>
         <span class="registros-data" data-col="registrado-em">${dataTexto}</span>
         ${raw(colunaMedidas)}
@@ -77,7 +78,7 @@ export function renderControleEmptyState(): string {
     return renderEmptyState({
         containerClass: 'controle-empty-state',
         icon: 'inbox',
-        titulo: 'Nenhum registro encontrado.'
+        titulo: t('controle.nenhum_registro_encontrado')
     });
 }
 

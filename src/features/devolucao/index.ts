@@ -3,6 +3,7 @@ import { criarDataAutoPicker } from '../../core/ui/index.js';
 import { renderLista, popularSelectDetalheEquipamento } from './render.js';
 import { attachDevolucaoEvents } from './events.js';
 import { getLoansAbertos, subscribe } from '../../core/state/loanStore.js';
+import { subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
 import type { LoanItemUI } from '../../types/index.js';
 
 export async function initDevolucao(): Promise<void> {
@@ -61,4 +62,5 @@ export async function initDevolucao(): Promise<void> {
 
     renderLista(els, estado, getLoansAbertos());
     subscribe(() => renderLista(els, estado, getLoansAbertos()));
+    subscribeI18n(() => renderLista(els, estado, getLoansAbertos()));
 }

@@ -10,6 +10,7 @@ import {
 } from './templates.js';
 import type { CadastroConfig, CampoCadastro, CampoOpcao } from './service.js';
 import type { Usuario } from '../../types/index.js';
+import { t } from '../../core/state/i18nStore.js';
 
 export interface CampoComOpcoes {
     campo: CampoCadastro;
@@ -129,8 +130,8 @@ export function exibirModoGravacao(els: RfidModalEls): void {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
             </svg>
             <p class="text-sm font-medium text-blue-800 text-center">
-                Modo de gravação ativo.<br>
-                Aproxime o cartão do Raspberry Pi nos próximos <span class="font-bold">30 segundos</span>.
+                ${t('cadastros.modo_de_gravacao_ativo')}<br>
+                ${t('cadastros.aproxime_cartao_raspberry')}
             </p>
         </div>
     `;

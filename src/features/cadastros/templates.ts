@@ -1,6 +1,7 @@
 import { html, raw } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
 import { gerarIniciais } from '../../core/utils/iniciais.js';
+import { t } from '../../core/state/i18nStore.js';
 import type { CampoCadastro, CampoOpcao } from './service.js';
 import type { Usuario } from '../../types/index.js';
 
@@ -24,7 +25,7 @@ function renderCampoSelect(campo: CampoCadastro, opcoes: CampoOpcao[]): string {
         <div class="form-group">
             <label for="${campo.id}">${campo.label}</label>
             <select id="${campo.id}">
-                <option value="" disabled selected hidden>Selecionar</option>
+                <option value="" disabled selected hidden>${t('cadastros.selecionar')}</option>
                 ${raw(opcoesHtml)}
             </select>
         </div>
@@ -36,17 +37,17 @@ export function renderItemRegistro(texto: string): string {
 }
 
 const NIVEL_LABEL: Record<string, string> = {
-    ADMINISTRADOR: 'Administrador',
-    EDITOR: 'Editor'
+    ADMINISTRADOR: 'cadastros.administrador',
+    EDITOR: 'cadastros.editor'
 };
 
 export function renderItemRegistroUsuario(usuario: Usuario): string {
     const chip = usuario.possuiCartaoRfid
         ? html`<button type="button" class="cadastro-rfid-chip cadastro-rfid-chip--vinculado" data-rfid-usuario-id="${usuario.id}">
-                <span class="material-symbols-outlined">contactless</span>Cartão vinculado
+                <span class="material-symbols-outlined">contactless</span>${t('cadastros.cartao_vinculado')}
             </button>`
         : html`<button type="button" class="cadastro-rfid-chip" data-rfid-usuario-id="${usuario.id}">
-                <span class="material-symbols-outlined">add_card</span>Vincular cartão
+                <span class="material-symbols-outlined">add_card</span>${t('cadastros.vincular_cartao')}
             </button>`;
 
     return html`
@@ -54,7 +55,7 @@ export function renderItemRegistroUsuario(usuario: Usuario): string {
             <span class="cadastro-usuario-avatar">${gerarIniciais(usuario.nome)}</span>
             <div class="cadastro-usuario-info">
                 <span class="cadastro-usuario-nome">${usuario.nome}</span>
-                <span class="cadastro-usuario-meta">${usuario.login} · ${NIVEL_LABEL[usuario.nivelAcesso] ?? usuario.nivelAcesso}</span>
+                <span class="cadastro-usuario-meta">${usuario.login} · ${t(NIVEL_LABEL[usuario.nivelAcesso] ?? usuario.nivelAcesso)}</span>
             </div>
             ${raw(chip)}
         </div>
@@ -64,15 +65,15 @@ export function renderItemRegistroUsuario(usuario: Usuario): string {
 export function renderListaVazia(): string {
     return renderEmptyState({
         containerClass: 'cadastro-modal-empty',
-        titulo: 'Nenhum registro cadastrado.',
+        titulo: t('cadastros.nenhum_registro_cadastrado'),
         tituloTag: null
     });
 }
 
 export function renderListaCarregando(): string {
-    return html`<div class="cadastro-modal-empty">Carregando...</div>`;
+    return html`<div class="cadastro-modal-empty">${t('cadastros.carregando')}</div>`;
 }
 
 export function renderListaErro(): string {
-    return html`<div class="cadastro-modal-empty">Não foi possível carregar os registros.</div>`;
+    return html`<div class="cadastro-modal-empty">${t('cadastros.nao_foi_possivel_carregar_os_registros')}</div>`;
 }

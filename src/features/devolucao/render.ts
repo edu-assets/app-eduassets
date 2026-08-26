@@ -14,6 +14,7 @@ import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overla
 import type { LoanItemUI, LoanUI, Equipamento } from '../../types/index.js';
 import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { getLoansAbertos } from '../../core/state/loanStore.js';
+import { t } from '../../core/state/i18nStore.js';
 
 interface DevolucaoEstado {
     idPendente: string | number | null;
@@ -110,7 +111,7 @@ export function abrirDetalhe(els: AbrirDetalheEls, estado: DevolucaoEstado, loan
 
     els.detalheResp.textContent = loan.responsavel;
     els.detalheAluno.textContent = loan.aluno;
-    els.detalheData.textContent = `Empréstimo realizado em ${formatarDataCard(loan.createdAt)}`;
+    els.detalheData.textContent = t('devolucao.emprestimo_realizado_em').replace('{data}', formatarDataCard(loan.createdAt));
 
     setModoEdicao(els, estado, false);
     renderDetalheItens(els, estado.itensEditando, false);
@@ -124,7 +125,7 @@ export function abrirDetalhe(els: AbrirDetalheEls, estado: DevolucaoEstado, loan
 
 export function popularSelectDetalheEquipamento(select: HTMLSelectElement, equipamentos: Equipamento[]): void {
     const opcoes = equipamentos.map((eq) => ({ id: eq.id, label: `${eq.modelo} — ${eq.categoria?.nome ?? ''}` }));
-    fillSelect(select, renderPlaceholderOption('Selecionar equipamento'), renderOpcoesSelect(opcoes));
+    fillSelect(select, renderPlaceholderOption(t('shell.selecionar_equipamento')), renderOpcoesSelect(opcoes));
 }
 
 export function fecharDetalhe(els: FecharDetalheEls, estado: DevolucaoEstado): void {
@@ -149,7 +150,7 @@ export function setModoEdicao(els: SetModoEdicaoEls, estado: DevolucaoEstado, at
     els.btnDetalheEditar.style.display = ativo ? 'none' : 'inline-flex';
     els.btnDetalheSalvar.style.display = ativo ? 'inline-flex' : 'none';
     els.btnConfirmarDevolucaoPainel.style.display = ativo ? 'none' : 'inline-flex';
-    els.btnDetalheCancelar.textContent = ativo ? 'Cancelar edição' : 'Cancelar';
+    els.btnDetalheCancelar.textContent = ativo ? t('devolucao.cancelar_edicao') : t('shell.cancelar');
 }
 
 export function marcarLinhaSelecionada(els: ListaEls, id: number | string | null): void {
@@ -177,8 +178,8 @@ function preencherResumoConfirmacao(els: ModalConfirmacaoEls, loan: LoanUI | und
         ['iniciais', gerarIniciais(loan.responsavel)],
         ['responsavel', loan.responsavel],
         ['aluno', loan.aluno],
-        ['data', `Retirado em ${formatarDataCard(loan.createdAt)}`],
-        ['itens', `${loan.itens.length} ${loan.itens.length === 1 ? 'item' : 'itens'}`]
+        ['data', t('devolucao.retirado_em').replace('{data}', formatarDataCard(loan.createdAt))],
+        ['itens', `${loan.itens.length} ${loan.itens.length === 1 ? t('devolucao.item') : t('devolucao.itens')}`]
     ];
 
     camposEsperados.forEach(([nome, valor]) => {

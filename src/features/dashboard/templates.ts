@@ -2,51 +2,52 @@ import { html, raw } from '../../core/utils/html.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { renderStatusBadge } from '../../shared/components/statusBadge.js';
+import { t } from '../../core/state/i18nStore.js';
 import type { Equipamento, LoanUI, LoanItemUI, CategoriaResumoDados } from '../../types/index.js';
 
 const LIMITE_CHIPS_HISTORICO_PADRAO = 2;
 
 export function renderDashboardCategoriaForm(dados: CategoriaResumoDados): string {
     return html`
-        <p class="category-edit-subtitle">Resumo somente leitura da categoria.</p>
+        <p class="category-edit-subtitle">${t('dashboard.resumo_somente_leitura_da_categoria')}</p>
 
         <div class="form-group margin-bottom-lg">
-            <label class="category-field-label">Nome da categoria</label>
+            <label class="category-field-label">${t('dashboard.nome_da_categoria')}</label>
             <div class="category-field-input">${dados.categoria}</div>
         </div>
 
         <div class="category-summary-box">
-            <h4 class="category-summary-box-title">Resumo da categoria</h4>
+            <h4 class="category-summary-box-title">${t('dashboard.resumo_da_categoria')}</h4>
 
             <div class="category-summary-grid">
                 <div class="category-metric-col col-total">
                     <div class="metric-icon-wrap"><span class="material-symbols-outlined">devices</span></div>
                     <div class="metric-readonly-value">${dados.total}</div>
-                    <label>Total</label>
+                    <label>${t('dashboard.total')}</label>
                 </div>
 
                 <div class="category-metric-col col-disponivel">
                     <div class="metric-icon-wrap"><span class="material-symbols-outlined">check_circle</span></div>
                     <div class="metric-readonly-value">${dados.disponivel}</div>
-                    <label>Disponíveis</label>
+                    <label>${t('dashboard.disponiveis')}</label>
                 </div>
 
                 <div class="category-metric-col col-emprestado">
                     <div class="metric-icon-wrap"><span class="material-symbols-outlined">schedule</span></div>
                     <div class="metric-readonly-value">${dados.emprestado}</div>
-                    <label>Emprestados</label>
+                    <label>${t('dashboard.emprestados')}</label>
                 </div>
 
                 <div class="category-metric-col col-manutencao">
                     <div class="metric-icon-wrap"><span class="material-symbols-outlined">build</span></div>
                     <div class="metric-readonly-value">${dados.manutencao}</div>
-                    <label>Manutenção</label>
+                    <label>${t('dashboard.manutencao')}</label>
                 </div>
 
                 <div class="category-metric-col col-quebrado">
                     <div class="metric-icon-wrap"><span class="material-symbols-outlined">warning</span></div>
                     <div class="metric-readonly-value">${dados.quebrado}</div>
-                    <label>Quebrados</label>
+                    <label>${t('dashboard.quebrados')}</label>
                 </div>
             </div>
         </div>
@@ -57,9 +58,9 @@ function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
     return html`
         <div class="estoque-row" data-id="${equipamento.id}" data-equipamento-id="${equipamento.id}">
             <span data-col="categoria">${equipamento.categoria?.nome ?? ''}</span>
-            <span data-col="total" data-label="Total">${equipamento.quantidadeTotal}</span>
-            <span data-col="disponivel" data-label="Disponível">${equipamento.quantidadeDisponivel}</span>
-            <span data-col="quebrado" data-label="Quebrado">${equipamento.quantidadeQuebrada}</span>
+            <span data-col="total" data-label="${t('dashboard.total')}">${equipamento.quantidadeTotal}</span>
+            <span data-col="disponivel" data-label="${t('dashboard.disponivel')}">${equipamento.quantidadeDisponivel}</span>
+            <span data-col="quebrado" data-label="${t('dashboard.quebrado')}">${equipamento.quantidadeQuebrada}</span>
         </div>
     `;
 }
@@ -67,16 +68,16 @@ function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
 export function renderDashboardEstoqueContent(equipamentos: Equipamento[]): string {
     const header = html`
         <div class="estoque-header">
-            <span>Categoria</span>
-            <span>Total</span>
-            <span>Disponível</span>
-            <span>Quebrado</span>
+            <span>${t('dashboard.categoria')}</span>
+            <span>${t('dashboard.total')}</span>
+            <span>${t('dashboard.disponivel')}</span>
+            <span>${t('dashboard.quebrado')}</span>
         </div>
     `;
 
     const linhas = equipamentos.length
         ? equipamentos.map(renderDashboardEstoqueLinha).join('')
-        : html`<div class="dashboard-andamento-vazio" style="display:flex;"><p>Nenhum equipamento cadastrado.</p></div>`;
+        : html`<div class="dashboard-andamento-vazio" style="display:flex;"><p>${t('dashboard.nenhum_equipamento_cadastrado')}</p></div>`;
 
     return header + linhas;
 }
@@ -143,7 +144,7 @@ export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
 
     const obsHtml = loan.observacao ? html`
         <div class="devolucao-detalhe-secao devolucao-detalhe-obs">
-            <span class="detalhe-emprestimo-obs-label">Observação</span>
+            <span class="detalhe-emprestimo-obs-label">${t('dashboard.observacao')}</span>
             <p>${loan.observacao}</p>
         </div>
     ` : '';
@@ -169,7 +170,7 @@ export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
 
         <div class="devolucao-detalhe-secao">
             <div class="devolucao-detalhe-secao-header">
-                <span>Itens emprestados</span>
+                <span>${t('dashboard.itens_emprestados')}</span>
                 <span class="devolucao-detalhe-contagem">(${loan.itens.length})</span>
             </div>
             <ul class="detalhe-emprestimo-lista">${raw(itensHtml)}</ul>

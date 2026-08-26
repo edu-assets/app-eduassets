@@ -1,4 +1,5 @@
-import { DOCS_REGISTRY, getDocMeta } from './registry.js';
+import { getDocsRegistry, getDocMeta } from './registry.js';
+import { getIdioma } from '../state/i18nStore.js';
 import type { DocRegistryItem } from './registry.js';
 import { renderizarMarkdown } from './markdownRenderer.js';
 import type { HeadingItem } from './markdownRenderer.js';
@@ -27,10 +28,11 @@ async function buscarMarkdown(file: string): Promise<string> {
 }
 
 export async function loadDocument(id: string): Promise<LoadedDocument> {
-    const cacheado = cache.get(id);
+    const cacheKey = `${getIdioma()}:${id}`;
+    const cacheado = cache.get(cacheKey);
     if (cacheado) return cacheado;
 
-    const emAndamento = inflight.get(id);
+    const emAndamento = inflight.get(cacheKey);
     if (emAndamento) return emAndamento;
 
     const meta = getDocMeta(id);
@@ -40,26 +42,26 @@ export async function loadDocument(id: string): Promise<LoadedDocument> {
         const markdown = await buscarMarkdown(meta.file);
         const { html, headings } = await renderizarMarkdown(markdown);
         const documento: LoadedDocument = { meta, markdown, html, headings };
-        cache.set(id, documento);
-        inflight.delete(id);
+        cache.set(cacheKey, documento);
+        inflight.delete(cacheKey);
         return documento;
     })();
 
-    inflight.set(id, promise);
+    inflight.set(cacheKey, promise);
     return promise;
 }
 
 export function getDocument(id: string): LoadedDocument | null {
-    return cache.get(id) ?? null;
+    return cache.get(`${getIdioma()}:${id}`) ?? null;
 }
 
 export function getAllDocuments(): DocRegistryItem[] {
-    return DOCS_REGISTRY;
+    return getDocsRegistry();
 }
 
 /** Carrega todos os documentos em segundo plano, sem bloquear a UI. Chamado ao entrar em "Sobre". */
 export function preloadAllDocuments(): void {
-    DOCS_REGISTRY.forEach((doc) => {
+    getDocsRegistry().forEach((doc) => {
         loadDocument(doc.id).catch((erro) => {
             console.warn(`[eduAssets] Falha ao pré-carregar documento "${doc.id}":`, erro);
         });

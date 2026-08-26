@@ -4,6 +4,7 @@ import { renderControleLinha, renderControleEmptyState, ICONE_POR_TIPO } from '.
 import { listarCategoriasDisponiveis,filtrarOcorrencias, listarEquipamentosPorCategoria } from './service.js';
 import { fillSelect, renderPlaceholderOption  } from '../../shared/dom/fillSelect.js';
 import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
+import { t } from '../../core/state/i18nStore.js';
 
 const TIPOS_VISIVEIS = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
 
@@ -167,13 +168,13 @@ export function atualizarToolbar(els: ControleEls, estado: ControleEstado): void
 export function popularSelectCategorias(els: ControleEls): void {
     const categorias = listarCategoriasDisponiveis();
     const opcoes = categorias.map((c) => ({ id: c, label: c }));
-    fillSelect(els.campoCategoria, renderPlaceholderOption('Selecionar categoria'), renderOpcoesSelect(opcoes));
+    fillSelect(els.campoCategoria, renderPlaceholderOption(t('shell.selecionar_categoria')), renderOpcoesSelect(opcoes));
 }
 
 export function popularSelectModelos(els: ControleEls, categoriaNome: string | null): void {
     const equipamentos = listarEquipamentosPorCategoria(categoriaNome);
     const opcoes = equipamentos.map((eq) => ({ id: eq.id, label: eq.modelo }));
-    fillSelect(els.campoModelo, renderPlaceholderOption('Selecionar modelo'), renderOpcoesSelect(opcoes));
+    fillSelect(els.campoModelo, renderPlaceholderOption(t('shell.selecionar_modelo')), renderOpcoesSelect(opcoes));
 }
 
 function limparCamposModal(els: ControleEls): void {

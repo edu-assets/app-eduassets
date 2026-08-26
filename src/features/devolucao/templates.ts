@@ -2,6 +2,7 @@ import { html, raw } from '../../core/utils/html.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { gerarIniciais, formatarHora } from './utils.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
+import { t } from '../../core/state/i18nStore.js';
 import type { LoanItemUI, LoanUI } from '../../types/index.js';
 
 const LIMITE_ICONES_CARD = 3;
@@ -11,9 +12,9 @@ export function renderDevolucaoEmptyState(): string {
         containerClass: 'devolucao-vazia',
         imageSrc: '/assets/logos/eduAssets_logo-empty-state.webp',
         imageClass: 'devolucao-vazia-logo',
-        titulo: 'Empréstimos aparecerão aqui',
+        titulo: t('devolucao.emprestimos_aparecerao_aqui'),
         tituloClass: 'devolucao-vazia-texto',
-        subtitulo: 'Registre um novo empréstimo para começar a acompanhar as devoluções.',
+        subtitulo: t('devolucao.registre_um_novo_emprestimo_para_comecar'),
         subtituloClass: 'devolucao-vazia-sub'
     });
 }
@@ -21,10 +22,10 @@ export function renderDevolucaoEmptyState(): string {
 export function renderDevolucaoTabelaHeader(): string {
     return html`
         <div class="devolucao-tabela-header">
-            <span>Responsável</span>
-            <span>Equipamentos</span>
-            <span>Empréstimo</span>
-            <span>Ações</span>
+            <span>${t('devolucao.responsavel')}</span>
+            <span>${t('devolucao.equipamentos')}</span>
+            <span>${t('devolucao.emprestimo')}</span>
+            <span>${t('devolucao.acoes')}</span>
         </div>
     `;
 }
@@ -33,7 +34,7 @@ export function renderDevolucaoCard(loan: LoanUI): string {
     const temObservacao = loan.observacao ? html`
         <span class="info-data-relativa">
             <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.7;">sticky_note_2</span>
-            Com observação
+            ${t('devolucao.com_observacao')}
         </span>
     ` : '';
 
@@ -57,7 +58,7 @@ export function renderDevolucaoCard(loan: LoanUI): string {
                 ${raw(temObservacao)}
             </div>
             <div class="devolucao-col-acao">
-                <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}" data-requires-auth>Devolver</button>
+                <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}" data-requires-auth>${t('devolucao.devolver')}</button>
             </div>
         </div>
     `;
@@ -72,7 +73,7 @@ export function renderItensIcons(itens: LoanItemUI[]): string {
     const restantes = itens.length - visiveis.length;
 
     return visiveis.map(renderItemIconPill).join('') +
-        `<div class="devolucao-item-icon-pill devolucao-item-icon-mais" title="+${restantes} ${restantes > 1 ? 'itens' : 'item'}">...</div>`;
+        `<div class="devolucao-item-icon-pill devolucao-item-icon-mais" title="+${restantes} ${restantes > 1 ? t('devolucao.itens') : t('devolucao.item')}">...</div>`;
 }
 
 export function renderItemIconPill(item: LoanItemUI): string {
@@ -89,7 +90,7 @@ export function renderDetalheItensView(itens: LoanItemUI[]): string {
         <li>
             <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
             <span class="detalhe-item-nome">${item.quantidade}x ${item.nome}</span>
-            <span class="detalhe-item-status">Pendente</span>
+            <span class="detalhe-item-status">${t('devolucao.pendente')}</span>
         </li>
     `).join('');
 }
@@ -99,7 +100,7 @@ export function renderDetalheItensEdit(itens: LoanItemUI[]): string {
         <li class="detalhe-emprestimo-item-edit">
             <input type="number" min="1" class="detalhe-item-qtd" value="${item.quantidade}" data-id="${item.id}">
             <span>${item.nome}</span>
-            <button type="button" class="item-emprestimo-remover detalhe-item-remover" data-id="${item.id}" aria-label="Remover">
+            <button type="button" class="item-emprestimo-remover detalhe-item-remover" data-id="${item.id}" aria-label="${t('devolucao.remover')}">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </li>
@@ -108,5 +109,5 @@ export function renderDetalheItensEdit(itens: LoanItemUI[]): string {
 
 export function renderDetalheObservacao(observacao: string | null | undefined): string {
     if (!observacao) return '';
-    return html`<span class="detalhe-emprestimo-obs-label">Observação</span><p>${observacao}</p>`;
+    return html`<span class="detalhe-emprestimo-obs-label">${t('devolucao.observacao')}</span><p>${observacao}</p>`;
 }

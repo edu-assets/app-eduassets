@@ -3,6 +3,7 @@ import { getLoansAbertos } from '../../core/state/loanStore.js';
 import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
 import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
+import { t } from '../../core/state/i18nStore.js';
 import {
     renderDetalheItens,
     abrirDetalhe,
@@ -90,7 +91,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         els.btnConfirmarDevolucao.disabled = true;
         try {
             await confirmarDevolucao(Number(estado.idPendente));
-            showToast(`Devolução registrada para ${els.devolucaoDataInput.value}`, 'success');
+            showToast(t('feedback.devolucao_registrada').replace('{data}', els.devolucaoDataInput.value), 'success');
             closeModal('modal-confirmar-devolucao');
             estado.idPendente = null;
         } catch (erro) {

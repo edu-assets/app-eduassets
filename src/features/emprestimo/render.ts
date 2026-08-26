@@ -1,5 +1,6 @@
 import { renderItemRow, renderItensEmptyState } from './templates.js';
 import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
+import { t } from '../../core/state/i18nStore.js';
 import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect.js';
 import type { LoanItemUI, Equipamento, Responsavel } from '../../types/index.js';
 
@@ -31,5 +32,5 @@ export function popularSelectEquipamentos(select: HTMLSelectElement, equipamento
 
 export function popularSelectResponsaveis(select: HTMLSelectElement, responsaveis: Responsavel[]): void {
     const opcoes = responsaveis.map((r) => ({ id: r.id, label: r.nome }));
-    fillSelect(select, renderPlaceholderOption('Responsável pelo empréstimo'), renderOpcoesSelect(opcoes));
+    fillSelect(select, renderPlaceholderOption(t('emprestimo.responsavel_pelo_emprestimo')), renderOpcoesSelect(opcoes));
 }
