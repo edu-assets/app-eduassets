@@ -117,8 +117,8 @@ export function atualizarPaginacaoTexto(els: ControleEls, tabContent: HTMLElemen
     if (!tabContent || !els.paginacaoTexto) return;
     const total = tabContent.querySelectorAll('.registros-row').length;
     els.paginacaoTexto.textContent = total > 0
-        ? `Mostrando 1 a ${total} de ${total} registros`
-        : 'Nenhum registro encontrado';
+        ? t('controle.mostrando_registros').replace(/\{total\}/g, String(total))
+        : t('controle.nenhum_registro_encontrado');
 }
 
 export function ativarAba(els: ControleEls, estado: ControleEstado, tab: string): void {
