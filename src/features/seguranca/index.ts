@@ -1,6 +1,6 @@
 import { getUsuario, subscribe } from '../../core/state/authStore.js';
 import { attachSegurancaEvents } from './events.js';
-import { renderInfoConta } from './render.js';
+import { renderInfoConta, habilitarProtecaoAutofill } from './render.js';
 import type { SegurancaEls, SegurancaEstado } from './render.js';
 
 export function initSeguranca(): void {
@@ -24,4 +24,12 @@ export function initSeguranca(): void {
     renderInfoConta(els, getUsuario());
     subscribe(({ usuario }) => renderInfoConta(els, usuario));
     attachSegurancaEvents(els, estado);
+
+    habilitarProtecaoAutofill(els);
+
+    requestAnimationFrame(() => {
+        els.inputAtual.value = '';
+        els.inputNova.value = '';
+        els.inputConfirmar.value = '';
+    });
 }

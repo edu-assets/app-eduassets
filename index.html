@@ -343,7 +343,8 @@
                                         <div class="form-group">
                                             <label for="observacao"></label>
                                             <textarea id="observacao" name="observacao" rows="3"
-                                                placeholder="Adicione observações sobre o empréstimo..."  maxlength="250" style="resize: none;"></textarea>
+                                                placeholder="Adicione observações sobre o empréstimo..." maxlength="250"
+                                                style="resize: none;"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -562,7 +563,8 @@
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Disponíveis</span>
                                     <span class="dashboard-resumo-numero" id="resumo-disponivel">0</span>
-                                    <span class="dashboard-resumo-sub" id="resumo-disponivel-pct" data-i18n-exclude>0% do total</span>
+                                    <span class="dashboard-resumo-sub" id="resumo-disponivel-pct" data-i18n-exclude>0%
+                                        do total</span>
                                 </div>
                             </div>
                             <div class="dashboard-resumo-card dashboard-resumo-card-warning">
@@ -571,7 +573,8 @@
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Emprestados</span>
                                     <span class="dashboard-resumo-numero" id="resumo-emprestado">0</span>
-                                    <span class="dashboard-resumo-sub" id="resumo-emprestado-pct" data-i18n-exclude>0% do total</span>
+                                    <span class="dashboard-resumo-sub" id="resumo-emprestado-pct" data-i18n-exclude>0%
+                                        do total</span>
                                 </div>
                             </div>
 
@@ -581,7 +584,8 @@
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Em Manutenção</span>
                                     <span class="dashboard-resumo-numero" id="resumo-manutencao">0</span>
-                                    <span class="dashboard-resumo-sub" id="resumo-manutencao-pct" data-i18n-exclude>0% do total</span>
+                                    <span class="dashboard-resumo-sub" id="resumo-manutencao-pct" data-i18n-exclude>0%
+                                        do total</span>
                                 </div>
                             </div>
 
@@ -592,34 +596,35 @@
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Quebrados</span>
                                     <span class="dashboard-resumo-numero" id="resumo-quebrado">0</span>
-                                    <span class="dashboard-resumo-sub" id="resumo-quebrado-pct" data-i18n-exclude>0% do total</span>
+                                    <span class="dashboard-resumo-sub" id="resumo-quebrado-pct" data-i18n-exclude>0% do
+                                        total</span>
                                 </div>
                             </div>
                         </div>
 
-                            <div class="dashboard-main">
+                        <div class="dashboard-main">
 
-                                <div class="dashboard-tabs">
-                                    <span class="dashboard-tab-link active" data-tab="estoque">
-                                        <span class="material-symbols-outlined">inventory_2</span>Estoque
-                                    </span>
-                                    <span class="dashboard-tab-link" data-tab="historico">
-                                        <span class="material-symbols-outlined">history</span>Histórico
-                                    </span>
+                            <div class="dashboard-tabs">
+                                <span class="dashboard-tab-link active" data-tab="estoque">
+                                    <span class="material-symbols-outlined">inventory_2</span>Estoque
+                                </span>
+                                <span class="dashboard-tab-link" data-tab="historico">
+                                    <span class="material-symbols-outlined">history</span>Histórico
+                                </span>
 
-                                    <div class="dashboard-toolbar" id="dashboard-toolbar">
-                                        <div class="controle-tabs-ferramentas">
-                                            <div class="controle-busca-wrap">
-                                                <span class="material-symbols-outlined">search</span>
-                                                <input type="text" placeholder="Buscar por informações..."
-                                                    id="dashboard-busca">
-                                            </div>
-                                            <button type="button" class="btn btn-neutral btn-sm" disabled>
-                                                <span class="material-symbols-outlined">filter_list</span> Filtros
-                                            </button>
+                                <div class="dashboard-toolbar" id="dashboard-toolbar">
+                                    <div class="controle-tabs-ferramentas">
+                                        <div class="controle-busca-wrap">
+                                            <span class="material-symbols-outlined">search</span>
+                                            <input type="text" placeholder="Buscar por informações..."
+                                                id="dashboard-busca">
                                         </div>
+                                        <button type="button" class="btn btn-neutral btn-sm" disabled>
+                                            <span class="material-symbols-outlined">filter_list</span> Filtros
+                                        </button>
                                     </div>
                                 </div>
+                            </div>
 
                             <div class="dashboard-tab-content active" id="tab-estoque"></div>
 
@@ -1679,23 +1684,32 @@
                             </button>
 
                             <div class="seguranca-form-senha" id="seguranca-form-senha" style="display:none;">
+                                <!-- Campos-isca ocultos: absorvem o autofill do Chrome antes dos campos reais -->
+                                <input type="text" name="fake-username" autocomplete="username" style="display:none"
+                                    tabindex="-1" aria-hidden="true">
+                                <input type="password" name="fake-password" autocomplete="new-password"
+                                    style="display:none" tabindex="-1" aria-hidden="true">
+
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="seguranca-senha-atual">Senha atual</label>
-                                        <input type="password" id="seguranca-senha-atual"
-                                            autocomplete="current-password">
+                                        <input type="password" id="seguranca-senha-atual" name="senha-atual-eduassets"
+                                            autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore>
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="seguranca-senha-nova">Nova senha</label>
-                                        <input type="password" id="seguranca-senha-nova" autocomplete="new-password"
+                                        <input type="password" id="seguranca-senha-nova" name="senha-nova-eduassets"
+                                            autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore
                                             placeholder="Mínimo de 8 caracteres">
                                     </div>
                                     <div class="form-group">
                                         <label for="seguranca-senha-confirmar">Confirmar nova senha</label>
                                         <input type="password" id="seguranca-senha-confirmar"
-                                            autocomplete="new-password" placeholder="Digite novamente a nova senha">
+                                            name="senha-confirmar-eduassets" autocomplete="new-password" readonly
+                                            data-lpignore="true" data-1p-ignore
+                                            placeholder="Digite novamente a nova senha">
                                     </div>
                                 </div>
                                 <p class="login-erro" id="seguranca-senha-erro"></p>
