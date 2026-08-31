@@ -50,10 +50,10 @@ export function renderResumo(els: DashboardEls, equipamentos: Equipamento[]): vo
     els.resumoQuebrado.textContent = String(resumo.quebrado);
     els.resumoManutencao.textContent = String(resumo.manutencao);
 
-    els.resumoDisponivelPct.textContent = `${resumo.disponivelPct} do total`;
-    els.resumoEmprestadoPct.textContent = `${resumo.emprestadoPct} do total`;
-    els.resumoQuebradoPct.textContent = `${resumo.quebradoPct} do total`;
-    els.resumoManutencaoPct.textContent = `${resumo.manutencaoPct} do total`;
+    els.resumoDisponivelPct.textContent = `${resumo.disponivelPct} / Total`;
+    els.resumoEmprestadoPct.textContent = `${resumo.emprestadoPct} / Total`;
+    els.resumoQuebradoPct.textContent = `${resumo.quebradoPct} / Total`;
+    els.resumoManutencaoPct.textContent = `${resumo.manutencaoPct} / Total`;
 }
 
 export function renderHistorico(els: DashboardEls, loans: LoanUI[]): void {
