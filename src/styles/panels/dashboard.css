@@ -321,7 +321,7 @@
 .category-summary-box-title {
     font-size: 0.88rem;
     font-weight: 700;
-    color: var(--primary-dark);
+    color: var(--text-primary);
     margin-bottom: 16px;
 }
 
