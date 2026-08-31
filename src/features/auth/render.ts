@@ -29,6 +29,8 @@ export function renderHeroButton(els: AuthEls, autenticado: boolean): void {
     els.btnHeroLogin.classList.toggle('btn-primary', !autenticado);
     els.btnHeroLogin.classList.toggle('btn-neutral', autenticado);
 
+    els.btnHeroLogin.dataset.i18nKey = autenticado ? 'auth.sair' : 'auth.login';
+
     els.btnHeroLogin.innerHTML = autenticado
         ? '<span class="material-symbols-outlined">logout</span> Sair'
         : '<span class="material-symbols-outlined">login</span> Login';
