@@ -326,15 +326,10 @@
 }
 
 .category-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
-    gap: 10px;
-    align-items: flex-start;
-}
-
-.col-manutencao .metric-icon-wrap {
-    background-color: var(--secondary-bg);
-    color: var(--secondary-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 22px 18px;
 }
 
 .category-metric-col {
@@ -342,6 +337,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+    flex: 0 1 96px;
     min-width: 0;
     gap: 2px;
 }
@@ -351,12 +347,12 @@
     width: 100%;
     border: none;
     background: transparent;
-    font-size: 1.35rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--text-primary);
     text-align: center;
     padding: 4px 0;
-    margin-top: 4px;
+    margin-top: 6px;
     font-family: var(--font-heading);
     line-height: 1.1;
 }
@@ -395,41 +391,72 @@
 }
 
 .metric-icon-wrap {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1.5px solid transparent;
+    box-shadow: var(--shadow-sm);
 }
 
 .metric-icon-wrap .material-symbols-outlined {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
 }
 
+/* Cada métrica usa a mesma cor de destaque no ícone e no número,
+   com um selo (badge) de contraste consistente nos dois temas —
+   em vez de um fundo claro fixo que "sumia" no tema escuro. */
 .col-total .metric-icon-wrap {
-    background-color: var(--primary-50);
+    background-color: color-mix(in srgb, var(--primary-color) 16%, var(--surface-white));
+    border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
+    color: var(--primary-color);
+}
+
+.col-total .metric-readonly-value {
     color: var(--primary-color);
 }
 
 .col-disponivel .metric-icon-wrap {
-    background-color: var(--success-bg);
+    background-color: color-mix(in srgb, var(--success-color) 16%, var(--surface-white));
+    border-color: color-mix(in srgb, var(--success-color) 40%, transparent);
+    color: var(--success-color);
+}
+
+.col-disponivel .metric-readonly-value {
     color: var(--success-color);
 }
 
 .col-emprestado .metric-icon-wrap {
-    background-color: var(--warning-bg);
+    background-color: color-mix(in srgb, var(--warning-color) 16%, var(--surface-white));
+    border-color: color-mix(in srgb, var(--warning-color) 40%, transparent);
     color: var(--warning-color);
 }
 
-.metric-readonly-value {
+.col-emprestado .metric-readonly-value {
     color: var(--warning-color);
+}
+
+.col-manutencao .metric-icon-wrap {
+    background-color: color-mix(in srgb, var(--secondary-color) 16%, var(--surface-white));
+    border-color: color-mix(in srgb, var(--secondary-color) 40%, transparent);
+    color: var(--secondary-color);
+}
+
+.col-manutencao .metric-readonly-value {
+    color: var(--secondary-color);
 }
 
 .col-quebrado .metric-icon-wrap {
-    background-color: var(--error-bg);
+    background-color: color-mix(in srgb, var(--error-color) 16%, var(--surface-white));
+    border-color: color-mix(in srgb, var(--error-color) 40%, transparent);
+    color: var(--error-color);
+}
+
+.col-quebrado .metric-readonly-value {
     color: var(--error-color);
 }
 
@@ -437,7 +464,10 @@
     min-width: 0;
 }
 
-/* ===== Drawer de detalhes (categoria / histórico) ===== */
+/* ===== Drawer de detalhes (categoria / histórico) =====
+   Desktop/tablet: painel lateral fixo (comportamento "inspector").
+   Mobile (ver media query 640px): vira modal centralizado, igual ao
+   padrão usado em devolução — nunca deve abrir lateralmente no celular. */
 .dashboard-detalhe-backdrop {
     display: none;
     position: fixed;
@@ -616,9 +646,33 @@
         width: 100%;
     }
 
+    /* Mobile: o detalhe deixa de ser um drawer lateral ("inspector") e
+       passa a se comportar como os demais modais do app — caixa
+       centralizada com backdrop, igual ao padrão de
+       .devolucao-detalhe-painel.mobile-aberto. */
     .dashboard-detalhe-drawer {
-        max-width: 100%;
-        padding: 18px;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        height: auto;
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
+        width: calc(100% - 32px);
+        max-width: 440px;
+        border-radius: 8px;
+        padding: 20px 18px 18px;
+        transform: translate(-50%, -50%) scale(0.96);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform 0.2s ease, opacity 0.2s ease, visibility 0.2s;
+    }
+
+    .dashboard-detalhe-drawer.open {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
     }
 
     /* ----- inventory cards ----- */
