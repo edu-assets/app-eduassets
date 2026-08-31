@@ -1,13 +1,11 @@
-import { openModal } from '../../core/ui/index.js';
-import { getEquipamentos } from '../../core/state/equipamentoStore.js';
-import { calcularResumo, calcularEmprestado, calcularManutencao, buscarEquipamentoPorId } from './service.js';
+import { calcularResumo, calcularEmprestado, calcularManutencao } from './service.js';
 import {
     renderDashboardCategoriaForm,
     renderDashboardEstoqueContent,
-    renderDashboardAndamentoContent,
     renderDashboardHistoricoContent,
     renderDashboardHistoricoDetalheBody
 } from './templates.js';
+import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overlayPanel.js';
 import type { Equipamento, LoanUI, CategoriaResumoDados } from '../../types/index.js';
 import { t } from '../../core/state/i18nStore.js';
 
@@ -16,18 +14,13 @@ const LIMITE_CHIPS_HISTORICO = 2;
 export interface DashboardEls {
     estoqueContainer: HTMLElement;
     btnExportar: HTMLElement | null;
-    andamentoLista: HTMLElement;
-    andamentoVazio: HTMLElement;
-    detalheConteudo: HTMLElement;
+    detalheDrawer: HTMLElement | null;
+    detalheBackdrop: HTMLElement | null;
     detalheTitulo: HTMLElement;
     detalheBody: HTMLElement;
     btnDetalheFechar: HTMLElement | null;
-    detalheContainer: HTMLElement | null;
-    detalheEmpty: HTMLElement | null;
     historicoLista: HTMLElement;
     historicoVazio: HTMLElement;
-    modalCategoriaBody: HTMLElement;
-    btnModalCategoriaFechar: HTMLElement | null;
     resumoTotal: HTMLElement;
     resumoDisponivel: HTMLElement;
     resumoEmprestado: HTMLElement;
@@ -41,8 +34,6 @@ export interface DashboardEls {
 }
 
 export interface DashboardEstado {
-    equipamentoIdModalAtual: number | null;
-    equipamentoIdPainelAtual: number | null;
     termoBusca: string;
 }
 
@@ -65,17 +56,6 @@ export function renderResumo(els: DashboardEls, equipamentos: Equipamento[]): vo
     els.resumoManutencaoPct.textContent = `${resumo.manutencaoPct} do total`;
 }
 
-export function renderAndamento(els: DashboardEls, loans: LoanUI[]): void {
-    if (!loans.length) {
-        els.andamentoLista.innerHTML = '';
-        els.andamentoVazio.style.display = 'flex';
-        return;
-    }
-
-    els.andamentoVazio.style.display = 'none';
-    els.andamentoLista.innerHTML = renderDashboardAndamentoContent(loans);
-}
-
 export function renderHistorico(els: DashboardEls, loans: LoanUI[]): void {
     if (!loans.length) {
         els.historicoLista.innerHTML = '';
@@ -88,7 +68,7 @@ export function renderHistorico(els: DashboardEls, loans: LoanUI[]): void {
 }
 
 export function ativarAbaDashboard(els: DashboardEls, tab: string): void {
-    document.querySelectorAll('.dashboard-tab-link').forEach((t) => t.classList.remove('active'));
+    document.querySelectorAll('.dashboard-tab-link').forEach((tabEl) => tabEl.classList.remove('active'));
     document.querySelectorAll('.dashboard-tab-content').forEach((c) => c.classList.remove('active'));
 
     const tabLink = document.querySelector(`.dashboard-tab-link[data-tab="${tab}"]`);
@@ -96,18 +76,6 @@ export function ativarAbaDashboard(els: DashboardEls, tab: string): void {
 
     if (tabLink) tabLink.classList.add('active');
     if (targetTab) targetTab.classList.add('active');
-}
-
-export function atualizarVisibilidadeDetalhe(els: DashboardEls, ehLayoutEmpilhadoAtual: boolean): void {
-    if (!els.detalheContainer) return;
-    const abaAtiva = document.querySelector<HTMLElement>('.dashboard-tab-link.active')?.dataset.tab;
-    const deveExibir = (abaAtiva === 'estoque' || abaAtiva === 'historico') && !ehLayoutEmpilhadoAtual;
-
-    els.detalheContainer.style.display = deveExibir ? 'flex' : 'none';
-
-    if (!deveExibir) {
-        fecharDetalhe(els);
-    }
 }
 
 function montarDadosFormularioCategoria(equipamento: Equipamento): CategoriaResumoDados {
@@ -122,60 +90,27 @@ function montarDadosFormularioCategoria(equipamento: Equipamento): CategoriaResu
     };
 }
 
-export function exibirDetalheEstoque(
-    els: DashboardEls,
-    estado: DashboardEstado,
-    equipamento: Equipamento,
-    ehLayoutEmpilhadoAtual: boolean
-): void {
-    if (ehLayoutEmpilhadoAtual) {
-        abrirModalCategoria(els, estado, equipamento);
-        return;
-    }
-
+export function exibirDetalheEstoque(els: DashboardEls, equipamento: Equipamento): void {
     const dadosFormulario = montarDadosFormularioCategoria(equipamento);
 
     els.detalheTitulo.textContent = t('shell.detalhes_da_categoria');
-    els.detalheBody.innerHTML = renderDashboardCategoriaForm(dadosFormulario) + `
-        <div class="category-edit-actions">
-            <button type="button" class="btn btn-neutral" id="btn-detalhe-estoque-fechar">${t('dashboard.fechar')}</button>
-        </div>
-    `;
+    els.detalheBody.innerHTML = renderDashboardCategoriaForm(dadosFormulario);
 
-    estado.equipamentoIdPainelAtual = equipamento.id;
-    mostrarDetalhe(els);
-}
-
-export function abrirModalCategoria(els: DashboardEls, estado: DashboardEstado, equipamento: Equipamento): void {
-    estado.equipamentoIdModalAtual = equipamento.id;
-    const painel = els.detalheConteudo.closest<HTMLElement>('.devolucao-detalhe-painel');
-    if (painel) painel.classList.remove('dashboard-detalhe-overlay-open');
-    els.modalCategoriaBody.innerHTML = renderDashboardCategoriaForm(montarDadosFormularioCategoria(equipamento));
-    openModal('modal-dashboard-categoria');
+    abrirDetalhe(els);
 }
 
 export function abrirDetalheHistorico(els: DashboardEls, loan: LoanUI): void {
     els.detalheTitulo.textContent = `Empréstimo #${loan.numero}`;
     els.detalheBody.innerHTML = renderDashboardHistoricoDetalheBody(loan);
-    mostrarDetalhe(els);
+    abrirDetalhe(els);
 }
 
-export function mostrarDetalhe(els: DashboardEls): void {
-    if (els.detalheEmpty) els.detalheEmpty.style.display = 'none';
-    els.detalheConteudo.style.display = 'block';
-
-    const painel = els.detalheConteudo.closest<HTMLElement>('.devolucao-detalhe-painel');
-    if (painel && els.detalheBody.innerHTML.trim()) {
-        painel.classList.add('dashboard-detalhe-overlay-open');
-    }
-
-    if (els.detalheContainer) els.detalheContainer.style.display = 'flex';
+function abrirDetalhe(els: DashboardEls): void {
+    if (!els.detalheDrawer) return;
+    abrirPainelOverlay({ painel: els.detalheDrawer, backdrop: els.detalheBackdrop }, 'open', 'active');
 }
 
 export function fecharDetalhe(els: DashboardEls): void {
-    els.detalheConteudo.style.display = 'none';
-    if (els.detalheEmpty) els.detalheEmpty.style.display = 'flex';
-
-    const painel = els.detalheConteudo.closest<HTMLElement>('.devolucao-detalhe-painel');
-    if (painel) painel.classList.remove('dashboard-detalhe-overlay-open');
+    if (!els.detalheDrawer) return;
+    fecharPainelOverlay({ painel: els.detalheDrawer, backdrop: els.detalheBackdrop }, 'open', 'active');
 }

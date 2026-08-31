@@ -1,15 +1,11 @@
-import { showToast, closeModal } from '../../core/ui/index.js';
+import { showToast } from '../../core/ui/index.js';
 import { getEquipamentos, subscribe as subscribeEquipamentos } from '../../core/state/equipamentoStore.js';
-import { getLoans, getLoansAbertos, subscribe as subscribeLoans } from '../../core/state/loanStore.js';
-import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
-import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
+import { getLoans, subscribe as subscribeLoans } from '../../core/state/loanStore.js';
 import {
     renderEstoque,
     renderResumo,
-    renderAndamento,
     renderHistorico,
     ativarAbaDashboard,
-    atualizarVisibilidadeDetalhe,
     exibirDetalheEstoque,
     abrirDetalheHistorico,
     fecharDetalhe
@@ -18,27 +14,24 @@ import type { DashboardEls, DashboardEstado } from './render.js';
 import { exportarEstoqueCsv, filtrarEquipamentos, filtrarHistorico, buscarEquipamentoPorId } from './service.js';
 import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
 
-
 export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado): void {
     els.estoqueContainer.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const row = target.closest<HTMLElement>('.estoque-row');
-    if (!row) return;
+        const target = e.target as HTMLElement;
+        const row = target.closest<HTMLElement>('.estoque-row');
+        if (!row) return;
 
-    const equipamento = buscarEquipamentoPorId(row.dataset.equipamentoId ?? '', getEquipamentos());
-    if (!equipamento) return;
+        const equipamento = buscarEquipamentoPorId(row.dataset.equipamentoId ?? '', getEquipamentos());
+        if (!equipamento) return;
 
-    exibirDetalheEstoque(els, estado, equipamento, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
-});
+        exibirDetalheEstoque(els, equipamento);
+    });
 
-    if (els.detalheBody) {
-        els.detalheBody.addEventListener('click', (e) => {
-            const target = e.target as HTMLElement;
-            if (target.closest('#btn-detalhe-estoque-fechar')) {
-                fecharDetalhe(els);
-            }
-        });
-    }
+    if (els.btnDetalheFechar) els.btnDetalheFechar.addEventListener('click', () => fecharDetalhe(els));
+    if (els.detalheBackdrop) els.detalheBackdrop.addEventListener('click', () => fecharDetalhe(els));
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && els.detalheDrawer?.classList.contains('open')) fecharDetalhe(els);
+    });
 
     if (els.inputBusca) {
         els.inputBusca.addEventListener('input', (e) => {
@@ -54,22 +47,12 @@ export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado
         });
     }
 
-    if (els.btnModalCategoriaFechar) {
-        els.btnModalCategoriaFechar.addEventListener('click', () => {
-            estado.equipamentoIdModalAtual = null;
-            closeModal('modal-dashboard-categoria');
-        });
-    }
-
     document.querySelectorAll<HTMLElement>('.dashboard-tab-link').forEach((tabLink) => {
         tabLink.addEventListener('click', () => {
             ativarAbaDashboard(els, tabLink.dataset.tab ?? '');
-            atualizarVisibilidadeDetalhe(els, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT));
             fecharDetalhe(els);
         });
     });
-
-    if (els.btnDetalheFechar) els.btnDetalheFechar.addEventListener('click', () => fecharDetalhe(els));
 
     if (els.btnExportar) {
         els.btnExportar.addEventListener('click', () => {
@@ -93,16 +76,13 @@ export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado
         if (loan) abrirDetalheHistorico(els, loan);
     });
 
-    window.addEventListener('resize', () => atualizarVisibilidadeDetalhe(els, ehLayoutEmpilhado(LAYOUT_EMPILHADO_BREAKPOINT)));
-
     subscribeEquipamentos(() => {
         const equipamentos = getEquipamentos();
         renderEstoque(els, filtrarEquipamentos(equipamentos, estado.termoBusca));
-        renderResumo(els, equipamentos); 
+        renderResumo(els, equipamentos);
     });
 
     subscribeLoans(() => {
-        renderAndamento(els, getLoansAbertos());
         const loansOrdenados = [...getLoans()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         renderHistorico(els, filtrarHistorico(loansOrdenados, estado.termoBusca));
     });

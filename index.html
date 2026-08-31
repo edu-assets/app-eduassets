@@ -528,22 +528,8 @@
                     </div>
                 </section>
 
-                <!-- PAINEL 3: Dashboard -->
+                <!-- Painel 3: Dashboard -->
                 <section class="panel" id="panel-dashboard">
-
-                    <!-- Modal de edição de categoria no dashboard -->
-                    <div class="modal-overlay" id="modal-dashboard-categoria">
-                        <div class="modal-box">
-                            <div class="modal-header">
-                                <h3>Detalhes da categoria</h3>
-                            </div>
-                            <div class="modal-body" id="modal-categoria-body"></div>
-                            <div class="modal-footer">
-                                <button class="btn btn-neutral" id="modal-categoria-fechar"
-                                    type="button">Fechar</button>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="dashboard-header-row">
                         <div>
@@ -611,90 +597,68 @@
                             </div>
                         </div>
 
-                        <div class="dashboard-layout">
-
-                            <div class="dashboard-main">
-
-                                <div class="dashboard-tabs">
-                                    <span class="dashboard-tab-link active" data-tab="estoque">
-                                        <span class="material-symbols-outlined">inventory_2</span>Estoque
-                                    </span>
-                                    <span class="dashboard-tab-link" data-tab="historico">
-                                        <span class="material-symbols-outlined">history</span>Histórico
-                                    </span>
-
-                                    <div class="dashboard-toolbar" id="dashboard-toolbar">
-                                        <div class="controle-tabs-ferramentas">
-                                            <div class="controle-busca-wrap">
-                                                <span class="material-symbols-outlined">search</span>
-                                                <input type="text" placeholder="Buscar por informações..."
-                                                    id="dashboard-busca">
-                                            </div>
-                                            <button type="button" class="btn btn-neutral btn-sm" disabled>
-                                                <span class="material-symbols-outlined">filter_list</span> Filtros
-                                            </button>
+                        <div class="dashboard-main">
+                            <div class="dashboard-tabs">
+                                <span class="dashboard-tab-link active" data-tab="estoque">
+                                    <span class="material-symbols-outlined">inventory_2</span><span
+                                        data-i18n-key="dashboard.aba_estoque">Estoque</span>
+                                </span>
+                                <span class="dashboard-tab-link" data-tab="historico">
+                                    <span class="material-symbols-outlined">history</span><span
+                                        data-i18n-key="dashboard.aba_historico">Histórico</span>
+                                </span>
+                                <div class="dashboard-toolbar" id="dashboard-toolbar">
+                                    <div class="controle-tabs-ferramentas">
+                                        <div class="controle-busca-wrap">
+                                            <span class="material-symbols-outlined">search</span>
+                                            <input type="text" placeholder="Buscar por informações..."
+                                                id="dashboard-busca">
                                         </div>
+                                        <button type="button" class="btn btn-neutral btn-sm" disabled>
+                                            <span class="material-symbols-outlined">filter_list</span> Filtros
+                                        </button>
                                     </div>
                                 </div>
-
-                                <div class="dashboard-tab-content active" id="tab-estoque"></div>
-
-                                <div class="dashboard-tab-content" id="tab-historico">
-                                    <div class="historico-header">
-                                        <span>ID</span>
-                                        <span>Solicitante</span>
-                                        <span>Responsável</span>
-                                        <span>Retirada</span>
-                                        <span>Devolução</span>
-                                        <span>Itens</span>
-                                        <span>Status</span>
-                                        <span></span>
-                                    </div>
-                                    <div class="historico-lista" id="historico-lista"></div>
-                                    <div class="historico-vazio devolucao-detalhe-empty" id="historico-vazio"
-                                        style="display:none;">
-                                        <span class="material-symbols-outlined">history</span>
-                                        <p>Nenhum empréstimo registrado ainda.</p>
-                                    </div>
-                                </div>
-
                             </div>
 
-                            <aside class="devolucao-detalhe-painel">
+                            <div class="dashboard-tab-content active" id="tab-estoque"></div>
 
-                                <div class="dashboard-andamento" id="dashboard-andamento">
-                                    <h3 class="dashboard-andamento-title">Empréstimos em andamento</h3>
-                                    <div class="dashboard-andamento-lista" id="dashboard-andamento-lista"></div>
-                                    <div class="dashboard-andamento-vazio" id="dashboard-andamento-vazio"
-                                        style="display:none;">
-                                        <span class="material-symbols-outlined">event_available</span>
-                                        <p>Nenhum empréstimo em andamento.</p>
-                                    </div>
+                            <div class="dashboard-tab-content" id="tab-historico">
+                                <div class="historico-header">
+                                    <span>ID</span>
+                                    <span>Solicitante</span>
+                                    <span>Responsável</span>
+                                    <span>Retirada</span>
+                                    <span>Devolução</span>
+                                    <span>Itens</span>
+                                    <span>Status</span>
+                                    <span></span>
                                 </div>
-
-                                <div class="dashboard-detalhe-container" id="dashboard-detalhe-container">
-                                    <!-- Novo Estado Vazio para o Detalhe -->
-                                    <div class="dashboard-detalhe-empty-state" id="dashboard-detalhe-empty">
-                                        <span class="material-symbols-outlined">touch_app</span>
-                                        <p>Selecione um item para visualizar</p>
-                                    </div>
-
-                                    <div class="devolucao-detalhe-conteudo" id="dashboard-detalhe-conteudo"
-                                        style="display:none;">
-                                        <div class="devolucao-detalhe-header">
-                                            <h3 id="dashboard-detalhe-titulo">Detalhes</h3>
-                                            <button type="button" class="devolucao-detalhe-fechar"
-                                                id="btn-dashboard-detalhe-fechar" aria-label="Fechar">
-                                                <span class="material-symbols-outlined">close</span>
-                                            </button>
-                                        </div>
-                                        <div id="dashboard-detalhe-body"></div>
-                                    </div>
+                                <div class="historico-lista" id="historico-lista"></div>
+                                <div class="historico-vazio devolucao-detalhe-empty" id="historico-vazio"
+                                    style="display:none;">
+                                    <span class="material-symbols-outlined">history</span>
+                                    <p>Nenhum empréstimo registrado ainda.</p>
                                 </div>
-
-                            </aside>
+                            </div>
 
                         </div>
+
+                        <div class="dashboard-detalhe-backdrop" id="dashboard-detalhe-backdrop"></div>
+
+                        <aside class="dashboard-detalhe-drawer" id="dashboard-detalhe-drawer">
+                            <div class="devolucao-detalhe-conteudo" id="dashboard-detalhe-conteudo">
+                                <div class="devolucao-detalhe-header">
+                                    <h3 id="dashboard-detalhe-titulo">Detalhes</h3>
+                                    <button type="button" class="devolucao-detalhe-fechar"
+                                        id="btn-dashboard-detalhe-fechar" aria-label="Fechar">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
+                                </div>
+                                <div id="dashboard-detalhe-body"></div>
+                            </div>
+                        </aside>
+
                     </div>
                 </section>
 
