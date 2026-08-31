@@ -36,7 +36,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         id: 'readme',
         title: { pt: 'README', en: 'README' },
         icon: 'article',
-        file: { pt: '/docs/README.md', en: '/docs/README.md' },
+        file: { pt: '/docs/LEIAME.md', en: '/docs/README.md' },
         category: 'geral',
         version: 'v0.9.9',
         updatedAt: '2026-08-25'

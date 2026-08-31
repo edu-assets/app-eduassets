@@ -597,29 +597,29 @@
                             </div>
                         </div>
 
-                        <div class="dashboard-main">
-                            <div class="dashboard-tabs">
-                                <span class="dashboard-tab-link active" data-tab="estoque">
-                                    <span class="material-symbols-outlined">inventory_2</span><span
-                                        data-i18n-key="dashboard.aba_estoque">Estoque</span>
-                                </span>
-                                <span class="dashboard-tab-link" data-tab="historico">
-                                    <span class="material-symbols-outlined">history</span><span
-                                        data-i18n-key="dashboard.aba_historico">Histórico</span>
-                                </span>
-                                <div class="dashboard-toolbar" id="dashboard-toolbar">
-                                    <div class="controle-tabs-ferramentas">
-                                        <div class="controle-busca-wrap">
-                                            <span class="material-symbols-outlined">search</span>
-                                            <input type="text" placeholder="Buscar por informações..."
-                                                id="dashboard-busca">
+                            <div class="dashboard-main">
+
+                                <div class="dashboard-tabs">
+                                    <span class="dashboard-tab-link active" data-tab="estoque">
+                                        <span class="material-symbols-outlined">inventory_2</span>Estoque
+                                    </span>
+                                    <span class="dashboard-tab-link" data-tab="historico">
+                                        <span class="material-symbols-outlined">history</span>Histórico
+                                    </span>
+
+                                    <div class="dashboard-toolbar" id="dashboard-toolbar">
+                                        <div class="controle-tabs-ferramentas">
+                                            <div class="controle-busca-wrap">
+                                                <span class="material-symbols-outlined">search</span>
+                                                <input type="text" placeholder="Buscar por informações..."
+                                                    id="dashboard-busca">
+                                            </div>
+                                            <button type="button" class="btn btn-neutral btn-sm" disabled>
+                                                <span class="material-symbols-outlined">filter_list</span> Filtros
+                                            </button>
                                         </div>
-                                        <button type="button" class="btn btn-neutral btn-sm" disabled>
-                                            <span class="material-symbols-outlined">filter_list</span> Filtros
-                                        </button>
                                     </div>
                                 </div>
-                            </div>
 
                             <div class="dashboard-tab-content active" id="tab-estoque"></div>
 
@@ -970,9 +970,9 @@
                             <div class="controle-dica-bar">
                                 <div class="controle-dica-info">
                                     <span class="material-symbols-outlined">info</span>
-                                    <span><strong>Dica:</strong> Clique em um registro para visualizar detalhes,
-                                        adicionar
-                                        resolução e acompanhar o histórico.</span>
+                                    <span><strong data-i18n-key="shell.dica">Dica:</strong> <span
+                                            data-i18n-key="controle.dica_texto">Clique em um registro para visualizar
+                                            detalhes, adicionar resolução e acompanhar o histórico.</span></span>
                                 </div>
                                 <button type="button" class="btn btn-neutral btn-sm" disabled>
                                     Saiba mais <span class="material-symbols-outlined">open_in_new</span>
@@ -1913,7 +1913,7 @@
                     </div>
 
                     <div class="doc-body-row">
-                        <article class="doc-content">
+                        <article class="doc-content" data-i18n-exclude>
                             <h2 id="doc-content-title" style="margin-top:0;"></h2>
                             <div id="doc-content-body"></div>
                         </article>

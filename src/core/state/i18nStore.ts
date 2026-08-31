@@ -112,11 +112,14 @@ function traduzirElemento(raiz: Node | null): void {
         acceptNode(no) {
             const pai = no.parentElement;
             if (!pai || ['SCRIPT', 'STYLE'].includes(pai.tagName)) return NodeFilter.FILTER_REJECT;
+            if (pai.closest('[data-i18n-exclude]')) return NodeFilter.FILTER_REJECT;
             return no.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
         }
     });
 
-    const textos: Text[] = raiz.nodeType === Node.TEXT_NODE ? [raiz as Text] : [];
+    const textos: Text[] = raiz.nodeType === Node.TEXT_NODE
+        ? ((raiz as Text).parentElement?.closest('[data-i18n-exclude]') ? [] : [raiz as Text])
+        : [];
     while (walker.nextNode()) textos.push(walker.currentNode as Text);
 
     textos.forEach((no) => {

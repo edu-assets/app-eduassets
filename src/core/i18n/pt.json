@@ -52,6 +52,7 @@
   "controle.botao": "Botão",
   "controle.cabo": "Cabo",
   "controle.carcaca": "Carcaça",
+  "controle.dica_texto": "Clique em um registro para visualizar detalhes, adicionar resolução e acompanhar o histórico.",
   "controle.editar": "Editar",
   "controle.excluir": "Excluir",
   "controle.mais_opcoes": "Mais opções",
@@ -335,5 +336,8 @@
   "shell.vincule_um_cartao_fisico_para_login_rapi": "Vincule um cartão físico para login rápido de administrador.",
   "shell.visao_geral_do_estoque_com_estatisticas_": "Visão geral do estoque com estatísticas e últimos registros.",
   "emprestimo.dados_do_emprestimo": "Dados do Empréstimo",
-  "shell.clique_para_alterar": "(Clique para alterar)"
+  "controle.mostrando_registros": "Mostrando 1 a {total} de {total} registros",
+  "shell.clique_para_alterar": "(Clique para alterar)",
+  "dashboard.aba_estoque": "Estoque",
+  "dashboard.aba_historico": "Histórico"
 }

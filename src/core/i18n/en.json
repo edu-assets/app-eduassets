@@ -52,6 +52,7 @@
   "controle.botao": "Button",
   "controle.cabo": "Cable",
   "controle.carcaca": "Casing",
+  "controle.dica_texto": "Click a record to view details, add a resolution, and track its history.",
   "controle.editar": "Edit",
   "controle.excluir": "Delete",
   "controle.mais_opcoes": "More options",
@@ -335,5 +336,8 @@
   "shell.vincule_um_cartao_fisico_para_login_rapi": "Link a physical card for quick administrator login.",
   "shell.visao_geral_do_estoque_com_estatisticas_": "Stock overview with statistics and latest records.",
   "emprestimo.dados_do_emprestimo": "Loan Details",
-  "shell.clique_para_alterar": "(Click to change)"
+  "shell.clique_para_alterar": "(Click to change)",
+  "controle.mostrando_registros": "Showing 1 to {total} of {total} records",
+  "dashboard.aba_estoque": "Stock",
+  "dashboard.aba_historico": "History"
 }
