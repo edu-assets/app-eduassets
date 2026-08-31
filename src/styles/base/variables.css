@@ -68,6 +68,11 @@
   --secondary-hover: var(--secondary-600);
   --secondary-bg: var(--secondary-50);
 
+  /* Form Inputs (Light) */
+  --input-bg: var(--surface-white);
+  --input-border: var(--slate-300);
+  --input-hover-bg: var(--slate-50);
+
   /* Text */
   --text-primary: #1f2d3d;
   --text-secondary: #5a6a85;
@@ -124,7 +129,7 @@ html[data-theme="dark"] {
   --surface-2: var(--slate-700);
   --surface-3: var(--slate-600);
 
-  --border-color: var(--slate-600);
+  --border-color: var(--slate-700);
 
   --primary-color: var(--primary-400);
   --primary-light: var(--primary-300);
@@ -134,6 +139,10 @@ html[data-theme="dark"] {
   --secondary-color: var(--secondary-400);
   --secondary-hover: var(--secondary-300);
   --secondary-bg: color-mix(in srgb, var(--secondary-400) 16%, var(--slate-900));
+
+  --input-bg: color-mix(in srgb, var(--slate-950) 45%, transparent);
+  --input-border: color-mix(in srgb, var(--slate-200) 12%, transparent);
+  --input-hover-bg: color-mix(in srgb, var(--slate-950) 65%, transparent);
 
   --neutral-bg: var(--slate-800);
 
