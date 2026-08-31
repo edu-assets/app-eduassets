@@ -298,7 +298,6 @@
   "shell.revogar_cartao": "Revogar cartão",
   "shell.comecar": "Começar",
   "shell.escuro": "Escuro",
-  "shell.sistema": "Sistema",
   "shell.portugues": "Português",
   "shell.se_voce_acredita_que_isso_e_um_erro_entr": "Se você acredita que isso é um erro, entre em contato com o administrador do sistema.",
   "shell.seguranca_da_conta": "Segurança da conta",
@@ -314,6 +313,7 @@
   "shell.senha": "Senha",
   "shell.senha_atual": "Senha atual",
   "shell.simples_eficiente_e_confiavel": "simples, eficiente e confiável",
+  "shell.seguranca": "Segurança",
   "shell.sistema": "Sistema",
   "shell.sistema_de_gestao_de_emprestimos_e_inven": "Sistema de gestão de empréstimos e inventário de equipamentos escolares, desenvolvido para digitalizar um processo antes controlado por planilhas físicas.",
   "shell.sobre": "Sobre",
@@ -338,6 +338,11 @@
   "emprestimo.dados_do_emprestimo": "Dados do Empréstimo",
   "controle.mostrando_registros": "Mostrando 1 a {total} de {total} registros",
   "shell.clique_para_alterar": "(Clique para alterar)",
+  "shell.meu_perfil_titulo": "Meu Perfil",
+  "shell.ultima_alteracao": "Última alteração",
+  "shell.alterar_senha": "Alterar senha",
+  "shell.nome_completo": "Nome completo",
+  "shell.nivel_de_acesso": "Nível de acesso",
   "dashboard.aba_estoque": "Estoque",
   "dashboard.aba_historico": "Histórico"
 }

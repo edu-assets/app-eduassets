@@ -298,7 +298,6 @@
   "shell.revogar_cartao": "Revoke card",
   "shell.comecar": "Get started",
   "shell.escuro": "Dark",
-  "shell.sistema": "System",
   "shell.portugues": "Portuguese",
   "shell.se_voce_acredita_que_isso_e_um_erro_entr": "If you believe this is an error, contact the system administrator.",
   "shell.seguranca_da_conta": "Account security",
@@ -339,5 +338,11 @@
   "shell.clique_para_alterar": "(Click to change)",
   "controle.mostrando_registros": "Showing 1 to {total} of {total} records",
   "dashboard.aba_estoque": "Stock",
-  "dashboard.aba_historico": "History"
+  "dashboard.aba_historico": "History",
+  "shell.seguranca": "Security",
+  "shell.meu_perfil_titulo": "My Profile",
+  "shell.ultima_alteracao": "Last changed",
+  "shell.alterar_senha": "Change password",
+  "shell.nome_completo": "Full name",
+  "shell.nivel_de_acesso": "Access level"
 }
