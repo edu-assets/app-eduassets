@@ -311,6 +311,46 @@
     height: 16px;
 }
 
+/* ===== Modo de gravação RFID (aproxime o cartão) ===== */
+.cadastro-rfid-gravacao {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 18px 16px;
+    margin-top: 4px;
+    border: 1.5px dashed var(--primary-color);
+    border-radius: 8px;
+    background-color: var(--primary-bg);
+    text-align: center;
+}
+
+.cadastro-rfid-gravacao .material-symbols-outlined {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    color: var(--primary-color);
+    animation: cadastro-rfid-pulse 1.4s ease-in-out infinite;
+}
+
+.cadastro-rfid-gravacao p {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    line-height: 1.5;
+}
+
+@keyframes cadastro-rfid-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.92); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cadastro-rfid-gravacao .material-symbols-outlined {
+        animation: none;
+    }
+}
 
 /*RESPONSIVINESS*/
 

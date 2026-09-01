@@ -74,10 +74,9 @@ function attachRfidModalEvents(els: CadastrosEls): void {
 
     rfidModal.btnFechar.addEventListener('click', () => fecharModalRfid());
 
-    rfidModal.btnGerar.addEventListener('click', () => gerarOuRegerarToken(els));
-    rfidModal.btnRegerar.addEventListener('click', () => gerarOuRegerarToken(els));
+    rfidModal.btnGerar.addEventListener('click', () => gerarOuRegerarToken(els, rfidModal.btnGerar));
+    rfidModal.btnRegerar.addEventListener('click', () => gerarOuRegerarToken(els, rfidModal.btnRegerar));
 
-    // Ação do btnCopiar mantida para retrocompatibilidade técnica, mesmo ficando oculto na visualização[cite: 22]
     rfidModal.btnCopiar.addEventListener('click', async () => {
         const valor = rfidModal.tokenValor.textContent ?? '';
         try {
@@ -112,34 +111,29 @@ function attachRfidModalEvents(els: CadastrosEls): void {
     });
 }
 
-// AQUI: Lógica atualizada para invocar a gravação via API e lidar com falhas de hardware[cite: 22]
-async function gerarOuRegerarToken(els: CadastrosEls): Promise<void> {
+async function gerarOuRegerarToken(els: CadastrosEls, botaoClicado: HTMLButtonElement): Promise<void> {
     const { rfidModal } = els;
     if (bloquearSeNaoAdmin() || !usuarioRfidAtual) return;
 
+    const textoOriginal = botaoClicado.innerHTML;
     rfidModal.btnGerar.disabled = true;
     rfidModal.btnRegerar.disabled = true;
-    
-    // Status de feedback visual provisório (UX)
-    const textoOriginal = rfidModal.btnGerar.textContent;
-    rfidModal.btnGerar.textContent = 'Iniciando Hardware...';
-    
+    botaoClicado.innerHTML = '<span class="material-symbols-outlined">progress_activity</span> Iniciando hardware...';
+
     try {
         await gerarCartaoRfid(usuarioRfidAtual.id);
-        
-        // Exibe o painel de animação para encostar o cartão[cite: 22]
+
         exibirModoGravacao(rfidModal);
         atualizarUsuarioLocal(els, { ...usuarioRfidAtual, possuiCartaoRfid: true });
-        
+
         showToast('Leitor pronto para gravar.', 'success');
     } catch (erro) {
-        // Se a Promise no service capturar o erro 502/503 e rejeitar, ele vai extrair e disparar a mensagem de "Hardware indisponível"[cite: 22]
         const mensagemErro = erro instanceof Error ? erro.message : 'Erro ao gerar token.';
         showToast(mensagemErro, 'error');
     } finally {
         rfidModal.btnGerar.disabled = false;
         rfidModal.btnRegerar.disabled = false;
-        rfidModal.btnGerar.textContent = textoOriginal;
+        botaoClicado.innerHTML = textoOriginal;
     }
 }
 

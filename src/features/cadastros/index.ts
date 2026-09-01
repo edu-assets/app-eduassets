@@ -23,6 +23,7 @@ export function initCadastros(): void {
             login: document.getElementById('rfid-modal-login') as HTMLElement,
             estadoVazio: document.getElementById('rfid-estado-vazio') as HTMLElement,
             estadoToken: document.getElementById('rfid-estado-token') as HTMLElement,
+            estadoGravacao: document.getElementById('rfid-estado-gravacao') as HTMLElement,
             estadoVinculado: document.getElementById('rfid-estado-vinculado') as HTMLElement,
             tokenValor: document.getElementById('rfid-token-valor') as HTMLElement,
             btnGerar: document.getElementById('btn-rfid-gerar') as HTMLButtonElement,

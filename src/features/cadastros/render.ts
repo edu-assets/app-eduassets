@@ -36,6 +36,7 @@ export interface RfidModalEls {
     login: HTMLElement;
     estadoVazio: HTMLElement;
     estadoToken: HTMLElement;
+    estadoGravacao: HTMLElement;
     estadoVinculado: HTMLElement;
     tokenValor: HTMLElement;
     btnGerar: HTMLButtonElement;
@@ -103,9 +104,12 @@ export function limparCamposFormulario(campos: CampoCadastro[]): void {
 
 /* ===== Modal Cartão RFID ===== */
 
-function mostrarEstadoRfid(els: RfidModalEls, estado: 'vazio' | 'token' | 'vinculado'): void {
+type EstadoRfid = 'vazio' | 'token' | 'gravacao' | 'vinculado';
+
+function mostrarEstadoRfid(els: RfidModalEls, estado: EstadoRfid): void {
     els.estadoVazio.style.display = estado === 'vazio' ? 'flex' : 'none';
     els.estadoToken.style.display = estado === 'token' ? 'flex' : 'none';
+    els.estadoGravacao.style.display = estado === 'gravacao' ? 'flex' : 'none';
     els.estadoVinculado.style.display = estado === 'vinculado' ? 'flex' : 'none';
 }
 
@@ -118,24 +122,8 @@ export function abrirModalRfid(els: RfidModalEls, usuario: Usuario): void {
     openModal('modal-cadastro-rfid');
 }
 
-// AQUI: Substituição da função `exibirTokenGerado` por `exibirModoGravacao`[cite: 21]
 export function exibirModoGravacao(els: RfidModalEls): void {
-    // Esconde o botão de cópia manual[cite: 21]
-    els.btnCopiar.style.display = 'none'; 
-    
-    // Injerta o contêiner de aviso visual animado na tela[cite: 21]
-    els.estadoToken.innerHTML = `
-        <div class="flex flex-col items-center justify-center p-4 border rounded-md border-blue-200 bg-blue-50 w-full mt-4">
-            <svg class="animate-pulse w-8 h-8 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
-            <p class="text-sm font-medium text-blue-800 text-center">
-                ${t('cadastros.modo_de_gravacao_ativo')}<br>
-                ${t('cadastros.aproxime_cartao_raspberry')}
-            </p>
-        </div>
-    `;
-    mostrarEstadoRfid(els, 'token');
+    mostrarEstadoRfid(els, 'gravacao');
 }
 
 export function exibirCartaoRevogado(els: RfidModalEls): void {
