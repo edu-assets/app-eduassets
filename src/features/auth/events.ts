@@ -2,6 +2,7 @@ import { closeModal, openModal, showToast } from '../../core/ui/index.js';
 import { entrar, sair, isAutenticado, subscribe } from '../../core/state/authStore.js';
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
+import { traduzirErro, t } from "../../core/state/i18nStore.js";
 
 export function attachAuthEvents(els: AuthEls): void {
     els.sidebarFooter.addEventListener('click', (e) => {
@@ -72,7 +73,7 @@ async function fazerLogin(els: AuthEls): Promise<void> {
     const senha = els.senhaInput.value;
 
     if (!login || !senha) {
-        mostrarErroLogin(els, 'Informe login e senha.');
+        mostrarErroLogin(els, t('auth.informe_login_senha'));
         return;
     }
 
@@ -84,7 +85,7 @@ async function fazerLogin(els: AuthEls): Promise<void> {
         els.senhaInput.value = '';
         showToast('Login realizado com sucesso.', 'success');
     } catch (erro) {
-        mostrarErroLogin(els, erro instanceof Error ? erro.message : 'Erro ao entrar.');
+        mostrarErroLogin(els, traduzirErro(erro, 'feedback.erro_entrar'));
     } finally {
         els.btnEntrar.disabled = false;
     }

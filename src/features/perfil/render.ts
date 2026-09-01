@@ -1,3 +1,4 @@
+import { t } from '../../core/state/i18nStore.js';
 import type { AuthUser } from '../../types/index.js';
 
 export interface PerfilEls {
@@ -11,7 +12,7 @@ export function renderPerfil(els: PerfilEls, usuario: AuthUser | null): void {
     if (els.emailEl) els.emailEl.textContent = usuario?.login ?? '—';
     if (els.nivelEl) {
         els.nivelEl.textContent = usuario?.nivelAcesso === 'ADMINISTRADOR'
-            ? 'Administrador'
-            : (usuario?.nivelAcesso === 'EDITOR' ? 'Editor' : '—');
+            ? t('cadastros.administrador')
+            : (usuario?.nivelAcesso === 'EDITOR' ? t('cadastros.editor') : '—');
     }
 }

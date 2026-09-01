@@ -108,7 +108,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             renderItens(els, estado.itens);
         } catch (erro) {
             const chave = erro instanceof Error ? erro.message : null;
-            const mensagem = chave && chave.includes('.') ? t(chave) : formatarErroEstoque(erro, 'Erro ao registrar empréstimo.');
+            const mensagem = chave && !chave.includes(' ') ? t(chave) : formatarErroEstoque(erro, 'feedback.erro_registrar_emprestimo');
             showToast(mensagem, 'error');
         } finally {
             els.btnSubmit.disabled = false;

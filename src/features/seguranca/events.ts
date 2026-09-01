@@ -1,4 +1,5 @@
 import { showToast } from '../../core/ui/index.js';
+import { traduzirErro } from '../../core/state/i18nStore.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import { trocarSenha } from './service.js';
 import { alternarFormSenha, mostrarErro } from './render.js';
@@ -23,7 +24,7 @@ export function attachSegurancaEvents(els: SegurancaEls, estado: SegurancaEstado
             showToast('Senha alterada com sucesso', 'success');
             alternarFormSenha(els, estado, false);
         } catch (erro) {
-            mostrarErro(els, erro instanceof Error ? erro.message : 'Erro ao alterar senha.');
+            mostrarErro(els, traduzirErro(erro, 'feedback.erro_alterar_senha'));
         } finally {
             els.btnSalvar.disabled = false;
         }

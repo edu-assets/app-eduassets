@@ -15,6 +15,7 @@ import {
 import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import type { CampoComOpcoes, RfidModalEls } from './render.js';
 import type { Usuario } from '../../types/index.js';
+import { traduzirErro, t } from '../../core/state/i18nStore.js';
 
 export interface CadastrosEls {
     cards: NodeListOf<HTMLElement>;
@@ -83,7 +84,7 @@ function attachRfidModalEvents(els: CadastrosEls): void {
             await navigator.clipboard.writeText(valor);
             showToast('Token copiado.', 'success');
         } catch {
-            showToast('Não foi possível copiar automaticamente. Selecione e copie manualmente.', 'warning');
+            showToast(t('feedback.erro_copiar_token_manual'), 'warning');
         }
     });
 
@@ -104,7 +105,7 @@ function attachRfidModalEvents(els: CadastrosEls): void {
             atualizarUsuarioLocal(els, { ...usuarioRfidAtual, possuiCartaoRfid: false });
             showToast('Cartão revogado com sucesso.', 'success');
         } catch (erro) {
-            showToast(erro instanceof Error ? erro.message : 'Erro ao revogar cartão.', 'error');
+            showToast(traduzirErro(erro, 'feedback.erro_revogar_cartao'), 'error');
         } finally {
             rfidModal.btnRevogar.disabled = false;
         }
@@ -122,14 +123,11 @@ async function gerarOuRegerarToken(els: CadastrosEls, botaoClicado: HTMLButtonEl
 
     try {
         await gerarCartaoRfid(usuarioRfidAtual.id);
-
         exibirModoGravacao(rfidModal);
         atualizarUsuarioLocal(els, { ...usuarioRfidAtual, possuiCartaoRfid: true });
-
         showToast('Leitor pronto para gravar.', 'success');
     } catch (erro) {
-        const mensagemErro = erro instanceof Error ? erro.message : 'Erro ao gerar token.';
-        showToast(mensagemErro, 'error');
+        showToast(traduzirErro(erro, 'feedback.erro_gerar_token'), 'error');
     } finally {
         rfidModal.btnGerar.disabled = false;
         rfidModal.btnRegerar.disabled = false;
@@ -137,7 +135,6 @@ async function gerarOuRegerarToken(els: CadastrosEls, botaoClicado: HTMLButtonEl
     }
 }
 
-/** Mantém a lista por trás do modal sincronizada em tempo real com o estado do cartão. */
 function atualizarUsuarioLocal(els: CadastrosEls, usuarioAtualizado: Usuario): void {
     usuarioRfidAtual = usuarioAtualizado;
     usuariosCache = usuariosCache.map((u) => (u.id === usuarioAtualizado.id ? usuarioAtualizado : u));
@@ -156,7 +153,7 @@ async function abrirCadastro(els: CadastrosEls, estado: CadastrosEstado, tipo: s
             config.campos.map(async (campo) => ({ campo, opcoes: await carregarOpcoesCampo(campo) }))
         );
     } catch {
-        showToast('Não foi possível carregar os dados do formulário.', 'error');
+        showToast(t('feedback.erro_carregar_formulario'), 'error');
         return;
     }
 
@@ -178,7 +175,7 @@ async function recarregarLista(els: CadastrosEls, estado: CadastrosEstado): Prom
         }
     } catch (erro) {
         exibirListaErro(els);
-        showToast(erro instanceof Error ? erro.message : 'Erro ao carregar registros.', 'error');
+        showToast(traduzirErro(erro, 'cadastros.erro_carregar_registros'), 'error');
     }
 }
 
@@ -206,7 +203,7 @@ async function salvarRegistro(els: CadastrosEls, estado: CadastrosEstado): Promi
         limparCamposFormulario(config.campos);
         await recarregarLista(els, estado);
     } catch (erro) {
-        showToast(erro instanceof Error ? erro.message : 'Erro ao salvar registro.', 'error');
+        showToast(traduzirErro(erro, 'feedback.erro_salvar_registro'), 'error');
     } finally {
         if (els.btnSalvar) els.btnSalvar.disabled = false;
     }

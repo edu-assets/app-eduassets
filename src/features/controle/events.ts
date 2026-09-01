@@ -15,6 +15,7 @@ import { renderDetalhesExclusao } from './templates.js';
 import { bloquearSeConvidado, bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 import type { ControleRegistroDados } from '../../types/index.js';
+import { traduzirErro } from '../../core/state/i18nStore.js';
 
 export function attachControleEvents(els: ControleEls, estado: ControleEstado): void {
     document.querySelectorAll<HTMLElement>('.controle-tab-link').forEach((tabLink) => {
@@ -180,7 +181,7 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
             showToast('Registro criado com sucesso', 'success');
         }
     } catch (erro) {
-        showToast(formatarErroEstoque(erro, 'Erro ao salvar registro.'), 'error');
+        showToast(formatarErroEstoque(erro, 'feedback.erro_salvar_registro'), 'error');
         return;
     }
 
@@ -204,7 +205,7 @@ async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promis
         await resolverRegistro(estado.idResolvendo, medidas);
         showToast('Registro marcado como resolvido', 'success');
     } catch (erro) {
-        showToast(erro instanceof Error ? erro.message : 'Erro ao resolver registro.', 'error');
+        showToast(traduzirErro(erro, 'feedback.erro_resolver_registro'), 'error');
         return;
     }
 
@@ -238,6 +239,6 @@ async function excluirRegistro(els: ControleEls, estado: ControleEstado, row: HT
         await removerRegistro(row.dataset.id ?? '');
         showToast('Registro excluído com sucesso', 'success');
     } catch (erro) {
-        showToast(erro instanceof Error ? erro.message : 'Erro ao excluir registro.', 'error');
+        showToast(traduzirErro(erro, 'feedback.erro_excluir_registro'), 'error');
     }
 }

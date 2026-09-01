@@ -86,6 +86,13 @@ export function traduzirTexto(texto: string): string {
     return t(CHAVE_POR_TEXTO_PT.get(texto) ?? texto);
 }
 
+export function traduzirErro(erro: unknown, chaveFallback: string): string {
+    if (erro instanceof Error && erro.message) {
+        return erro.message.includes(' ') ? traduzirTexto(erro.message) : t(erro.message);
+    }
+    return t(chaveFallback);
+}
+
 function aplicarIdioma(): void {
     document.documentElement.setAttribute('lang', idioma === 'en' ? 'en' : 'pt-BR');
     traduzirDocumento();

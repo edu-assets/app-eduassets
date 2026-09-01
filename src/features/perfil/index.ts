@@ -1,4 +1,5 @@
 import { getUsuario, subscribe } from '../../core/state/authStore.js';
+import { subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
 import { renderPerfil } from './render.js';
 import type { PerfilEls } from './render.js';
 
@@ -14,4 +15,5 @@ export function initPerfil(): void {
 
     renderPerfil(els, getUsuario());
     subscribe(({ usuario }) => renderPerfil(els, usuario));
+    subscribeI18n(() => renderPerfil(els, getUsuario()));
 }

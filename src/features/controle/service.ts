@@ -27,7 +27,7 @@ export function listarEquipamentosPorCategoria(categoriaNome: string | null): Eq
 export async function adicionarRegistro(tipo: string, dados: ControleRegistroDados): Promise<void> {
     const equipamentoId = Number(dados.equipamentoId);
     if (!equipamentoId) {
-        throw new Error('Selecione um equipamento válido para salvar o registro.');
+        throw new Error('controle.selecione_equipamento_valido');
     }
 
     await addOcorrencia({

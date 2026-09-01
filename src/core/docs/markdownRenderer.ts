@@ -1,4 +1,5 @@
 import { sanitizeHtml } from './sanitize.js';
+import { getIdioma } from '../state/i18nStore.js';
 
 export interface HeadingItem {
     id: string;
@@ -22,23 +23,34 @@ function carregarMarked(): Promise<MarkedModulo> {
     return modulePromise;
 }
 
-const CALLOUT_TIPOS: Record<string, { icone: string; classe: string; titulo: string }> = {
-    NOTE: { icone: 'info', classe: 'doc-callout-note', titulo: 'Nota' },
-    TIP: { icone: 'lightbulb', classe: 'doc-callout-tip', titulo: 'Dica' },
-    WARNING: { icone: 'warning', classe: 'doc-callout-warning', titulo: 'Atenção' },
-    IMPORTANT: { icone: 'priority_high', classe: 'doc-callout-important', titulo: 'Importante' }
-};
+const CALLOUT_TIPOS_POR_IDIOMA = {
+    pt: { NOTE: 'Nota', TIP: 'Dica', WARNING: 'Atenção', IMPORTANT: 'Importante' },
+    en: { NOTE: 'Note', TIP: 'Tip', WARNING: 'Warning', IMPORTANT: 'Important' }
+} as const;
+
+const CALLOUT_TIPOS = {
+    NOTE: { classe: 'note', icone: 'info' },
+    TIP: { classe: 'tip', icone: 'lightbulb' },
+    WARNING: { classe: 'warning', icone: 'warning' },
+    IMPORTANT: { classe: 'important', icone: 'report' }
+} as const;
 
 const CALLOUT_REGEX = /<blockquote>\s*<p>\[!(NOTE|TIP|WARNING|IMPORTANT)\]\s*<br\s*\/?>([\s\S]*?)<\/p>\s*<\/blockquote>/g;
 
 function transformarCallouts(html: string): string {
+    const idioma = getIdioma() as keyof typeof CALLOUT_TIPOS_POR_IDIOMA;
+
     return html.replace(CALLOUT_REGEX, (_match, tipo: string, conteudo: string) => {
-        const info = CALLOUT_TIPOS[tipo];
+        const tipoChave = tipo as keyof typeof CALLOUT_TIPOS;
+
+        const info = CALLOUT_TIPOS[tipoChave];
+        const titulo = CALLOUT_TIPOS_POR_IDIOMA[idioma][tipoChave];
+
         return `
             <div class="doc-callout ${info.classe}" data-callout="${tipo.toLowerCase()}">
                 <span class="material-symbols-outlined doc-callout-icon">${info.icone}</span>
                 <div class="doc-callout-body">
-                    <strong class="doc-callout-title">${info.titulo}</strong>
+                    <strong class="doc-callout-title">${titulo}</strong>
                     <p>${conteudo.trim()}</p>
                 </div>
             </div>

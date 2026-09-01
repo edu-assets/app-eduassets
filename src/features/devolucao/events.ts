@@ -3,7 +3,7 @@ import { getLoansAbertos } from '../../core/state/loanStore.js';
 import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
 import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
-import { t } from '../../core/state/i18nStore.js';
+import { traduzirErro, t } from '../../core/state/i18nStore.js';
 import {
     renderDetalheItens,
     abrirDetalhe,
@@ -95,7 +95,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
             closeModal('modal-confirmar-devolucao');
             estado.idPendente = null;
         } catch (erro) {
-            showToast(erro instanceof Error ? erro.message : 'Erro ao registrar devolução.', 'error');
+            showToast(traduzirErro(erro, 'feedback.erro_registrar_devolucao'), 'error');
         } finally {
             els.btnConfirmarDevolucao.disabled = false;
         }
@@ -203,7 +203,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
             setModoEdicao(els, estado, false);
             renderDetalheItens(els, estado.itensEditando, false);
         } catch (erro) {
-            showToast(formatarErroEstoque(erro, 'Erro ao atualizar empréstimo'), 'error');
+            showToast(formatarErroEstoque(erro, 'feedback.erro_atualizar_emprestimo'), 'error');
         } finally {
             els.btnDetalheSalvar.disabled = false;
         }

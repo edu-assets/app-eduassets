@@ -63,7 +63,7 @@ export async function confirmarDevolucao(id: number): Promise<void> {
 
 export async function salvarItensEmprestimo(id: number, itens: LoanItemUI[]): Promise<void> {
     if (!itens.length) {
-        throw new Error('O empréstimo precisa ter ao menos um equipamento');
+        throw new Error('devolucao.emprestimo_precisa_item');
     }
     await updateLoan(id, { itens });
 }

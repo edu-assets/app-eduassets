@@ -10,6 +10,7 @@ import {
 } from './render.js';
 import type { ExportarEls } from './render.js';
 import type { FiltrosExportacao } from '../../types/index.js';
+import { traduzirErro } from '../../core/state/i18nStore.js';
 
 export function attachExportarEvents(els: ExportarEls): void {
     els.tipoCards.forEach((card) => {
@@ -68,11 +69,11 @@ export function attachExportarEvents(els: ExportarEls): void {
 
         definirEstadoCarregando(els, true);
 
-       try {
+        try {
             await exportarDados(filtros);
             showToast('Exportação gerada com sucesso', 'success');
         } catch (erro) {
-            showToast(erro instanceof Error ? erro.message : 'Erro ao exportar dados.', 'error');
+            showToast(traduzirErro(erro, 'feedback.erro_exportar_dados'), 'error');
         } finally {
             definirEstadoCarregando(els, false);
         }
