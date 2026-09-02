@@ -419,5 +419,8 @@
   "backend.emprestimos.ja_devolvido": "This loan has already been returned.",
   "backend.usuarios.rfid_indisponivel": "RFID card login is not available in this deployment (no physical reader configured).",
   "backend.usuarios.rfid_timeout": "RFID hardware did not respond in time. Check whether the eduassets-rfid service is running.",
-  "backend.usuarios.rfid_hardware_indisponivel": "RFID hardware unavailable. Check whether the eduassets-rfid service is running."
+  "backend.usuarios.rfid_hardware_indisponivel": "RFID hardware unavailable. Check whether the eduassets-rfid service is running.",
+  "feedback.estoque_insuficiente_simples": "Insufficient stock: {nome} (available: {disponivel})",
+  "feedback.estoque_insuficiente_com_reservado": "Insufficient stock: {nome} (available: {disponivel}, already in this loan: {reservado})",
+  "feedback.estoque_insuficiente_quantidade": "Insufficient stock: only {disponivel} unit(s) available for this equipment."
 }

@@ -22,6 +22,7 @@ import {
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import type { LoanItemUI } from '../../types/index.js';
 import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
+import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 
 interface DevolucaoEstado {
     idPendente: string | number | null;
@@ -88,7 +89,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         if (bloquearSeConvidado()) return;
         if (!estado.idPendente) return;
 
-        els.btnConfirmarDevolucao.disabled = true;
+        setButtonLoading(els.btnConfirmarDevolucao, true);
         try {
             await confirmarDevolucao(Number(estado.idPendente));
             showToast(t('feedback.devolucao_registrada').replace('{data}', els.devolucaoDataInput.value), 'success');
@@ -97,7 +98,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_registrar_devolucao'), 'error');
         } finally {
-            els.btnConfirmarDevolucao.disabled = false;
+            setButtonLoading(els.btnConfirmarDevolucao, false);
         }
     });
 
@@ -153,7 +154,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         );
 
         if (!resultado.ok) {
-            showToast(resultado.erro ?? 'Estoque insuficiente.', 'warning');
+            showToast(resultado.erro ?? t('feedback.estoque_insuficiente'), 'warning');
             return;
         }
 
@@ -181,7 +182,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         const resultado = atualizarQuantidadeComValidacao(estado.itensEditando, estado.itensOriginais, id, quantidadeDesejada);
 
         if (!resultado.ok) {
-            showToast(resultado.erro ?? 'Estoque insuficiente.', 'warning');
+            showToast(resultado.erro ?? t('feedback.estoque_insuficiente'), 'warning');
             const itemAtual = estado.itensEditando.find((i) => String(i.id) === String(id));
             target.value = String(itemAtual?.quantidade ?? 1);
             return;
@@ -196,7 +197,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         if (bloquearSeConvidado()) return;
         if (!estado.idDetalheAberto) return;
 
-        els.btnDetalheSalvar.disabled = true;
+        setButtonLoading(els.btnConfirmarDevolucao, true);
         try {
             await salvarItensEmprestimo(estado.idDetalheAberto, estado.itensEditando);
             showToast('Empréstimo atualizado com sucesso', 'success');
@@ -205,7 +206,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         } catch (erro) {
             showToast(formatarErroEstoque(erro, 'feedback.erro_atualizar_emprestimo'), 'error');
         } finally {
-            els.btnDetalheSalvar.disabled = false;
+            setButtonLoading(els.btnConfirmarDevolucao, false);
         }
     });
 }

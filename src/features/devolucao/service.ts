@@ -3,6 +3,7 @@ import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { calcularDisponivelEfetivo } from '../../core/utils/estoqueDisponivel.js';
 import { adicionarOuIncrementarItem, removerItemPorId, atualizarQuantidadeItem } from '../../core/utils/listaItens.js';
 import type { LoanItemUI } from '../../types/index.js';
+import { t } from '../../core/state/i18nStore.js';
 
 export { removerItemPorId };
 
@@ -28,7 +29,10 @@ export function adicionarItemDetalheComValidacao(
         return {
             ok: false,
             itens: itensAtuais,
-            erro: `Estoque insuficiente: ${novoItem.nome} (disponível: ${disponivelEfetivo}, já neste empréstimo: ${jaNoRascunho})`
+            erro: t('feedback.estoque_insuficiente_com_reservado')
+                .replace('{nome}', novoItem.nome)
+                .replace('{disponivel}', String(disponivelEfetivo))
+                .replace('{reservado}', String(jaNoRascunho))
         };
     }
 
@@ -50,7 +54,7 @@ export function atualizarQuantidadeComValidacao(
         return {
             ok: false,
             itens: itensAtuais,
-            erro: `Estoque insuficiente: apenas ${disponivelEfetivo} unidade(s) disponível(is) para este equipamento.`
+            erro: t('feedback.estoque_insuficiente_quantidade').replace('{disponivel}', String(disponivelEfetivo))
         };
     }
 

@@ -3,6 +3,7 @@ import { addLoan } from '../../core/state/loanStore.js';
 import { adicionarOuIncrementarItem } from '../../core/utils/listaItens.js';
 import { calcularDisponivelEfetivo } from '../../core/utils/estoqueDisponivel.js';
 import type { LoanDraft, LoanItemUI } from '../../types/index.js';
+import { t } from '../../core/state/i18nStore.js';
 
 export interface ResultadoAjusteItem {
     ok: boolean;
@@ -24,7 +25,9 @@ export function adicionarItemComValidacao(
         return {
             ok: false,
             itens: itensAtuais,
-            erro: `Estoque insuficiente: ${novoItem.nome} (disponível: ${disponivelEfetivo})`
+            erro: t('feedback.estoque_insuficiente_simples')
+                .replace('{nome}', novoItem.nome)
+                .replace('{disponivel}', String(disponivelEfetivo))
         };
     }
 

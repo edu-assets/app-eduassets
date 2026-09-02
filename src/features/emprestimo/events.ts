@@ -7,6 +7,7 @@ import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import type { LoanItemUI, LoanDraft } from '../../types/index.js';
 import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { t } from '../../core/state/i18nStore.js';
+import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 
 interface EmprestimoEventosEls {
     form: HTMLFormElement;
@@ -42,7 +43,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
         const resultado = adicionarItemComValidacao(estado.itens, { id: equipamentoId, nome, quantidade });
 
         if (!resultado.ok) {
-            showToast(resultado.erro ?? 'Estoque insuficiente.', 'warning');
+            showToast(resultado.erro ?? t('feedback.estoque_insuficiente'), 'warning');
             return;
         }
 
@@ -96,7 +97,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             observacao: els.observacaoInput.value
         };
 
-        els.btnSubmit.disabled = true;
+        setButtonLoading(els.btnSubmit, true);
 
         try {
             await registrarEmprestimo(dados);
@@ -111,7 +112,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             const mensagem = chave && !chave.includes(' ') ? t(chave) : formatarErroEstoque(erro, 'feedback.erro_registrar_emprestimo');
             showToast(mensagem, 'error');
         } finally {
-            els.btnSubmit.disabled = false;
+            setButtonLoading(els.btnSubmit, false);
         }
     });
 }

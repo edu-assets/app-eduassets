@@ -419,5 +419,8 @@
   "backend.emprestimos.ja_devolvido": "Este empréstimo já foi devolvido.",
   "backend.usuarios.rfid_indisponivel": "Login por cartão RFID não está disponível nesta implantação (nenhum leitor físico configurado).",
   "backend.usuarios.rfid_timeout": "Hardware RFID não respondeu a tempo. Verifique se o serviço eduassets-rfid está rodando.",
-  "backend.usuarios.rfid_hardware_indisponivel": "Hardware RFID indisponível. Verifique se o serviço eduassets-rfid está rodando."
+  "backend.usuarios.rfid_hardware_indisponivel": "Hardware RFID indisponível. Verifique se o serviço eduassets-rfid está rodando.",
+  "feedback.estoque_insuficiente_simples": "Estoque insuficiente: {nome} (disponível: {disponivel})",
+  "feedback.estoque_insuficiente_com_reservado": "Estoque insuficiente: {nome} (disponível: {disponivel}, já neste empréstimo: {reservado})",
+  "feedback.estoque_insuficiente_quantidade": "Estoque insuficiente: apenas {disponivel} unidade(s) disponível(is) para este equipamento."
 }

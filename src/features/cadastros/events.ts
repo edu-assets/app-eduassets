@@ -16,6 +16,7 @@ import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import type { CampoComOpcoes, RfidModalEls } from './render.js';
 import type { Usuario } from '../../types/index.js';
 import { traduzirErro, t } from '../../core/state/i18nStore.js';
+import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 
 export interface CadastrosEls {
     cards: NodeListOf<HTMLElement>;
@@ -196,7 +197,7 @@ async function salvarRegistro(els: CadastrosEls, estado: CadastrosEstado): Promi
         return;
     }
 
-    if (els.btnSalvar) els.btnSalvar.disabled = true;
+    if (els.btnSalvar) setButtonLoading(els.btnSalvar, true);
     try {
         await criarRegistro(estado.tipoAtual, valores);
         showToast('Registro criado com sucesso', 'success');
@@ -205,6 +206,6 @@ async function salvarRegistro(els: CadastrosEls, estado: CadastrosEstado): Promi
     } catch (erro) {
         showToast(traduzirErro(erro, 'feedback.erro_salvar_registro'), 'error');
     } finally {
-        if (els.btnSalvar) els.btnSalvar.disabled = false;
+        if (els.btnSalvar) setButtonLoading(els.btnSalvar, false);
     }
 }

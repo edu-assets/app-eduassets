@@ -1,6 +1,7 @@
 import { renderEquipamentoChecklistItem } from './templates.js';
 import type { Equipamento } from '../../types/index.js';
 import { t } from '../../core/state/i18nStore.js';
+import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 
 const FORMATOS_LABEL: Record<string, string> = { csv: 'CSV (.csv)', excel: 'Excel (.xlsx)', pdf: 'PDF (.pdf)' };
 function tipoLabel(tipo: string): string {
@@ -43,8 +44,7 @@ function paraInputDate(date: Date): string {
 }
 
 export function definirEstadoCarregando(els: ExportarEls, carregando: boolean): void {
-    els.btnSubmit.disabled = carregando;
-    els.btnSubmit.innerHTML = carregando ? t('exportar.gerando_arquivo') : els.textoOriginalBtn;
+    setButtonLoading(els.btnSubmit, carregando);
 }
 
 export function popularChecklistEquipamentos(els: ExportarEls, equipamentos: Equipamento[]): void {
