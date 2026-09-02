@@ -88,7 +88,9 @@ export function renderItemIconPill(item: LoanItemUI): string {
 export function renderDetalheItensView(itens: LoanItemUI[]): string {
     return itens.map((item) => html`
         <li>
-            <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
+            <span class="icon-badge icon-badge--sm icon-badge--primary">
+                <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
+            </span>
             <span class="detalhe-item-nome">${item.quantidade}x ${item.nome}</span>
             <span class="detalhe-item-status">${t('devolucao.pendente')}</span>
         </li>

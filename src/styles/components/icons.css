@@ -26,3 +26,35 @@
     gap: 12px;
     text-decoration: none;
 }
+
+/* ICON BADGE — primitivo reutilizável  */
+.icon-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background-color: var(--neutral-bg);
+    color: var(--text-secondary);
+}
+
+.icon-badge--circle { border-radius: 50%; }
+
+/* Tamanhos */
+.icon-badge--sm { width: 28px; height: 28px; }
+.icon-badge--sm .material-symbols-outlined { font-size: 16px; width: 16px; height: 16px; }
+
+.icon-badge--md { width: 38px; height: 38px; }
+.icon-badge--md .material-symbols-outlined { font-size: 20px; width: 20px; height: 20px; }
+
+.icon-badge--lg { width: 46px; height: 46px; border-radius: 10px; }
+.icon-badge--lg .material-symbols-outlined { font-size: 24px; width: 24px; height: 24px; }
+
+/* Cores semânticas */
+.icon-badge--primary   { background-color: var(--primary-bg);   color: var(--primary-color); }
+.icon-badge--secondary { background-color: var(--secondary-bg); color: var(--secondary-color); }
+.icon-badge--success    { background-color: var(--success-bg);   color: var(--success-color); }
+.icon-badge--warning   { background-color: var(--warning-bg);   color: var(--warning-color); }
+.icon-badge--error      { background-color: var(--error-bg);     color: var(--error-color); }
+.icon-badge--info       { background-color: var(--info-bg);      color: var(--info-color); }
+.icon-badge--neutral   { background-color: var(--neutral-bg);   color: var(--text-secondary); }
