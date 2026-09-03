@@ -141,11 +141,6 @@
     white-space: nowrap;
 }
 
-.info-data-completa .material-symbols-outlined {
-    font-size: 16px;
-    color: var(--text-muted);
-}
-
 .info-data-relativa {
     font-size: 0.78rem;
     color: var(--text-muted);
@@ -291,14 +286,6 @@
     overflow: hidden;
     white-space: nowrap;
     transition: all 0.2s ease;
-}
-
-.devolucao-item-icon-pill .material-symbols-outlined {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    color: inherit;
-    flex-shrink: 0;
 }
 
 .devolucao-item-icon-pill[data-eq="eq1"] {

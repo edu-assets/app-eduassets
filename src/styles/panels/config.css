@@ -6,6 +6,14 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
+    will-change: opacity, transform, filter;
+}
+
+#panel-config.config-panel--language-switching .config-container {
+    opacity: 0.45;
+    transform: translateY(4px);
+    filter: saturate(0.94);
 }
 
 .config-card {

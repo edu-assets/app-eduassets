@@ -311,13 +311,6 @@
     justify-content: center;
 }
 
-.registros-row-icon .material-symbols-outlined {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    color: var(--primary-color);
-}
-
 .registros-numero {
     color: var(--primary-color);
     font-weight: 600;

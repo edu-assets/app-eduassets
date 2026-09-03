@@ -244,13 +244,6 @@
     color: var(--text-secondary);
 }
 
-.historico-item-chip .material-symbols-outlined {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-    color: var(--primary-color);
-}
-
 .historico-item-chip-mais {
     font-weight: 700;
     color: var(--primary-color);

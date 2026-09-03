@@ -18,13 +18,22 @@ export function renderUserMenuAutenticado(usuario: AuthUser): string {
         </button>
         <div class="user-menu-dropdown" id="user-menu-dropdown">
             <a href="#" class="user-menu-item nav-link" data-panel="panel-perfil">
-                <span class="material-symbols-outlined">person</span> ${t('auth.meu_perfil')}
+                <span class="icon-badge icon-badge--sm icon-badge--neutral">
+                    <span class="material-symbols-outlined">person</span>
+                </span>
+                ${t('auth.meu_perfil')}
             </a>
             <a href="#" class="user-menu-item nav-link" data-panel="panel-seguranca">
-                <span class="material-symbols-outlined">lock</span> ${t('shell.seguranca_da_conta')}
+                <span class="icon-badge icon-badge--sm icon-badge--neutral">
+                    <span class="material-symbols-outlined">lock</span>
+                </span>
+                ${t('shell.seguranca_da_conta')}
             </a>
             <button type="button" class="user-menu-item user-menu-item-danger" id="btn-user-menu-sair">
-                <span class="material-symbols-outlined">logout</span> ${t('auth.sair')}
+                <span class="icon-badge icon-badge--sm icon-badge--error">
+                    <span class="material-symbols-outlined">logout</span>
+                </span>
+                ${t('auth.sair')}
             </button>
         </div>
     `;

@@ -112,13 +112,6 @@
     transition: background-color 0.2s ease;
 }
 
-.user-menu-item .material-symbols-outlined {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    color: var(--text-muted);
-}
-
 .user-menu-item:hover {
     background-color: var(--hover-light);
 }
@@ -126,10 +119,6 @@
 .user-menu-item-danger {
     color: var(--error-color);
     border-top: 1px solid var(--border-color);
-}
-
-.user-menu-item-danger .material-symbols-outlined {
-    color: var(--error-color);
 }
 
 .user-menu-item-danger:hover {

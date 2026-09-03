@@ -5,6 +5,35 @@ import { getIdioma, definirIdioma } from '../../core/state/i18nStore.js';
 import { marcarTemaAtivo, marcarIdiomaAtivo } from './render.js';
 import type { TemaPreferencia, IdiomaPreferencia } from './render.js';
 
+let idiomaSwapTimers: number[] = [];
+
+function limparIdiomaSwapTimers(): void {
+    idiomaSwapTimers.forEach((timer) => window.clearTimeout(timer));
+    idiomaSwapTimers = [];
+}
+
+function animarTrocaIdioma(grupoIdioma: HTMLElement, idioma: IdiomaPreferencia): void {
+    const painel = grupoIdioma.closest<HTMLElement>('#panel-config');
+    if (!painel) {
+        definirIdioma(idioma);
+        marcarIdiomaAtivo(grupoIdioma, idioma);
+        return;
+    }
+
+    limparIdiomaSwapTimers();
+    painel.classList.add('config-panel--language-switching');
+
+    idiomaSwapTimers.push(window.setTimeout(() => {
+        definirIdioma(idioma);
+        marcarIdiomaAtivo(grupoIdioma, idioma);
+    }, 120));
+
+    idiomaSwapTimers.push(window.setTimeout(() => {
+        painel.classList.remove('config-panel--language-switching');
+        limparIdiomaSwapTimers();
+    }, 280));
+}
+
 export function attachConfigEvents(btnSalvar: HTMLElement): void {
     document.querySelectorAll<HTMLElement>('.config-switch').forEach((switchEl) => {
         switchEl.addEventListener('click', () => {
@@ -41,8 +70,8 @@ export function attachIdiomaToggle(grupoIdioma: HTMLElement): void {
     botoes.forEach((btn) => {
         btn.addEventListener('click', () => {
             const idioma = btn.dataset.idioma as IdiomaPreferencia;
-            definirIdioma(idioma);
-            marcarIdiomaAtivo(grupoIdioma, idioma);
+            if (idioma === getIdioma()) return;
+            animarTrocaIdioma(grupoIdioma, idioma);
         });
     });
 }

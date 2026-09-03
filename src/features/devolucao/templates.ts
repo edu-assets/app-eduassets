@@ -33,7 +33,9 @@ export function renderDevolucaoTabelaHeader(): string {
 export function renderDevolucaoCard(loan: LoanUI): string {
     const temObservacao = loan.observacao ? html`
         <span class="info-data-relativa">
-            <span class="material-symbols-outlined" style="font-size: 14px; opacity: 0.7;">sticky_note_2</span>
+            <span class="icon-badge icon-badge--sm icon-badge--neutral">
+                <span class="material-symbols-outlined">sticky_note_2</span>
+            </span>
             ${t('devolucao.com_observacao')}
         </span>
     ` : '';
@@ -52,7 +54,9 @@ export function renderDevolucaoCard(loan: LoanUI): string {
             </div>
             <div class="devolucao-col-data">
                 <span class="info-data-completa">
-                    <span class="material-symbols-outlined">schedule</span>
+                    <span class="icon-badge icon-badge--sm icon-badge--neutral">
+                        <span class="material-symbols-outlined">schedule</span>
+                    </span>
                     ${formatarHora(loan.createdAt)}
                 </span>
                 ${raw(temObservacao)}
@@ -79,7 +83,9 @@ export function renderItensIcons(itens: LoanItemUI[]): string {
 export function renderItemIconPill(item: LoanItemUI): string {
     return html`
         <div class="devolucao-item-icon-pill" data-eq="${item.id}" title="${item.quantidade}x ${item.nome}">
-            <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
+            <span class="icon-badge icon-badge--sm icon-badge--primary">
+                <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
+            </span>
             <span class="devolucao-item-icon-pill-texto">${item.quantidade}x ${item.nome}</span>
         </div>
     `;

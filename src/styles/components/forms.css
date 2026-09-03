@@ -102,13 +102,6 @@ section .form-label {
     color: var(--primary-color); 
 }
 
-section .form-label .material-symbols-outlined {
-    font-size: 2rem;
-    vertical-align: middle;
-    margin-right: 8px;
-    color: var(--primary-color)
-}
-
 section .form-label-description {
     font-size: 0.9rem;
     color: var(--text-secondary);

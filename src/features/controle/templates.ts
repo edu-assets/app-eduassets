@@ -61,7 +61,11 @@ export function renderControleLinha(tipo: string, dados: OcorrenciaUI): string {
             data-tipo="${tipo}" data-status="${dados.status}" data-problema="${dados.problema}" data-categoria="${dados.categoria}"
             data-modelo="${dados.modelo}" data-numero="${dados.numero}" data-descricao="${dados.descricao}"
             data-registrado-em="${dataTexto}"${ehResolvido ? ` data-medidas="${dados.medidas || ''}"` : ''}>
-        <span class="registros-row-icon"><span class="material-symbols-outlined">${iconeLinha}</span></span>
+        <span class="registros-row-icon">
+            <span class="icon-badge icon-badge--md icon-badge--primary">
+                <span class="material-symbols-outlined">${iconeLinha}</span>
+            </span>
+        </span>
         <span data-col="categoria">${dados.categoria}</span>
         <span data-col="modelo">${dados.modelo}</span>
         <span class="registros-numero" data-col="numero">${dados.numero}</span>

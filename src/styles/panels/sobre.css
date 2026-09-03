@@ -277,13 +277,6 @@
     color: var(--text-secondary);
 }
 
-.sobre-info-label .material-symbols-outlined {
-    font-size: 17px;
-    width: 17px;
-    height: 17px;
-    color: var(--text-muted);
-}
-
 .sobre-info-valor {
     font-size: 0.85rem;
     font-weight: 700;
@@ -337,8 +330,7 @@
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.sobre-footer-svg,
-.sobre-footer-link .material-symbols-outlined {
+.sobre-footer-svg {
     width: 22px;
     height: 22px;
     flex-shrink: 0;

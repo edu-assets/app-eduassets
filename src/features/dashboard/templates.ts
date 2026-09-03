@@ -100,7 +100,10 @@ export function renderDashboardChip(item: LoanItemUI): string {
     const titulo = `${item.quantidade}x ${escapeHtml(item.nome)}`;
     return html`
         <span class="historico-item-chip" title="${raw(titulo)}">
-            <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>${item.quantidade}
+            <span class="icon-badge icon-badge--sm icon-badge--primary">
+                <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
+            </span>
+            ${item.quantidade}
         </span>
     `;
 }
@@ -137,7 +140,9 @@ export function renderDashboardHistoricoContent(loans: LoanUI[], limiteChips: nu
 export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
     const itensHtml = loan.itens.map((item) => html`
         <li>
-            <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
+            <span class="icon-badge icon-badge--sm icon-badge--primary">
+                <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
+            </span>
             <span class="detalhe-item-nome">${item.quantidade}x ${item.nome}</span>
         </li>
     `).join('');

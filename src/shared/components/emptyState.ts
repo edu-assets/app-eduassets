@@ -34,7 +34,11 @@ function renderMidia(
         return html`<img src="${imageSrc}" alt="${imageAlt}" class="${imageClass}">`;
     }
     if (icon) {
-        return html`<span class="material-symbols-outlined ${iconClass}">${icon}</span>`;
+        return html`
+            <span class="icon-badge icon-badge--lg icon-badge--neutral ${iconClass}">
+                <span class="material-symbols-outlined">${icon}</span>
+            </span>
+        `;
     }
     return '';
 }

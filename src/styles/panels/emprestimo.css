@@ -119,14 +119,6 @@
     text-align: center;
 }
 
-.itens-emprestimo-empty .material-symbols-outlined {
-    font-size: 26px;
-    width: 26px;
-    height: 26px;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-}
-
 .itens-emprestimo-empty-titulo {
     font-size: 0.9rem;
     font-weight: 600;
