@@ -23,7 +23,16 @@ export function showToast(message: string, type: ToastType = 'success', duration
     message = traduzirTexto(message);
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    toast.innerHTML = `<span class="material-symbols-outlined">${ICONS[type] || ICONS.success}</span><span>${message}</span>`;
+
+    const icon = document.createElement('span');
+    icon.className = 'material-symbols-outlined';
+    icon.textContent = ICONS[type] || ICONS.success;
+
+    const text = document.createElement('span');
+    text.className = 'toast-message';
+    text.textContent = message;
+
+    toast.append(icon, text);
 
     getContainer().appendChild(toast);
 

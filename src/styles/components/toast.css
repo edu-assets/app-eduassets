@@ -34,6 +34,11 @@
     height: 20px;
 }
 
+.toast-message {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
 .toast-success .material-symbols-outlined { color: var(--success-color); }
 .toast-error .material-symbols-outlined { color: var(--error-color); }
 .toast-warning .material-symbols-outlined { color: var(--warning-color); }

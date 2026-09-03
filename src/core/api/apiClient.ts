@@ -1,22 +1,59 @@
 import { API_BASE_URL } from './apiConfig.js';
 import { getToken } from '../state/tokenStore.js';
+import { t } from '../state/i18nStore.js';
+
+export interface ValidationErrorDetail {
+    campo?: string;
+    mensagem?: string;
+    [key: string]: unknown;
+}
 
 export interface ApiErrorPayload {
     erro?: string;
     sessaoExpirada?: boolean;
+    detalhes?: ValidationErrorDetail[];
     [key: string]: unknown;
 }
 
 export class ApiError extends Error {
     status: number;
     payload: ApiErrorPayload | null;
+    detalhesValidacao: ValidationErrorDetail[] | null;
 
     constructor(message: string, status: number, payload: ApiErrorPayload | null) {
         super(message);
         this.name = 'ApiError';
         this.status = status;
         this.payload = payload;
+        this.detalhesValidacao = Array.isArray(payload?.detalhes) ? payload.detalhes : null;
     }
+}
+
+function formatarDetalhesValidacao(detalhes: ValidationErrorDetail[] | null | undefined): string | null {
+    if (!Array.isArray(detalhes) || detalhes.length === 0) return null;
+
+    const mensagem = detalhes
+        .map((detalhe) => {
+            const campo = detalhe.campo?.trim();
+            const texto = detalhe.mensagem?.trim();
+
+            if (campo && texto) return `${campo}: ${texto}`;
+            return campo || texto || null;
+        })
+        .filter((valor): valor is string => Boolean(valor))
+        .map((valor) => `- ${valor}`)
+        .join('\n');
+
+    return mensagem || null;
+}
+
+function formatarMensagemErro(payload: ApiErrorPayload | null, status: number): string {
+    const mensagemBase = payload?.erro
+        ? t(payload.erro)
+        : t('feedback.erro_api_generico').replace('{status}', String(status));
+    const detalhes = formatarDetalhesValidacao(payload?.detalhes);
+
+    return detalhes ? `${mensagemBase}\n${detalhes}` : mensagemBase;
 }
 
 interface RequestOptions {
@@ -51,7 +88,7 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
         if (response.status === 401 && payload?.sessaoExpirada) {
             window.dispatchEvent(new Event('eduassets:sessao-expirada'));
         }
-        const mensagem = payload?.erro || `Erro ${response.status} ao comunicar com a API`;
+        const mensagem = formatarMensagemErro(payload, response.status);
         throw new ApiError(mensagem, response.status, payload);
     }
 
