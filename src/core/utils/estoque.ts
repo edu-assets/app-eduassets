@@ -1,3 +1,7 @@
+export interface EquipamentoComDisponivel {
+    quantidadeDisponivel?: number;
+}
+
 export interface LoanItemMinimo {
     id: string | number;
     quantidade: number;
@@ -9,6 +13,13 @@ export interface LoanAbertoMinimo {
 
 export interface OcorrenciaManutencaoMinima {
     equipamentoId: string | number;
+}
+
+export function calcularDisponivelEfetivo(
+    equipamento: EquipamentoComDisponivel | null | undefined,
+    reservadoPeloRegistroAtual: number = 0
+): number {
+    return (equipamento?.quantidadeDisponivel ?? 0) + reservadoPeloRegistroAtual;
 }
 
 export function contarEmprestadoPorEquipamento(loansAbertos: LoanAbertoMinimo[]): Map<string, number> {

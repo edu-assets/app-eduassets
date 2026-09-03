@@ -1,6 +1,6 @@
 import { returnLoan, updateLoan } from '../../core/state/loanStore.js';
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
-import { calcularDisponivelEfetivo } from '../../core/utils/estoqueDisponivel.js';
+import { calcularDisponivelEfetivo } from '../../core/utils/estoque.js';
 import { adicionarOuIncrementarItem, removerItemPorId, atualizarQuantidadeItem } from '../../core/utils/listaItens.js';
 import type { LoanItemUI } from '../../types/index.js';
 import { t } from '../../core/state/i18nStore.js';

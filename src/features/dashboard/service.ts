@@ -2,7 +2,7 @@ import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { getLoansAbertos } from '../../core/state/loanStore.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
 import { gerarLinhasCsv, baixarArquivoCsv } from '../../core/services/csv.js';
-import { contarEmprestadoPorEquipamento, contarManutencaoPorEquipamento } from '../../core/utils/estoqueCalculado.js';
+import { contarEmprestadoPorEquipamento, contarManutencaoPorEquipamento } from '../../core/utils/estoque.js';
 import type { Equipamento, LoanUI, OcorrenciaUI, ResumoDashboard } from '../../types/index.js';
 
 /* ===== Data processing: calculations, data transformations ===== */

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { contarEmprestadoPorEquipamento, contarManutencaoPorEquipamento } from '../core/utils/estoqueCalculado.js';
+import { contarEmprestadoPorEquipamento, contarManutencaoPorEquipamento } from '../core/utils/estoque.js';
 
 describe('contarEmprestadoPorEquipamento', () => {
     it('soma quantidades do mesmo equipamento em empréstimos diferentes', () => {
