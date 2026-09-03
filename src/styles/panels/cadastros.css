@@ -354,6 +354,37 @@
 
 /*RESPONSIVINESS*/
 
+@media (min-width: 1024px) and (max-height: 650px) {
+    .cadastros-container {
+        margin-top: 12px;
+        gap: 16px;
+    }
+    .cadastros-info-banner {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
+    .cadastros-grid {
+        gap: 12px;
+    }
+    .cadastro-card {
+        padding: 14px 16px;
+        gap: 6px;
+    }
+    .cadastro-card-icon {
+        width: 36px;
+        height: 36px;
+    }
+    .cadastro-card-icon .material-symbols-outlined {
+        font-size: 20px;
+    }
+    .cadastro-card-title {
+        font-size: 0.95rem;
+    }
+    .cadastro-card-desc {
+        font-size: 0.78rem;
+    }
+}
+
 @media (max-width: 1024px) {
     .cadastros-container {
         max-width: 100%;

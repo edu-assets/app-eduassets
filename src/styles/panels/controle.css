@@ -602,6 +602,145 @@
 
 /* RESPONSIVINESS */
 
+@media (min-width: 1024px) and (max-height: 650px) {
+    .controle-container {
+        margin-top: 4px;
+        gap: 8px;
+    }
+    
+    .controle-resumo-card {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+    
+    .controle-resumo-icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .controle-resumo-icon .material-symbols-outlined {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+    
+    .controle-resumo-numero {
+        font-size: 1.2rem;
+    }
+    
+    .controle-resumo-titulo {
+        font-size: 0.8rem;
+    }
+    
+    .controle-resumo-sub {
+        font-size: 0.7rem;
+    }
+    
+    .controle-registros-container {
+        padding: 12px 16px;
+    }
+    
+    .controle-registros-header-row {
+        margin-bottom: 8px;
+    }
+    
+    .controle-registros-header-row h4 {
+        font-size: 0.95rem;
+        margin-bottom: 0;
+    }
+    
+    .controle-registros-desc {
+        font-size: 0.75rem;
+    }
+    
+    .controle-registros-toolbar .btn {
+        height: 28px;
+        padding: 0 10px;
+        font-size: 0.75rem;
+    }
+    
+    .controle-registros-toolbar .btn .material-symbols-outlined {
+        font-size: 16px;
+    }
+    
+    .controle-tabs-row {
+        margin-bottom: 8px;
+    }
+    
+    .controle-tab-link {
+        padding: 4px 10px;
+        font-size: 0.82rem;
+    }
+    
+    .controle-tabs-ferramentas {
+        padding-bottom: 4px;
+    }
+    
+    .controle-busca-wrap input {
+        height: 28px;
+        padding: 4px 12px 4px 30px;
+        font-size: 0.8rem;
+    }
+    
+    .controle-busca-wrap .material-symbols-outlined {
+        font-size: 16px;
+        left: 8px;
+    }
+    
+    .registros-header,
+    .registros-row {
+        padding: 4px 8px;
+        gap: 8px;
+    }
+    
+    .registros-header {
+        font-size: 0.7rem;
+    }
+    
+    .registros-row {
+        font-size: 0.82rem;
+    }
+    
+    .registros-row-icon .material-symbols-outlined {
+        font-size: 18px;
+    }
+    
+    .controle-problema-badge {
+        padding: 2px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .controle-problema-badge .material-symbols-outlined {
+        font-size: 13px;
+    }
+    
+    .controle-paginacao {
+        margin-top: 8px;
+    }
+    
+    .controle-pagina-btn {
+        min-width: 26px;
+        height: 26px;
+        padding: 0 6px;
+        font-size: 0.75rem;
+    }
+    
+    .controle-dica-bar {
+        margin-top: 8px;
+        padding: 8px 12px;
+    }
+    
+    .controle-dica-info {
+        font-size: 0.75rem;
+    }
+    
+    .controle-dica-info .material-symbols-outlined {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+}
+
 @media (max-width: 1024px) {
     .controle-resumo-grid {
         grid-template-columns: repeat(3, 1fr);

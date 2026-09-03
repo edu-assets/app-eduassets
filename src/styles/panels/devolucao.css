@@ -810,3 +810,73 @@
         padding-top: 1px;
     }
 }
+
+@media (min-width: 1024px) and (max-height: 650px) {
+    .devolucao-layout {
+        margin-top: 8px;
+        gap: 12px;
+    }
+    .devolucao-tabela-header,
+    .devolucao-item {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+    .devolucao-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+    .info-resp-nome {
+        font-size: 0.82rem;
+    }
+    .info-aluno-nome {
+        font-size: 0.7rem;
+    }
+    .devolucao-item-icon-pill {
+        padding: 3px 8px;
+        font-size: 0.72rem;
+    }
+    .devolver-btn {
+        padding: 4px 10px;
+        font-size: 0.78rem;
+    }
+    /* Painel de detalhes ultracompacto */
+    .devolucao-detalhe-painel {
+        max-height: calc(100vh - 16px);
+        top: 8px;
+        padding: 12px;
+    }
+    .devolucao-detalhe-header {
+        margin-bottom: 8px;
+    }
+    .devolucao-detalhe-header h3 {
+        font-size: 0.88rem;
+    }
+    .devolucao-detalhe-pessoa,
+    .devolucao-detalhe-secao {
+        padding-bottom: 6px;
+        margin-bottom: 6px;
+    }
+    .devolucao-detalhe-pessoa-data {
+        font-size: 0.75rem;
+    }
+    .devolucao-detalhe-secao-header {
+        font-size: 0.82rem;
+        margin-bottom: 4px;
+    }
+    .detalhe-emprestimo-lista {
+        max-height: 70px;
+        gap: 4px;
+    }
+    .detalhe-emprestimo-lista li {
+        font-size: 0.78rem;
+    }
+    .devolucao-detalhe-acoes {
+        gap: 6px;
+        padding-top: 6px;
+    }
+    .devolucao-detalhe-acoes .btn {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+    }
+}

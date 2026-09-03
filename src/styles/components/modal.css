@@ -433,5 +433,49 @@
 }
 
 #modal-confirmar-exclusao {
-    z-index: 400;
+    z-index: 99999;
+}
+
+@media (min-width: 1024px) and (max-height: 650px) {
+    .modal-box {
+        max-height: calc(100vh - 32px);
+        overflow-y: auto;
+        padding: 18px;
+    }
+
+    .modal-box--md,
+    .modal-box--lg {
+        padding: 20px 22px;
+    }
+
+    .modal-header h3,
+    .modal-header-titles h3 {
+        margin-bottom: 0;
+        font-size: 1rem;
+    }
+
+    .modal-body {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .modal-box--md .modal-body,
+    .modal-box--lg .modal-body {
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .modal-summary-panel {
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .modal-summary-person {
+        padding-bottom: 10px;
+    }
+
+    .modal-summary-items-list {
+        max-height: 70px;
+        overflow-y: auto;
+    }
 }

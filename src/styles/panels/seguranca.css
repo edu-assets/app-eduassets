@@ -54,6 +54,21 @@
     margin-bottom: 0;
 }
 
+@media (min-width: 1024px) and (max-height: 650px) {
+    .seguranca-container {
+        margin-top: 12px;
+    }
+    .seguranca-toggle-btn {
+        margin-top: 12px;
+        padding: 10px 12px;
+    }
+    .seguranca-form-senha {
+        gap: 12px;
+        margin-top: 12px;
+        padding-top: 12px;
+    }
+}
+
 @media (max-width: 640px) {
     .seguranca-container {
         margin-top: 16px;

@@ -250,6 +250,138 @@
    RESPONSIVIDADE: PAINEL DE EMPRÉSTIMO
    ========================================== */
 
+@media (min-width: 1024px) and (max-height: 650px) {
+    .emprestimo-container {
+        margin-top: 4px; 
+    }
+    
+    .conteudo-container {
+        max-width: 820px;
+    }
+
+    .form-emprestimo {
+        padding: 12px 18px;
+        gap: 0;
+    }
+
+    .form-emprestimo > h2,
+    .form-emprestimo > header h2 {
+        font-size: 1.1rem;
+        margin-bottom: 2px;
+    }
+    
+    .form-emprestimo > p,
+    .form-emprestimo > header p {
+        font-size: 0.78rem;
+        margin-bottom: 10px;
+    }
+
+    .form-section {
+        gap: 2px;
+    }
+
+    .form-section:not(:last-child) {
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .form-section h3,
+    .form-section legend,
+    .form-section > span {
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-section h3 .material-symbols-outlined,
+    .form-section legend .material-symbols-outlined {
+        font-size: 1.1rem;
+    }
+
+    .form-section .form-label-description {
+        margin-bottom: 4px;
+        font-size: 0.72rem;
+        line-height: 1.2;
+    }
+
+    .form-group label {
+        margin-bottom: 2px;
+        font-size: 0.78rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 2px 8px;
+        font-size: 0.82rem;
+    }
+
+    .form-row {
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    #panel-emprestimo .form-group.col-md input,
+    #panel-emprestimo .form-group.col-sm input,
+    #panel-emprestimo select {
+        height: 28px;
+    }
+
+    #panel-emprestimo .form-group-align-btn .btn {
+        height: 28px;
+        padding: 0 10px;
+        font-size: 0.78rem;
+    }
+    
+    #panel-emprestimo .form-group-align-btn .material-symbols-outlined {
+        font-size: 16px;
+    }
+
+    .itens-emprestimo-header {
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }
+    
+    .itens-emprestimo-header span:first-child {
+        font-size: 0.8rem;
+    }
+
+    .itens-emprestimo-empty {
+        padding: 8px;
+        gap: 2px;
+    }
+    
+    .itens-emprestimo-empty .material-symbols-outlined {
+        font-size: 20px;
+        height: 20px;
+        margin-bottom: 2px;
+    }
+
+    .itens-emprestimo-empty-titulo {
+        font-size: 0.8rem;
+    }
+    
+    .itens-emprestimo-empty-sub {
+        font-size: 0.7rem;
+    }
+
+    #panel-emprestimo textarea#observacao {
+        min-height: 32px;
+    }
+
+    .form-actions {
+        margin-top: 6px;
+    }
+
+    #panel-emprestimo .registrar-emprestimo {
+        padding: 6px 16px;
+        font-size: 0.85rem;
+        min-width: 180px;
+        height: 32px;
+    }
+}
+
 @media (max-width: 1024px) {
     .conteudo-container {
         max-width: 100%;
@@ -392,3 +524,4 @@
         min-width: 140px;
     }
 }
+

@@ -330,17 +330,53 @@
    RESPONSIVIDADE
    ========================================================== */
 
+   @media (min-width: 1024px) and (max-height: 650px) {
+    #modal-documentacao .modal-box {
+        height: 90vh; 
+    }
+    .doc-header {
+        padding: 12px 16px;
+    }
+    .doc-sidebar {
+        padding: 10px 8px;
+    }
+    .doc-sidebar-item {
+        padding: 8px 10px;
+        font-size: 0.82rem;
+    }
+    .doc-search-wrap {
+        padding: 10px 16px;
+    }
+    .doc-search-wrap input {
+        padding: 6px 12px 6px 32px;
+    }
+    .doc-content {
+        padding: 16px 20px;
+    }
+    .doc-content h1 {
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+    }
+    .doc-content h2 {
+        font-size: 1.1rem;
+        margin: 16px 0 8px;
+    }
+    .doc-content p, .doc-content ul, .doc-content ol {
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+    .doc-footer {
+        padding: 8px 16px;
+    }
+}
+
 /* Tablet: esconde a TOC lateral (fica só sidebar + conteúdo) */
 @media (max-width: 1024px) {
     .doc-toc-wrap {
         display: none;
     }
 }
-
-/* Mobile / kiosk touch: empilha tudo verticalmente.
-   ESSENCIAL: .doc-layout precisa virar coluna aqui, senão a sidebar
-   (que passa a ser uma faixa horizontal) continua sendo tratada como
-   item lateral do flex row e espreme o conteúdo a largura zero. */
 @media (max-width: 768px) {
     .modal-overlay:has(#modal-documentacao) ,
     #modal-documentacao {
