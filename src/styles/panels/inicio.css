@@ -375,51 +375,102 @@
 }
 
 @media (min-width: 1024px) and (max-height: 650px) {
+    /* Distributes the whole panel vertically instead of stacking
+       everything against the top of a short viewport.
+       IMPORTANT: must stay scoped to `.active` — panels are hidden via
+       `.panel { display: none }` (panels-shell.css) and shown via
+       `.panel.active { display: block }`. An ID selector like
+       `#panel-inicio { display: flex }` on its own has higher
+       specificity than `.panel`'s `display: none`, so it would keep
+       Início visible even when it's not the active panel, breaking
+       the SPA navigation (other panels render stacked underneath it). */
+    #panel-inicio.active {
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 80px);
+        justify-content: center;
+        gap: 18px;
+    }
+
     .inicio-hero-card {
-        padding: 16px 20px;
+        padding: 28px 32px;
     }
+
     .inicio-hero-grid {
-        gap: 16px;
+        gap: 32px;
+        align-items: stretch;
     }
-    .inicio-logo-img {
-        max-width: 180px;
-        margin-top: 0;
-    }
-    .inicio-divider {
-        margin: 6px 0 8px;
-    }
-    .inicio-descricao {
-        margin-bottom: 10px;
-        font-size: 0.8rem;
-        line-height: 1.4;
-    }
-    .inicio-hero-img-placeholder {
-        flex: 1 1 240px;
-        aspect-ratio: 21 / 9; /* Força um banner bem achatado */
-    }
-    .inicio-acoes {
-        margin-top: 12px;
-    }
-    .inicio-acoes-titulo {
-        margin-bottom: 8px;
-        font-size: 0.9rem;
-    }
-    .inicio-acoes-grid {
+
+    .inicio-hero-textos {
+        justify-content: center;
         gap: 10px;
     }
+
+    .inicio-logo-img {
+        max-width: 240px;
+        margin-top: 4px;
+    }
+
+    .inicio-divider {
+        margin: 8px 0 10px;
+    }
+
+    .inicio-descricao {
+        margin-bottom: 16px;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .inicio-botoes .btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+
+    /* Keeps the hero image tall and impactful instead of squashed
+       into a thin banner strip. */
+    .inicio-hero-img-placeholder {
+        flex: 1 1 380px;
+        aspect-ratio: 4 / 3;
+        max-height: 280px;
+    }
+
+    .inicio-acoes {
+        margin-top: 0;
+    }
+
+    .inicio-acoes-titulo {
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+    }
+
+    .inicio-acoes-grid {
+        gap: 14px;
+    }
+
     .inicio-acao-card {
-        padding: 10px;
-        gap: 8px;
+        padding: 14px;
+        gap: 12px;
     }
+
     .inicio-acao-icon {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
     }
+
     .inicio-acao-icon .material-symbols-outlined {
-        font-size: 18px;
+        font-size: 22px;
     }
+
+    .inicio-acao-titulo {
+        font-size: 0.85rem;
+    }
+
+    .inicio-acao-desc {
+        font-size: 0.72rem;
+    }
+
     .inicio-dica-bar {
-        margin-top: 10px;
-        padding: 8px 12px;
+        margin-top: 0;
+        padding: 12px 18px;
     }
 }
