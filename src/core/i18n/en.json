@@ -424,5 +424,14 @@
   "backend.usuarios.rfid_hardware_indisponivel": "RFID hardware unavailable. Check whether the eduassets-rfid service is running.",
   "feedback.estoque_insuficiente_simples": "Insufficient stock: {nome} (available: {disponivel})",
   "feedback.estoque_insuficiente_com_reservado": "Insufficient stock: {nome} (available: {disponivel}, already in this loan: {reservado})",
-  "feedback.estoque_insuficiente_quantidade": "Insufficient stock: only {disponivel} unit(s) available for this equipment."
+  "feedback.estoque_insuficiente_quantidade": "Insufficient stock: only {disponivel} unit(s) available for this equipment.",
+  "controle.titulo_nova_observacao": "New Observation",
+  "controle.titulo_nova_manutencao": "New Maintenance",
+  "controle.titulo_registrar_quebra": "Register Breakage",
+  "controle.titulo_editar_resolvido": "Edit Resolved Record",
+  "controle.editar_registro": "Edit Record",
+  "controle.subtitulo_observacao": "Log an issue for tracking.",
+  "controle.subtitulo_manutencao": "Register equipment that needs maintenance.",
+  "controle.subtitulo_quebrado": "Register broken or damaged equipment.",
+  "controle.subtitulo_resolvidos": "Update the information for this resolved record."
 }

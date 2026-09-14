@@ -1,25 +1,25 @@
 import { openModal } from '../../core/ui/index.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
 import { renderControleLinha, renderControleEmptyState, ICONE_POR_TIPO } from './templates.js';
-import { listarCategoriasDisponiveis,filtrarOcorrencias, listarEquipamentosPorCategoria } from './service.js';
-import { fillSelect, renderPlaceholderOption  } from '../../shared/dom/fillSelect.js';
+import { listarCategoriasDisponiveis, filtrarOcorrencias, listarEquipamentosPorCategoria } from './service.js';
+import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect.js';
 import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
 import { t } from '../../core/state/i18nStore.js';
 
 const TIPOS_VISIVEIS = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
 
 const TITULOS_POR_TIPO: Record<string, string> = {
-    observacao: 'Nova Observação',
-    manutencao: 'Nova Manutenção',
-    quebrado: 'Registrar Quebra',
-    resolvidos: 'Editar Registro Resolvido'
+    observacao: 'controle.titulo_nova_observacao',
+    manutencao: 'controle.titulo_nova_manutencao',
+    quebrado: 'controle.titulo_registrar_quebra',
+    resolvidos: 'controle.titulo_editar_resolvido'
 };
 
 const SUBTITULOS_POR_TIPO: Record<string, string> = {
-    observacao: 'Registre uma ocorrência para acompanhamento.',
-    manutencao: 'Registre um equipamento que precisa de manutenção.',
-    quebrado: 'Registre um equipamento quebrado ou danificado.',
-    resolvidos: 'Atualize as informações deste registro resolvido.'
+    observacao: 'controle.subtitulo_observacao',
+    manutencao: 'controle.subtitulo_manutencao',
+    quebrado: 'controle.subtitulo_quebrado',
+    resolvidos: 'controle.subtitulo_resolvidos'
 };
 
 const COR_ICONE_POR_TIPO: Record<string, string> = {
@@ -80,7 +80,7 @@ export function renderControle(els: ControleEls, estado: ControleEstado): void {
         const registros = getOcorrenciasPorTipo(tipo);
         // NOVO: Aplica o filtro antes de renderizar
         const registrosFiltrados = filtrarOcorrencias(registros, estado.termoBusca);
-        
+
         const rows = registrosFiltrados.length
             ? registrosFiltrados.map((registro) => renderControleLinha(tipo, registro)).join('')
             : renderControleEmptyState();
@@ -189,8 +189,8 @@ function alternarCampoMedidas(els: ControleEls, mostrar: boolean): void {
 }
 
 function atualizarHeaderModal(els: ControleEls, tipo: string): void {
-    if (els.modalTitle) els.modalTitle.textContent = TITULOS_POR_TIPO[tipo] || 'Novo Registro';
-    if (els.modalSubtitle) els.modalSubtitle.textContent = SUBTITULOS_POR_TIPO[tipo] || '';
+    if (els.modalTitle) els.modalTitle.textContent = t(TITULOS_POR_TIPO[tipo] ?? 'shell.novo_registro');
+    if (els.modalSubtitle) els.modalSubtitle.textContent = t(SUBTITULOS_POR_TIPO[tipo] ?? '');
 
     if (els.modalHeaderIcon) {
         const cor = COR_ICONE_POR_TIPO[tipo] || 'info';
@@ -227,7 +227,9 @@ export function abrirEdicaoRegistro(els: ControleEls, estado: ControleEstado, ro
 
     atualizarHeaderModal(els, tipo);
     if (els.modalTitle) {
-        els.modalTitle.textContent = tipo === 'resolvidos' ? 'Editar Registro Resolvido' : 'Editar Registro';
+        els.modalTitle.textContent = tipo === 'resolvidos'
+            ? t('controle.titulo_editar_resolvido')
+            : t('controle.editar_registro');
     }
 
     popularSelectCategorias(els);

@@ -12,8 +12,8 @@ export function renderCampo(campo: CampoCadastro, opcoes: CampoOpcao[] | null): 
 function renderCampoTexto(campo: CampoCadastro): string {
     return html`
         <div class="form-group">
-            <label for="${campo.id}">${campo.label}</label>
-            <input type="${campo.type}" id="${campo.id}" placeholder="${campo.placeholder || ''}">
+            <label for="${campo.id}">${t(campo.label)}</label>
+            <input type="${campo.type}" id="${campo.id}" placeholder="${t(campo.placeholder || '')}">
         </div>
     `;
 }
@@ -23,7 +23,7 @@ function renderCampoSelect(campo: CampoCadastro, opcoes: CampoOpcao[]): string {
 
     return html`
         <div class="form-group">
-            <label for="${campo.id}">${campo.label}</label>
+            <label for="${campo.id}">${t(campo.label)}</label>
             <select id="${campo.id}">
                 <option value="" disabled selected hidden>${t('cadastros.selecionar')}</option>
                 ${raw(opcoesHtml)}

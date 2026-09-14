@@ -6,6 +6,7 @@ import {
     ApiError
 } from '../../core/api/index.js';
 import type { Categoria, Equipamento, Responsavel, Usuario } from '../../types/index.js';
+import { t } from '../../core/state/i18nStore.js';
 
 export interface CampoOpcao {
     value: string | number;
@@ -36,8 +37,8 @@ export type TipoCadastro = 'equipamentos' | 'responsaveis' | 'usuarios' | 'categ
 
 const CADASTRO_CONFIG: Record<TipoCadastro, CadastroConfig<any>> = {
     equipamentos: {
-        titulo: 'Equipamentos',
-        descricao: 'Adicione um novo equipamento à lista disponível para empréstimo.',
+        titulo: 'cadastros.titulo_equipamentos',
+        descricao: 'cadastros.desc_equipamentos',
         icone: 'devices',
         iconeClasse: 'primary',
         listar: () => equipamentosApi.listarEquipamentos(),
@@ -50,18 +51,18 @@ const CADASTRO_CONFIG: Record<TipoCadastro, CadastroConfig<any>> = {
         campos: [
             {
                 id: 'cad-categoria',
-                label: 'Categoria',
+                label: 'cadastros.campo_categoria',
                 type: 'select',
                 carregarOpcoes: () => categoriasApi.listarCategorias()
-                    .then((categorias) => categorias.map((c) => ({ value: c.id, label: c.nome })))
+                    .then((categorias) => categorias.map((c) => ({ value: c.id, label: c.nome }))) // dado real, não traduzir
             },
-            { id: 'cad-modelo', label: 'Modelo', type: 'text', placeholder: 'Ex: Multilaser' },
-            { id: 'cad-quantidade', label: 'Quantidade', type: 'number', placeholder: '1' }
+            { id: 'cad-modelo', label: 'cadastros.campo_modelo', type: 'text', placeholder: 'cadastros.placeholder_modelo' },
+            { id: 'cad-quantidade', label: 'cadastros.campo_quantidade', type: 'number', placeholder: '1' }
         ]
     },
     responsaveis: {
-        titulo: 'Responsáveis',
-        descricao: 'Cadastre um professor ou funcionário autorizado a retirar equipamentos.',
+        titulo: 'cadastros.titulo_responsaveis',
+        descricao: 'cadastros.desc_responsaveis',
         icone: 'badge',
         iconeClasse: 'success',
         listar: () => responsaveisApi.listarResponsaveis(),
@@ -71,13 +72,13 @@ const CADASTRO_CONFIG: Record<TipoCadastro, CadastroConfig<any>> = {
         }),
         formatarItem: (item: Responsavel) => `${item.nome} — ${item.cargo}`,
         campos: [
-            { id: 'cad-nome', label: 'Nome', type: 'text', placeholder: 'Nome completo' },
-            { id: 'cad-cargo', label: 'Cargo', type: 'text', placeholder: 'Ex: Professor' }
+            { id: 'cad-nome', label: 'cadastros.campo_nome', type: 'text', placeholder: 'cadastros.placeholder_nome_completo' },
+            { id: 'cad-cargo', label: 'cadastros.campo_cargo', type: 'text', placeholder: 'cadastros.placeholder_cargo' }
         ]
     },
     usuarios: {
-        titulo: 'Usuários do Sistema',
-        descricao: 'Adicione um novo usuário com acesso ao sistema.',
+        titulo: 'cadastros.titulo_usuarios',
+        descricao: 'cadastros.desc_usuarios',
         icone: 'admin_panel_settings',
         iconeClasse: 'secondary',
         listar: () => usuariosApi.listarUsuarios(),
@@ -89,30 +90,30 @@ const CADASTRO_CONFIG: Record<TipoCadastro, CadastroConfig<any>> = {
         }),
         formatarItem: (item: Usuario) => `${item.nome} — ${item.login} · ${item.nivelAcesso === 'ADMINISTRADOR' ? 'Administrador' : 'Editor'}`,
         campos: [
-            { id: 'cad-nome-usuario', label: 'Nome', type: 'text', placeholder: 'Nome completo' },
-            { id: 'cad-login-usuario', label: 'E-mail / Login', type: 'text', placeholder: 'usuario@escola.com' },
-            { id: 'cad-senha-usuario', label: 'Senha', type: 'password', placeholder: 'Mínimo 8 caracteres' },
+            { id: 'cad-nome-usuario', label: 'cadastros.campo_nome', type: 'text', placeholder: 'cadastros.placeholder_nome_completo' },
+            { id: 'cad-login-usuario', label: 'cadastros.campo_email_login', type: 'text', placeholder: 'cadastros.placeholder_email' },
+            { id: 'cad-senha-usuario', label: 'cadastros.campo_senha', type: 'password', placeholder: 'cadastros.placeholder_senha' },
             {
                 id: 'cad-nivel-acesso',
-                label: 'Nível de acesso',
+                label: 'cadastros.campo_nivel_acesso',
                 type: 'select',
                 options: [
-                    { value: 'ADMINISTRADOR', label: 'Administrador' },
-                    { value: 'EDITOR', label: 'Editor' }
+                    { value: 'ADMINISTRADOR', label: 'cadastros.administrador' },
+                    { value: 'EDITOR', label: 'cadastros.editor' }
                 ]
             }
         ]
     },
     categorias: {
-        titulo: 'Categorias de Equipamentos',
-        descricao: 'Crie uma nova categoria para organizar os equipamentos.',
+        titulo: 'cadastros.titulo_categorias',
+        descricao: 'cadastros.desc_categorias',
         icone: 'category',
         iconeClasse: 'info',
         listar: () => categoriasApi.listarCategorias(),
         criar: (valores) => categoriasApi.criarCategoria(valores['cad-nome-categoria']),
         formatarItem: (item: Categoria) => item.nome,
         campos: [
-            { id: 'cad-nome-categoria', label: 'Nome da Categoria', type: 'text', placeholder: 'Ex: Notebook' }
+            { id: 'cad-nome-categoria', label: 'cadastros.campo_nome_categoria', type: 'text', placeholder: 'cadastros.placeholder_nome_categoria' }
         ]
     }
 };
@@ -149,7 +150,9 @@ export async function carregarOpcoesCampo(campo: CampoCadastro): Promise<CampoOp
 
     const opcoesBrutas: Array<CampoOpcao | string> = campo.carregarOpcoes
         ? await campo.carregarOpcoes()
-        : (campo.options ?? []);
+        : (campo.options ?? []).map((op) =>
+            typeof op === 'object' ? { ...op, label: t(op.label) } : op
+          );
 
     return opcoesBrutas.map((op) => (typeof op === 'object' ? op : { value: op, label: op }));
 }

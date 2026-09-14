@@ -59,9 +59,9 @@ export function abrirModalCadastro(
     config: CadastroConfig,
     camposComOpcoes: CampoComOpcoes[]
 ): void {
-    els.titulo.textContent = config.titulo;
+    els.titulo.textContent = t(config.titulo);
 
-    if (els.subtitulo) els.subtitulo.textContent = config.descricao || '';
+    if (els.subtitulo) els.subtitulo.textContent = t(config.descricao) || '';
     if (els.headerIcone) els.headerIcone.className = `modal-header-icon modal-header-icon-${config.iconeClasse || 'primary'}`;
     if (els.headerIconeSymbol) els.headerIconeSymbol.textContent = config.icone || 'list_alt';
 
