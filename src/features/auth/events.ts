@@ -54,7 +54,9 @@ export function attachAuthEvents(els: AuthEls): void {
         openModal('modal-login');
     });
 
-    els.btnContinuarConvidado.addEventListener('click', () => closeModal('modal-login'));
+    els.btnContinuarConvidado.addEventListener('click', () => {
+        showToast(t('auth.contate_administrador_senha_mensagem'), 'warning');
+    });
     els.btnEntrar.addEventListener('click', () => fazerLogin(els));
     els.senhaInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') fazerLogin(els);

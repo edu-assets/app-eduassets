@@ -433,5 +433,9 @@
   "controle.subtitulo_observacao": "Log an issue for tracking.",
   "controle.subtitulo_manutencao": "Register equipment that needs maintenance.",
   "controle.subtitulo_quebrado": "Register broken or damaged equipment.",
-  "controle.subtitulo_resolvidos": "Update the information for this resolved record."
+  "controle.subtitulo_resolvidos": "Update the information for this resolved record.",
+  "auth.contate_administrador": "Contact the administrator",
+  "auth.contate_administrador_senha_mensagem": "Password reset isn't available here. Contact the system administrator.",
+  "feedback.erro_carregar_dados_iniciais": "Could not load all system data. Try reloading the page.",
+  "backend.seguranca.muitas_tentativas_senha": "Too many password change attempts. Please try again in a few minutes."
 }

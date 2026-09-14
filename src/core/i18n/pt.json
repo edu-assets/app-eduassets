@@ -433,5 +433,9 @@
   "controle.subtitulo_observacao": "Registre uma ocorrência para acompanhamento.",
   "controle.subtitulo_manutencao": "Registre um equipamento que precisa de manutenção.",
   "controle.subtitulo_quebrado": "Registre um equipamento quebrado ou danificado.",
-  "controle.subtitulo_resolvidos": "Atualize as informações deste registro resolvido."
+  "controle.subtitulo_resolvidos": "Atualize as informações deste registro resolvido.",
+  "auth.contate_administrador": "Contate o administrador",
+  "auth.contate_administrador_senha_mensagem": "Não é possível redefinir a senha por aqui. Entre em contato com o administrador do sistema.",
+  "feedback.erro_carregar_dados_iniciais": "Não foi possível carregar todos os dados do sistema. Tente recarregar a página.",
+  "backend.seguranca.muitas_tentativas_senha": "Muitas tentativas de alteração de senha. Tente novamente em alguns minutos."
 }

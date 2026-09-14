@@ -1,7 +1,7 @@
 import { initNavigation, initMobileNavigation } from './core/layout/index.js';
-import { initModals, initConfirm } from './core/ui/index.js';
+import { initModals, initConfirm, showToast } from './core/ui/index.js';
 import { initTheme } from './core/state/themeStore.js';
-import { initI18n } from './core/state/i18nStore.js';
+import { initI18n, t } from './core/state/i18nStore.js';
 import { initSessionTimeout } from './core/auth/sessionTimeout.js';
 import { initDashboard } from './features/dashboard/index.js';
 import { initControle } from './features/controle/index.js';
@@ -22,12 +22,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     initI18n();
     const [_, ...cargasIniciais] = await Promise.allSettled([initAuth(), carregarEquipamentos(), carregarResponsaveis(), carregarEmprestimos(), carregarOcorrencias()]);
 
+    let houveFalhaCarregamento = false;
+
     cargasIniciais.forEach((resultado, indice) => {
         if (resultado.status === 'rejected') {
             const origem = ['equipamentos', 'responsáveis', 'empréstimos', 'ocorrências'][indice];
             console.error(`[eduAssets] Fail to load ${origem}:`, resultado.reason);
+            houveFalhaCarregamento = true;
         }
     });
+
+    if (houveFalhaCarregamento) {
+        showToast(t('feedback.erro_carregar_dados_iniciais'), 'error');
+    }
 
     const inits: Array<() => void> = [
         initNavigation,
