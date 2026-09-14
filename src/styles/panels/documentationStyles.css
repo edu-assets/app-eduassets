@@ -230,6 +230,12 @@
     -webkit-overflow-scrolling: touch;
 }
 
+.doc-code code {
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+}
+
 .doc-code-copy-btn {
     position: absolute;
     top: 8px;
