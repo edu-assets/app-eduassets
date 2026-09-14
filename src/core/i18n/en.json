@@ -437,5 +437,7 @@
   "auth.contate_administrador": "Contact the administrator",
   "auth.contate_administrador_senha_mensagem": "Password reset isn't available here. Contact the system administrator.",
   "feedback.erro_carregar_dados_iniciais": "Could not load all system data. Try reloading the page.",
-  "backend.seguranca.muitas_tentativas_senha": "Too many password change attempts. Please try again in a few minutes."
+  "backend.seguranca.muitas_tentativas_senha": "Too many password change attempts. Please try again in a few minutes.",
+  "backend.seguranca.muitas_provisionamentos_rfid": "Too many RFID card provisioning attempts. Please try again in a few minutes.",
+  "backend.usuarios.nao_encontrado": "User not found."
 }

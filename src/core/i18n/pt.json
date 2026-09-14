@@ -437,5 +437,7 @@
   "auth.contate_administrador": "Contate o administrador",
   "auth.contate_administrador_senha_mensagem": "Não é possível redefinir a senha por aqui. Entre em contato com o administrador do sistema.",
   "feedback.erro_carregar_dados_iniciais": "Não foi possível carregar todos os dados do sistema. Tente recarregar a página.",
-  "backend.seguranca.muitas_tentativas_senha": "Muitas tentativas de alteração de senha. Tente novamente em alguns minutos."
+  "backend.seguranca.muitas_tentativas_senha": "Muitas tentativas de alteração de senha. Tente novamente em alguns minutos.",
+  "backend.usuarios.nao_encontrado": "Usuário não encontrado.",
+  "backend.seguranca.muitas_provisionamentos_rfid": "Muitas tentativas de provisionamento de cartão RFID. Tente novamente em alguns minutos."
 }
