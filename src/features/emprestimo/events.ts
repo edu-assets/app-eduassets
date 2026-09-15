@@ -87,13 +87,14 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             return;
         }
 
-        const dataSelecionada = els.picker.selectedDates[0] || new Date();
+        const dataFoiEditadaManualmente = !els.dataInput.classList.contains('input-auto');
+        const dataSelecionada = els.picker.selectedDates[0];
 
         const dados: LoanDraft = {
             aluno: els.solicitanteInput.value,
             responsavelId: els.responsavelSelect.value,
             itens: estado.itens,
-            dataRetiradaISO: dataSelecionada.toISOString(),
+            dataRetiradaISO: dataFoiEditadaManualmente && dataSelecionada ? dataSelecionada.toISOString() : undefined,
             observacao: els.observacaoInput.value
         };
 

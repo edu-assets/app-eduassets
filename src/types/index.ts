@@ -120,7 +120,7 @@ export interface ItemEmprestimoPayload {
 export interface EmprestimoCreatePayload {
     solicitanteNome: string;
     responsavelId: number;
-    dataRetirada: string;
+    dataRetirada?: string;
     observacao?: string;
     itens: ItemEmprestimoPayload[];
 }
@@ -168,7 +168,7 @@ export interface LoanUI {
 export interface LoanDraft {
     aluno: string;
     responsavelId: string | number;
-    dataRetiradaISO: string;
+    dataRetiradaISO?: string;
     observacao?: string;
     itens: LoanItemUI[];
 }

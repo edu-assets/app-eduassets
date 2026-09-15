@@ -25,7 +25,7 @@ export async function addLoan(loan: LoanDraft): Promise<void> {
     await criarEmprestimo({
         solicitanteNome: loan.aluno,
         responsavelId: Number(loan.responsavelId),
-        dataRetirada: loan.dataRetiradaISO,
+        ...(loan.dataRetiradaISO ? { dataRetirada: loan.dataRetiradaISO } : {}),
         observacao: loan.observacao || undefined,
         itens: loan.itens.map((item) => ({ equipamentoId: Number(item.id), quantidade: item.quantidade }))
     });
