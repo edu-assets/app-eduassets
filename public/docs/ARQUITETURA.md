@@ -1,69 +1,149 @@
 # Arquitetura — eduAssets
 
-## Visão geral
+> Este documento descreve a arquitetura atualmente implementada no código-fonte. Não descreve uma topologia de produção implantada e não infere módulos ou recursos de banco que não estejam presentes no código.
 
-O eduAssets é dividido em três camadas independentes que se comunicam por HTTP/WebSocket:
+## Fronteira do sistema e topologia
 
+A aplicação tem um frontend no navegador, uma API HTTP, um banco PostgreSQL acessado pelo Prisma e um caminho RFID opcional:
+
+```text
+Navegador (servidor Vite ou assets compilados)
+        │ HTTP / JSON
+        ▼
+Aplicação Express (backend :3000)
+        │ Prisma
+        ▼
+PostgreSQL
+
+Caminho RFID opcional:
+Leitor RFID → bridge Python → POST /auth/rfid ──► backend
+                                             │
+                                             └─► WS /ws/rfid → abas abertas
+
+Navegador/admin → POST 127.0.0.1:3001/provision → bridge Python → leitor RFID
 ```
-Cartão RFID → Leitor MFRC522 → Serviço Python (bridge) → Backend (Express) → Frontend (Vite/TS)
-                                                              ↕
-                                                        PostgreSQL (Prisma)
-```
 
-Veja o diagrama de componentes e o diagrama de sequência do login RFID nas imagens desta seção.
+O caminho RFID é opcional. O login por senha continua sendo o caminho normal quando não há leitor conectado.
+
+## Fronteiras de execução e portas
+
+| Componente | Binding/configuração real | Responsabilidade |
+|---|---|---|
+| Backend | `PORT` ou `BACKEND_PORT`, com fallback para **3000**; `HOST` padrão `127.0.0.1` fora de produção e `0.0.0.0` quando `NODE_ENV=production` | API HTTP Express, health check, roteamento, autenticação e tratamento de upgrade WebSocket |
+| Servidor de desenvolvimento Vite | **0.0.0.0:5173** | Serve o frontend e encaminha as rotas de API configuradas para `http://127.0.0.1:3000`; `/ws` é encaminhado com suporte WebSocket para `ws://127.0.0.1:3000` |
+| Servidor de provisionamento RFID | **127.0.0.1:3001** | Endpoint HTTP local `/provision`, que enfileira a gravação de um token no leitor |
+| WebSocket de login RFID | Caminho `/ws/rfid` no backend | Canal opcional de eventos do backend para abas do navegador; só é criado quando `RFID_BRIDGE_ENABLED=true` |
+
+O proxy do Vite é configuração de desenvolvimento, não uma política de rede geral. Ele lista explicitamente as rotas da API (`/auth`, `/categorias`, `/equipamentos`, `/responsaveis`, `/usuarios`, `/emprestimos`, `/ocorrencias`, `/health`) e encaminha `/ws` separadamente.
 
 ## Frontend
 
-Arquitetura **feature-first e em camadas**, totalmente em TypeScript, sem framework — apenas Vite + módulos ES.
+O frontend é uma aplicação TypeScript construída com Vite e módulos ES nativos. O ponto de entrada é `frontend/src/main.ts`:
 
-```
-frontend/src/
-├── core/       infraestrutura: API client, auth guards, layout, state stores, UI primitives, utils
-├── features/   uma pasta por tela (dashboard, emprestimo, devolucao, controle, cadastros, exportar, config, seguranca, perfil, auth)
-├── shared/     componentes reutilizáveis não pertencentes a nenhuma feature específica
-└── types/      interfaces TypeScript centralizadas
-```
+1. Em `DOMContentLoaded`, inicializa tema e internacionalização.
+2. Executa a inicialização da autenticação e as cargas iniciais de equipamentos, responsáveis, empréstimos e ocorrências com `Promise.allSettled`.
+3. Uma falha em uma carga inicial mostra um toast de erro; as demais inicializações continuam de forma independente, para que uma falha de feature não interrompa todas as outras.
+4. Inicializa navegação, helpers de UI, timeout de sessão administrativa, módulos de feature, listener RFID, telas de perfil/segurança/configuração e documentação.
 
-Cada `feature/` segue o padrão de 4 arquivos, com fluxo de dados unidirecional:
+As camadas observadas do frontend são:
 
-| Arquivo | Responsabilidade |
-|---|---|
-| `index.ts` | apenas inicializa (busca elementos do DOM, monta estado, chama `attachEvents`) |
-| `events.ts` | escuta eventos de UI e orquestra chamadas a `service.ts` |
-| `service.ts` | regras de negócio e chamadas de API — nunca toca o DOM |
-| `render.ts` / `templates.ts` | `templates.ts` gera apenas strings HTML; `render.ts` atualiza o DOM |
+- **`core/`**: infraestrutura como cliente/configuração da API, stores de token e domínio, autenticação/timeout de sessão, layout, UI, utilitários HTML e listener RFID.
+- **`features/`**: módulos de tela (autenticação, dashboard, empréstimos/devoluções, controle de equipamentos e cadastros, exportação, configuração, segurança, perfil e documentação) compostos por `main.ts`.
+- O ponto de entrada não inicializa framework nem biblioteca global de estado. O estado de domínio é exposto por stores com funções `get...`, carga/mutação e `subscribe` para equipamentos, empréstimos, ocorrências, responsáveis, tema e i18n.
 
-Regra de ouro: **`events → service → render`**, nunca `events → render` diretamente para operações de negócio. Features não importam umas das outras — lógica compartilhada vai para `core/` ou `shared/`.
+### Estado e fluxo da API
 
-Toda geração de HTML dinâmico passa pelo helper `html\`\`` (tagged template com auto-escape), com `raw()` como escape hatch explícito para HTML já confiável.
+- `tokenStore` mantém o bearer token atual em memória e o espelha no `localStorage` sob `eduassets_token`. Limpar o token remove essa chave. O código não implementa fluxo de refresh token.
+- `apiClient` lê `VITE_API_BASE_URL` por meio de `apiConfig`, adiciona `Authorization: Bearer <token>` quando disponível, envia JSON, interpreta erros estruturados da API e emite `eduassets:sessao-expirada` após um HTTP 401.
+- Em desenvolvimento, uma base de API vazia torna as requisições relativas, permitindo que o proxy do Vite as encaminhe. O build de produção do frontend falha se `VITE_API_BASE_URL` estiver vazio.
+- O listener RFID tem um gate próprio de build: conecta somente quando `VITE_RFID_BRIDGE_ENABLED=true`, deriva a URL WebSocket da base da API (ou do host atual do navegador), tenta reconectar após 3 segundos, armazena o token recebido, valida-o por `/auth/me` e recarrega a página.
 
-O estado global usa um padrão simples de *store* (`subscribe`/`notify`) por entidade — sem Redux/Zustand — mantendo o app leve e sem dependências externas de state management.
+### Contrato de segurança para HTML
+
+`core/utils/html.ts` fornece o tagged template `html`. Valores interpolados passam por `escapeHtml`; `attr()` valida o nome do atributo e escapa seu valor. `raw()` é uma desativação explícita para HTML que o chamador já considera confiável. Portanto, usar `raw()` é uma fronteira deliberada de confiança, não um sanitizador automático.
 
 ## Backend
 
-Node.js + Express 5, TypeScript estrito, Prisma como ORM sobre PostgreSQL.
+O backend é uma aplicação Node.js/Express em TypeScript estrito. `server.ts` carrega dotenv, cria um servidor HTTP em torno de `app`, anexa condicionalmente a bridge WebSocket RFID e escuta no host e na porta resolvidos.
 
-```
-backend/src/
-├── routes/       um router por entidade (equipamentos, emprestimos, ocorrencias, usuarios...)
-├── middleware/    auth (requireAuth/requireAdmin), security (helmet, rate limit), errorHandler
-├── lib/           jwt, estoque (lógica atômica de estoque), validate, adminActivity, rfidBridge/Token
-└── schemas/       validação de entrada com Zod, em toda rota de escrita
-```
+### Pipeline da aplicação
 
-Pontos importantes:
+`app.ts` monta o pipeline nesta ordem:
 
-- **Autenticação**: JWT assinado no login, validado em todo endpoint mutável via `requireAuth`/`requireAdmin`.
-- **Estoque atômico**: decrementos usam `updateMany` com condição `WHERE quantidadeDisponivel >= quantidade`, evitando condição de corrida sem lock explícito. Erros de estoque insuficiente lançam `EstoqueInsuficienteError`, tratado de forma centralizada.
-- **WebSocket loopback-only** (`/ws/rfid`): usado apenas para propagar login automático por cartão para as abas abertas no mesmo dispositivo — nunca exposto externamente.
-- **Tratamento de erro centralizado**: `errorHandler.ts` mapeia códigos conhecidos do Prisma (registro não encontrado, referência inválida, valor duplicado) para respostas HTTP consistentes.
+1. Headers de segurança do Helmet (`frameguard: deny`, política de recurso cross-origin `cross-origin`; CSP é explicitamente desabilitada nessa configuração).
+2. CORS. O desenvolvimento local só é permissivo quando `NODE_ENV=development` e `HOST` é loopback. Fora desse caso, `CORS_ORIGIN` deve conter uma ou mais origens permitidas separadas por vírgula ou o processo falha na inicialização.
+3. Log de requisições.
+4. `express.json({ limit: '100kb' })`.
+5. Rate limiter global.
+6. `/health`, `/`, e os routers da aplicação.
+7. Handler de rota inexistente e handler centralizado de erros.
 
-## Bridge RFID (opcional)
+Os routers montados são `/auth`, `/categorias`, `/equipamentos`, `/responsaveis`, `/usuarios`, `/emprestimos` e `/ocorrencias`. Validação e autenticação por rota são aplicadas onde declaradas por cada router; a UI não é a fronteira de segurança.
 
-Serviço Python que roda no Raspberry Pi (SPI nativo) ou é retransmitido via Arduino Nano (serial USB), atrás de uma interface comum `RfidReaderBase`. Comunica-se com o backend por uma rota HTTP protegida por segredo compartilhado e restrita a conexões loopback (`127.0.0.1`) — o leitor físico e o backend precisam estar na mesma máquina (ou o bridge acessando `localhost`).
+### Autenticação e autorização
 
-## Decisões arquiteturais notáveis
+- O login por senha é `POST /auth/login`. O módulo JWT assina tokens HS256 com validade de **8 horas** e aceita somente HS256 na verificação. O payload precisa conter `sub` numérico e `nivelAcesso` igual a `ADMINISTRADOR` ou `EDITOR`.
+- `JWT_SECRET` é obrigatório e deve ter pelo menos 32 caracteres; o processo falha durante a inicialização do módulo JWT se estiver ausente ou fraco.
+- `requireAuth` exige `Authorization: Bearer ...`, verifica o token, confirma que o usuário ainda existe no PostgreSQL e atualiza o nível de acesso a partir do banco antes de colocá-lo em `req.user`.
+- `requireAdmin` compõe `requireAuth` e exige que o nível atual no banco seja `ADMINISTRADOR`. O router de usuários é exclusivo de administradores. As mutações de empréstimos observadas também exigem `requireAuth` e validação de entrada.
+- A inatividade de administradores é limitada a 30 minutos. O backend mantém a atividade em um `Map` na memória do processo, portanto o comportamento é consistente somente em uma instância do backend; escala horizontal exige estado compartilhado. O frontend também encerra a sessão de administrador após 30 minutos sem atividade e reage ao evento 401 do cliente da API.
+- `POST /auth/rfid` tem rate limit, valida a entrada e não é uma rota de navegador autenticada por JWT. O serviço exige origem loopback e comparação em tempo constante do header `X-RFID-Bridge-Secret` com `RFID_BRIDGE_SECRET`, aplica SHA-256 ao token RFID de 32 caracteres, procura `Usuario.rfidTokenHash` e publica um evento JWT assinado quando o cartão é reconhecido.
 
-- **Sem framework de frontend (v1)**: escolha deliberada para portfólio — demonstra fundamentos de DOM, TypeScript e arquitetura sem depender de React/Vue. A migração para React + TS está planejada para v2, reaproveitando as camadas `core`/`features`/`shared` já existentes (só a camada de renderização muda).
-- **Guest Mode como padrão**: como o projeto é público, toda leitura é aberta; apenas escrita exige autenticação — reforçado tanto na UI (`data-requires-auth`/`data-requires-admin`) quanto no backend (a UI é só UX, o backend é a fronteira de segurança real).
-- **Hardware desacoplado da aplicação principal**: o RFID é 100% opcional — o sistema funciona inteiramente por senha sem qualquer leitor conectado.
+### Persistência
+
+`prisma.ts` exporta um `PrismaClient` único e o helper `runTransaction`. Os limites padrão de uma transação interativa são **15.000 ms de timeout** e **5.000 ms de espera máxima**; o chamador pode fornecer um nível de isolamento.
+
+O datasource Prisma é PostgreSQL e lê `DATABASE_URL` e `DIRECT_URL`. O schema contém atualmente `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` e `Ocorrencia`, além dos enums de acesso/status declarados no schema. Há índices de status para empréstimos e ocorrências, e a credencial RFID é armazenada como hash único opcional em `Usuario`.
+
+Não há políticas RLS no schema Prisma. A autorização é implementada no código da aplicação e nos middlewares de rota; o schema não deve ser interpretado como isolamento por linha.
+
+## Bridge RFID e comportamento WebSocket
+
+### WebSocket do backend
+
+`rfidBridge.ts` cria um servidor `ws` com `noServer: true` e trata upgrades HTTP somente para `/ws/rfid`. Aceita apenas `127.0.0.1`, `::1` ou o endereço loopback IPv4 mapeado `::ffff:127.0.0.1`. `publicarLoginRfid` transmite o evento de login assinado para os clientes loopback abertos.
+
+A flag do backend é exata: **o servidor WebSocket só é anexado quando `RFID_BRIDGE_ENABLED === 'true'`**. O listener frontend tem seu próprio gate `VITE_RFID_BRIDGE_ENABLED === 'true'`. Portanto, a entrega ao navegador exige as flags apropriadas nos dois lados; ativar somente a flag do Vite não cria um endpoint WebSocket no backend.
+
+Loopback é uma verificação do endereço de origem, não substitui firewall, segmentação de rede ou configuração correta de reverse proxy. Um proxy deve preservar a fronteira de confiança pretendida e encaminhar `/ws` deliberadamente; a configuração do proxy do Vite, sozinha, não protege uma implantação acessível externamente.
+
+### Serviço Python e provisionamento
+
+`rpi/rfid/rfid_admin_bridge.py`:
+
+- Envia leituras passivas como `POST {EDUASSETS_BACKEND_URL}/auth/rfid`, com o token em JSON hexadecimal e `X-RFID-Bridge-Secret`; a URL padrão do backend é `http://localhost:3000` e o timeout da requisição é de 3 segundos.
+- Exige `RFID_BRIDGE_SECRET` com pelo menos 32 caracteres e compara o header de provisionamento com `hmac.compare_digest`.
+- Executa o servidor HTTP de provisionamento em `127.0.0.1:3001`. `POST /provision` aceita um token de tamanho 32, enfileira-o, espera até 35 segundos pela operação do leitor e retorna `201`, `500` ou `504` para gravação, falha ou timeout.
+- Usa o bloco `8` do leitor; a escrita espera até 30 segundos. As leituras passivas usam timeout de polling de 1 segundo e debounce físico de 1,5 segundo. `RFID_BACKEND` seleciona o backend do leitor e o padrão é `spi`.
+
+A unidade systemd `eduassets-rfid.service` descreve uma instalação em `/opt/eduassets-rfid`, executada pelo usuário/grupo sem privilégios `eduassets`, carrega `/etc/eduassets/rfid_bridge.env`, exige modo `600` nesse arquivo, reinicia em caso de falha e aplica `NoNewPrivileges`, `PrivateTmp` e `UMask=0077`. O arquivo de unidade é uma definição de implantação; não prova que o serviço esteja instalado ou em execução.
+
+## Configuração e limites
+
+| Variável/configuração | Comportamento ou limite atual |
+|---|---|
+| `PORT`, `BACKEND_PORT` | Seleção da porta do backend; padrão `3000` quando o valor resolvido está ausente/inválido |
+| `HOST` | Host de binding do backend; padrão `127.0.0.1`, ou `0.0.0.0` em produção |
+| `NODE_ENV` | Controla host/trust proxy de produção e a exceção de CORS para desenvolvimento local |
+| `CORS_ORIGIN` | Origens permitidas separadas por vírgula; obrigatória fora do desenvolvimento local |
+| `TRUST_PROXY` | Valor explícito de trust proxy do Express; sem ele, produção usa 1 salto e não produção usa `false` |
+| `JWT_SECRET` | Obrigatório, mínimo de 32 caracteres |
+| `DATABASE_URL`, `DIRECT_URL` | URLs do datasource PostgreSQL lidas pelo Prisma |
+| `RFID_BRIDGE_ENABLED` | Bridge WS do backend habilitada somente para o valor exato `true` |
+| `VITE_API_BASE_URL` | Origem da API do frontend; vazia permitida em desenvolvimento, obrigatória no build de produção |
+| `VITE_RFID_BRIDGE_ENABLED` | Listener RFID do frontend habilitado somente para o valor exato `true` |
+| `EDUASSETS_BACKEND_URL` | URL do backend usada pela bridge Python; padrão `http://localhost:3000` |
+| `RFID_BRIDGE_SECRET` | Obrigatória na bridge Python e no login RFID do backend; mínimo de 32 caracteres |
+| `RFID_BACKEND` | Seletor do backend do leitor; padrão `spi` |
+| Tamanho do JSON | Limite do corpo de requisição Express: `100kb` |
+| Validade JWT | `8h` |
+| Inatividade administrativa | `30min`, com estado do backend na memória do processo |
+| Transação Prisma | `timeout=15s`, `maxWait=5s` por padrão |
+| Rate limits | Global: 300 requisições/15 min; login: 10/15 min; login RFID: 60/15 min; troca de senha: 10/15 min; provisionamento RFID: 5/15 min |
+
+## Não-afirmações explícitas
+
+- Este documento não afirma RLS, ambiente de produção implantado ou configuração de reverse proxy/firewall em produção.
+- Restrições a `127.0.0.1` reduzem os endereços de origem aceitos, mas não substituem política de rede nem configuração de proxy.
+- O proxy do Vite é do servidor de desenvolvimento e não configura automaticamente um host frontend de produção.
+- RFID é opcional, e a aplicação continua utilizável por autenticação com senha sem o serviço do leitor.

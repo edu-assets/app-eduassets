@@ -1,101 +1,181 @@
 # User Manual — eduAssets
 
-## 1. Introduction
+> **Scope:** this manual describes the interface and workflows confirmed in the current eduAssets code. Use the UI names shown below; this document contains no credentials, records, or other real data.
 
-eduAssets is a loan and inventory management system for school equipment (notebooks, tablets, headphones, chargers, etc). This manual describes how to use each panel in day-to-day operation.
+## 1. Overview
 
-The system has three access levels:
+eduAssets manages school-equipment inventory and loans. The interface covers **New loan**, **Returns**, **Dashboard**, **Control**, **Records**, **Export**, **Settings**, **Security**, and **My Profile**.
 
-- **Guest** — anyone who opens the system without logging in. Can view everything, but cannot create, edit, or delete anything.
-- **Editor** — authenticated user. Can register loans, process returns, and create/edit Control records.
-- **Administrator** — full access, including Registrations, record deletion, and RFID card management.
+The current data model tracks quantities by **category/model**. It does not provide per-serial-number tracking; the **Number** field in Control is an operator-supplied identifier for an issue record.
 
----
+## 2. Access levels and security boundaries
 
-## 2. Home
+| Role | Operational capabilities | Restricted actions |
+| --- | --- | --- |
+| **Guest** | View public stock, history, returns, and issue views; use the available searches and exports. | Cannot create, update, resolve, return, or delete records. The **Records** panel is administrative; **Security** and **My Profile** require authentication. |
+| **Editor** | Sign in, register loans, edit items in open loans, confirm returns, create/edit/resolve **Control** records, and change the account's own password. | Cannot use **Records**, provision/revoke RFID, or delete issues. |
+| **Administrator** | Everything an Editor can do, plus **Records**, user and RFID-card management, **Save Settings**, and deleting **Control** records. | Still subject to stock, format, and required-field validation. |
 
-Landing screen with shortcuts to the most common actions (New Loan, Returns, Dashboard, Control) and the Login button.
+> **Important:** menus, indicators, and UI guards improve usability, but **they are not the security control**. The backend is the security boundary: it requires authentication/JWTs and enforces permissions on its routes. Do not treat a hidden button as proof of authorization.
 
-## 3. New Loan
+### Log in and Guest Mode
 
-1. Fill in the **Requester** (the student or person picking up the equipment).
-2. Select the **Responsible party** (authorized teacher/staff member).
-3. Adjust the **Date and Time** if needed (auto-filled with the current moment).
-4. Select the **Equipment** and **Quantity**, then click **Add** — repeat for each item.
-5. Add an **Observation**, if you want.
-6. Click **Register Loan**.
+1. Click **Log in** on the home screen or in the sidebar footer.
+2. In the **Administrator Login** modal, fill in **E-mail / Login** and **Password**.
+3. Click **Sign in**. After sign-in, the user menu shows the account name and role.
+4. To finish, open the user menu and click **Log out**. The interface returns to **Guest Mode**.
+5. **Contact the administrator** does not recover a password; it is the guidance shown when an account has no available password-recovery path.
 
-> Requires login (Editor or Administrator). The system blocks registration if there isn't enough available stock.
+**Administrator** sessions expire after 30 minutes of inactivity and return to the login modal. The current code does not apply that idle limit to **Editor** sessions.
 
-## 4. Returns
+### RFID (optional)
 
-- The list shows all currently open loans.
-- Click a card to view its details in the side panel (responsible party, student, items, observation).
-- The detail panel lets you **edit the loan's items** (add/remove/change quantity) before returning it.
-- Click **Return** (on the card or in the panel) to open the confirmation, adjust the return date/time, and confirm.
+RFID is an alternative login path, not a system requirement or a replacement for password login.
 
-## 5. Dashboard
+1. An **Administrator** opens **Records → System Users** and selects **Link card** next to the account.
+2. In the **RFID Card** modal, use **Generate token and link card**. The token is shown only once; copy it if needed.
+3. With the bridge and reader ready, follow the README procedure to write the card. The UI may show **Recording mode active** and ask you to hold the card near the reader for the next 30 seconds.
+4. Once linked, the modal shows **Card linked**. **Generate new token** replaces the current token; **Revoke card** invalidates that card for automatic login.
+5. For browser-side tap login, the installation must also enable the RFID listener. While in Guest Mode, tap the card; the browser validates the token and reloads the linked account session.
 
-- **Summary cards**: total equipment, available, on loan, under maintenance, and broken.
-- **Stock tab**: list by category with total, available, and broken counts. Click a row to see the category's detailed summary.
-- **History tab**: every loan ever registered, with status (Open/Returned). Click "Details" to see the full item list.
-- Use the search field to filter by category, requester, responsible party, or number.
-- **Export** generates a CSV of the current stock (or takes you to the Export panel when viewing History).
+The flow works only when configuration, networking, the local bridge, dependencies, and compatible hardware are correct. The backend requires loopback communication for `/auth/rfid` and `/ws/rfid`; a Raspberry Pi on the same LAN is not automatically sufficient. If it fails, use **Log in** with **E-mail / Login** and **Password**.
 
-## 6. Control
+## 3. Home
 
-Used to record equipment occurrences:
+On **Home**, use the shortcuts **New loan**, **Returns**, **Dashboard**, and **Control**. **Get started** opens the **Register Loan** panel. The page also offers **View documentation**.
 
-- **Observation** — a general note, doesn't affect stock.
-- **Maintenance** — removes the item from available stock until resolved.
-- **Broken** — removes the item from available stock and adds it to the broken count.
-- **Resolved** — history of maintenance/broken records already resolved, with the measures taken.
+## 4. Register Loan
 
-To resolve an open record, select it and click **Resolve**, describing the applied solution — the item automatically becomes available again.
+The sidebar item is **New loan** and the panel title is **Register Loan**. It requires an **Editor** or **Administrator** session.
 
-> Creating/editing is allowed for Editors and Administrators. Deleting is restricted to Administrators.
+1. Under **Loan Details**, fill in **Requester** and select the **Responsible** person.
+2. Check **Date and Time**. It is filled automatically; click it to choose a different pickup date when needed.
+3. Under **Loan Items**, choose **Equipment**, enter **Qty.**, and click **Add**. Repeat for each model; items appear under **Added items**.
+4. Optionally fill in **Note**.
+5. Click **Register Loan**.
 
-## 7. Registrations (Administrator only)
+At least one item is required. Both the UI and backend validate available quantity in a transaction; if stock is insufficient, the loan is not created. When successful, available quantity is reduced.
 
-Manage the system's base data:
+## 5. Returns
 
-- **Equipment** — category, model, and total quantity.
-- **Responsible parties** — teachers/staff authorized to pick up equipment.
-- **Users** — system access accounts (name, login, password, access level), including RFID card linking.
-- **Categories** — grouping for equipment.
+1. Open **Returns**. The list shows loans whose status is open.
+2. Click a row/card to open **Loan Details**. Review **Responsible**, **Requester**, items, and any note.
+3. To correct items before returning, use **Edit items**. Select **Equipment**, enter **Quantity**, click **Add**, remove items when necessary, and finish with **Save Changes**. Use **Cancel** to abandon the edit. At least one item must remain.
+4. Click **Return** in the list or **Confirm Return** in the detail panel.
+5. Review the **Confirm Return** modal and click **Confirm Return**; **Cancel** closes it without completing the return.
 
-### RFID Card (Users)
+Items become available again after confirmation. **Return Date and Time** is filled automatically and can be edited visually, but there is a confirmed limitation: the backend stores `dataDevolucao` using the server's **current time** (`new Date()`). The date manually selected in the UI must not be treated as persisted historical-date data.
 
-Click "Link card" next to a user to generate a unique token. Write the token to the physical card using `provision_card.py` (see the Hardware section of the README). The card can be regenerated or revoked at any time.
+## 6. Dashboard
 
-## 8. Export
+The **Dashboard** shows **Total equipment**, **Available**, **On Loan**, **Maintenance**, and **Broken** summary cards.
 
-Choose between exporting **Loans and returns** (by date range) or **Equipment** (current inventory state, with individual item selection). Available formats: CSV, Excel, and PDF. You can add a note that appears in the generated report.
+- In **Stock**, review totals by category. Click a row for the category's read-only details.
+- In **History**, review registered loans, **Requester**, **Responsible**, **Pickup**, **Return**, items, and **Status**; click **Details** for the full record.
+- Use **Search by information...**. In **Stock**, it searches the category; in **History**, it searches number, requester, and responsible party.
+- In **Stock**, **Export** immediately downloads a CSV of the current stock. In **History**, **Export** takes you to the **Export** panel for more options.
 
-## 9. Settings
+Displayed stock is derived from open loans and maintenance/broken issues. Check **Control** before interpreting a count affected by an issue.
 
-- **Appearance** — switch between Light, Dark, or System theme (follows the OS automatically).
-- **Notifications** — alert preferences (interface ready; saving restricted to Administrators).
+## 7. Control
 
-## 10. Security
+**Control** separates records into **Observation**, **Maintenance**, **Broken**, and **Resolved** tabs. Summary cards show open records.
 
-Any authenticated user can change their own password by providing the current password and a new one (minimum 8 characters).
+### Create or edit a record
 
-## 11. My Profile
+1. Click **New** and choose **Observation**, **Maintenance**, or **Broken**.
+2. In the form, select **Category** and **Model**, enter **Number**, choose the **Issue**, and fill in **Description**. Available issue choices include **Screen**, **Audio**, **Battery**, **Cable**, **Touchscreen**, **Keyboard**, **Button**, **Casing**, and **Other**.
+3. Click **Save**. For an existing row, select it, click **Edit**, change the fields, and save.
 
-Read-only summary of the logged-in account: name, email/login, and access level.
+**Observation** is a note and does not change stock. **Maintenance** removes the affected quantity from available stock until resolution. **Broken** also removes it from available stock and increments the broken count.
 
-## 12. Login and Guest Mode
+### Resolve and delete
 
-- Click **Login** in the sidebar or on the home screen.
-- **Administrator** sessions expire automatically after 30 minutes of inactivity.
-- **Editor** sessions have no such limit.
-- If an RFID card is linked, tapping it on the reader (Raspberry Pi/Arduino) logs the user in automatically, without a password.
+1. Select an issue in **Maintenance** or **Broken** and click **Resolve**.
+2. Fill in **Measures taken** and click **Confirm resolution**. The record moves to **Resolved** and the quantity becomes available again; for **Broken**, the broken count is adjusted as well.
+3. To permanently remove an issue, select it, click **Delete**, and confirm. This is irreversible and restricted to **Administrator**.
 
-## 13. Frequently Asked Questions
+Creating, editing, and resolving require authentication (**Editor** or **Administrator**). The backend enforces these rules too; the UI must not be used as a security mechanism.
 
-**I can't edit anything, even while logged in.**
-Check your access level under "My Profile" — some actions (Registrations, deletion, settings) are Administrator-only.
+## 8. Records (Administrator)
 
-**The system refuses the loan even though the equipment shows up in the registry.**
-The available quantity may be at zero (items on loan or under maintenance). Check the Dashboard for the current stock levels.
+**Records** is administrative. Open a card, fill in the fields, and click **Save**; **Cancel** closes the modal. **Registered** lists the data loaded from the API.
+
+- **Equipment:** **Category**, **Model**, and **Quantity**.
+- **Responsible Parties:** **Name** and **Role**.
+- **System Users:** **Name**, **Email / Login**, **Password**, and **Access level** (**Administrator** or **Editor**).
+- **Equipment Categories:** **Category Name**.
+
+On a user row, **Link card** opens **RFID Card**. After linking, use **Generate new token** (replaces the current one), **Copy token** when available, or **Revoke card**. Treat the token as sensitive; do not publish it or include it in reports.
+
+The current **Records** UI is designed to list/view and create the records shown. Do not assume that an edit or delete action available in another panel exists for every record type.
+
+## 9. Export
+
+Open **Export** and choose one of the cards:
+
+| UI data type | Confirmed workflow |
+| --- | --- |
+| **Loans and returns** | Set **Start date** and **End date**; the current month is selected by default. The period filters records by the loan creation date. |
+| **Equipment** | The report reflects the current inventory. Use **Select all** or choose equipment individually; at least one must be selected. |
+
+Then:
+
+1. Under **Export format**, choose **CSV**, **Excel**, or **PDF**.
+2. Optionally add a note in **Note**; it appears in the report.
+3. Review **Export summary** and click **Export Data**.
+
+Confirmed formats are `.csv`, `.xlsx` (Excel), and `.pdf`. CSV and Excel contain the main table and, when applicable, issue sections; PDF produces the equivalent report. If no record matches the filters, the application refuses the export instead of creating an empty file.
+
+## 10. Settings
+
+In **Settings**:
+
+- **Appearance → Theme:** choose **Light**, **Dark**, or **System**.
+- **Language:** choose **Português** or **English**; the interface switches immediately.
+- **Notifications:** switch **Loan alerts** and **Return alerts** between **Enabled** and **Disabled**.
+- Click **Save Settings** when the UI offers it. Saving is restricted to **Administrator**.
+
+Theme and language are browser preferences. The notification interface is present, but the inspected code exposes no backend route for persisting alerts; do not treat the visual switch state as proof that a notification was delivered.
+
+## 11. Account Security
+
+Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 8 characters and the confirmation must match. Click **Update password** or **Cancel**.
+
+Changing a password is available only to the authenticated account and requires the current password. **Password recovery is not implemented**; if the password is lost, use **Contact the administrator**.
+
+## 12. My Profile
+
+From the user menu, open **My profile**. The **My Profile** panel is read-only and shows **Full name**, **Email** (the account login), and **Access level**. Use **Log out** to end the session.
+
+## 13. Data and installation reference
+
+The current schema relates:
+
+- **Category** and **Equipment** (model, total, available, and broken quantities);
+- **Responsible Party**;
+- **User**, with **Administrator** or **Editor** access and an optional RFID token;
+- **Loan** and its items, with open/returned status;
+- **Issue**, with observation/maintenance/broken type and open/resolved status.
+
+Anyone preparing an installation should follow the README and provide local values in `.env`: PostgreSQL in `DATABASE_URL`, `DIRECT_URL` when needed, a strong `JWT_SECRET` (at least 32 characters), `CORS_ORIGIN` outside local mode, and `VITE_API_BASE_URL` for a build that does not use the Vite proxy. Never put real passwords, tokens, or secrets in this manual or in the repository.
+
+## 14. Confirmed limitations
+
+- **Return date:** `dataDevolucao` currently uses the server time in the backend. Editing **Return Date and Time** in the UI does **not** turn the return into persisted historical-date data.
+- **RFID:** optional and dependent on configuration (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), network/loopback reachability, bridge, dependencies, and compatible hardware. The same LAN alone does not guarantee operation.
+- **Deployment:** a real deployment, public domain, proxy, hosted database, or backup policy was not validated by this work. The README describes local development and technical preparation.
+- **Password:** there is no password recovery; only the authenticated change in **Security** is available.
+- **UI security:** guestGate, permissions, and `data-requires-*` attributes guide the interface. Effective authorization is enforced by backend routes/controllers.
+- **Inventory granularity:** the system tracks quantities by model/category, not individual serial numbers.
+- **Data:** this manual contains no real data; use only accounts, people, equipment, and tokens authorized by your installation.
+
+## 15. Quick troubleshooting
+
+**I cannot create, edit, or return anything.** Check the role under **My Profile**, confirm that the session is still active, and try again. **Guest Mode** is read-only.
+
+**The loan is rejected.** Check **Available** on the **Dashboard**; items already on loan or in **Maintenance** cannot be checked out. Confirm that at least one item is in the form.
+
+**The RFID card does not work.** Check both flags, the shared secret, bridge process, loopback connection, reader, and card link. Use password login while troubleshooting.
+
+**The export is not generated.** Review the type, period, selected equipment, and format. The application does not create a file when no record matches the filters.
