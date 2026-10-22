@@ -33,7 +33,7 @@ UI/UX decisions follow a set of internal design guidelines focused on functional
 - **TypeScript** (fully migrated from the original vanilla JS codebase) compiled via [Vite](https://vitejs.dev/), ES Modules, no separate bundler config beyond `vite.config.js`
 - **Feature-first architecture** (see [Architecture](#architecture) below) — already implemented, not just planned
 - [flatpickr](https://flatpickr.js.org/) for datetime input handling
-- [SheetJS (xlsx)](https://sheetjs.com/) and [jsPDF](https://github.com/parallax/jsPDF) + `jspdf-autotable`, loaded via CDN in `index.html`, for Excel and PDF export
+- [ExcelJS](https://github.com/exceljs/exceljs) and [jsPDF](https://github.com/parallax/jsPDF) + `jspdf-autotable`, bundled as dependencies, for Excel and PDF export
 - Material Symbols Outlined for iconography, subset at build time via a custom script (`scripts/extract-icons.mjs` + `scripts/subset-icons.mjs`) to keep the icon font small
 - Theming implemented purely with CSS Custom Properties (`base/variables.css`), scoped via `html[data-theme]` — no component-level style duplication between Light and Dark
 - A lightweight native WebSocket client (`core/rfid/rfidListener.ts`) that listens for RFID login events pushed by the backend and reloads the session automatically
@@ -132,7 +132,7 @@ All dynamic HTML goes through an XSS-safe, tagged-template `html\`\`` helper (`c
 | **Dashboard** | Complete | Estoque and Histórico tabs (publicly viewable), category detail panel (admin-only editing), loan history sourced from shared state, search/filter on both tabs |
 | **Controle** | Complete | Four tabs (Observação, Manutenção, Quebrado, Resolvidos), create/edit modal with conditional "Medidas tomadas" field, row selection, Promise-based delete confirmation modal, search; creation/editing available to Editors and Administrators, deletion restricted to Administrators |
 | **Cadastros** | Complete, admin-only | Modal-based CRUD for equipment, staff, users, and categories, wired to the backend; entire panel restricted to authenticated administrators; the Usuários list additionally supports generating, regenerating, and revoking RFID login tokens per user |
-| **Exportar** | Complete | Exports Empréstimos/Devoluções or Equipamentos (with per-item selection) as CSV, Excel (SheetJS), or PDF (jsPDF + autotable), including detailed occurrence sections and optional notes |
+| **Exportar** | Complete | Exports Empréstimos/Devoluções or Equipamentos (with per-item selection) as CSV, Excel (ExcelJS), or PDF (jsPDF + autotable), including detailed occurrence sections and optional notes |
 | **Configurações** | Complete | Dark Mode toggle (Light / Dark / System) fully functional and persisted; notification preferences UI-only, save action restricted to administrators |
 | **Segurança** | Complete | Authenticated password change (current + new password, confirmation, min. 8 characters), available to any authenticated user |
 | **Meu Perfil** | Complete | Read-only summary of the logged-in account (name, login, access level) |
@@ -282,7 +282,7 @@ Access-level restrictions are expressed declaratively: any control tagged `data-
 - [x] Implement optional RFID physical card login (Raspberry Pi / Arduino bridge + WebSocket push)
 - [ ] Accessibility improvements: focus trap in modals, `role="dialog"`
 - [ ] Unit tests with Vitest for pure utility and service functions
-- [ ] Properly configure CORS for production (currently a `TODO` in `server.ts`)
+- [x] Configure explicit CORS allowlists per environment; production requires `CORS_ORIGIN`.
 - [ ] First public deployment (Vercel + Render)
 - [ ] Migrate to React + TypeScript (v2)
 
@@ -295,7 +295,7 @@ Access-level restrictions are expressed declaratively: any control tagged `data-
 - Individual asset tracking (per-unit serial numbers) is out of scope for v1.
 - `nivelAcesso` distinguishes `ADMINISTRADOR` and `EDITOR` with genuinely different permissions on both frontend and backend, but no finer-grained roles (e.g. per-panel permissions) exist yet.
 - Dark Mode ships with a single alternate palette; the token structure supports additional themes in the future, but no theme picker beyond Light/Dark/System exists yet.
-- CORS configuration is currently permissive by default when `CORS_ORIGIN` is unset — needs to be locked down before production deployment.
+- Production startup requires an explicit `CORS_ORIGIN` allowlist; development CORS is limited to loopback when `NODE_ENV=development`.
 
 ---
 
@@ -313,13 +313,13 @@ Access-level restrictions are expressed declaratively: any control tagged `data-
 ```
 4. (Optional) Create a `.env` file to point at a non-default backend URL:
 ```
-   VITE_API_BASE_URL=http://localhost:3000
+   VITE_API_BASE_URL= (em desenvolvimento, deixe vazio para usar o proxy Vite)
 ```
 5. Start the dev server:
 ```bash
    npm run dev
 ```
-> Vite serves the app on `http://localhost:5173` by default. Run `npm run build` to produce a production build in `dist/`, or `npm run typecheck` to run `tsc --noEmit`.
+> The API defaults to `http://localhost:3000` (or the platform-provided `PORT`); production binds to `0.0.0.0`. The Vite dev server runs at `http://localhost:5173` and proxies API/WebSocket requests to port 3000. Run `npm run build` to produce a production build in `dist/`, or `npm run typecheck` to run `tsc --noEmit`.
 
 ### Backend
 1. Navigate to the backend directory:
@@ -338,7 +338,8 @@ Access-level restrictions are expressed declaratively: any control tagged `data-
    SEED_ADMIN_PASSWORD=<the password for the initial administrator account>
    SEED_EDITOR_PASSWORD=<optional — creates a test editor account when set>
    CORS_ORIGIN=<comma-separated list of allowed frontend origins, e.g. http://localhost:5173>
-   RFID_BRIDGE_SECRET=<only needed if you plan to use RFID card login — shared secret with the rpi/ bridge>
+   RFID_BRIDGE_ENABLED=false
+   RFID_BRIDGE_SECRET=<only needed if RFID is enabled — shared secret with the rpi/ bridge>
 ```
 4. Run migrations:
 ```bash
@@ -352,7 +353,7 @@ Access-level restrictions are expressed declaratively: any control tagged `data-
 ```bash
    npm run dev
 ```
-> The API runs on `http://localhost:3000` by default, and also upgrades `/ws/rfid` WebSocket connections on the same port (loopback only). Log in on the frontend using the login you defined via the seed (`admin@eduassets.com` by default) and the password set in `SEED_ADMIN_PASSWORD`.
+> The API defaults to `http://localhost:3000`, honors `PORT` then `BACKEND_PORT`, and only initializes `/ws/rfid` when `RFID_BRIDGE_ENABLED=true`. The bridge provisioning HTTP server listens on loopback port 3001. Log in on the frontend using the login you defined via the seed (`admin@eduassets.com` by default) and the password set in `SEED_ADMIN_PASSWORD`.
 
 ### RFID Bridge (optional)
 Only needed if you want physical card login. Run on the same machine as the backend (or a Raspberry Pi with network access to it):
@@ -373,7 +374,7 @@ Only needed if you want physical card login. Run on the same machine as the back
 ```bash
    python3 rfid_admin_bridge.py
 ```
-> For unattended operation on a Raspberry Pi, install `eduassets-rfid.service` as a `systemd` unit and configure `/etc/eduassets/rfid-bridge.env` with the variables above. Use `provision_card.py <token>` to write a token (generated via Cadastros → Usuários in the app) onto a physical card.
+> For unattended operation on a Raspberry Pi, install `eduassets-rfid.service` as a `systemd` unit and configure `/etc/eduassets/rfid_bridge.env` with the variables above. Use `provision_card.py <token>` to write a token (generated via Cadastros → Usuários in the app) onto a physical card.
 
 ---
 

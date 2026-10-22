@@ -6,23 +6,24 @@ const EVENTOS_ATIVIDADE = ['mousemove', 'keydown', 'click', 'scroll', 'touchstar
 
 let timer: ReturnType<typeof setTimeout> | null = null;
 
-function expirarSessaoAdmin(): void {
-    if (getUsuario()?.nivelAcesso !== 'ADMINISTRADOR') return;
+function expirarSessao(): void {
+    if (!getUsuario()) return;
+    const eraAdmin = getUsuario()?.nivelAcesso === 'ADMINISTRADOR';
     sair();
-    showToast('Sessão expirada por inatividade. Faça login novamente.', 'warning');
+    showToast(eraAdmin ? 'Sessão expirada por inatividade. Faça login novamente.' : 'Sessão expirada. Faça login novamente.', 'warning');
     openModal('modal-login');
 }
 
 function registrarAtividade(): void {
     if (getUsuario()?.nivelAcesso !== 'ADMINISTRADOR') return;
     if (timer) clearTimeout(timer);
-    timer = setTimeout(expirarSessaoAdmin, IDLE_LIMIT_MS);
+    timer = setTimeout(expirarSessao, IDLE_LIMIT_MS);
 }
 
 export function initSessionTimeout(): void {
     EVENTOS_ATIVIDADE.forEach((evento) => document.addEventListener(evento, registrarAtividade, { passive: true }));
     
-    window.addEventListener('eduassets:sessao-expirada', expirarSessaoAdmin);
+    window.addEventListener('eduassets:sessao-expirada', expirarSessao);
 
     registrarAtividade();
 }

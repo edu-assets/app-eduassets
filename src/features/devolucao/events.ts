@@ -197,16 +197,17 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         if (bloquearSeConvidado()) return;
         if (!estado.idDetalheAberto) return;
 
-        setButtonLoading(els.btnConfirmarDevolucao, true);
+        setButtonLoading(els.btnDetalheSalvar, true);
         try {
             await salvarItensEmprestimo(estado.idDetalheAberto, estado.itensEditando);
+            estado.itensOriginais = estado.itensEditando.map((item) => ({ ...item }));
             showToast('Empréstimo atualizado com sucesso', 'success');
             setModoEdicao(els, estado, false);
             renderDetalheItens(els, estado.itensEditando, false);
         } catch (erro) {
             showToast(formatarErroEstoque(erro, 'feedback.erro_atualizar_emprestimo'), 'error');
         } finally {
-            setButtonLoading(els.btnConfirmarDevolucao, false);
+            setButtonLoading(els.btnDetalheSalvar, false);
         }
     });
 }

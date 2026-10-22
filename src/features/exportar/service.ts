@@ -30,7 +30,7 @@ export function filtrarPorPeriodo<T>(
     if (!dataInicial && !dataFinal) return itens;
 
     const inicio = dataInicial ? new Date(dataInicial) : null;
-    const fim = dataFinal ? new Date(dataFinal) : null;
+    const fim = dataFinal ? new Date(`${dataFinal}T23:59:59.999`) : null;
 
     return itens.filter((item) => {
         const data = obterData(item);

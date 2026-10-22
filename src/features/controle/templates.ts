@@ -1,4 +1,4 @@
-import { html, raw } from '../../core/utils/html.js';
+import { attr, html, raw } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
 import { t } from '../../core/state/i18nStore.js';
 import type { OcorrenciaUI } from '../../types/index.js';
@@ -39,7 +39,7 @@ export function renderControleMenuAcoes(tipo: string): string {
             </button>
             <div class="registros-row-menu">
                 ${raw(opcaoResolver)}
-                <span class="registros-row-menu-opcao" data-acao="editar"data-requires-auth>${t('controle.editar')}</span>
+                <span class="registros-row-menu-opcao" data-acao="editar" data-requires-auth>${t('controle.editar')}</span>
                 <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir" data-requires-admin>${t('controle.excluir')}</span>
             </div>
         </span>
@@ -60,7 +60,7 @@ export function renderControleLinha(tipo: string, dados: OcorrenciaUI): string {
         <div class="${ehResolvido ? 'registros-row registros-row-resolvidos' : 'registros-row'}" data-id="${dados.id}" data-equipamento-id="${dados.equipamentoId}"
             data-tipo="${tipo}" data-status="${dados.status}" data-problema="${dados.problema}" data-categoria="${dados.categoria}"
             data-modelo="${dados.modelo}" data-numero="${dados.numero}" data-descricao="${dados.descricao}"
-            data-registrado-em="${dataTexto}"${ehResolvido ? ` data-medidas="${dados.medidas || ''}"` : ''}>
+            data-registrado-em="${dataTexto}"${ehResolvido ? attr('data-medidas', dados.medidas || '') : ''}>
         <span class="registros-row-icon">
             <span class="icon-badge icon-badge--md icon-badge--primary">
                 <span class="material-symbols-outlined">${iconeLinha}</span>

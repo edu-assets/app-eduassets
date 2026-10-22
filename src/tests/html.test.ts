@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { html, raw } from '../core/utils/html.js';
+import { attr, html, raw } from '../core/utils/html.js';
 
 describe('html tagged template', () => {
     it('escapa valores interpolados por padrão', () => {
@@ -26,5 +26,12 @@ describe('html tagged template', () => {
         const resultado = html`<span>${null}${undefined}</span>`;
 
         expect(resultado).toBe('<span></span>');
+    });
+
+    it('escapa valores como atributo HTML completo, incluindo aspas e sinais especiais', () => {
+        const medida = 'troca "peça" & revisão <final>';
+        const resultado = html`<div ${attr('data-medidas', medida)}></div>`;
+
+        expect(resultado).toBe('<div data-medidas="troca &quot;peça&quot; &amp; revisão &lt;final&gt;"></div>');
     });
 });

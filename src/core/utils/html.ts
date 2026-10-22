@@ -1,5 +1,12 @@
 import { escapeHtml } from './sanitize.js';
 
+export interface SafeAttribute {
+    __safeAttribute: string;
+}
+export function attr(nome: string, valor: unknown): SafeAttribute {
+    if (!/^[a-zA-Z_:][a-zA-Z0-9:._-]*$/.test(nome)) throw new Error('Nome de atributo HTML inválido');
+    return { __safeAttribute: `${nome}=\"${escapeHtml(valor)}\"` };
+}
 export interface RawHtml {
     __raw: string;
 }
@@ -24,6 +31,9 @@ export function html(strings: TemplateStringsArray, ...values: unknown[]): strin
 }
 
 function formatar(valor: unknown): string {
+    if (valor && typeof valor === 'object' && '__safeAttribute' in valor) {
+        return (valor as SafeAttribute).__safeAttribute;
+    }
     if (valor && typeof valor === 'object' && '__raw' in valor) {
         return (valor as RawHtml).__raw;
     }

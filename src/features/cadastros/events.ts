@@ -8,7 +8,7 @@ import {
     renderListaUsuarios,
     limparCamposFormulario,
     abrirModalRfid,
-    exibirModoGravacao, // AQUI: Atualizado a importação[cite: 22]
+    exibirModoGravacao,
     exibirCartaoRevogado,
     fecharModalRfid
 } from './render.js';

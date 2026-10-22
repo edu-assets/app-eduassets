@@ -85,7 +85,7 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
     }
 
     if (!response.ok) {
-        if (response.status === 401 && payload?.sessaoExpirada) {
+        if (response.status === 401) {
             window.dispatchEvent(new Event('eduassets:sessao-expirada'));
         }
         const mensagem = formatarMensagemErro(payload, response.status);
