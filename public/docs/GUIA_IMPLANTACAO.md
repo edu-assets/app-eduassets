@@ -55,6 +55,9 @@ Revise `deploy/nginx/eduassets-api.conf.example`, substitua hostname e caminhos 
 
 O backend usa loopback como padrão de serviço direto fora de produção; o container escuta na sua rede isolada, publicado só em loopback da VM. RFID público permanece off (`RFID_BRIDGE_ENABLED=false`, `VITE_RFID_BRIDGE_ENABLED=false`); não há rota proxy `/ws`. Não colocar quiosque RFID na instância pública.
 
+
+For public deployments, add a reviewed Cloudflare WAF/rate-limiting rule for `POST /auth/login` in addition to the application limiter. This is an external configuration requirement and is not configured or verified by this repository.
+
 ## Saúde, logs e monitoramento
 
 - `GET /health` é liveness e deliberadamente não depende do PostgreSQL.

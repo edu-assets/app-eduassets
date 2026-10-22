@@ -188,7 +188,7 @@ O processo inicia o provisionador local em `127.0.0.1:3001/provision`. A unidade
 - RFID depende de hardware real, dependências Linux, alcance por loopback, segredo compartilhado forte e política de rede explícita. Quando desativado, o login por senha continua sendo o caminho suportado.
 - O modelo controla quantidades, não unidades serializadas individualmente, e os níveis de acesso não têm permissões mais granulares por painel.
 - Não há recuperação de senha. A data offset-aware escolhida no modal de devolução é validada e persistida; clientes antigos podem omitir o campo e usar horário do servidor.
-- Testes de integração e migrations passaram em PostgreSQL 16 local descartável. CI hospedado, Docker/Compose, proxy Nginx/Cloudflare no host-alvo, TLS do provedor gerenciado, backups externos, acessibilidade, QA em navegador de produção e hardware ainda requerem validação externa. Templates e testes locais não comprovam deployment.
+- Migrations, seed e testes de integração em PostgreSQL descartável não foram executados neste sandbox. CI hospedado, Docker/Compose, proxy Nginx/Cloudflare no host-alvo, TLS do provedor gerenciado, backups externos, acessibilidade, QA em navegador de produção e hardware ainda requerem validação externa. Templates e testes unitários/build locais não comprovam deployment.
 
 ## Versões por idioma
 

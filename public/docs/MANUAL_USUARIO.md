@@ -142,7 +142,7 @@ O tema e o idioma são preferências do navegador. A interface de notificações
 
 ## 11. Segurança da conta
 
-Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preencha **Senha atual**, **Nova senha** e **Confirmar nova senha**; a nova senha precisa ter pelo menos 8 caracteres e a confirmação deve coincidir. Clique em **Atualizar senha** ou **Cancelar**.
+Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preencha **Senha atual**, **Nova senha** e **Confirmar nova senha**; a nova senha precisa ter pelo menos 12 caracteres e a confirmação deve coincidir. Clique em **Atualizar senha** ou **Cancelar**.
 
 A troca é permitida somente para a conta autenticada e exige a senha atual. **Não há recuperação de senha implementada**: se a senha for perdida, **Contate o administrador**.
 

@@ -2,6 +2,7 @@ import type { DocRegistryItem } from '../../core/docs/registry.js';
 import type { LoadedDocument, SearchResultado } from '../../core/docs/docsService.js';
 import { renderTocHtml } from '../../core/docs/toc.js';
 import { t } from '../../core/state/i18nStore.js';
+import { escapeHtml } from '../../core/utils/sanitize.js';
 
 export function renderSidebarItem(doc: DocRegistryItem, ativo: boolean): string {
     return `
@@ -47,8 +48,8 @@ export function renderSearchResults(resultados: SearchResultado[]): string {
         <button type="button" class="doc-search-result" data-doc-id="${r.doc.id}">
             <span class="material-symbols-outlined">${r.doc.icon}</span>
             <span class="doc-search-result-body">
-                <span class="doc-search-result-title">${r.doc.title}</span>
-                <span class="doc-search-result-snippet">${r.trecho}</span>
+            <span class="doc-search-result-title">${escapeHtml(r.doc.title)}</span>
+            <span class="doc-search-result-snippet">${escapeHtml(r.trecho)}</span>
             </span>
         </button>
     `).join('');

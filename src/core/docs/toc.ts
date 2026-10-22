@@ -1,11 +1,12 @@
 import type { HeadingItem } from './markdownRenderer.js';
+import { escapeHtml } from '../utils/sanitize.js';
 
 export function renderTocHtml(headings: HeadingItem[]): string {
     if (!headings.length) return '';
 
     return headings.map((h) => `
         <a href="#${h.id}" class="doc-toc-item doc-toc-item-${h.nivel}" data-toc-target="${h.id}">
-            ${h.texto}
+            ${escapeHtml(h.texto)}
         </a>
     `).join('');
 }

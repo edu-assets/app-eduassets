@@ -142,7 +142,7 @@ Theme and language are browser preferences. The notification interface is presen
 
 ## 11. Account Security
 
-Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 8 characters and the confirmation must match. Click **Update password** or **Cancel**.
+Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 12 characters and the confirmation must match. Click **Update password** or **Cancel**.
 
 Changing a password is available only to the authenticated account and requires the current password. **Password recovery is not implemented**; if the password is lost, use **Contact the administrator**.
 

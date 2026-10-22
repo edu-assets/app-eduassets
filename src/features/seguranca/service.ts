@@ -6,7 +6,7 @@ export async function trocarSenha(senhaAtual: string, novaSenha: string, confirm
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
         throw new Error('validation.seguranca.preencha_campos');
     }
-    if (novaSenha.length < 8) {
+    if (novaSenha.length < 12) {
         throw new Error('validation.seguranca.senha_minima');
     }
     if (novaSenha !== confirmarSenha) {

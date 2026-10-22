@@ -10,9 +10,12 @@ All versions below v1.0.0 belong to the beta cycle; earlier dates are approximat
 - The return flow sends the user's selected offset-aware timestamp; legacy clients may omit it and use server time. Export filters use inclusive local-calendar boundaries.
 - `/health` is liveness and `/ready` probes PostgreSQL with a timeout; responses do not reveal connection/provider details. Backend build and Prisma Client generation work without `DIRECT_URL` via the `DATABASE_URL` fallback.
 - Added separate local env templates and production template, a multi-stage backend Dockerfile and Compose file with loopback-only host binding, RFID disabled, sanitized Nginx/Cloudflare proxy template, backup/restore scripts restricted to empty DB, PostgreSQL CI workflow and integration/race tests.
-- Seed display names are synthetic and existing passwords are not overwritten; historical login identifiers were preserved.
-- Sandbox verification on Oct 22: 35 frontend tests (9 files), frontend build, 24 backend unit tests, backend TypeScript build and `prisma validate` passed. PostgreSQL 16 was installed locally in the sandbox only; all six migrations applied to an empty disposable test database; seeding ran twice, and a changed seed password did not overwrite the existing credential; all nine HTTP/concurrency/auth integration tests passed, including logout/password-change revocation. Frontend tests cover Guest/Editor/Administrator data synchronization and immediate logout cleanup.
-- Hosted CI, Docker/Compose, `nginx -t`, browser QA, hardware, Vercel, DNS, firewall, Cloudflare on the target host, certificates and deployment remain unverified. No remote database, public resource or production environment was accessed or changed; PostgreSQL testing used only a local disposable database.
+- Seed display names are synthetic and existing passwords are not overwritten; seed execution remains explicit and requires configured `SEED_*` variables.
+- Sandbox verification on Oct 22: 36 frontend tests across 9 files, 30 backend unit tests, frontend typecheck/build, backend TypeScript build, Prisma generation, JSON/YAML validation and `prisma validate` passed. PostgreSQL, migrations, seed, the 9 HTTP/concurrency integration tests, Docker/Compose and `nginx -t` were **not run** because those services/tools were unavailable in the sandbox.
+- Hosted CI, browser QA, hardware, Vercel, DNS, firewall, Cloudflare on the target host, certificates and deployment remain unverified. No remote database, public resource or production environment was accessed or changed.
+
+- Added bounded loan/occurrence payloads, raised user/password-change minimum to 12 characters, handled async feature initialization failures, and escaped documentation TOC/search text.
+- Backend audit recorded: `npm audit --omit=dev` still reports the Prisma chain in the current lockfile; 3 high remain in the Prisma 6 development/migration toolchain, with no forced major upgrade.
 
 ## v0.9.9 (August 2026)
 - Database indexes on `Emprestimo.status` and `Ocorrencia.status` for faster Dashboard and Control queries.
