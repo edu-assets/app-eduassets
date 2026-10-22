@@ -409,6 +409,8 @@
   "backend.geral.registro_duplicado": "Já existe um registro com esse valor único.",
   "backend.geral.erro_processar_requisicao": "Erro ao processar a requisição.",
   "backend.geral.erro_interno": "Erro interno do servidor.",
+  "backend.geral.banco_indisponivel": "Banco de dados indisponível. Inicie o PostgreSQL e verifique DATABASE_URL.",
+  "backend.geral.banco_nao_inicializado": "Banco de dados não inicializado ou desatualizado. Execute as migrations antes de iniciar o sistema.",
   "backend.geral.json_invalido": "Corpo da requisição contém JSON inválido.",
   "backend.seguranca.muitas_requisicoes": "Muitas requisições. Tente novamente em alguns minutos.",
   "backend.seguranca.muitas_tentativas_login": "Muitas tentativas de login. Tente novamente em alguns minutos.",

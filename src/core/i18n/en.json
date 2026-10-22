@@ -409,6 +409,8 @@
   "backend.geral.registro_duplicado": "A record with this unique value already exists.",
   "backend.geral.erro_processar_requisicao": "Error processing the request.",
   "backend.geral.erro_interno": "Internal server error.",
+  "backend.geral.banco_indisponivel": "Database unavailable. Start PostgreSQL and check DATABASE_URL.",
+  "backend.geral.banco_nao_inicializado": "Database is not initialized or is out of date. Run migrations before starting the system.",
   "backend.geral.json_invalido": "Request body contains invalid JSON.",
   "backend.seguranca.muitas_requisicoes": "Too many requests. Please try again in a few minutes.",
   "backend.seguranca.muitas_tentativas_login": "Too many login attempts. Please try again in a few minutes.",

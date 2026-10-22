@@ -4,8 +4,8 @@
 
 ## Completed in code and locally verified
 
-- [x] TypeScript/Vite frontend: 35 tests across 9 files and local build passed; tests cover Guest/Editor/Administrator synchronization, server revocation, and immediate local logout cleanup.
-- [x] Prisma/Express backend: no in-memory fallback, required JWT secret, validated config, TypeScript build, `prisma validate` with omitted/empty `DIRECT_URL`, and 25 unit tests passed.
+- [x] TypeScript/Vite frontend: 36 tests across 9 files and local build passed; tests cover readiness, Guest/Editor/Administrator synchronization, server revocation, and immediate local logout cleanup.
+- [x] Prisma/Express backend: no in-memory fallback, required JWT secret, validated config, TypeScript build, `prisma validate` with omitted/empty `DIRECT_URL`, and 28 unit tests passed.
 - [x] JWT/roles and current DB user authorization reviewed; admin timeout uses jti and fails closed; PostgreSQL-backed `sessionVersion` revokes tokens on logout/password change; 401 clears the session while 403/network errors remain distinct.
 - [x] Guest Mode preserved with minimized, server-side allowlisted projections; `/responsaveis` and `/usuarios` require auth; backend authorizes writes.
 - [ ] Loan/return and occurrence transaction/locking paths, logout and password-change revocation require the HTTP/concurrency suite and six migrations against disposable PostgreSQL; they did not run in this execution.

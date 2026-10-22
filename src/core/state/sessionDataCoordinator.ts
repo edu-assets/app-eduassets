@@ -2,6 +2,7 @@ export interface SessionDataActions {
     nextVersion: () => number;
     getVersion: () => number;
     clear: () => void;
+    checkReady?: () => Promise<void>;
     loadPublic: () => Promise<unknown>[];
     loadPrivate: () => Promise<unknown>[];
     isCurrent: (version: number) => boolean;
@@ -17,6 +18,7 @@ export function createSessionDataCoordinator(actions: SessionDataActions) {
             version = actions.nextVersion();
             const currentVersion = version;
             actions.clear();
+            if (actions.checkReady) await actions.checkReady();
             const requests = [
                 ...actions.loadPublic(),
                 ...(authenticated ? actions.loadPrivate() : []),

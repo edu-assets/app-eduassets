@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   loadLoans: vi.fn(() => Promise.resolve([])),
   loadOccurrences: vi.fn(() => Promise.resolve([])),
   loadResponsible: vi.fn(() => Promise.resolve([])),
+  checkReady: vi.fn(() => Promise.resolve()),
   showToast: vi.fn(),
 }));
 
@@ -35,6 +36,7 @@ vi.mock('../core/state/index.js', () => ({
 
 vi.mock('../core/ui/index.js', () => ({ showToast: mocks.showToast }));
 vi.mock('../core/state/i18nStore.js', () => ({ t: (key: string) => key }));
+vi.mock('../core/api/apiClient.js', () => ({ http: { get: mocks.checkReady } }));
 
 describe('auth-driven data synchronization', () => {
   beforeEach(() => {
@@ -51,6 +53,7 @@ describe('auth-driven data synchronization', () => {
     expect(mocks.loadEquipment).toHaveBeenCalledTimes(1);
     expect(mocks.loadLoans).toHaveBeenCalledTimes(1);
     expect(mocks.loadOccurrences).toHaveBeenCalledTimes(1);
+    expect(mocks.checkReady).toHaveBeenCalledTimes(1);
     expect(mocks.loadResponsible).not.toHaveBeenCalled();
     expect(mocks.clearResponsible).toHaveBeenCalledTimes(1);
   });
@@ -62,14 +65,18 @@ describe('auth-driven data synchronization', () => {
     expect(emit).toBeTypeOf('function');
 
     emit?.({ autenticado: true, usuario: { id: 10, nivelAcesso: 'EDITOR' } });
+    await Promise.resolve();
     expect(mocks.loadResponsible).toHaveBeenCalledTimes(1);
     expect(mocks.loadLoans).toHaveBeenCalledTimes(2);
     expect(mocks.loadOccurrences).toHaveBeenCalledTimes(2);
 
     emit?.({ autenticado: true, usuario: { id: 11, nivelAcesso: 'ADMINISTRADOR' } });
+    await Promise.resolve();
     expect(mocks.loadResponsible).toHaveBeenCalledTimes(2);
+    expect(mocks.checkReady).toHaveBeenCalledTimes(3);
 
     emit?.({ autenticado: false, usuario: null });
+    await Promise.resolve();
     // Store clearing runs synchronously inside the auth notification, before Guest refetches complete.
     expect(mocks.clearEquipment).toHaveBeenCalledTimes(4);
     expect(mocks.clearLoans).toHaveBeenCalledTimes(4);

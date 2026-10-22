@@ -18,6 +18,26 @@ describe('session data coordinator', () => {
     expect(calls).toEqual(['clear', 'public']);
   });
 
+  it('checks readiness before requesting session data and stops on an unavailable backend', async () => {
+    let version = 0;
+    const calls: string[] = [];
+    const coordinator = createSessionDataCoordinator({
+      nextVersion: () => ++version,
+      getVersion: () => version,
+      isCurrent: (candidate) => candidate === version,
+      clear: () => calls.push('clear'),
+      checkReady: async () => {
+        calls.push('ready');
+        throw new Error('backend unavailable');
+      },
+      loadPublic: () => { calls.push('public'); return [Promise.resolve()]; },
+      loadPrivate: () => { calls.push('private'); return [Promise.resolve()]; },
+    });
+
+    await expect(coordinator.sync(false)).rejects.toThrow('backend unavailable');
+    expect(calls).toEqual(['clear', 'ready']);
+  });
+
   it('loads authorized stores after login and clears old data immediately', async () => {
     let version = 0;
     let privateValue = 'previous user data';

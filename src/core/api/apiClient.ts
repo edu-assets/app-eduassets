@@ -66,11 +66,17 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-        method,
-        headers,
-        body: body !== undefined ? JSON.stringify(body) : undefined
-    });
+    let response: Response;
+    try {
+        response = await fetch(`${API_BASE_URL}${path}`, {
+            method,
+            headers,
+            body: body !== undefined ? JSON.stringify(body) : undefined
+        });
+    } catch {
+        const payload = { erro: 'backend.geral.banco_indisponivel' };
+        throw new ApiError(t(payload.erro), 503, payload);
+    }
 
     const temConteudo = response.status !== 204;
     let payload: ApiErrorPayload | null = null;

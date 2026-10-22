@@ -1,4 +1,5 @@
 import { subscribe, isAutenticado } from './authStore.js';
+import { http } from '../api/apiClient.js';
 import {
     carregarEquipamentos, limparEquipamentos,
     carregarEmprestimos, limparEmprestimos,
@@ -14,6 +15,7 @@ const coordinator = createSessionDataCoordinator({
     nextVersion: advanceSessionDataVersion,
     getVersion: getSessionDataVersion,
     isCurrent: (version) => version === getSessionDataVersion(),
+    checkReady: () => http.get('/ready'),
     clear: () => {
         limparEquipamentos();
         limparEmprestimos();
@@ -40,6 +42,12 @@ async function synchronize(authenticated: boolean): Promise<void> {
         await coordinator.sync(authenticated);
     } catch (error) {
         console.error('[eduAssets] Falha ao sincronizar dados da sessão:', error);
-        showToast(t('feedback.erro_carregar_dados_iniciais'), 'error');
+        const erroPrincipal = error instanceof AggregateError
+            ? error.errors.find((item): item is Error => item instanceof Error)
+            : error;
+        const mensagem = erroPrincipal instanceof Error && erroPrincipal.message
+            ? erroPrincipal.message
+            : t('feedback.erro_carregar_dados_iniciais');
+        showToast(mensagem, 'error');
     }
 }
