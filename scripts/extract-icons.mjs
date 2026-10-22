@@ -10,6 +10,7 @@ const KNOWN_DYNAMIC_ICONS = [
     'chat_bubble', 'build', 'heart_broken', 'task_alt',
     'monitor', 'battery_alert', 'cable', 'touch_app', 'keyboard',
     'smart_button', 'construction', 'help',
+    'check_circle', 'error', 'warning', 'lightbulb', 'report',
 ];
 
 function collectFiles(path, acc = []) {
@@ -32,7 +33,7 @@ function extractFromFile(content) {
     let m;
     while ((m = spanRegex.exec(content))) found.add(m[1]);
 
-    const iconKeyRegex = /icon:\s*['"]([a-zA-Z_][a-zA-Z0-9_]*)['"]/g;
+    const iconKeyRegex = /icon(?:e)?:\s*['"]([a-zA-Z_][a-zA-Z0-9_]*)['"]/g;
     while ((m = iconKeyRegex.exec(content))) found.add(m[1]);
 
     return found;

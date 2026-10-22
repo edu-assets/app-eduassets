@@ -50,6 +50,7 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `login` | `String` | No | `@unique` |
 | `passwordHash` | `String` | No | — |
 | `nivelAcesso` | `NivelAcesso` | No | No schema default |
+| `sessionVersion` | `Int` | No | `@default(0)`; incremented on logout/password change to revoke earlier JWTs |
 | `rfidTokenHash` | `String` | Yes | `@unique`; `null` when no card is provisioned |
 | `createdAt` | `DateTime` | No | `@default(now())` |
 

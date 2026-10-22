@@ -74,7 +74,7 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
             body: body !== undefined ? JSON.stringify(body) : undefined
         });
     } catch {
-        const payload = { erro: 'backend.geral.banco_indisponivel' };
+        const payload = { erro: 'backend.geral.api_indisponivel' };
         throw new ApiError(t(payload.erro), 503, payload);
     }
 

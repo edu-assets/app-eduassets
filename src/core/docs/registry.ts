@@ -29,8 +29,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'auto_stories',
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
-        version: 'v0.9.9',
-        updatedAt: '2026-08-25'
+        version: 'Beta',
+        updatedAt: '2026-10-22'
     },
     {
         id: 'readme',
@@ -38,8 +38,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'article',
         file: { pt: '/docs/LEIAME.md', en: '/docs/README.md' },
         category: 'geral',
-        version: 'v0.9.9',
-        updatedAt: '2026-08-25'
+        version: 'Beta',
+        updatedAt: '2026-10-22'
     },
     {
         id: 'architecture',
@@ -47,8 +47,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'account_tree',
         file: { pt: '/docs/ARQUITETURA.md', en: '/docs/ARCHITECTURE.md' },
         category: 'tecnico',
-        version: 'v0.9.9',
-        updatedAt: '2026-08-25'
+        version: 'Beta',
+        updatedAt: '2026-10-22'
     },
     {
         id: 'database-model',
@@ -56,8 +56,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'schema',
         file: { pt: '/docs/MODELO_DE_DADOS.md', en: '/docs/DATA_MODEL.md' },
         category: 'tecnico',
-        version: 'v0.9.9',
-        updatedAt: '2026-08-25'
+        version: 'Beta',
+        updatedAt: '2026-10-22'
     },
     {
         id: 'roadmap',
@@ -65,8 +65,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'route',
         file: { pt: '/docs/ROADMAP.md', en: '/docs/ROADMAP_EN.md' },
         category: 'geral',
-        version: 'v0.9.9',
-        updatedAt: '2026-08-25'
+        version: 'Beta',
+        updatedAt: '2026-10-22'
     },
     {
         id: 'changelog',
@@ -74,8 +74,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: 'v0.9.9',
-        updatedAt: '2026-08-25'
+        version: 'Beta',
+        updatedAt: '2026-10-22'
     }
 ];
 

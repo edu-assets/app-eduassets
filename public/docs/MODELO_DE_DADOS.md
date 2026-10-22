@@ -50,6 +50,7 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `login` | `String` | Não | `@unique` |
 | `passwordHash` | `String` | Não | — |
 | `nivelAcesso` | `NivelAcesso` | Não | Sem padrão no schema |
+| `sessionVersion` | `Int` | Não | `@default(0)`; incrementado em logout/troca de senha para revogar JWTs anteriores |
 | `rfidTokenHash` | `String` | Sim | `@unique`; `null` quando não há cartão provisionado |
 | `createdAt` | `DateTime` | Não | `@default(now())` |
 
