@@ -6,7 +6,7 @@
   </a>
 </div>
 
-[Root README](../../../README.md) · [Português](LEIAME.md)
+[Português](LEIAME.md)
 
 > **Status: Beta.** eduAssets is a TypeScript school-equipment loan and inventory application. Authentication, guest read-only access, loans/returns, occurrences, exports and an optional RFID integration are present in the current checkout. No public deployment is assumed by this documentation.
 
@@ -32,7 +32,7 @@ Browser :5173 ── Vite proxy ── API :3000 ── PostgreSQL
                                       └─ provisioner :3001
 ```
 
-- The backend defaults to **3000**. `PORT` has precedence over `BACKEND_PORT`; if neither yields a usable value, 3000 is used.
+- The backend defaults to **3000**. `PORT` has precedence over `BACKEND_PORT`; supplied values are validated and invalid values fail startup.
 - The backend uses `HOST` when set. Otherwise it binds to `127.0.0.1` outside production and `0.0.0.0` in production.
 - Vite is served on **`0.0.0.0:5173`** and proxies the API paths and WebSocket path to `127.0.0.1:3000`.
 - With an empty `VITE_API_BASE_URL`, the browser uses relative URLs and the Vite proxy in development. A production frontend build requires `VITE_API_BASE_URL`.
@@ -40,22 +40,22 @@ Browser :5173 ── Vite proxy ── API :3000 ── PostgreSQL
 
 ## Access model
 
-- **Guest:** public read views; no data mutation.
+- **Guest:** minimized category/equipment/loan/occurrence reads through server-side allowlisted DTOs; responsible-party and user listings require auth. Personal names, notes and free-text issue details are omitted/masked; no mutations.
 - **Editor:** authenticated operational actions allowed by the route policy, including loan/return flows and occurrence creation/editing.
 - **Administrator:** administrative CRUD, account/password actions and RFID-token provisioning in addition to operational actions.
 
-JWT authentication is sent as `Authorization: Bearer <token>`. Backend authorization is authoritative; frontend disabled controls are only a UX layer. Administrator activity has a 30-minute server-side idle timeout. There is no password-recovery flow; an authenticated user can change their own password with `PATCH /auth/senha`.
+JWT authentication is sent as `Authorization: Bearer <token>`. Backend authorization is authoritative; frontend disabled controls are only a UX layer. Administrator activity expires after 30 minutes per JWT; backend activity state is process-local, so the current timeout model assumes a single instance. There is no password-recovery flow; an authenticated user can change their own password with `PATCH /auth/senha`.
 
 ## Backend and data model
 
 The API exposes health/root responses, authentication routes, entity CRUD routes and administrator-only RFID-token actions:
 
-- `/health`, `/`;
+- `/health` (liveness), `/ready` (bounded database readiness), `/`;
 - `/auth/login`, `/auth/me`, `/auth/senha`, `/auth/rfid`;
 - `/categorias`, `/equipamentos`, `/responsaveis`, `/usuarios`, `/emprestimos`, `/ocorrencias`; and
 - `/usuarios/:id/rfid-token` for RFID-token provisioning/revocation.
 
-Prisma models are `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` and `Ocorrencia`, backed by PostgreSQL. Mutating routes use authentication/administrator middleware; read routes support Guest mode.
+Prisma models are `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` and `Ocorrencia`, backed by PostgreSQL. Anonymous GETs for categories/equipment/loans/occurrences use endpoint-specific allowlisted DTOs; responsible-party/user reads and all mutations are authorized by route policy.
 
 ## Requirements
 
@@ -71,9 +71,9 @@ The repository does not assume a hosting provider, cloud project, public domain,
 From the repository root:
 
 ```bash
-npm install
-npm --prefix backend install
-npm --prefix frontend install
+npm ci
+npm ci --prefix backend
+npm ci --prefix frontend
 cp .env.example backend/.env
 ```
 
@@ -91,11 +91,11 @@ Then initialize the database:
 ```bash
 cd backend
 npx prisma migrate dev
-npx prisma db seed
+npm run db:seed
 cd ..
 ```
 
-The seed **requires `SEED_ADMIN_PASSWORD`** and is idempotent. `SEED_EDITOR_PASSWORD` is optional and creates an editor account only when set. Passwords are read from the environment; this documentation supplies no demo credentials.
+The seed **requires `SEED_ADMIN_PASSWORD`**, is idempotent and does not overwrite an existing administrator password. `SEED_EDITOR_PASSWORD` is optional and creates an editor account only when set. Passwords are read from the environment; this documentation supplies no demo credentials.
 
 Start both processes:
 
@@ -121,9 +121,9 @@ A built frontend can be inspected with `cd frontend && npm run preview`; this is
 | Variable | Purpose |
 | --- | --- |
 | `NODE_ENV` | Controls development/production behavior. |
-| `PORT` / `BACKEND_PORT` | Port selection; `PORT` wins, default 3000. |
+| `PORT` / `BACKEND_PORT` | Every supplied value is validated; `PORT` wins, default 3000. |
 | `HOST` | Bind address; default `127.0.0.1`, or `0.0.0.0` in production when absent. |
-| `TRUST_PROXY` | Optional explicit Express proxy setting; configure for the actual proxy topology. |
+| `TRUST_PROXY` | Validated Express proxy setting; required explicitly in production (`0` without proxy or only the exact trusted hops/IPs). |
 | `CORS_ORIGIN` | Comma-separated allowed origins; required outside local development. |
 | `DATABASE_URL` | Required PostgreSQL URL. |
 | `DIRECT_URL` | Optional separate direct URL; falls back to `DATABASE_URL`. |
@@ -168,28 +168,33 @@ The process starts the local provisioning service at `127.0.0.1:3001/provision`.
 | root | `npm run dev` | Run backend and frontend concurrently. |
 | root | `npm run build` | Build backend, then frontend. |
 | backend | `npm run dev` | Watch-mode API server. |
-| backend | `npm run build` | TypeScript build. |
+| backend | `npm run build` | Generates Prisma Client and compiles TypeScript. |
 | backend | `npm start` | Run `dist/src/server.js`. |
 | backend | `npm run migrate:deploy` | Apply existing migrations. |
-| backend | `npm test` | Run the configured Node test script; no result is asserted here. |
+| backend | `npm test` | Backend unit tests (no database required). |
+| backend | `npm run test:integration` | HTTP/concurrency tests; requires an isolated migrated test PostgreSQL. |
 | frontend | `npm run dev` | Vite on port 5173. |
 | frontend | `npm run build` | Build `dist/`. |
 | frontend | `npm run preview` | Preview `dist/` locally. |
 | frontend | `npm run typecheck` | Run `tsc --noEmit`. |
-| frontend | `npm test` / `npm run test:watch` | Run Vitest once or in watch mode; no result is asserted here. |
+| frontend | `npm test` / `npm run test:watch` | Run Vitest once or in watch mode; confirm the result and test count in that run's output. |
 
 ## Limitations
 
 - There is no operational public deployment, remote migration, secret rotation or cloud database configuration in this repository.
-- Provider-side RLS, grants and anonymous PostgREST exposure are not established or verified here and require a separate privacy/security review.
+- Application authorization is enforced by the backend. Provider grants/PostgREST are not part of the current request path; if exposed by a provider, review permissions and block unintended anonymous access.
 - Production requires `CORS_ORIGIN`; proxy deployments also need an intentional `TRUST_PROXY` and network policy.
 - RFID needs real hardware, Linux dependencies, loopback reachability, a strong shared secret and an explicit network policy. Password login remains the supported path when it is off.
 - The data model tracks quantities rather than individual serialized units, and roles are limited to Guest/Editor/Administrator behavior.
-- Password recovery is not implemented. The return-date field does not currently change the backend's current-time semantics.
-- Remaining manual validation includes target hardware, proxy/deployment behavior and selected browser flows; no test or deployment result is implied by this document.
+- Password recovery is not implemented. The selected offset-aware return timestamp is validated/persisted; older clients may omit it and use server time.
+- Hosted CI, PostgreSQL integration, Docker build, Nginx/Cloudflare proxy, TLS, backups, accessibility, browser and hardware require external verification. Templates are not evidence of a deployment or successful validation.
 
 ## Language versions
 
 - English: this file.
 - Português: [LEIAME.md](LEIAME.md).
-- Repository overview: [root README](../../../README.md).
+- Repository overview and local-development instructions are maintained in the root README files; they are not shipped with frontend assets.
+
+## Deployment / Implantação
+
+[Deployment and operations](DEPLOYMENT.md). The internal remediation report is kept at the repository root and is not shipped with frontend assets.

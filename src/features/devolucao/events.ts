@@ -91,7 +91,12 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
 
         setButtonLoading(els.btnConfirmarDevolucao, true);
         try {
-            await confirmarDevolucao(Number(estado.idPendente));
+            const selecionada = els.devolucaoPicker.selectedDates[0];
+            if (!selecionada || Number.isNaN(selecionada.getTime())) {
+                els.devolucaoDataInput.reportValidity();
+                return;
+            }
+            await confirmarDevolucao(Number(estado.idPendente), selecionada.toISOString());
             showToast(t('feedback.devolucao_registrada').replace('{data}', els.devolucaoDataInput.value), 'success');
             closeModal('modal-confirmar-devolucao');
             estado.idPendente = null;

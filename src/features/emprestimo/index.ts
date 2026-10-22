@@ -1,5 +1,5 @@
-import { getEquipamentos } from '../../core/state/equipamentoStore.js';
-import { getResponsaveis } from '../../core/state/responsavelStore.js';
+import { getEquipamentos, subscribe as subscribeEquipamentos } from '../../core/state/equipamentoStore.js';
+import { getResponsaveis, subscribe as subscribeResponsaveis } from '../../core/state/responsavelStore.js';
 import { criarDataAutoPicker } from '../../core/ui/index.js';
 import { attachEmprestimoEvents } from './events.js';
 import { renderItens, popularSelectEquipamentos, popularSelectResponsaveis } from './render.js';
@@ -39,6 +39,8 @@ export async function initEmprestimo(): Promise<void> {
 
     popularSelectEquipamentos(els.equipamentoSelect, getEquipamentos());
     popularSelectResponsaveis(els.responsavelSelect, getResponsaveis());
+    subscribeEquipamentos((equipamentos) => popularSelectEquipamentos(els.equipamentoSelect, equipamentos));
+    subscribeResponsaveis((responsaveis) => popularSelectResponsaveis(els.responsavelSelect, responsaveis));
 
     attachEmprestimoEvents(els, estado);
 

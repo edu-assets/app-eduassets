@@ -157,9 +157,10 @@
     display: none;
 }
 
-/* Guest mode disables interactive elements (works via CSS) */
-body.editor-mode [data-requires-admin],
-body.guest-mode [data-requires-admin] {
+/* Explain unavailable actions without treating CSS as an authorization boundary. */
+body.guest-mode [data-requires-auth],
+body.guest-mode [data-requires-admin],
+body.editor-mode [data-requires-admin] {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;

@@ -23,13 +23,13 @@ Leitor RFID → bridge Python → POST /auth/rfid ──► backend
 Navegador/admin → POST 127.0.0.1:3001/provision → bridge Python → leitor RFID
 ```
 
-O caminho RFID é opcional. O login por senha continua sendo o caminho normal quando não há leitor conectado.
+O caminho RFID é opcional e desativado por padrão nas configurações de implantação. O login por senha continua sendo o caminho normal quando não há leitor conectado; o Compose público força RFID desligado e não publica `/ws`.
 
 ## Fronteiras de execução e portas
 
 | Componente | Binding/configuração real | Responsabilidade |
 |---|---|---|
-| Backend | `PORT` ou `BACKEND_PORT`, com fallback para **3000**; `HOST` padrão `127.0.0.1` fora de produção e `0.0.0.0` quando `NODE_ENV=production` | API HTTP Express, health check, roteamento, autenticação e tratamento de upgrade WebSocket |
+| Backend | `PORT` ou `BACKEND_PORT` validados (nessa precedência), com padrão **3000**; `HOST` padrão `127.0.0.1` fora de produção e `0.0.0.0` quando `NODE_ENV=production` | API HTTP Express, health check, roteamento, autenticação e tratamento de upgrade WebSocket |
 | Servidor de desenvolvimento Vite | **0.0.0.0:5173** | Serve o frontend e encaminha as rotas de API configuradas para `http://127.0.0.1:3000`; `/ws` é encaminhado com suporte WebSocket para `ws://127.0.0.1:3000` |
 | Servidor de provisionamento RFID | **127.0.0.1:3001** | Endpoint HTTP local `/provision`, que enfileira a gravação de um token no leitor |
 | WebSocket de login RFID | Caminho `/ws/rfid` no backend | Canal opcional de eventos do backend para abas do navegador; só é criado quando `RFID_BRIDGE_ENABLED=true` |
@@ -70,22 +70,22 @@ O backend é uma aplicação Node.js/Express em TypeScript estrito. `server.ts` 
 
 `app.ts` monta o pipeline nesta ordem:
 
-1. Headers de segurança do Helmet (`frameguard: deny`, política de recurso cross-origin `cross-origin`; CSP é explicitamente desabilitada nessa configuração).
-2. CORS. O desenvolvimento local só é permissivo quando `NODE_ENV=development` e `HOST` é loopback. Fora desse caso, `CORS_ORIGIN` deve conter uma ou mais origens permitidas separadas por vírgula ou o processo falha na inicialização.
+1. Headers de segurança do Helmet (`frameguard: deny`, política de recurso cross-origin `cross-origin`; CSP HTTP do backend é desabilitada nessa configuração).
+2. CORS. O desenvolvimento local só é permissivo quando `NODE_ENV=development` e `HOST` é loopback. Fora desse caso, `CORS_ORIGIN` deve conter origens HTTP(S) exatas, sem path/query/fragment, separadas por vírgula ou o processo falha na inicialização. Produção também exige `TRUST_PROXY` explícito e validado.
 3. Log de requisições.
 4. `express.json({ limit: '100kb' })`.
 5. Rate limiter global.
-6. `/health`, `/`, e os routers da aplicação.
+6. `/health` (liveness), `/ready` (prova de dependência de banco com timeout e resposta mínima), `/` e os routers da aplicação.
 7. Handler de rota inexistente e handler centralizado de erros.
 
-Os routers montados são `/auth`, `/categorias`, `/equipamentos`, `/responsaveis`, `/usuarios`, `/emprestimos` e `/ocorrencias`. Validação e autenticação por rota são aplicadas onde declaradas por cada router; a UI não é a fronteira de segurança.
+Os routers montados são `/auth`, `/categorias`, `/equipamentos`, `/responsaveis`, `/usuarios`, `/emprestimos` e `/ocorrencias`. GETs de categorias/equipamentos/empréstimos/ocorrências permitem auth opcional e aplicam DTOs minimizados a respostas anônimas; listagens de responsáveis/usuários exigem auth. Mutações têm autorização/validação na rota; a UI não é a fronteira de segurança.
 
 ### Autenticação e autorização
 
 - O login por senha é `POST /auth/login`. O módulo JWT assina tokens HS256 com validade de **8 horas** e aceita somente HS256 na verificação. O payload precisa conter `sub` numérico e `nivelAcesso` igual a `ADMINISTRADOR` ou `EDITOR`.
 - `JWT_SECRET` é obrigatório e deve ter pelo menos 32 caracteres; o processo falha durante a inicialização do módulo JWT se estiver ausente ou fraco.
 - `requireAuth` exige `Authorization: Bearer ...`, verifica o token, confirma que o usuário ainda existe no PostgreSQL e atualiza o nível de acesso a partir do banco antes de colocá-lo em `req.user`.
-- `requireAdmin` compõe `requireAuth` e exige que o nível atual no banco seja `ADMINISTRADOR`. O router de usuários é exclusivo de administradores. As mutações de empréstimos observadas também exigem `requireAuth` e validação de entrada.
+- `requireAdmin` compõe `requireAuth` e exige que o nível atual no banco seja `ADMINISTRADOR`. O router de usuários é exclusivo de administradores. Mutações de empréstimos e ocorrências exigem `requireAuth` e validação. Senha atual incorreta em `PATCH /auth/senha` retorna erro de negócio sem encerrar a sessão.
 - A inatividade de administradores é limitada a 30 minutos. O backend mantém a atividade em um `Map` na memória do processo, portanto o comportamento é consistente somente em uma instância do backend; escala horizontal exige estado compartilhado. O frontend também encerra a sessão de administrador após 30 minutos sem atividade e reage ao evento 401 do cliente da API.
 - `POST /auth/rfid` tem rate limit, valida a entrada e não é uma rota de navegador autenticada por JWT. O serviço exige origem loopback e comparação em tempo constante do header `X-RFID-Bridge-Secret` com `RFID_BRIDGE_SECRET`, aplica SHA-256 ao token RFID de 32 caracteres, procura `Usuario.rfidTokenHash` e publica um evento JWT assinado quando o cartão é reconhecido.
 
@@ -93,7 +93,7 @@ Os routers montados são `/auth`, `/categorias`, `/equipamentos`, `/responsaveis
 
 `prisma.ts` exporta um `PrismaClient` único e o helper `runTransaction`. Os limites padrão de uma transação interativa são **15.000 ms de timeout** e **5.000 ms de espera máxima**; o chamador pode fornecer um nível de isolamento.
 
-O datasource Prisma é PostgreSQL e lê `DATABASE_URL` e `DIRECT_URL`. O schema contém atualmente `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` e `Ocorrencia`, além dos enums de acesso/status declarados no schema. Há índices de status para empréstimos e ocorrências, e a credencial RFID é armazenada como hash único opcional em `Usuario`.
+O datasource Prisma é PostgreSQL; `DATABASE_URL` é obrigatório fora de `NODE_ENV=test` e `DIRECT_URL` é opcional, com fallback a `DATABASE_URL` definido em `prisma.config.ts`. O schema contém atualmente `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` e `Ocorrencia`, além dos enums de acesso/status declarados no schema. Há índices de status para empréstimos e ocorrências, e a credencial RFID é armazenada como hash único opcional em `Usuario`.
 
 Não há políticas RLS no schema Prisma. A autorização é implementada no código da aplicação e nos middlewares de rota; o schema não deve ser interpretado como isolamento por linha.
 
@@ -103,7 +103,7 @@ Não há políticas RLS no schema Prisma. A autorização é implementada no có
 
 `rfidBridge.ts` cria um servidor `ws` com `noServer: true` e trata upgrades HTTP somente para `/ws/rfid`. Aceita apenas `127.0.0.1`, `::1` ou o endereço loopback IPv4 mapeado `::ffff:127.0.0.1`. `publicarLoginRfid` transmite o evento de login assinado para os clientes loopback abertos.
 
-A flag do backend é exata: **o servidor WebSocket só é anexado quando `RFID_BRIDGE_ENABLED === 'true'`**. O listener frontend tem seu próprio gate `VITE_RFID_BRIDGE_ENABLED === 'true'`. Portanto, a entrega ao navegador exige as flags apropriadas nos dois lados; ativar somente a flag do Vite não cria um endpoint WebSocket no backend.
+A flag do backend é exata: **o servidor WebSocket só é anexado quando `RFID_BRIDGE_ENABLED === 'true'`**. O Compose de implantação força essa flag para `false` e não publica/proxy `/ws`. O listener frontend tem seu próprio gate `VITE_RFID_BRIDGE_ENABLED === 'true'`. Portanto, a entrega ao navegador exige as flags apropriadas nos dois lados; ativar somente a flag do Vite não cria um endpoint WebSocket no backend.
 
 Loopback é uma verificação do endereço de origem, não substitui firewall, segmentação de rede ou configuração correta de reverse proxy. Um proxy deve preservar a fronteira de confiança pretendida e encaminhar `/ws` deliberadamente; a configuração do proxy do Vite, sozinha, não protege uma implantação acessível externamente.
 
@@ -122,13 +122,13 @@ A unidade systemd `eduassets-rfid.service` descreve uma instalação em `/opt/ed
 
 | Variável/configuração | Comportamento ou limite atual |
 |---|---|
-| `PORT`, `BACKEND_PORT` | Seleção da porta do backend; padrão `3000` quando o valor resolvido está ausente/inválido |
+| `PORT`, `BACKEND_PORT` | Cada valor fornecido é validado; `PORT` vence; padrão `3000` somente se ambos estiverem ausentes |
 | `HOST` | Host de binding do backend; padrão `127.0.0.1`, ou `0.0.0.0` em produção |
 | `NODE_ENV` | Controla host/trust proxy de produção e a exceção de CORS para desenvolvimento local |
-| `CORS_ORIGIN` | Origens permitidas separadas por vírgula; obrigatória fora do desenvolvimento local |
-| `TRUST_PROXY` | Valor explícito de trust proxy do Express; sem ele, produção usa 1 salto e não produção usa `false` |
+| `CORS_ORIGIN` | Origens HTTP(S) exatas separadas por vírgula; obrigatórias em produção e fora do desenvolvimento local explícito |
+| `TRUST_PROXY` | Valor validado; obrigatório explicitamente em produção; `true` é rejeitado, padrão `false` fora de produção |
 | `JWT_SECRET` | Obrigatório, mínimo de 32 caracteres |
-| `DATABASE_URL`, `DIRECT_URL` | URLs do datasource PostgreSQL lidas pelo Prisma |
+| `DATABASE_URL`, `DIRECT_URL` | URL do banco requerida fora de teste; URL direta opcional e fallback ao `DATABASE_URL` |
 | `RFID_BRIDGE_ENABLED` | Bridge WS do backend habilitada somente para o valor exato `true` |
 | `VITE_API_BASE_URL` | Origem da API do frontend; vazia permitida em desenvolvimento, obrigatória no build de produção |
 | `VITE_RFID_BRIDGE_ENABLED` | Listener RFID do frontend habilitado somente para o valor exato `true` |
@@ -137,7 +137,7 @@ A unidade systemd `eduassets-rfid.service` descreve uma instalação em `/opt/ed
 | `RFID_BACKEND` | Seletor do backend do leitor; padrão `spi` |
 | Tamanho do JSON | Limite do corpo de requisição Express: `100kb` |
 | Validade JWT | `8h` |
-| Inatividade administrativa | `30min`, com estado do backend na memória do processo |
+| Inatividade administrativa | `30min`, com estado na memória do processo (uma instância; escala horizontal requer compartilhamento) |
 | Transação Prisma | `timeout=15s`, `maxWait=5s` por padrão |
 | Rate limits | Global: 300 requisições/15 min; login: 10/15 min; login RFID: 60/15 min; troca de senha: 10/15 min; provisionamento RFID: 5/15 min |
 
@@ -145,5 +145,5 @@ A unidade systemd `eduassets-rfid.service` descreve uma instalação em `/opt/ed
 
 - Este documento não afirma RLS, ambiente de produção implantado ou configuração de reverse proxy/firewall em produção.
 - Restrições a `127.0.0.1` reduzem os endereços de origem aceitos, mas não substituem política de rede nem configuração de proxy.
-- O proxy do Vite é do servidor de desenvolvimento e não configura automaticamente um host frontend de produção.
+- O proxy Vite é somente de desenvolvimento. Templates Vercel + Docker/Nginx/Cloudflare foram adicionados, mas seguem não configurados e não verificados.
 - RFID é opcional, e a aplicação continua utilizável por autenticação com senha sem o serviço do leitor.

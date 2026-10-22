@@ -138,7 +138,7 @@ As relações com chave estrangeira declaradas são `Equipamento.categoriaId →
 - A criação do empréstimo ocorre em transação. As quantidades dos itens são agrupadas por `equipamentoId`, o estoque disponível é validado, o empréstimo e seus itens são criados e o estoque disponível é decrementado atomicamente.
 - A validação considera equipamento inexistente como estoque insuficiente e lança `EstoqueInsuficienteError` quando alguma quantidade solicitada excede o estoque efetivo.
 - `atualizarItensEmprestimo` só edita empréstimo com status `ABERTO`. Ela devolve as quantidades antigas ao estoque efetivo, substitui as linhas de itens e decrementa as novas quantidades agrupadas em uma única transação.
-- `devolverEmprestimo` muda um empréstimo aberto para `DEVOLVIDO`, grava `dataDevolucao` com o instante atual e incrementa o estoque disponível para cada item. Uma segunda devolução é rejeitada; a linha do empréstimo e o histórico dos itens são mantidos, não excluídos.
+- `devolverEmprestimo` muda um empréstimo aberto para `DEVOLVIDO`, grava o timestamp offset-aware validado enviado pela UI (ou o instante atual quando clientes antigos omitem o campo) e incrementa o estoque disponível para cada item. Uma segunda devolução é rejeitada; a linha do empréstimo e o histórico dos itens são mantidos, não excluídos.
 - Os decrementos de estoque usam update atômico com condição `quantidadeDisponivel >= quantidade`; uma falha de concorrência aborta a transação em vez de reduzir o estoque abaixo da quantidade verificada.
 
 ### Ocorrências
@@ -155,6 +155,10 @@ As relações com chave estrangeira declaradas são `Equipamento.categoriaId →
 - A listagem de usuários expõe `possuiCartaoRfid` como booleano derivado de `rfidTokenHash`, em vez de retornar o hash armazenado. O schema armazena apenas o hash, que é nulo quando não há cartão.
 - O provisionamento RFID exige que a bridge esteja habilitada e que o usuário exista; depois envia um token gerado à bridge local. Somente após resposta bem-sucedida da bridge o serviço grava `hashRfidToken(token)` em `rfidTokenHash`; o token gerado é retornado nessa operação. Bridge desabilitada, falhas e timeouts resultam em erros do serviço.
 - Revogar um cartão RFID define `rfidTokenHash` como `null`.
+
+## Projeções públicas do Modo Convidado
+
+As respostas anônimas de `GET /equipamentos`, `/emprestimos` e `/ocorrencias` usam serializers allowlist explícitos no backend. Empréstimos ocultam solicitante, responsável e observação; ocorrências ocultam número de patrimônio, problema, descrição e medidas; equipamento expõe somente campos necessários ao painel (sem IDs/campos de auditoria). `GET /responsaveis` e `/usuarios` exigem autenticação. Isso reduz payloads da aplicação, mas não equivale a políticas RLS ou permissões do provedor de banco.
 
 ## Limites de constraints e auditoria
 

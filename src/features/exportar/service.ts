@@ -6,6 +6,8 @@ import { gerarArquivoXlsx, baixarArquivoXlsx } from '../../core/services/excel.j
 import { gerarBaixarPdf } from '../../core/services/pdf.js';
 import type { PdfTabelaSecao } from '../../core/services/pdf.js';
 import type { Equipamento, LoanUI, FiltrosExportacao } from '../../types/index.js';
+import { filtrarPorPeriodo } from './dateFilters.js';
+export { filtrarPorPeriodo } from './dateFilters.js';
 
 const FORMATOS_SUPORTADOS = ['csv', 'excel', 'pdf'];
 
@@ -20,25 +22,6 @@ export function prepararDadosEmprestimos(): LoanUI[] {
 }
 
 /* ===== 2. filtering ===== */
-
-export function filtrarPorPeriodo<T>(
-    itens: T[],
-    dataInicial: string,
-    dataFinal: string,
-    obterData: (item: T) => Date
-): T[] {
-    if (!dataInicial && !dataFinal) return itens;
-
-    const inicio = dataInicial ? new Date(dataInicial) : null;
-    const fim = dataFinal ? new Date(`${dataFinal}T23:59:59.999`) : null;
-
-    return itens.filter((item) => {
-        const data = obterData(item);
-        if (inicio && data < inicio) return false;
-        if (fim && data > fim) return false;
-        return true;
-    });
-}
 
 export function filtrarEquipamentosPorIds(equipamentos: Equipamento[], idsSelecionados: string[]): Equipamento[] {
     if (!idsSelecionados.length) return equipamentos;

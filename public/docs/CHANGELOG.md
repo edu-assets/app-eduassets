@@ -1,19 +1,18 @@
 # Changelog — eduAssets
 
-Todas as versões abaixo de v1.0.0 fazem parte do ciclo de desenvolvimento beta. Datas são aproximadas. A seção sem número de versão registra remediações posteriores no checkout selecionado.
+Todas as versões abaixo de v1.0.0 fazem parte do ciclo beta; datas antigas são aproximadas. A seção mais recente registra alterações do checkout, não releases publicados.
 
-## Remediações recentes — 22 de outubro de 2026
-- Removidos os fallbacks de autenticação e persistência em memória/demo; o backend usa `PrismaClient` e propaga erros de banco em vez de ocultá-los.
-- `JWT_SECRET` agora é obrigatório e deve ter pelo menos 32 caracteres; não há segredo padrão. O middleware administrativo aguarda a autenticação antes de autorizar.
-- Segurança reforçada: `helmet` nega enquadramento; CORS exige allowlist fora do desenvolvimento local; o WebSocket RFID só é inicializado com `RFID_BRIDGE_ENABLED=true` e aceita apenas conexões loopback.
-- O bridge RFID evita seleção/escrita quando não há UID e usa limites de espera nas operações do leitor; o comportamento com hardware real não foi validado.
-- Contrato de execução alinhado: o backend honra `PORT` (depois `BACKEND_PORT`) e usa 3000 por padrão; o frontend Vite usa 5173 e faz proxy para 3000. Builds de produção do frontend falham claramente sem `VITE_API_BASE_URL`.
-- A configuração Prisma usa `DATABASE_URL` como fallback de `DIRECT_URL`; `prisma generate` foi verificado, mas nenhuma conexão de banco ou migração foi executada.
-- Exportações CSV agora incluem BOM, escape de delimitadores/aspas/quebras de linha e neutralização de prefixos de fórmula; o cliente encerra a sessão autenticada em qualquer resposta 401.
-- Corrigidos serialização segura de atributos HTML, tradução ausente e spinner/estado obsoleto do fluxo de devolução; foram adicionados casos de teste para CSV e HTML.
-- Adicionado lockfile na raiz; backend e frontend declaram Node `>=22.12.0`. O serviço systemd do RFID deixou de depender de caminho e conta de máquina específicos, mas sua instalação e verificação no dispositivo não foram realizadas.
-- Validações locais registradas no relatório: 27 testes do frontend em cinco arquivos, 9 testes do backend, typecheck e build do frontend, build do backend, `prisma generate`, verificação de sintaxe Python e `git diff --check`.
-- Não houve deploy, operação em banco remoto, migração, rotação de segredo ou teste em hardware RFID/Raspberry Pi. Comportamento em produção/proxy e instalação do systemd não foram verificados; grants/RLS/PostgREST não foram alterados, e a semântica de data histórica da devolução não foi implementada.
+## Remediação e preparação de release — 22 de outubro de 2026
+- Removidos fallbacks de autenticação/persistência em memória e segredo JWT padrão; validação de ambiente falha cedo para segredo, banco, CORS, porta e confiança de proxy inválidos/ausentes em produção.
+- Corrigido timeout de administrador com identificador de JWT e estado fail-closed quando o estado de atividade não pode ser comprovado; confirmação de senha incorreta não derruba a sessão.
+- Empréstimo: criação/edição/devolução fazem serialização transacional por linha; retorno duplicado atualiza estoque uma vez. Ocorrências bloqueiam transições concorrentes para resolver/excluir sem duplo ajuste de estoque.
+- Guest Mode segue ativo, com DTO allowlist específicos para equipamento, empréstimo e ocorrência; campos pessoais, notas e detalhes livres de ocorrência são omitidos/mascarados; responsáveis e usuários exigem autenticação.
+- A devolução envia data/hora offset-aware selecionada pelo usuário; contratos antigos ainda podem omiti-la e usar horário do servidor. Relatórios/exportações filtram calendário local de forma inclusiva.
+- `/health` é liveness e `/ready` verifica PostgreSQL com timeout; ambas respostas evitam revelar credenciais/detalhes da conexão. Prisma sem `DIRECT_URL` foi compilado usando fallback `DATABASE_URL`.
+- Adicionados `.env` locais separados e template de produção, backend multi-stage Docker e Compose com bind host loopback, RFID desativado, Nginx/Cloudflare com encaminhamento saneado, scripts de backup/restauração somente em banco vazio, workflow CI com PostgreSQL efêmero e testes de integração/race.
+- Seed usa nomes sintéticos e não sobrescreve senha existente; identificadores de login históricos foram mantidos.
+- Validação local em 22/10: 29 testes frontend (6 arquivos), 20 testes unitários backend, typecheck e build frontend, build backend sem `DIRECT_URL`, sintaxe Python/shell e `git diff --check`. O primeiro run encontrou e corrigiu uma expectativa de teste de config; o rerun final está documentado no relatório.
+- A suíte de integração PostgreSQL, o workflow hospedado e os dois Docker targets estão escritos, mas não foram executados neste sandbox (sem PostgreSQL/Docker); nenhum banco real, migração, hardware, Vercel, DNS, Cloudflare, certificado ou deployment foi usado/alterado. Requer validação externa.
 
 ## v0.9.9 (agosto 2026)
 - Índices de banco em `Emprestimo.status` e `Ocorrencia.status` para consultas mais rápidas no Dashboard e Controle.

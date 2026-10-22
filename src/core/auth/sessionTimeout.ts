@@ -1,4 +1,5 @@
-import { sair, getUsuario } from '../state/authStore.js';
+import { sair, getUsuario, subscribe } from '../state/authStore.js';
+import { getToken } from '../state/tokenStore.js';
 import { showToast, openModal } from '../ui/index.js';
 
 const IDLE_LIMIT_MS = 30 * 60 * 1000;
@@ -7,7 +8,7 @@ const EVENTOS_ATIVIDADE = ['mousemove', 'keydown', 'click', 'scroll', 'touchstar
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 function expirarSessao(): void {
-    if (!getUsuario()) return;
+    if (!getToken()) return;
     const eraAdmin = getUsuario()?.nivelAcesso === 'ADMINISTRADOR';
     sair();
     showToast(eraAdmin ? 'Sessão expirada por inatividade. Faça login novamente.' : 'Sessão expirada. Faça login novamente.', 'warning');
@@ -22,6 +23,14 @@ function registrarAtividade(): void {
 
 export function initSessionTimeout(): void {
     EVENTOS_ATIVIDADE.forEach((evento) => document.addEventListener(evento, registrarAtividade, { passive: true }));
+    subscribe(({ autenticado, usuario }) => {
+        if (!autenticado || usuario?.nivelAcesso !== 'ADMINISTRADOR') {
+            if (timer) clearTimeout(timer);
+            timer = null;
+        } else {
+            registrarAtividade();
+        }
+    });
     
     window.addEventListener('eduassets:sessao-expirada', expirarSessao);
 

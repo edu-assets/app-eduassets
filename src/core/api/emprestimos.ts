@@ -13,6 +13,6 @@ export function atualizarItensEmprestimo(id: number, itens: ItemEmprestimoPayloa
     return http.patch<Emprestimo>(`/emprestimos/${id}`, { itens });
 }
 
-export function devolverEmprestimo(id: number): Promise<Emprestimo> {
-    return http.patch<Emprestimo>(`/emprestimos/${id}/devolver`);
+export function devolverEmprestimo(id: number, dataDevolucao: string): Promise<Emprestimo> {
+    return http.patch<Emprestimo>(`/emprestimos/${id}/devolver`, { dataDevolucao });
 }

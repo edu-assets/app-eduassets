@@ -32,7 +32,7 @@ Navegador :5173 ── proxy Vite ── API :3000 ── PostgreSQL
                                       └─ provisionador :3001
 ```
 
-- O backend usa **3000 por padrão**. `PORT` tem precedência sobre `BACKEND_PORT`; se nenhum resultar em uma porta utilizável, o fallback é 3000.
+- O backend usa **3000 por padrão**. `PORT` tem precedência sobre `BACKEND_PORT`; todos os valores fornecidos são validados e um inválido interrompe o startup.
 - Quando definida, `HOST` controla o endereço de bind. Sem ela, o servidor usa `127.0.0.1` fora de produção e `0.0.0.0` em produção.
 - O Vite escuta em **`0.0.0.0:5173`** e faz proxy das rotas da API e do WebSocket para `127.0.0.1:3000`.
 - Com `VITE_API_BASE_URL` vazia, o navegador usa URLs relativas e o proxy do Vite em desenvolvimento. Um build de frontend para produção exige `VITE_API_BASE_URL`.
@@ -40,28 +40,28 @@ Navegador :5173 ── proxy Vite ── API :3000 ── PostgreSQL
 
 ## Modelo de acesso
 
-- **Convidado:** visualizações públicas de leitura; não pode alterar dados.
+- **Convidado:** leituras minimizadas de categorias, equipamentos, empréstimos e ocorrências por DTOs server-side allowlisted; responsáveis e usuários exigem autenticação. Nomes, notas e texto livre de ocorrência são omitidos/mascarados; nenhum dado pode ser alterado sem autorização.
 - **Editor:** ações operacionais autenticadas permitidas pela política das rotas, incluindo fluxos de empréstimo/devolução e criação/edição de ocorrências.
 - **Administrador:** CRUD administrativo, ações de conta/senha e provisionamento de tokens RFID, além das ações operacionais.
 
-A autenticação usa JWT em `Authorization: Bearer <token>`. A autorização do backend é a barreira efetiva; controles desabilitados no frontend são apenas uma camada de UX. A atividade de administradores tem expiração server-side após 30 minutos de inatividade. Não existe recuperação de senha; um usuário autenticado pode alterar a própria senha por `PATCH /auth/senha`.
+A autenticação usa JWT em `Authorization: Bearer <token>`. A autorização do backend é a barreira efetiva; controles desabilitados no frontend são apenas uma camada de UX. A atividade de administradores expira após 30 minutos por JWT; o estado é local ao processo, portanto a escala atual pressupõe uma instância. Não existe recuperação de senha; um usuário autenticado pode alterar a própria senha por `PATCH /auth/senha`.
 
 ## Backend e modelo de dados
 
 A API oferece respostas de saúde/raiz, autenticação, CRUD das entidades e ações administrativas de RFID:
 
-- `/health`, `/`;
+- `/health` (liveness), `/ready` (readiness com banco limitado por timeout), `/`;
 - `/auth/login`, `/auth/me`, `/auth/senha`, `/auth/rfid`;
 - `/categorias`, `/equipamentos`, `/responsaveis`, `/usuarios`, `/emprestimos`, `/ocorrencias`; e
 - `/usuarios/:id/rfid-token` para provisionar/revogar tokens RFID, somente para administradores.
 
-Os modelos Prisma são `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` e `Ocorrencia`, usando PostgreSQL. Rotas que alteram dados usam middleware de autenticação/administração; rotas de leitura sustentam o Modo Convidado.
+Os modelos Prisma são `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` e `Ocorrencia`, usando PostgreSQL. GET de categorias/equipamentos/empréstimos/ocorrências permite auth opcional e respostas anônimas limitadas por DTO; GET de responsáveis/usuários e todas as mutações exigem autorização conforme a rota.
 
 ## Requisitos
 
 - Node.js **>=22.12.0** e npm para os dois pacotes;
 - PostgreSQL acessível por `DATABASE_URL`;
-- `DIRECT_URL` quando o provedor exigir uma conexão direta separada (a configuração do Prisma usa `DATABASE_URL` como fallback); e
+- `DIRECT_URL` só quando o provedor exigir conexão direta separada (a configuração Prisma usa `DATABASE_URL` se omitida); e
 - Linux/Python e hardware RFID compatíveis somente se a ponte opcional for ativada.
 
 O repositório não pressupõe provedor de hospedagem, projeto cloud, domínio público, política RLS ou deployment operacional.
@@ -71,13 +71,13 @@ O repositório não pressupõe provedor de hospedagem, projeto cloud, domínio p
 Na raiz do repositório:
 
 ```bash
-npm install
-npm --prefix backend install
-npm --prefix frontend install
+npm ci
+npm ci --prefix backend
+npm ci --prefix frontend
 cp .env.example backend/.env
 ```
 
-Edite `backend/.env` com pelo menos `DATABASE_URL`, um `JWT_SECRET` exclusivo com 32 ou mais caracteres e `SEED_ADMIN_PASSWORD`. Não versionar segredos. Para desenvolvimento local explícito, use `NODE_ENV=development`; fora desse modo, defina `CORS_ORIGIN` com uma lista separada por vírgulas das origens de frontend permitidas.
+Edite `backend/.env` com pelo menos `DATABASE_URL`, `JWT_SECRET` exclusivo com 32 ou mais caracteres, `SEED_ADMIN_PASSWORD` e `NODE_ENV=development`. Em produção, também são obrigatórios `CORS_ORIGIN` e `TRUST_PROXY` explícito. Não versionar segredos. Para desenvolvimento local explícito, use `NODE_ENV=development`; fora desse modo, defina `CORS_ORIGIN` com uma lista separada por vírgulas das origens de frontend permitidas.
 
 Crie `frontend/.env` para usar o proxy do Vite:
 
@@ -91,11 +91,11 @@ Inicialize o banco de dados:
 ```bash
 cd backend
 npx prisma migrate dev
-npx prisma db seed
+npm run db:seed
 cd ..
 ```
 
-O seed é idempotente e **exige `SEED_ADMIN_PASSWORD`**. Ele cria o administrador inicial usando a senha dessa variável; nenhuma senha fica no código. `SEED_EDITOR_PASSWORD` é opcional e cria uma conta de editor somente quando definida. Esta documentação não fornece credenciais demo ou senhas prontas.
+O seed é idempotente e **exige `SEED_ADMIN_PASSWORD`**; não substitui a senha de um administrador que já existe. Ele cria o administrador inicial usando a senha dessa variável; nenhuma senha fica no código. `SEED_EDITOR_PASSWORD` é opcional e cria uma conta de editor somente quando definida. Esta documentação não fornece credenciais demo ou senhas prontas.
 
 Inicie os dois processos:
 
@@ -121,12 +121,12 @@ Um frontend já compilado pode ser inspecionado com `cd frontend && npm run prev
 | Variável | Finalidade |
 | --- | --- |
 | `NODE_ENV` | Controla o comportamento de desenvolvimento/produção. |
-| `PORT` / `BACKEND_PORT` | Seleção da porta; `PORT` vence, padrão 3000. |
+| `PORT` / `BACKEND_PORT` | Cada valor fornecido é validado; `PORT` vence; padrão 3000. |
 | `HOST` | Endereço de bind; padrão `127.0.0.1`, ou `0.0.0.0` em produção quando ausente. |
-| `TRUST_PROXY` | Configuração explícita opcional do proxy do Express; ajuste à topologia real. |
+| `TRUST_PROXY` | Configuração validada do proxy; obrigatória explicitamente em produção (`0` sem proxy, número exato de saltos ou IP/CIDR confiáveis). |
 | `CORS_ORIGIN` | Origens permitidas separadas por vírgulas; obrigatória fora do desenvolvimento local. |
 | `DATABASE_URL` | URL PostgreSQL obrigatória. |
-| `DIRECT_URL` | URL direta opcional; usa `DATABASE_URL` como fallback. |
+| `DIRECT_URL` | Opcional; o `prisma.config.ts` usa `DATABASE_URL` como fallback se omitido. |
 | `JWT_SECRET` | Segredo exclusivo de assinatura JWT HS256, com pelo menos 32 caracteres. |
 | `SEED_ADMIN_PASSWORD` | Obrigatória para o seed; define a senha do administrador inicial. |
 | `SEED_EDITOR_PASSWORD` | Opcional; define a senha de uma conta de editor criada pelo seed. |
@@ -168,28 +168,33 @@ O processo inicia o provisionador local em `127.0.0.1:3001/provision`. A unidade
 | raiz | `npm run dev` | Executa backend e frontend em paralelo. |
 | raiz | `npm run build` | Compila backend e depois frontend. |
 | backend | `npm run dev` | API em modo watch. |
-| backend | `npm run build` | Build TypeScript. |
+| backend | `npm run build` | Gera Prisma Client e compila TypeScript. |
 | backend | `npm start` | Executa `dist/src/server.js`. |
 | backend | `npm run migrate:deploy` | Aplica migrações existentes. |
-| backend | `npm test` | Executa o script de testes configurado; nenhum resultado é afirmado aqui. |
+| backend | `npm test` | Suíte unitária sem PostgreSQL. |
+| backend | `npm run test:integration` | Testes HTTP/race; exige PostgreSQL de teste isolado e migrado. |
 | frontend | `npm run dev` | Vite na porta 5173. |
 | frontend | `npm run build` | Gera `dist/`. |
 | frontend | `npm run preview` | Faz preview local de `dist/`. |
 | frontend | `npm run typecheck` | Executa `tsc --noEmit`. |
-| frontend | `npm test` / `npm run test:watch` | Executa Vitest uma vez ou em watch; nenhum resultado é afirmado aqui. |
+| frontend | `npm test` / `npm run test:watch` | Executa Vitest uma vez ou em watch; confirme o resultado e a contagem na saída da execução. |
 
 ## Limitações
 
 - Não há deployment público operacional, migração remota, rotação de segredos ou configuração de banco cloud realizada por este repositório.
-- RLS, grants e exposição anônima via PostgREST do provedor não são estabelecidos nem verificados aqui; exigem revisão separada de privacidade e segurança.
+- A autorização da aplicação usa a API backend. Grants/PostgREST do provedor não fazem parte da rota atual; se o provedor os expuser, revisar permissões e bloquear acesso anônimo indevido.
 - Produção exige `CORS_ORIGIN`; deployments atrás de proxy também exigem `TRUST_PROXY` e política de rede intencional.
 - RFID depende de hardware real, dependências Linux, alcance por loopback, segredo compartilhado forte e política de rede explícita. Quando desativado, o login por senha continua sendo o caminho suportado.
 - O modelo controla quantidades, não unidades serializadas individualmente, e os níveis de acesso não têm permissões mais granulares por painel.
-- Não há recuperação de senha. O campo de data de devolução não altera atualmente a semântica de horário atual persistida pelo backend.
-- A validação manual restante inclui hardware-alvo, comportamento de proxy/deployment e alguns fluxos de navegador; este documento não transforma esses pontos em garantias de teste ou produção.
+- Não há recuperação de senha. A data offset-aware escolhida no modal de devolução é validada e persistida; clientes antigos podem omitir o campo e usar horário do servidor.
+- CI hospedado, integração PostgreSQL, build Docker, proxy Nginx/Cloudflare, TLS, backups, acessibilidade, navegador e hardware requerem execução/verificação externa. Templates não significam deployment nem validação.
 
 ## Versões por idioma
 
 - Português: este arquivo.
 - English: [README.md](README.md).
-- Visão geral do repositório: [README raiz](../../../README.md).
+- A visão geral e as instruções de desenvolvimento local estão nos READMEs da raiz do repositório; eles não são enviados com os assets do frontend.
+
+## Deployment / Implantação
+
+[Guia de implantação e operação](GUIA_IMPLANTACAO.md). O relatório interno de remediação fica na raiz do repositório e não é publicado com os assets do frontend.

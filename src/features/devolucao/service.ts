@@ -61,8 +61,8 @@ export function atualizarQuantidadeComValidacao(
     return { ok: true, itens: atualizarQuantidadeItem(itensAtuais, id, quantidadeValida) };
 }
 
-export async function confirmarDevolucao(id: number): Promise<void> {
-    await returnLoan(id);
+export async function confirmarDevolucao(id: number, dataDevolucao: string): Promise<void> {
+    await returnLoan(id, dataDevolucao);
 }
 
 export async function salvarItensEmprestimo(id: number, itens: LoanItemUI[]): Promise<void> {

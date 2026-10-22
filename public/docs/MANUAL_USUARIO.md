@@ -12,7 +12,7 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 
 | Papel | O que pode fazer na operação | O que é restrito |
 | --- | --- | --- |
-| **Convidado** | Consultar as visões públicas de estoque, histórico, devoluções e ocorrências; usar consultas e exportações disponíveis. | Não cria, altera, resolve, devolve ou exclui registros. **Cadastros** é administrativo; **Segurança** e **Meu Perfil** exigem autenticação. |
+| **Convidado** | Consultar estoque, categorias, histórico e ocorrências anonimizados; usar consultas/exportações derivadas desses dados. | Não cria, altera, resolve, devolve ou exclui registros. Identificação do solicitante, responsável, observações e detalhes da ocorrência são omitidos/mascarados. Listagem de responsáveis, **Cadastros**, **Segurança** e **Meu Perfil** exigem autenticação. |
 | **Editor** | Fazer login, registrar empréstimos, editar itens de empréstimos abertos, confirmar devoluções e criar/editar/resolver registros em **Controle**; alterar a própria senha. | Não acessa a gestão de **Cadastros**, não provisiona/revoga RFID e não exclui ocorrências. |
 | **Administrador** | Tudo que o Editor faz, além de operar **Cadastros**, gerenciar usuários e cartões RFID, salvar **Configurações** e excluir registros de **Controle**. | Continua sujeito às validações de estoque, formato e campos obrigatórios. |
 
@@ -26,7 +26,7 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 4. Para encerrar, abra o menu do usuário e clique em **Sair**. A interface volta ao **Modo Convidado**.
 5. **Contate o administrador** não recupera senha: é apenas a orientação exibida quando a conta não tem uma senha disponível.
 
-Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam ao login. O código atual não aplica esse limite de inatividade às sessões de **Editor**.
+Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam ao login. O código atual não aplica esse limite às sessões de **Editor**. O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
 
 ### RFID (opcional)
 
@@ -64,14 +64,14 @@ O formulário exige pelo menos um item. A UI e o backend verificam a quantidade 
 4. Clique em **Devolver** na lista ou em **Confirmar Devolução** no painel.
 5. Revise o modal **Confirmar Devolução** e clique em **Confirmar Devolução**; **Cancelar** fecha sem concluir.
 
-Os itens retornam à quantidade disponível depois da confirmação. O campo **Data e Hora da Devolução** é preenchido automaticamente e aceita edição visual, mas há uma limitação importante: o backend grava `dataDevolucao` usando o **horário atual do servidor** (`new Date()`). A data escolhida manualmente na UI não deve ser tratada como persistência de uma data histórica.
+Os itens retornam à quantidade disponível depois da confirmação. **Data e Hora da Devolução** é preenchido automaticamente e pode ser editado; ao confirmar, a UI envia o timestamp ISO com offset selecionado, que o backend valida e persiste. Clientes antigos que não enviem esse campo continuam usando o horário atual do servidor.
 
 ## 6. Dashboard
 
 O **Dashboard** apresenta os cartões **Total de equipamentos**, **Disponíveis**, **Emprestados**, **Em Manutenção** e **Quebrados**.
 
 - Na aba **Estoque**, consulte os totais por categoria. Clique em uma linha para abrir os detalhes somente leitura da categoria.
-- Na aba **Histórico**, veja empréstimos registrados, **Solicitante**, **Responsável**, **Retirada**, **Devolução**, itens e **Status**; clique em **Detalhes** para abrir o registro completo.
+- Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível.
 - Use o campo **Buscar por informações...**. Em **Estoque**, a busca considera a categoria; em **Histórico**, considera número, solicitante e responsável.
 - Na aba **Estoque**, o botão **Exportar** baixa imediatamente um CSV do estoque atual. Na aba **Histórico**, **Exportar** leva ao painel **Exportar**, onde há mais opções.
 
@@ -162,7 +162,7 @@ Quem prepara uma instância deve seguir o README e preencher valores próprios n
 
 ## 14. Limitações confirmadas
 
-- **Data de devolução:** `dataDevolucao` atualmente usa o horário do servidor no backend. Alterar o campo visual **Data e Hora da Devolução** não transforma o retorno em uma data histórica persistida.
+- **Data de devolução:** timestamp offset-aware selecionado é persistido; clientes antigos podem omitir o campo e usar o horário do servidor. Alteração da data não reescreve o histórico dos registros já existentes.
 - **RFID:** é opcional e depende de configuração (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), rede/loopback, ponte, dependências e hardware compatível. A mesma LAN, sozinha, não garante funcionamento.
 - **Deployment:** um deployment real, domínio público, proxy, banco hospedado ou política de backup não foi validado por este trabalho. O README descreve desenvolvimento local e preparação técnica.
 - **Senha:** não há recuperação de senha; somente a troca autenticada em **Segurança**.

@@ -138,7 +138,7 @@ The declared foreign-key relations are `Equipamento.categoriaId → Categoria.id
 - Loan creation runs in a transaction. Requested item quantities are aggregated by `equipamentoId`, availability is checked, the loan and its items are created, and available stock is decremented atomically.
 - The stock check treats a missing equipment record as insufficient stock and raises an `EstoqueInsuficienteError` when any requested quantity exceeds effective availability.
 - `atualizarItensEmprestimo` only edits a loan whose status is `ABERTO`. It returns the old item quantities to the effective availability, replaces the item rows, and decrements the new aggregated quantities in one transaction.
-- `devolverEmprestimo` changes an open loan to `DEVOLVIDO`, sets `dataDevolucao` to the current time, and increments available stock for every item. A repeated return is rejected; the loan row and item history are retained rather than deleted.
+- `devolverEmprestimo` changes an open loan to `DEVOLVIDO`, stores the validated offset-aware timestamp sent by the UI (or current server time when legacy clients omit it), and increments available stock for every item. A repeated return is rejected; the loan row and item history are retained rather than deleted.
 - Stock decrements use an atomic `where quantidadeDisponivel >= quantidade` update, so a failed concurrent decrement aborts the transaction instead of silently reducing stock below the checked amount.
 
 ### Occurrences
@@ -155,6 +155,10 @@ The declared foreign-key relations are `Equipamento.categoriaId → Categoria.id
 - User listing exposes `possuiCartaoRfid` as a boolean derived from `rfidTokenHash`, rather than returning the stored hash. The schema stores only the hash value, which is nullable.
 - RFID provisioning first requires the bridge to be enabled and the user to exist, then sends a generated token to the local bridge. Only after a successful bridge response does it store `hashRfidToken(token)` in `rfidTokenHash`; the generated token is returned by that service operation. A disabled bridge returns a service error, and bridge failures/timeouts return service errors.
 - Revoking an RFID card sets `rfidTokenHash` to `null`.
+
+## Guest Mode public projections
+
+Anonymous `GET /equipamentos`, `/emprestimos`, and `/ocorrencias` responses use explicit backend allowlist serializers. Loans omit requester, responsible party, and note; occurrences omit serial number, issue, description, and remediation; equipment exposes only dashboard-required fields (no foreign-key/audit fields). `GET /responsaveis` and `/usuarios` require authentication. These application projections minimize payloads but are not equivalent to database-provider grants or RLS policies.
 
 ## Constraints and audit boundaries
 

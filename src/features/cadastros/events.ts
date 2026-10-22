@@ -16,6 +16,8 @@ import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import type { CampoComOpcoes, RfidModalEls } from './render.js';
 import type { Usuario } from '../../types/index.js';
 import { traduzirErro, t } from '../../core/state/i18nStore.js';
+import { carregarEquipamentos } from '../../core/state/equipamentoStore.js';
+import { carregarResponsaveis } from '../../core/state/responsavelStore.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 
 export interface CadastrosEls {
@@ -200,6 +202,8 @@ async function salvarRegistro(els: CadastrosEls, estado: CadastrosEstado): Promi
     if (els.btnSalvar) setButtonLoading(els.btnSalvar, true);
     try {
         await criarRegistro(estado.tipoAtual, valores);
+        if (estado.tipoAtual === 'equipamentos' || estado.tipoAtual === 'categorias') await carregarEquipamentos();
+        if (estado.tipoAtual === 'responsaveis') await carregarResponsaveis();
         showToast('Registro criado com sucesso', 'success');
         limparCamposFormulario(config.campos);
         await recarregarLista(els, estado);

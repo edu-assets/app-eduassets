@@ -1,5 +1,5 @@
-import { getEquipamentos } from '../../core/state/equipamentoStore.js';
-import { getLoans } from '../../core/state/loanStore.js';
+import { getEquipamentos, subscribe as subscribeEquipamentos } from '../../core/state/equipamentoStore.js';
+import { getLoans, subscribe as subscribeLoans } from '../../core/state/loanStore.js';
 import { attachDashboardEvents } from './events.js';
 import { renderEstoque, renderResumo, renderHistorico } from './render.js';
 import type { DashboardEls, DashboardEstado } from './render.js';
@@ -39,4 +39,6 @@ export function initDashboard(): void {
     renderEstoque(els, getEquipamentos());
     renderResumo(els, getEquipamentos());
     renderHistorico(els, [...getLoans()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
+    subscribeEquipamentos((equipamentos) => { renderEstoque(els, equipamentos); renderResumo(els, equipamentos); });
+    subscribeLoans((loans) => renderHistorico(els, [...loans].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())));
 }

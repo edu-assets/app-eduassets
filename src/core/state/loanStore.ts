@@ -32,8 +32,8 @@ export async function addLoan(loan: LoanDraft): Promise<void> {
     await carregarEmprestimos();
 }
 
-export async function returnLoan(id: number): Promise<void> {
-    await devolverEmprestimo(id);
+export async function returnLoan(id: number, dataDevolucao: string): Promise<void> {
+    await devolverEmprestimo(id, dataDevolucao);
     await carregarEmprestimos();
 }
 

@@ -1,19 +1,18 @@
 # Changelog — eduAssets
 
-All versions below v1.0.0 are part of the beta development cycle. Dates are approximate. The unnumbered section records later remediation work in the selected checkout.
+All versions below v1.0.0 belong to the beta cycle; earlier dates are approximate. The latest section records checkout changes, not published releases.
 
-## Recent remediations — October 22, 2026
-- Removed in-memory/demo authentication and persistence fallbacks; the backend uses `PrismaClient` and propagates database errors instead of hiding them.
-- `JWT_SECRET` is now required and must contain at least 32 characters; there is no default secret. The admin middleware now awaits authentication before authorizing.
-- Security strengthened: `helmet` denies framing; CORS requires an allowlist outside local development; the RFID WebSocket is initialized only with `RFID_BRIDGE_ENABLED=true` and accepts loopback connections only.
-- The RFID bridge avoids selection/write operations when no UID is available and uses wait limits for reader operations; behavior with real hardware was not validated.
-- Runtime contract aligned: the backend honors `PORT` (then `BACKEND_PORT`) and defaults to 3000; the Vite frontend uses 5173 and proxies to 3000. Production frontend builds fail clearly when `VITE_API_BASE_URL` is absent.
-- Prisma configuration falls back to `DATABASE_URL` when `DIRECT_URL` is absent; `prisma generate` was verified, but no database connection or migration was run.
-- CSV exports now include a BOM, delimiter/quote/line-break escaping, and formula-prefix neutralization; the API client clears the authenticated session on every 401 response.
-- Fixed safe HTML attribute serialization, a missing translation, and the return-flow spinner/stale state; CSV and HTML test cases were added.
-- A root lockfile was added; the backend and frontend declare Node `>=22.12.0`. The RFID systemd service no longer depends on machine-specific paths and accounts, but its installation and device verification were not performed.
-- Local validations recorded in the report: 27 frontend tests across five files, 9 backend tests, frontend typecheck and build, backend build, `prisma generate`, Python syntax check, and `git diff --check`.
-- No deployment, remote database operation, migration, secret rotation, or RFID/Raspberry Pi hardware test took place. Production/proxy behavior and systemd installation were not verified; remote grants/RLS/PostgREST were not changed, and historical return-date semantics were not implemented.
+## Remediation and release preparation — October 22, 2026
+- Removed in-memory authentication/persistence fallbacks and the default JWT secret; environment validation fails early for missing/invalid database, secret, CORS, port and production proxy trust.
+- Fixed the Administrator idle timeout using the JWT identifier and fail-closed handling when activity state cannot be be established; an incorrect current password no longer clears the session.
+- Loans: create/edit/return operations serialize transactional state changes; repeated return updates stock once. Occurrence resolution/deletion locks concurrent transitions to prevent duplicate inventory adjustments.
+- Guest Mode remains available with endpoint-specific allowlisted DTOs for equipment, loans and occurrences; personal names, free-text notes and issue details are omitted/masked; responsible-party and user listings require authentication.
+- The return flow sends the user's selected offset-aware timestamp; legacy clients may omit it and use server time. Export filters use inclusive local-calendar boundaries.
+- `/health` is liveness and `/ready` probes PostgreSQL with a timeout; responses do not reveal connection/provider details. Backend build and Prisma Client generation work without `DIRECT_URL` via the `DATABASE_URL` fallback.
+- Added separate local env templates and production template, a multi-stage backend Dockerfile and Compose file with loopback-only host binding, RFID disabled, sanitized Nginx/Cloudflare proxy template, backup/restore scripts restricted to empty DB, PostgreSQL CI workflow and integration/race tests.
+- Seed display names are synthetic and existing passwords are not overwritten; historical login identifiers were preserved.
+- Local verification on Oct 22: 29 frontend tests (6 files), 20 backend unit tests, frontend typecheck/build, backend build without `DIRECT_URL`, Python/shell syntax and `git diff --check`. The first run caught and fixed a test expectation for configuration validation; the final rerun is recorded in the remediation report.
+- PostgreSQL integration suite, hosted CI run and both Docker targets are authored but not executed in this sandbox (no PostgreSQL/Docker); no real database, migration, hardware, Vercel, DNS, Cloudflare, certificate or deployment was used/changed. External verification remains required.
 
 ## v0.9.9 (August 2026)
 - Database indexes on `Emprestimo.status` and `Ocorrencia.status` for faster Dashboard and Control queries.

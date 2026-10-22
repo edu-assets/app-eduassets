@@ -12,7 +12,7 @@ The current data model tracks quantities by **category/model**. It does not prov
 
 | Role | Operational capabilities | Restricted actions |
 | --- | --- | --- |
-| **Guest** | View public stock, history, returns, and issue views; use the available searches and exports. | Cannot create, update, resolve, return, or delete records. The **Records** panel is administrative; **Security** and **My Profile** require authentication. |
+| **Guest** | View anonymized stock, categories, loan summaries and issue summaries; use searches/exports derived from those views. | Cannot create, update, resolve, return, or delete records. Requester/responsible identities, notes and issue details are omitted/masked. Responsible-party listing, **Records**, **Security** and **My Profile** require authentication. |
 | **Editor** | Sign in, register loans, edit items in open loans, confirm returns, create/edit/resolve **Control** records, and change the account's own password. | Cannot use **Records**, provision/revoke RFID, or delete issues. |
 | **Administrator** | Everything an Editor can do, plus **Records**, user and RFID-card management, **Save Settings**, and deleting **Control** records. | Still subject to stock, format, and required-field validation. |
 
@@ -26,7 +26,7 @@ The current data model tracks quantities by **category/model**. It does not prov
 4. To finish, open the user menu and click **Log out**. The interface returns to **Guest Mode**.
 5. **Contact the administrator** does not recover a password; it is the guidance shown when an account has no available password-recovery path.
 
-**Administrator** sessions expire after 30 minutes of inactivity and return to the login modal. The current code does not apply that idle limit to **Editor** sessions.
+**Administrator** sessions expire after 30 minutes of inactivity and return to the login modal. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
 
 ### RFID (optional)
 
@@ -64,14 +64,14 @@ At least one item is required. Both the UI and backend validate available quanti
 4. Click **Return** in the list or **Confirm Return** in the detail panel.
 5. Review the **Confirm Return** modal and click **Confirm Return**; **Cancel** closes it without completing the return.
 
-Items become available again after confirmation. **Return Date and Time** is filled automatically and can be edited visually, but there is a confirmed limitation: the backend stores `dataDevolucao` using the server's **current time** (`new Date()`). The date manually selected in the UI must not be treated as persisted historical-date data.
+Items become available again after confirmation. **Return Date and Time** is filled automatically and can be edited; on confirmation the UI sends the selected offset-aware ISO timestamp, which the backend validates and persists. Older clients that omit the field continue to use server-current time.
 
 ## 6. Dashboard
 
 The **Dashboard** shows **Total equipment**, **Available**, **On Loan**, **Maintenance**, and **Broken** summary cards.
 
 - In **Stock**, review totals by category. Click a row for the category's read-only details.
-- In **History**, review registered loans, **Requester**, **Responsible**, **Pickup**, **Return**, items, and **Status**; click **Details** for the full record.
+- In **History**, review loan dates, items, and status. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Click **Details** when available.
 - Use **Search by information...**. In **Stock**, it searches the category; in **History**, it searches number, requester, and responsible party.
 - In **Stock**, **Export** immediately downloads a CSV of the current stock. In **History**, **Export** takes you to the **Export** panel for more options.
 
@@ -162,7 +162,7 @@ Anyone preparing an installation should follow the README and provide local valu
 
 ## 14. Confirmed limitations
 
-- **Return date:** `dataDevolucao` currently uses the server time in the backend. Editing **Return Date and Time** in the UI does **not** turn the return into persisted historical-date data.
+- **Return date:** the selected offset-aware timestamp is persisted; older clients may omit it and use server time. Changing the field does not rewrite existing historical records.
 - **RFID:** optional and dependent on configuration (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), network/loopback reachability, bridge, dependencies, and compatible hardware. The same LAN alone does not guarantee operation.
 - **Deployment:** a real deployment, public domain, proxy, hosted database, or backup policy was not validated by this work. The README describes local development and technical preparation.
 - **Password:** there is no password recovery; only the authenticated change in **Security** is available.
