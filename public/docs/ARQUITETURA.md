@@ -82,11 +82,12 @@ Os routers montados são `/auth`, `/categorias`, `/equipamentos`, `/responsaveis
 
 ### Autenticação e autorização
 
-- O login por senha é `POST /auth/login`. O módulo JWT assina tokens HS256 com validade de **8 horas** e aceita somente HS256 na verificação. O payload precisa conter `sub` numérico e `nivelAcesso` igual a `ADMINISTRADOR` ou `EDITOR`.
+- O login por senha é `POST /auth/login`. O módulo JWT assina tokens HS256 com validade de **8 horas** e aceita somente HS256 na verificação. O payload contém `sub` numérico, `nivelAcesso` igual a `ADMINISTRADOR` ou `EDITOR` e `sessionVersion` não negativa.
 - `JWT_SECRET` é obrigatório e deve ter pelo menos 32 caracteres; o processo falha durante a inicialização do módulo JWT se estiver ausente ou fraco.
-- `requireAuth` exige `Authorization: Bearer ...`, verifica o token, confirma que o usuário ainda existe no PostgreSQL e atualiza o nível de acesso a partir do banco antes de colocá-lo em `req.user`.
+- `requireAuth` exige `Authorization: Bearer ...`, verifica o token, confirma que o usuário ainda existe no PostgreSQL, compara `sessionVersion` do JWT ao valor no banco e atualiza o nível de acesso a partir do banco antes de colocá-lo em `req.user`.
 - `requireAdmin` compõe `requireAuth` e exige que o nível atual no banco seja `ADMINISTRADOR`. O router de usuários é exclusivo de administradores. Mutações de empréstimos e ocorrências exigem `requireAuth` e validação. Senha atual incorreta em `PATCH /auth/senha` retorna erro de negócio sem encerrar a sessão.
 - A inatividade de administradores é limitada a 30 minutos. O backend mantém a atividade em um `Map` na memória do processo, portanto o comportamento é consistente somente em uma instância do backend; escala horizontal exige estado compartilhado. O frontend também encerra a sessão de administrador após 30 minutos sem atividade e reage ao evento 401 do cliente da API.
+- `POST /auth/logout` incrementa `sessionVersion` por usuário no PostgreSQL e revoga todos os JWTs anteriores da conta, inclusive entre instâncias. O navegador limpa o token imediatamente e envia a revogação em modo best-effort; se estiver offline/falhar, cópias continuam válidas até expirar. Troca de senha bem-sucedida também incrementa a versão e retorna JWT substituto para o navegador atual.
 - `POST /auth/rfid` tem rate limit, valida a entrada e não é uma rota de navegador autenticada por JWT. O serviço exige origem loopback e comparação em tempo constante do header `X-RFID-Bridge-Secret` com `RFID_BRIDGE_SECRET`, aplica SHA-256 ao token RFID de 32 caracteres, procura `Usuario.rfidTokenHash` e publica um evento JWT assinado quando o cartão é reconhecido.
 
 ### Persistência
@@ -139,7 +140,7 @@ A unidade systemd `eduassets-rfid.service` descreve uma instalação em `/opt/ed
 | Validade JWT | `8h` |
 | Inatividade administrativa | `30min`, com estado na memória do processo (uma instância; escala horizontal requer compartilhamento) |
 | Transação Prisma | `timeout=15s`, `maxWait=5s` por padrão |
-| Rate limits | Global: 300 requisições/15 min; login: 10/15 min; login RFID: 60/15 min; troca de senha: 10/15 min; provisionamento RFID: 5/15 min |
+| Rate limits | Em memória por instância: global 1.200/15 min por IP do cliente resolvido; login 10/15 min por IP + identificador de login SHA-256 e 300/15 min por IP; troca de senha 10/15 min por usuário autenticado; RFID login 60/15 min por IP; provisioning RFID 5/15 min por administrador + IP. Escala horizontal requer storage compartilhado. |
 
 ## Não-afirmações explícitas
 

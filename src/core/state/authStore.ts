@@ -1,4 +1,4 @@
-import { fetchMe, login as loginRequest } from '../api/auth.js';
+import { fetchMe, login as loginRequest, logoutSession } from '../api/auth.js';
 import { getToken, setToken } from './tokenStore.js';
 import type { AuthUser, AuthState } from '../../types/index.js';
 
@@ -37,10 +37,18 @@ export async function entrar(login: string, senha: string): Promise<void> {
     notify();
 }
 
-export function sair(): void {
+export function sair(revogarNoServidor = true): void {
+    if (revogarNoServidor && getToken()) {
+        // Local cleanup is immediate even if the best-effort server request fails.
+        void logoutSession().catch(() => undefined);
+    }
     setToken(null);
     user = null;
     notify();
+}
+
+export function atualizarToken(novoToken: string): void {
+    setToken(novoToken);
 }
 
 export function subscribe(callback: AuthListener): () => void {

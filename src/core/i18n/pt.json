@@ -417,6 +417,7 @@
   "backend.validacao.parametro_invalido": "Parâmetro inválido.",
   "backend.equipamentos.nao_encontrado": "Equipamento não encontrado.",
   "backend.equipamentos.soma_invalida": "A soma de Disponível e Quebrado não pode ultrapassar o Total.",
+  "backend.equipamentos.quantidade_em_uso": "As quantidades não podem ser reduzidas abaixo do estoque comprometido por empréstimos ou ocorrências abertas.",
   "backend.emprestimos.nao_encontrado": "Empréstimo não encontrado.",
   "backend.emprestimos.nao_editavel": "Este empréstimo já foi devolvido e não pode mais ser editado.",
   "backend.emprestimos.ja_devolvido": "Este empréstimo já foi devolvido.",

@@ -1,5 +1,6 @@
 import { listarEquipamentos, atualizarEquipamento } from '../api/equipamentos.js';
 import type { Equipamento, EquipamentoUpdatePayload } from '../../types/index.js';
+import { getSessionDataVersion } from './sessionDataVersion.js';
 
 type EquipamentoListener = (equipamentos: Equipamento[]) => void;
 
@@ -7,9 +8,17 @@ let equipamentos: Equipamento[] = [];
 let listeners: EquipamentoListener[] = [];
 
 export async function carregarEquipamentos(): Promise<Equipamento[]> {
-    equipamentos = await listarEquipamentos();
+    const version = getSessionDataVersion();
+    const dados = await listarEquipamentos();
+    if (version !== getSessionDataVersion()) return equipamentos;
+    equipamentos = dados;
     notify();
     return equipamentos;
+}
+
+export function limparEquipamentos(): void {
+    equipamentos = [];
+    notify();
 }
 
 export function getEquipamentos(): Equipamento[] {

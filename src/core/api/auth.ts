@@ -9,6 +9,10 @@ export function fetchMe(): Promise<AuthUser> {
     return http.get<AuthUser>('/auth/me');
 }
 
-export function alterarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
-    return http.patch<void>('/auth/senha', { senhaAtual, novaSenha });
+export function logoutSession(): Promise<void> {
+    return http.post<void>('/auth/logout');
+}
+
+export function alterarSenha(senhaAtual: string, novaSenha: string): Promise<{ token: string }> {
+    return http.patch<{ token: string }>('/auth/senha', { senhaAtual, novaSenha });
 }

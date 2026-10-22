@@ -28,6 +28,8 @@ The current data model tracks quantities by **category/model**. It does not prov
 
 **Administrator** sessions expire after 30 minutes of inactivity and return to the login modal. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
 
+**Security note:** **Log out** clears the current browser token immediately and asks the server to revoke every earlier token for that account. A successful password change also revokes other sessions while keeping this browser signed in with a replacement token. If the browser is offline or the revocation request fails, a copied token may remain usable until its 8-hour expiry (subject to account checks and the Administrator inactivity limit). Use only trusted devices and contact the installation administrator promptly if a token may be exposed.
+
 ### RFID (optional)
 
 RFID is an alternative login path, not a system requirement or a replacement for password login.

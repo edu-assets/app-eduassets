@@ -28,6 +28,8 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 
 Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam ao login. O código atual não aplica esse limite às sessões de **Editor**. O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
 
+**Nota de segurança:** **Sair** limpa imediatamente o token do navegador atual e solicita ao servidor a revogação de todos os tokens anteriores daquela conta. A troca de senha também revoga as demais sessões e mantém este navegador conectado com um token substituto. Se o navegador estiver offline ou a solicitação de revogação falhar, um token copiado pode continuar válido até expirar em 8 horas (sujeito às verificações da conta e ao timeout de inatividade do Administrador). Use somente dispositivos confiáveis e avise o administrador da instalação imediatamente se houver suspeita de exposição do token.
+
 ### RFID (opcional)
 
 O RFID é um caminho alternativo de login, não um requisito do sistema nem um substituto do login por senha.

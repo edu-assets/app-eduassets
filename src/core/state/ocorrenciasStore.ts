@@ -6,6 +6,7 @@ import {
     excluirOcorrencia
 } from '../api/ocorrencias.js';
 import type { Ocorrencia, OcorrenciaUI, OcorrenciaCreatePayload, OcorrenciaUpdatePayload } from '../../types/index.js';
+import { getSessionDataVersion } from './sessionDataVersion.js';
 
 type OcorrenciaListener = (ocorrencias: OcorrenciaUI[]) => void;
 
@@ -13,10 +14,17 @@ let ocorrencias: OcorrenciaUI[] = [];
 let listeners: OcorrenciaListener[] = [];
 
 export async function carregarOcorrencias(): Promise<OcorrenciaUI[]> {
+    const version = getSessionDataVersion();
     const dados = await listarOcorrencias();
+    if (version !== getSessionDataVersion()) return ocorrencias;
     ocorrencias = dados.map(mapOcorrencia);
     notify();
     return ocorrencias;
+}
+
+export function limparOcorrencias(): void {
+    ocorrencias = [];
+    notify();
 }
 
 export function getOcorrencias(): OcorrenciaUI[] {

@@ -127,8 +127,8 @@ As relações com chave estrangeira declaradas são `Equipamento.categoriaId →
 - `createdAt` de `Equipamento`, `Usuario`, `Emprestimo` e `Ocorrencia` usa `@default(now())`.
 - `Equipamento.updatedAt` usa `@updatedAt` do Prisma; não é declarado como campo nulo fornecido pelo usuário.
 - As declarações únicas são `Categoria.nome`, `Usuario.login` e `Usuario.rfidTokenHash` (nulo). Elas geram enforcement/índices de unicidade para esses campos.
-- Os índices secundários explícitos são `@@index([Emprestimo.status])` e `@@index([Ocorrencia.status])`.
-- Nenhum outro `@@index`, `@@unique` ou índice composto explícito é declarado. Os índices de chave primária são implícitos; os campos de chave estrangeira não possuem declaração adicional de índice neste schema.
+- Os índices secundários explícitos cobrem `Emprestimo.status`, `Ocorrencia.status`, quantidades disponível/quebrada do equipamento, `ItemEmprestimo.emprestimoId`, o composto `ItemEmprestimo(equipamentoId, emprestimoId)` e `Ocorrencia(equipamentoId, status, tipo)`.
+- `ItemEmprestimo.emprestimoId` e `Ocorrencia.equipamentoId` agora têm índices explícitos para as consultas e referências usadas; o primeiro também integra índice composto para localizar empréstimos abertos por equipamento.
 
 ## Regras de negócio verificadas nos serviços do backend
 
@@ -140,6 +140,7 @@ As relações com chave estrangeira declaradas são `Equipamento.categoriaId →
 - `atualizarItensEmprestimo` só edita empréstimo com status `ABERTO`. Ela devolve as quantidades antigas ao estoque efetivo, substitui as linhas de itens e decrementa as novas quantidades agrupadas em uma única transação.
 - `devolverEmprestimo` muda um empréstimo aberto para `DEVOLVIDO`, grava o timestamp offset-aware validado enviado pela UI (ou o instante atual quando clientes antigos omitem o campo) e incrementa o estoque disponível para cada item. Uma segunda devolução é rejeitada; a linha do empréstimo e o histórico dos itens são mantidos, não excluídos.
 - Os decrementos de estoque usam update atômico com condição `quantidadeDisponivel >= quantidade`; uma falha de concorrência aborta a transação em vez de reduzir o estoque abaixo da quantidade verificada.
+- Atualizações administrativas de equipamento bloqueiam a linha, incluem quantidades em empréstimos ativos e ocorrências abertas de manutenção no cálculo de capacidade e rejeitam combinações de total/disponível/quebrado abaixo do estoque comprometido. Ocorrências abertas de quebra também devem continuar representadas em `quantidadeQuebrada`.
 
 ### Ocorrências
 
@@ -162,4 +163,4 @@ As respostas anônimas de `GET /equipamentos`, `/emprestimos` e `/ocorrencias` u
 
 ## Limites de constraints e auditoria
 
-O schema Prisma inspecionado não declara constraints `CHECK` para faixas de quantidade, aritmética de estoque, datas ou consistência entre status e datas. Os serviços inspecionados realizam ajustes transacionais de estoque, mas este documento não os promove a constraints no banco. Grants, políticas RLS, políticas PostgREST e outros controles externos de banco/segurança não são representados por este schema ou por estes serviços; **os grants/RLS reais exigem auditoria separada**.
+A migration `20261022090000_stock_checks_and_fk_indexes` adiciona constraints `CHECK` no banco para contagens de equipamento não negativas, `quantidadeDisponivel + quantidadeQuebrada <= quantidadeTotal` e quantidades positivas em itens de empréstimo. A migration `20261022110000_user_session_version` adiciona `Usuario.sessionVersion`, padrão `0`; JWTs autenticados carregam a versão, `requireAuth` compara-a em cada requisição, e logout/troca de senha incrementam o valor para revogar tokens anteriores em todas as instâncias. A coluna preserva usuários existentes, mas exige novo login para JWTs emitidos antes dessa migration. As checks ficam no SQL porque a linguagem de schema do Prisma 6 não oferece atributo `CHECK`. A migration de estoque falha em vez de reescrever linhas antigas que violem uma constraint; valide as migrations em banco descartável/staging antes de produção. Checks entre tabelas para empréstimos/ocorrências abertos permanecem nos serviços transacionais. Não há check para datas nem consistência status/data. Grants, políticas RLS, políticas PostgREST e outros controles externos não são representados aqui; **os grants/RLS reais do banco permanecem não verificados**.

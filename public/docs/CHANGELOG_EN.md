@@ -4,15 +4,15 @@ All versions below v1.0.0 belong to the beta cycle; earlier dates are approximat
 
 ## Remediation and release preparation — October 22, 2026
 - Removed in-memory authentication/persistence fallbacks and the default JWT secret; environment validation fails early for missing/invalid database, secret, CORS, port and production proxy trust.
-- Fixed the Administrator idle timeout using the JWT identifier and fail-closed handling when activity state cannot be be established; an incorrect current password no longer clears the session.
+- Fixed the Administrator idle timeout using the JWT identifier and fail-closed handling when activity state cannot be established; an incorrect current password no longer clears the session. Logout and password changes now update a PostgreSQL-backed `sessionVersion` to revoke older JWTs, including across instances.
 - Loans: create/edit/return operations serialize transactional state changes; repeated return updates stock once. Occurrence resolution/deletion locks concurrent transitions to prevent duplicate inventory adjustments.
 - Guest Mode remains available with endpoint-specific allowlisted DTOs for equipment, loans and occurrences; personal names, free-text notes and issue details are omitted/masked; responsible-party and user listings require authentication.
 - The return flow sends the user's selected offset-aware timestamp; legacy clients may omit it and use server time. Export filters use inclusive local-calendar boundaries.
 - `/health` is liveness and `/ready` probes PostgreSQL with a timeout; responses do not reveal connection/provider details. Backend build and Prisma Client generation work without `DIRECT_URL` via the `DATABASE_URL` fallback.
 - Added separate local env templates and production template, a multi-stage backend Dockerfile and Compose file with loopback-only host binding, RFID disabled, sanitized Nginx/Cloudflare proxy template, backup/restore scripts restricted to empty DB, PostgreSQL CI workflow and integration/race tests.
 - Seed display names are synthetic and existing passwords are not overwritten; historical login identifiers were preserved.
-- Local verification on Oct 22: 29 frontend tests (6 files), 20 backend unit tests, frontend typecheck/build, backend build without `DIRECT_URL`, Python/shell syntax and `git diff --check`. The first run caught and fixed a test expectation for configuration validation; the final rerun is recorded in the remediation report.
-- PostgreSQL integration suite, hosted CI run and both Docker targets are authored but not executed in this sandbox (no PostgreSQL/Docker); no real database, migration, hardware, Vercel, DNS, Cloudflare, certificate or deployment was used/changed. External verification remains required.
+- Sandbox verification on Oct 22: 35 frontend tests (9 files), frontend build, 24 backend unit tests, backend TypeScript build and `prisma validate` passed. PostgreSQL 16 was installed locally in the sandbox only; all six migrations applied to an empty disposable test database; seeding ran twice, and a changed seed password did not overwrite the existing credential; all nine HTTP/concurrency/auth integration tests passed, including logout/password-change revocation. Frontend tests cover Guest/Editor/Administrator data synchronization and immediate logout cleanup.
+- Hosted CI, Docker/Compose, `nginx -t`, browser QA, hardware, Vercel, DNS, firewall, Cloudflare on the target host, certificates and deployment remain unverified. No remote database, public resource or production environment was accessed or changed; PostgreSQL testing used only a local disposable database.
 
 ## v0.9.9 (August 2026)
 - Database indexes on `Emprestimo.status` and `Ocorrencia.status` for faster Dashboard and Control queries.

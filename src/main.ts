@@ -1,7 +1,7 @@
 import { initNavigation, initMobileNavigation } from './core/layout/index.js';
-import { initModals, initConfirm, showToast } from './core/ui/index.js';
+import { initModals, initConfirm } from './core/ui/index.js';
 import { initTheme } from './core/state/themeStore.js';
-import { initI18n, t } from './core/state/i18nStore.js';
+import { initI18n } from './core/state/i18nStore.js';
 import { initSessionTimeout } from './core/auth/sessionTimeout.js';
 import { initDashboard } from './features/dashboard/index.js';
 import { initControle } from './features/controle/index.js';
@@ -10,7 +10,7 @@ import { initEmprestimo } from './features/emprestimo/index.js';
 import { initDevolucao } from './features/devolucao/index.js';
 import { initExportar } from './features/exportar/index.js';
 import { initConfig } from './features/config/index.js';
-import { carregarEquipamentos, carregarEmprestimos, carregarOcorrencias, carregarResponsaveis } from './core/state/index.js';
+import { initAuthDataSync } from './core/state/authDataSync.js';
 import { initAuth } from './features/auth/index.js';
 import { initSeguranca } from './features/seguranca/index.js';
 import { initPerfil } from './features/perfil/index.js';
@@ -20,21 +20,8 @@ import { initDocumentation } from './features/sobre/index.js';
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initI18n();
-    const [_, ...cargasIniciais] = await Promise.allSettled([initAuth(), carregarEquipamentos(), carregarResponsaveis(), carregarEmprestimos(), carregarOcorrencias()]);
-
-    let houveFalhaCarregamento = false;
-
-    cargasIniciais.forEach((resultado, indice) => {
-        if (resultado.status === 'rejected') {
-            const origem = ['equipamentos', 'responsáveis', 'empréstimos', 'ocorrências'][indice];
-            console.error(`[eduAssets] Fail to load ${origem}:`, resultado.reason);
-            houveFalhaCarregamento = true;
-        }
-    });
-
-    if (houveFalhaCarregamento) {
-        showToast(t('feedback.erro_carregar_dados_iniciais'), 'error');
-    }
+    await initAuth();
+    await initAuthDataSync();
 
     const inits: Array<() => void> = [
         initNavigation,

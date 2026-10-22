@@ -44,14 +44,14 @@ Navegador :5173 ── proxy Vite ── API :3000 ── PostgreSQL
 - **Editor:** ações operacionais autenticadas permitidas pela política das rotas, incluindo fluxos de empréstimo/devolução e criação/edição de ocorrências.
 - **Administrador:** CRUD administrativo, ações de conta/senha e provisionamento de tokens RFID, além das ações operacionais.
 
-A autenticação usa JWT em `Authorization: Bearer <token>`. A autorização do backend é a barreira efetiva; controles desabilitados no frontend são apenas uma camada de UX. A atividade de administradores expira após 30 minutos por JWT; o estado é local ao processo, portanto a escala atual pressupõe uma instância. Não existe recuperação de senha; um usuário autenticado pode alterar a própria senha por `PATCH /auth/senha`.
+A autenticação usa JWT em `Authorization: Bearer <token>`. A autorização do backend é a barreira efetiva; controles desabilitados no frontend são apenas uma camada de UX. A atividade de administradores expira após 30 minutos por JWT; o estado é local ao processo, portanto a escala atual pressupõe uma instância. Sair chama `POST /auth/logout`, que incrementa uma versão de sessão por usuário persistida no PostgreSQL e revoga todos os JWTs anteriores da conta; o navegador remove o token imediatamente, então uma falha/offline pode deixar cópias válidas até expirarem. A troca de senha também revoga as sessões anteriores e devolve um token substituto para o navegador atual. Não existe recuperação de senha; um usuário autenticado pode alterar a própria senha por `PATCH /auth/senha`.
 
 ## Backend e modelo de dados
 
 A API oferece respostas de saúde/raiz, autenticação, CRUD das entidades e ações administrativas de RFID:
 
 - `/health` (liveness), `/ready` (readiness com banco limitado por timeout), `/`;
-- `/auth/login`, `/auth/me`, `/auth/senha`, `/auth/rfid`;
+- `/auth/login`, `/auth/me`, `/auth/logout`, `/auth/senha`, `/auth/rfid`;
 - `/categorias`, `/equipamentos`, `/responsaveis`, `/usuarios`, `/emprestimos`, `/ocorrencias`; e
 - `/usuarios/:id/rfid-token` para provisionar/revogar tokens RFID, somente para administradores.
 
@@ -77,7 +77,7 @@ npm ci --prefix frontend
 cp .env.example backend/.env
 ```
 
-Edite `backend/.env` com pelo menos `DATABASE_URL`, `JWT_SECRET` exclusivo com 32 ou mais caracteres, `SEED_ADMIN_PASSWORD` e `NODE_ENV=development`. Em produção, também são obrigatórios `CORS_ORIGIN` e `TRUST_PROXY` explícito. Não versionar segredos. Para desenvolvimento local explícito, use `NODE_ENV=development`; fora desse modo, defina `CORS_ORIGIN` com uma lista separada por vírgulas das origens de frontend permitidas.
+Edite `backend/.env` com pelo menos `DATABASE_URL`, `JWT_SECRET` exclusivo com 32 ou mais caracteres, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` e `NODE_ENV=development`. A senha do seed deve ter ao menos 16 caracteres e não pode ultrapassar 72 bytes UTF-8. Em produção, também são obrigatórios `CORS_ORIGIN` e `TRUST_PROXY` explícito. Não versionar segredos. Para desenvolvimento local explícito, use `NODE_ENV=development`; fora desse modo, defina `CORS_ORIGIN` com uma lista separada por vírgulas das origens de frontend permitidas.
 
 Crie `frontend/.env` para usar o proxy do Vite:
 
@@ -95,7 +95,7 @@ npm run db:seed
 cd ..
 ```
 
-O seed é idempotente e **exige `SEED_ADMIN_PASSWORD`**; não substitui a senha de um administrador que já existe. Ele cria o administrador inicial usando a senha dessa variável; nenhuma senha fica no código. `SEED_EDITOR_PASSWORD` é opcional e cria uma conta de editor somente quando definida. Esta documentação não fornece credenciais demo ou senhas prontas.
+O seed **exige `SEED_ADMIN_EMAIL` válido e `SEED_ADMIN_PASSWORD` forte**, é idempotente e não substitui conta ou senha existente. Para criar também um editor, informe o par `SEED_EDITOR_EMAIL` e `SEED_EDITOR_PASSWORD`. Mantenha essas variáveis em arquivo protegido e não rastreado; execute `npm run db:seed` explicitamente depois das migrations, verifique o login, altere a senha inicial pelo fluxo autenticado e então limpe as variáveis de seed. A API não cria administrador no startup. Esta documentação não fornece credenciais demo ou senhas prontas.
 
 Inicie os dois processos:
 
@@ -128,8 +128,9 @@ Um frontend já compilado pode ser inspecionado com `cd frontend && npm run prev
 | `DATABASE_URL` | URL PostgreSQL obrigatória. |
 | `DIRECT_URL` | Opcional; o `prisma.config.ts` usa `DATABASE_URL` como fallback se omitido. |
 | `JWT_SECRET` | Segredo exclusivo de assinatura JWT HS256, com pelo menos 32 caracteres. |
-| `SEED_ADMIN_PASSWORD` | Obrigatória para o seed; define a senha do administrador inicial. |
-| `SEED_EDITOR_PASSWORD` | Opcional; define a senha de uma conta de editor criada pelo seed. |
+| `SEED_ADMIN_EMAIL` | Email válido obrigatório, usado somente no seed inicial explícito. |
+| `SEED_ADMIN_PASSWORD` | Obrigatória no seed explícito; mínimo 16 caracteres e máximo de 72 bytes UTF-8. |
+| `SEED_EDITOR_EMAIL` / `SEED_EDITOR_PASSWORD` | Par opcional; ambos devem ser fornecidos para criar um Editor. |
 | `LOG_LEVEL` | Nível de log do Winston; o template usa `info`. |
 
 ### Frontend
@@ -187,7 +188,7 @@ O processo inicia o provisionador local em `127.0.0.1:3001/provision`. A unidade
 - RFID depende de hardware real, dependências Linux, alcance por loopback, segredo compartilhado forte e política de rede explícita. Quando desativado, o login por senha continua sendo o caminho suportado.
 - O modelo controla quantidades, não unidades serializadas individualmente, e os níveis de acesso não têm permissões mais granulares por painel.
 - Não há recuperação de senha. A data offset-aware escolhida no modal de devolução é validada e persistida; clientes antigos podem omitir o campo e usar horário do servidor.
-- CI hospedado, integração PostgreSQL, build Docker, proxy Nginx/Cloudflare, TLS, backups, acessibilidade, navegador e hardware requerem execução/verificação externa. Templates não significam deployment nem validação.
+- Testes de integração e migrations passaram em PostgreSQL 16 local descartável. CI hospedado, Docker/Compose, proxy Nginx/Cloudflare no host-alvo, TLS do provedor gerenciado, backups externos, acessibilidade, QA em navegador de produção e hardware ainda requerem validação externa. Templates e testes locais não comprovam deployment.
 
 ## Versões por idioma
 

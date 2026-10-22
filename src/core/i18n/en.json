@@ -417,6 +417,7 @@
   "backend.validacao.parametro_invalido": "Invalid parameter.",
   "backend.equipamentos.nao_encontrado": "Equipment not found.",
   "backend.equipamentos.soma_invalida": "The sum of Available and Broken cannot exceed the Total.",
+  "backend.equipamentos.quantidade_em_uso": "Quantities cannot be reduced below stock committed to active loans or open incidents.",
   "backend.emprestimos.nao_encontrado": "Loan not found.",
   "backend.emprestimos.nao_editavel": "This loan has already been returned and can no longer be edited.",
   "backend.emprestimos.ja_devolvido": "This loan has already been returned.",

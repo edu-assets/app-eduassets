@@ -1,5 +1,6 @@
 import { listarEmprestimos, criarEmprestimo, atualizarItensEmprestimo, devolverEmprestimo } from '../api/emprestimos.js';
 import type { Emprestimo, LoanUI, LoanDraft, LoanUpdate } from '../../types/index.js';
+import { getSessionDataVersion } from './sessionDataVersion.js';
 
 type LoanListener = (emprestimos: LoanUI[]) => void;
 
@@ -7,7 +8,9 @@ let emprestimos: LoanUI[] = [];
 let listeners: LoanListener[] = [];
 
 export async function carregarEmprestimos(): Promise<LoanUI[]> {
+    const version = getSessionDataVersion();
     const dados = await listarEmprestimos();
+    if (version !== getSessionDataVersion()) return emprestimos;
     emprestimos = dados.map(mapEmprestimo);
     notify();
     return emprestimos;
@@ -15,6 +18,11 @@ export async function carregarEmprestimos(): Promise<LoanUI[]> {
 
 export function getLoans(): LoanUI[] {
     return emprestimos;
+}
+
+export function limparEmprestimos(): void {
+    emprestimos = [];
+    notify();
 }
 
 export function getLoansAbertos(): LoanUI[] {

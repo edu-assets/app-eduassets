@@ -1,6 +1,6 @@
 # Deployment and operations (English)
 
-> **Status: preparation only.** The repository contains deployment templates, but no Vercel project, Oracle Cloud instance, DNS, Cloudflare origin, database, certificate, firewall, backup job, or monitoring account has been verified or changed. `app.eduassets.tech` and `api.eduassets.tech` remain proposed hostnames. Do not use this guide as evidence of a live service.
+> **Status: preparation only.** The repository contains deployment templates, but no Vercel project, Oracle Cloud instance, DNS name, Cloudflare origin, database, certificate, firewall, backup job, or monitoring account has been verified or changed. No production hostname is designated here. Do not use this guide as evidence of a live service.
 
 ## Selected topology
 
@@ -13,11 +13,11 @@ Browser → Vercel static frontend → Cloudflare HTTPS → Nginx :443
 
 ### Prerequisites (operator actions)
 
-1. Choose verified frontend/API DNS names and provision a dedicated PostgreSQL database/user with least privilege, automated provider backups, and a tested restore destination. Do not share credentials or databases with a school kiosk or public demo.
+1. Choose verified frontend/API DNS names and provision a dedicated PostgreSQL database/user with least privilege, automated provider backups, and a tested restore destination. Do not share credentials or databases with a school kiosk or public demo. For managed PostgreSQL, use the provider hostname and CA bundle and prefer `sslmode=verify-full`, which validates both certificate trust and hostname; follow provider-specific connection instructions and never disable TLS verification in production. [PostgreSQL SSL documentation](https://www.postgresql.org/docs/current/libpq-ssl.html)
 2. Provision the VM, Docker Engine/Compose, Nginx, PostgreSQL client tools, and a non-root deployment account. In Oracle Cloud NSG/Security Lists and the host firewall, expose only HTTPS (preferably Cloudflare source ranges only) and explicitly managed SSH. Do not expose 3000, 3001, or PostgreSQL publicly.
 3. Obtain origin TLS for the actual API hostname. In Cloudflare, set **Full (strict)**. Never commit a private key. Verify certificate subject, chain, validity dates and hostname before loading it into Nginx; establish renewal and expiry alerts.
-4. Copy `.env.production.example` to `.env.production` with mode `0600`; set the verified origin, allowlist, strong external `JWT_SECRET`, and dedicated DB URLs. Never add production secrets to Git, frontend variables, build args, or Docker layers. `DIRECT_URL` may be omitted; Prisma config falls back to `DATABASE_URL`.
-5. Configure the current Cloudflare IP ranges in `/etc/nginx/snippets/eduassets-cloudflare-realip.conf` using one `set_real_ip_from` directive per published range. Trust `CF-Connecting-IP` only from those ranges. Re-check/update the list when Cloudflare changes it; the repo intentionally does not embed a potentially stale allowlist.
+4. Copy `.env.production.example` to `.env.production` with mode `0600`; set the verified origin, allowlist, strong external `JWT_SECRET`, dedicated DB URL, and one-time `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD` for the initial seed. Never add production secrets to Git, frontend variables, build args, or Docker layers. `DIRECT_URL` may be omitted; Prisma config falls back to `DATABASE_URL`.
+5. Review `deploy/nginx/eduassets-cloudflare-realip.conf.example`, which records ranges from Cloudflare's official sources retrieved on 2026-10-22. Re-check the official list immediately before deployment and periodically, then install the current ranges in `/etc/nginx/snippets/eduassets-cloudflare-realip.conf`, one `set_real_ip_from` per range. Trust `CF-Connecting-IP` only for verified Cloudflare peers. Also restrict the origin at cloud and host firewalls.
 
 ## Build, migrate, start
 
@@ -27,21 +27,27 @@ On the VM, from a reviewed release checkout:
 cp .env.production.example .env.production
 chmod 600 .env.production
 # Edit only after DNS/database/origin values are verified.
-docker compose -f docker-compose.production.yml build api migrate
+docker compose --env-file .env.production -f docker-compose.production.yml build api migrate seed
 # Take and verify a fresh backup before schema changes.
 set -a; . ./.env.production; set +a
 DATABASE_URL="$DATABASE_URL" BACKUP_DIR=./backups ./deploy/scripts/backup-postgres.sh
 # Confirm the dump exists and is non-empty; ideally perform a restore drill to a separate empty DB.
-docker compose -f docker-compose.production.yml --profile release run --rm migrate
-docker compose -f docker-compose.production.yml up -d api
-docker compose -f docker-compose.production.yml ps
-curl --fail https://VERIFIED_API_HOST/health
-curl --fail https://VERIFIED_API_HOST/ready
+docker compose --env-file .env.production -f docker-compose.production.yml --profile release run --rm migrate
+docker compose --env-file .env.production -f docker-compose.production.yml --profile release run --rm seed
+# Verify successful admin login through the application UI/API using the protected environment values.
+# Then change the initial password via the authenticated account flow and remove/clear SEED_ADMIN_* from .env.production.
+docker compose --env-file .env.production -f docker-compose.production.yml up -d api
+docker compose --env-file .env.production -f docker-compose.production.yml ps
+API_ORIGIN="${API_ORIGIN:?set the operator-verified API origin}"
+curl --fail "${API_ORIGIN%/}/health"
+curl --fail "${API_ORIGIN%/}/ready"
 ```
+
+Migration `20261022110000_user_session_version` rejects pre-existing JWTs that lack the new claim; plan for users to sign in again after this release.
 
 `api` is a multi-stage image with production dependencies only, runs as the unprivileged Node user, drops Linux capabilities, uses a read-only root filesystem and has a restart policy. The `migration` target keeps Prisma CLI/TSX available only for an explicit release command. The image build supplies a synthetic, loopback-only URL for `prisma generate`; it is not used by the running service. Database migration is never run automatically at startup. `npm ci --omit=dev` alone is not the release procedure: the migration stage needs Prisma CLI, while the runtime image is pruned to production dependencies after the client is generated.
 
-For Vercel, set the project root to `frontend`, install from `frontend/package-lock.json`, build with `npm run build`, and set the public build-time variable `VITE_API_BASE_URL` to the verified HTTPS API origin. Keep `VITE_RFID_BRIDGE_ENABLED=false`. `frontend/vercel.json` is the selected header configuration; `frontend/public/_headers` has been removed. Its CSP currently names the proposed `https://api.eduassets.tech`; update it to the actual API origin before deployment. A local JSON parse does not prove Vercel applied these headers.
+For Vercel, set the project root to `frontend`, install from `frontend/package-lock.json`, build with `npm run build`, and set the public build-time variable `VITE_API_BASE_URL` to the operator-verified HTTPS API origin. Keep `VITE_RFID_BRIDGE_ENABLED=false`. `frontend/vercel.json` is the selected header configuration; `frontend/public/_headers` has been removed. Its `connect-src 'self'` policy deliberately blocks cross-origin API calls until an authorized, verified API hostname is added to the CSP and deployment configuration. A local JSON parse does not prove Vercel applied these headers.
 
 ## Nginx, trusted proxy and TLS
 
@@ -54,11 +60,11 @@ The backend defaults to loopback for direct non-production service use; the cont
 - `GET /health` is liveness and intentionally does not depend on PostgreSQL.
 - `GET /ready` executes a bounded `SELECT 1`; it returns only `{status:"ready"}` or HTTP 503 `{status:"unavailable"}`.
 - Docker health checks `/ready`. Configure independent external uptime checks and alerts for HTTPS `/health` and `/ready`, HTTP 5xx, disk space, PostgreSQL availability, certificate expiry, backup failure, and CPU/memory pressure. A successful repository test does not configure monitoring.
-- Logs go to stdout/stderr; inspect with `docker compose ... logs --since=1h api`. Do not log bearer tokens, RFID token contents, bridge secrets or raw personal data.
+- Logs go to stdout/stderr and Docker rotation is capped at 10 MB × 5 files per container; inspect with `docker compose ... logs --since=1h api`. Do not log bearer tokens, RFID token contents, bridge secrets or raw personal data.
 
 ## Backup, retention and recovery
 
-Run `deploy/scripts/backup-postgres.sh` using a protected environment file or secret manager; the output is custom-format `pg_dump`, mode 0600. Store backups encrypted and off the VM, separate from the live DB credentials. A recommended starting retention policy is 30 daily and 12 monthly recovery points, adjusted to an approved RPO/RTO and applicable privacy retention policy. The script intentionally does not delete old backups; implement retention in the approved backup storage system and alert on failed/missing jobs.
+Run `deploy/scripts/backup-postgres.sh` using a protected environment file or secret manager; the output is custom-format `pg_dump`, mode 0600. Schedule it through the approved host/backup service; this repository does not install a schedule. Store backups encrypted and off the VM, separate from the live DB credentials. A recommended starting retention policy is 30 daily and 12 monthly recovery points, adjusted to an approved RPO/RTO and applicable privacy retention policy. The script intentionally does not delete old backups; implement retention in the approved backup storage system and alert on failed/missing jobs.
 
 For a restore drill, create a **new, empty, disposable** database, then run:
 

@@ -82,18 +82,19 @@ The mounted routers are `/auth`, `/categorias`, `/equipamentos`, `/responsaveis`
 
 ### Authentication and authorization
 
-- Password login is `POST /auth/login`. The JWT module signs HS256 tokens for **8 hours** and accepts only HS256 on verification. The payload must contain a numeric `sub` and `nivelAcesso` equal to `ADMINISTRADOR` or `EDITOR`.
+- Password login is `POST /auth/login`. The JWT module signs HS256 tokens for **8 hours** and accepts only HS256 on verification. The payload contains numeric `sub`, `nivelAcesso` equal to `ADMINISTRADOR` or `EDITOR`, and a non-negative `sessionVersion`.
 - `JWT_SECRET` is mandatory and must have at least 32 characters; the application fails during JWT module initialization if it is missing or weak.
-- `requireAuth` requires `Authorization: Bearer ...`, verifies the token, confirms that the user still exists in PostgreSQL, and refreshes the access level from the database before placing it in `req.user`.
+- `requireAuth` requires `Authorization: Bearer ...`, verifies the token, confirms that the user still exists in PostgreSQL, compares the token's `sessionVersion` with the database value, and refreshes the access level from the database before placing it in `req.user`.
 - `requireAdmin` composes `requireAuth` and requires the current database level to be `ADMINISTRADOR`. The users router is administrator-only. Loan and occurrence mutations require `requireAuth` and input validation. A wrong current password on `PATCH /auth/senha` returns a business error without logging the session out.
 - Administrator inactivity is limited to 30 minutes. Backend activity tracking is a process-memory `Map`, so the behavior is consistent for one backend instance only; horizontal scaling requires shared state. The frontend also logs an administrator out after 30 minutes without activity and reacts to the API client's 401 event.
+- `POST /auth/logout` increments a per-user `sessionVersion` in PostgreSQL and revokes all previously issued JWTs for that account across backend instances. The browser clears its token immediately and sends revocation best-effort; if offline/the request fails, copied tokens remain valid until expiry. A successful password change also increments the version and returns a replacement JWT to the current browser.
 - `POST /auth/rfid` is rate-limited, validates its input, and is not a JWT-authenticated browser route. The card stores a random 32-character opaque lookup credential; only its SHA-256 hash is persisted in `Usuario.rfidTokenHash`, not a JWT. Successful lookup still broadcasts a short-lived signed JWT to accepted local WebSocket clients; the card credential remains clonable at the physical layer, so the complete flow must stay isolated and disabled in public deployment. The service requires a loopback source address and a constant-time match of `X-RFID-Bridge-Secret` against `RFID_BRIDGE_SECRET`, hashes the 32-character RFID token with SHA-256, looks up `Usuario.rfidTokenHash`, and publishes a signed JWT event when the card is recognized.
 
 ### Persistence
 
 `prisma.ts` exports one `PrismaClient` and a `runTransaction` helper. The standard interactive transaction limits are **15,000 ms timeout** and **5,000 ms max wait**; an isolation level can be supplied by the caller.
 
-The Prisma datasource is PostgreSQL and reads `DATABASE_URL` and optional `DIRECT_URL` (falls back to `DATABASE_URL`). The schema currently contains `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo`, and `Ocorrencia`, with the access/status enums declared in the schema. Status indexes exist for loans and occurrences, and RFID credentials are stored as an optional unique hash on `Usuario`.
+The Prisma datasource is PostgreSQL and reads `DATABASE_URL` and optional `DIRECT_URL` (falls back to `DATABASE_URL`). The schema currently contains `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo`, and `Ocorrencia`, with the access/status enums declared in the schema. Status indexes exist for loans and occurrences; quantity/FK indexes and SQL check constraints are versioned in migration `20261022090000_stock_checks_and_fk_indexes`. RFID credentials are stored as an optional unique hash on `Usuario`; `sessionVersion` enables cross-instance JWT revocation.
 
 There are **no RLS policies in the Prisma schema**. Authorization is implemented in application code and route middleware; the database schema must not be read as proof of row-level isolation.
 
@@ -139,7 +140,7 @@ The systemd unit `eduassets-rfid.service` describes an installation under `/opt/
 | JWT lifetime | `8h` |
 | Admin inactivity | `30min`, with backend state held in process memory; single instance only |
 | Prisma transaction | `timeout=15s`, `maxWait=5s` by default |
-| Rate limits | Global: 300 requests/15 min; login: 10/15 min; RFID login: 60/15 min; password change: 10/15 min; RFID provisioning: 5/15 min |
+| Rate limits | In-memory per backend instance: global 1,200/15 min per resolved client IP; login 10/15 min per IP + SHA-256 login identifier plus 300/15 min per IP; password change 10/15 min per authenticated user; RFID login 60/15 min per IP; RFID provisioning 5/15 min per admin + IP. Horizontal scaling needs a shared store. |
 
 ## Explicit non-claims
 

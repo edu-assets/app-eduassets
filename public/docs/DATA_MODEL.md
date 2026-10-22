@@ -127,8 +127,8 @@ The declared foreign-key relations are `Equipamento.categoriaId → Categoria.id
 - `createdAt` on `Equipamento`, `Usuario`, `Emprestimo`, and `Ocorrencia` uses `@default(now())`.
 - `Equipamento.updatedAt` uses Prisma's `@updatedAt`; it is not declared as a user-supplied nullable field.
 - Unique declarations are `Categoria.nome`, `Usuario.login`, and nullable `Usuario.rfidTokenHash`. These produce uniqueness enforcement/indexes for those fields.
-- Explicit secondary indexes are `@@index([Emprestimo.status])` and `@@index([Ocorrencia.status])`.
-- No other explicit `@@index`, `@@unique`, or composite index is declared. Primary-key indexes are implicit in the primary keys; foreign-key fields have no additional index declaration in this schema.
+- Explicit secondary indexes cover `Emprestimo.status`, `Ocorrencia.status`, equipment availability/broken counts, `ItemEmprestimo.emprestimoId`, the composite `ItemEmprestimo(equipamentoId, emprestimoId)`, and `Ocorrencia(equipamentoId, status, tipo)`.
+- `ItemEmprestimo.emprestimoId` and `Ocorrencia.equipamentoId` therefore have explicit query-supporting indexes; the former also has a composite index for equipment-to-open-loan lookup.
 
 ## Business rules verified in backend services
 
@@ -140,6 +140,7 @@ The declared foreign-key relations are `Equipamento.categoriaId → Categoria.id
 - `atualizarItensEmprestimo` only edits a loan whose status is `ABERTO`. It returns the old item quantities to the effective availability, replaces the item rows, and decrements the new aggregated quantities in one transaction.
 - `devolverEmprestimo` changes an open loan to `DEVOLVIDO`, stores the validated offset-aware timestamp sent by the UI (or current server time when legacy clients omit it), and increments available stock for every item. A repeated return is rejected; the loan row and item history are retained rather than deleted.
 - Stock decrements use an atomic `where quantidadeDisponivel >= quantidade` update, so a failed concurrent decrement aborts the transaction instead of silently reducing stock below the checked amount.
+- Administrator equipment updates lock the equipment row, include active-loan item quantities and open maintenance incidents in the capacity check, and reject a new total/available/broken combination that would be below committed stock. Open broken incidents must also remain represented in `quantidadeQuebrada`.
 
 ### Occurrences
 
@@ -162,4 +163,4 @@ Anonymous `GET /equipamentos`, `/emprestimos`, and `/ocorrencias` responses use 
 
 ## Constraints and audit boundaries
 
-The inspected Prisma schema declares no `CHECK` constraints for quantity ranges, stock arithmetic, dates, or status/date consistency. The inspected services perform transactional stock adjustments, but this document does not promote those operations to database-level constraints. Grants, RLS policies, PostgREST policies, and other external database/security controls are not represented by this schema or these services; **the real grants/RLS configuration requires a separate audit**.
+Migration `20261022090000_stock_checks_and_fk_indexes` adds database `CHECK` constraints for non-negative equipment counts, `quantidadeDisponivel + quantidadeQuebrada <= quantidadeTotal`, and positive loan-item quantities. Migration `20261022110000_user_session_version` adds `Usuario.sessionVersion` with default `0`; authenticated JWTs carry the version, `requireAuth` compares it on each request, and logout/password change increments it to revoke earlier tokens across instances. The session-version change preserves existing users but requires re-login for JWTs issued before this migration. Check constraints are maintained in SQL because the installed Prisma 6 schema language does not support a `CHECK` attribute. The stock migration intentionally fails rather than rewriting legacy rows that violate a check; validate migrations against a disposable/staging database before any production release. Cross-table checks for open loans/incidents remain enforced by transactional services. No check was added for dates or status/date consistency. Grants, RLS policies, PostgREST policies, and other external database/security controls are not represented here; **the actual database grants/RLS configuration remains unverified**.

@@ -44,14 +44,14 @@ Browser :5173 ── Vite proxy ── API :3000 ── PostgreSQL
 - **Editor:** authenticated operational actions allowed by the route policy, including loan/return flows and occurrence creation/editing.
 - **Administrator:** administrative CRUD, account/password actions and RFID-token provisioning in addition to operational actions.
 
-JWT authentication is sent as `Authorization: Bearer <token>`. Backend authorization is authoritative; frontend disabled controls are only a UX layer. Administrator activity expires after 30 minutes per JWT; backend activity state is process-local, so the current timeout model assumes a single instance. There is no password-recovery flow; an authenticated user can change their own password with `PATCH /auth/senha`.
+JWT authentication is sent as `Authorization: Bearer <token>`. Backend authorization is authoritative; frontend disabled controls are only a UX layer. Administrator activity expires after 30 minutes per JWT; backend activity state is process-local, so the current timeout model assumes a single instance. Logout calls `POST /auth/logout`, which increments a database-backed per-user session version and revokes all previously issued JWTs for that account; the browser clears its token immediately, so a failed/offline revocation request can leave copied tokens valid until expiry. A successful password change also revokes all other sessions and returns a replacement token for the current browser. There is no password-recovery flow; an authenticated user can change their own password with `PATCH /auth/senha`.
 
 ## Backend and data model
 
 The API exposes health/root responses, authentication routes, entity CRUD routes and administrator-only RFID-token actions:
 
 - `/health` (liveness), `/ready` (bounded database readiness), `/`;
-- `/auth/login`, `/auth/me`, `/auth/senha`, `/auth/rfid`;
+- `/auth/login`, `/auth/me`, `/auth/logout`, `/auth/senha`, `/auth/rfid`;
 - `/categorias`, `/equipamentos`, `/responsaveis`, `/usuarios`, `/emprestimos`, `/ocorrencias`; and
 - `/usuarios/:id/rfid-token` for RFID-token provisioning/revocation.
 
@@ -77,7 +77,7 @@ npm ci --prefix frontend
 cp .env.example backend/.env
 ```
 
-Edit `backend/.env` with at least `DATABASE_URL`, a unique `JWT_SECRET` of 32 or more characters, and `SEED_ADMIN_PASSWORD`. Do not commit secrets. For explicit local development, use `NODE_ENV=development`; outside local development, set `CORS_ORIGIN` to a comma-separated list of allowed frontend origins.
+Edit `backend/.env` with at least `DATABASE_URL`, a unique `JWT_SECRET` of 32 or more characters, `SEED_ADMIN_EMAIL`, and `SEED_ADMIN_PASSWORD` (at least 16 characters; the seed also rejects passwords above bcrypt's 72-byte limit). Do not commit secrets. For explicit local development, use `NODE_ENV=development`; outside local development, set `CORS_ORIGIN` to a comma-separated list of allowed frontend origins.
 
 Create `frontend/.env` for the Vite proxy:
 
@@ -95,7 +95,7 @@ npm run db:seed
 cd ..
 ```
 
-The seed **requires `SEED_ADMIN_PASSWORD`**, is idempotent and does not overwrite an existing administrator password. `SEED_EDITOR_PASSWORD` is optional and creates an editor account only when set. Passwords are read from the environment; this documentation supplies no demo credentials.
+The seed **requires a valid `SEED_ADMIN_EMAIL` and a strong `SEED_ADMIN_PASSWORD`**, is idempotent, and does not overwrite an existing account or password. Optional editor provisioning requires both `SEED_EDITOR_EMAIL` and `SEED_EDITOR_PASSWORD`. Keep these values in a protected, untracked environment file, execute `npm run db:seed` explicitly after migrations, verify login, change the initial password through the authenticated account flow, and then clear the one-time seed variables. API startup never creates an administrator. No demo credentials are provided here.
 
 Start both processes:
 
@@ -128,8 +128,9 @@ A built frontend can be inspected with `cd frontend && npm run preview`; this is
 | `DATABASE_URL` | Required PostgreSQL URL. |
 | `DIRECT_URL` | Optional separate direct URL; falls back to `DATABASE_URL`. |
 | `JWT_SECRET` | Unique JWT HS256 secret, at least 32 characters. |
-| `SEED_ADMIN_PASSWORD` | Required by the seed for the initial administrator password. |
-| `SEED_EDITOR_PASSWORD` | Optional seed password for an editor account. |
+| `SEED_ADMIN_EMAIL` | Required valid email used only by the explicit initial seed. |
+| `SEED_ADMIN_PASSWORD` | Required by the explicit seed; at least 16 characters and at most 72 UTF-8 bytes. |
+| `SEED_EDITOR_EMAIL` / `SEED_EDITOR_PASSWORD` | Optional pair; both must be provided to seed an editor. |
 | `LOG_LEVEL` | Winston log level; template default is `info`. |
 
 ### Frontend
@@ -187,7 +188,7 @@ The process starts the local provisioning service at `127.0.0.1:3001/provision`.
 - RFID needs real hardware, Linux dependencies, loopback reachability, a strong shared secret and an explicit network policy. Password login remains the supported path when it is off.
 - The data model tracks quantities rather than individual serialized units, and roles are limited to Guest/Editor/Administrator behavior.
 - Password recovery is not implemented. The selected offset-aware return timestamp is validated/persisted; older clients may omit it and use server time.
-- Hosted CI, PostgreSQL integration, Docker build, Nginx/Cloudflare proxy, TLS, backups, accessibility, browser and hardware require external verification. Templates are not evidence of a deployment or successful validation.
+- Local PostgreSQL 16 disposable integration tests and migrations passed. Hosted CI, Docker/Compose, Nginx/Cloudflare proxy on the target host, managed-provider TLS, off-host backups, accessibility, production-browser QA and hardware still require external verification. Templates and local tests are not evidence of a deployment.
 
 ## Language versions
 
