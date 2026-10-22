@@ -409,6 +409,7 @@
   "backend.geral.registro_duplicado": "A record with this unique value already exists.",
   "backend.geral.erro_processar_requisicao": "Error processing the request.",
   "backend.geral.erro_interno": "Internal server error.",
+  "backend.geral.json_invalido": "Request body contains invalid JSON.",
   "backend.seguranca.muitas_requisicoes": "Too many requests. Please try again in a few minutes.",
   "backend.seguranca.muitas_tentativas_login": "Too many login attempts. Please try again in a few minutes.",
   "backend.seguranca.muitas_tentativas_rfid": "Too many RFID login attempts. Please try again in a few minutes.",
