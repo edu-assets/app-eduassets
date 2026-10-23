@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  plugins: [],
   publicDir: 'public',
   server: {
     host: '0.0.0.0',
