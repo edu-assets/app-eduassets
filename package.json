@@ -14,7 +14,7 @@
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@types/flatpickr": "^3.0.2",
     "@vitest/mocker": "^5.0.1",
