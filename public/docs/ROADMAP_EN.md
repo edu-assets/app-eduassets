@@ -1,6 +1,6 @@
 # Roadmap — eduAssets
 
-> **Checkout status (Oct 22, 2026): Beta.** Code fixes, tests and deployment templates are present. In this execution, unit tests, builds, `prisma validate`, and static assertions passed; PostgreSQL/migrations/seed, Docker/Compose, runtime Nginx, and hosted CI did not run. No public infrastructure was deployed or verified.
+> **Checkout status (Oct 22, 2026): Beta.** Code fixes, tests and deployment templates are present. In this execution, unit tests, builds, `prisma validate`, and static assertions passed; PostgreSQL/migrations/seed, production smoke, image builds and hosted CI passed in run `39875293195`; local Nginx runtime did not run. No public infrastructure was deployed or verified.
 
 ## Completed in code and locally verified
 
@@ -8,18 +8,18 @@
 - [x] Prisma/Express backend: no in-memory fallback, required JWT secret, validated config, TypeScript build, `prisma validate` with omitted/empty `DIRECT_URL`, and 30 unit tests passed.
 - [x] JWT/roles and current DB user authorization reviewed; admin timeout uses jti and fails closed; PostgreSQL-backed `sessionVersion` revokes tokens on logout/password change; 401 clears the session while 403/network errors remain distinct.
 - [x] Guest Mode preserved with minimized, server-side allowlisted projections; `/responsaveis` and `/usuarios` require auth; backend authorizes writes.
-- [ ] Loan/return and occurrence transaction/locking paths, logout and password-change revocation require the HTTP/concurrency suite and six migrations against disposable PostgreSQL; they did not run in this execution.
+- [ ] Loan/return and occurrence transaction/locking paths, logout and password-change revocation require the HTTP/concurrency suite and six migrations against disposable PostgreSQL; they passed in hosted run `39875293195`.
 - [x] F4 — dependent stores/forms refresh after creation; F5 — local-calendar date filters; F6 — 401 without hydrated user; F7 — selected return time sent as an offset-aware timestamp; locally reviewed/tested where applicable.
 - [x] `/health` liveness and timeout-bounded, non-disclosing PostgreSQL `/ready`; RFID bridge remains disabled by default.
 - [x] Local/production environment templates, multi-stage Docker, Compose, Nginx config, non-destructive backup/restore scripts, and GitHub Actions CI added. Execution against real services is not verified.
 - [x] P0/P1 remediation: optional `DIRECT_URL`, API CSP, direct Node entrypoint, production CI smoke workflow, and public Nginx RFID blocks implemented; runtime remains unverified.
 
-> No local PostgreSQL was available in this execution, so migrations and HTTP integration remain unverified; even disposable PostgreSQL evidence would not be provider staging, a production DB, hosted CI, a production-browser test, privacy approval, or hardware certification.
+> Local PostgreSQL was unavailable, but hosted CI validated migrations and HTTP integration against disposable PostgreSQL; this still does not equal provider staging, a production DB, production-browser testing, privacy approval, or hardware certification.
 
 ## Next steps toward v1.0.0
 
 - [ ] Run GitHub CI and resolve any runner-specific incompatibilities.
-- [ ] Execute integration/race/auth tests against disposable PostgreSQL in the production smoke workflow and resolve runner-specific failures.
+- [x] Execute integration/race/auth tests against disposable PostgreSQL in the production smoke workflow; run `39875293195` passed.
 - [ ] Perform browser QA for CORS/CSP, guest anonymization/exports, login/timeout, loan/occurrence flows, responsiveness and accessibility.
 - [ ] Validate Docker/Compose and Nginx on the target host; run `nginx -t`; check firewall, Cloudflare real-IP ranges and per-client rate limits. Without current ranges, clients may be grouped under an edge IP.
 - [ ] Provision/verify DNS, Vercel project, API origin, Full (strict) TLS, secret rotation, monitoring and availability.

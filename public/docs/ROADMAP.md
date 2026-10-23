@@ -1,6 +1,6 @@
 # Roadmap — eduAssets
 
-> **Status do checkout (22/10/2026): Beta.** Correções de código, testes e templates foram implementados. Nesta execução, testes unitários, builds, `prisma validate` e asserts estáticos passaram; PostgreSQL/migrations/seed, Docker/Compose, Nginx runtime e CI hospedado não foram executados. Nenhum recurso público/infraestrutura foi implantado ou validado.
+> **Status do checkout (22/10/2026): Beta.** Correções de código, testes e templates foram implementados. Nesta execução, testes unitários, builds, `prisma validate` e asserts estáticos passaram; PostgreSQL/migrations/seed, production smoke, builds de imagem e CI hospedado passaram no run `39875293195`; Nginx runtime local ainda não foi executado. Nenhum recurso público/infraestrutura foi implantado ou validado.
 
 ## Concluído no código e verificado localmente
 
@@ -8,18 +8,18 @@
 - [x] Backend Prisma/Express: sem fallback in-memory, segredo JWT obrigatório, configuração validada, build TypeScript, `prisma validate` com `DIRECT_URL` omitido/vazio e 30 testes unitários aprovados.
 - [x] JWT/roles e estado atual de usuário verificados na autorização; timeout de administrador por jti fail-closed; `sessionVersion` persistida revoga tokens no logout/troca de senha; 401 limpa a sessão e erros 403/rede continuam distintos.
 - [x] Guest Mode preservado com projeções server-side allowlisted e minimizadas; `/responsaveis` e `/usuarios` exigem auth; mutações exigem autorização no backend.
-- [ ] Transações e locking de empréstimos/devoluções e resolução/exclusão de ocorrências, logout e troca de senha: a suíte HTTP/concorrência e as seis migrations exigem PostgreSQL descartável e não foram executadas nesta execução.
+- [ ] Transações e locking de empréstimos/devoluções e resolução/exclusão de ocorrências, logout e troca de senha: a suíte HTTP/concorrência e as seis migrations passaram no CI hospedado `39875293195` contra PostgreSQL descartável.
 - [x] F4 — atualização de stores/formulários após criação; F5 — filtros de datas de calendário local; F6 — 401 sem usuário hidratado; F7 — data escolhida enviada como timestamp offset-aware; revisados com testes locais onde aplicável.
 - [x] `/health` liveness e `/ready` readiness PostgreSQL com timeout/sem detalhe sensível; bridge RFID com flag desligada por padrão.
 - [x] Templates de ambiente local/produção, Docker multi-stage, Compose, configuração Nginx, backup/restore não destrutivo e GitHub Actions CI foram adicionados. Sua execução em serviço real não foi validada.
 - [x] P0/P1 desta remediação: `DIRECT_URL` opcional, CSP da API, entrypoint Node direto, smoke de produção no CI e bloqueio público Nginx para RFID foram implementados; runtime ainda não foi validado.
 
-> A ausência de PostgreSQL local nesta execução impede validar migrations e requests HTTP; mesmo quando executado, um banco descartável não equivale a homologação do provedor, banco de produção, CI hospedado, browser em produção, aprovação de privacidade ou certificação de hardware.
+> Embora PostgreSQL não esteja disponível localmente, o CI hospedado validou migrations e requests HTTP em banco descartável; isso não equivale a homologação do provedor, banco de produção, browser em produção, aprovação de privacidade ou certificação de hardware.
 
 ## Próximos passos para v1.0.0
 
 - [ ] Executar workflow CI no GitHub e resolver eventuais incompatibilidades específicas do runner.
-- [ ] Executar testes de integração/race em PostgreSQL 16 descartável no workflow de produção e repetir qualquer falha específica do runner.
+- [x] Executar testes de integração/race em PostgreSQL descartável no workflow de produção; o run `39875293195` passou.
 - [ ] Fazer QA manual de browser para CORS/CSP, guest anonymization/exports, login/timeout, fluxos de empréstimo/ocorrência e responsividade/acessibilidade.
 - [ ] Validar `docker build`, compose e Nginx no host-alvo; `nginx -t`, firewall, real-IP Cloudflare e rate limit com ranges Cloudflare atuais; sem isso, o IP do edge pode agrupar usuários.
 - [ ] Obter e validar domínio/DNS, projeto Vercel, origem API, certificado TLS Full (strict), rotação de segredo, monitoramento e disponibilidade.

@@ -188,7 +188,7 @@ The process starts the local provisioning service at `127.0.0.1:3001/provision`.
 - RFID needs real hardware, Linux dependencies, loopback reachability, a strong shared secret and an explicit network policy. Password login remains the supported path when it is off.
 - The data model tracks quantities rather than individual serialized units, and roles are limited to Guest/Editor/Administrator behavior.
 - Password recovery is not implemented. The selected offset-aware return timestamp is validated/persisted; older clients may omit it and use server time.
-- PostgreSQL migrations, seed, and disposable integration tests were not run in this sandbox. Hosted CI, Docker/Compose, Nginx/Cloudflare proxy on the target host, managed-provider TLS, off-host backups, accessibility, production-browser QA and hardware still require external verification. Templates and local unit/build checks are not evidence of a deployment.
+- PostgreSQL migrations, seed, and disposable integration tests passed in hosted CI run `39875293195`; local Docker/Compose/Nginx and the public proxy, managed-provider TLS, off-host backups, accessibility, production-browser QA and hardware still require external verification. Templates and local unit/build checks are not evidence of a deployment.
 
 ## Language versions
 
