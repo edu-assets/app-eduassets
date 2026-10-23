@@ -1,6 +1,6 @@
 # Deployment and operations (English)
 
-> **Status: preparation only.** The repository contains deployment templates, but no Cloudflare Pages project, Oracle Cloud instance, DNS name, Cloudflare origin, database, certificate, firewall, backup job, or monitoring account has been verified or changed. No production hostname is designated here. Do not use this guide as evidence of a live service.
+> **Status: Beta deployment validated on October 23, 2026.** The operator verified the Cloudflare Pages frontend at `app.eduassets.tech`, the Oracle VM/Nginx API at `api.eduassets.tech`, Neon connectivity configuration, external HTTPS reachability, and the CORS preflight. Off-host backup, restore drill, monitoring, and final real-data security review remain operational tasks. See `Hosting.md` for the complete runbook and the exact firewall incident resolution.
 
 ## Selected topology
 
@@ -47,7 +47,7 @@ Migration `20261022110000_user_session_version` rejects pre-existing JWTs that l
 
 `api` is a multi-stage image with production dependencies only, runs as the unprivileged Node user, drops Linux capabilities, uses a read-only root filesystem and has a restart policy. The `migration` target keeps Prisma CLI/TSX available only for an explicit release command. The image build supplies a synthetic, loopback-only URL for `prisma generate`; it is not used by the running service. Database migration is never run automatically at startup. `npm ci --omit=dev` alone is not the release procedure: the migration stage needs Prisma CLI, while the runtime image is pruned to production dependencies after the client is generated.
 
-For Cloudflare Pages, connect the GitHub repository, set the production branch to `main`, set the root directory to `frontend`, build command to `npm run build`, and output directory to `dist`. Set the public build-time variables `VITE_API_BASE_URL=https://api.eduassets.tech` and `VITE_RFID_BRIDGE_ENABLED=false` under Settings → Environment variables. The repository file `frontend/public/_headers` is copied by Vite into the Pages output and supplies CSP/security headers; Cloudflare Pages parses it at deploy time. Add the custom domain `app.eduassets.tech` from Workers & Pages → the project → Custom domains. Keep the separate landing page at `eduassets.tech`. In the API environment, set `CORS_ORIGIN=https://app.eduassets.tech` without a trailing slash. DNS, the Pages deployment, and actual response headers still require external verification.
+For the validated Cloudflare Pages deployment, connect the GitHub repository, set the production branch to `main`, set the root directory to `frontend`, build command to `npm run build`, and output directory to `dist`. Set `VITE_API_BASE_URL=https://api.eduassets.tech` and `VITE_RFID_BRIDGE_ENABLED=false`. Add the custom domain `app.eduassets.tech`; keep the separate landing page at `eduassets.tech`. In the API environment, set `CORS_ORIGIN=https://app.eduassets.tech` without a trailing slash. The deployed CSP also allows `https://static.cloudflareinsights.com` for the official Pages Analytics beacon. See `Hosting.md` for the verified DNS, Nginx, Docker, firewall, CORS, and troubleshooting procedure.
 
 ## Nginx, trusted proxy and TLS
 

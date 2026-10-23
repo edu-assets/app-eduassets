@@ -51,6 +51,15 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         updatedAt: '2026-10-22'
     },
     {
+        id: 'hosting',
+        title: { pt: 'Hospedagem', en: 'Hosting' },
+        icon: 'cloud',
+        file: { pt: '/docs/Hospedagem.md', en: '/docs/Hosting.md' },
+        category: 'tecnico',
+        version: 'Beta',
+        updatedAt: '2026-10-23'
+    },
+    {
         id: 'database-model',
         title: { pt: 'Modelo de Dados', en: 'Data Model' },
         icon: 'schema',

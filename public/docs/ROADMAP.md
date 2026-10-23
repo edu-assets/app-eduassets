@@ -1,6 +1,6 @@
 # Roadmap — eduAssets
 
-> **Status do checkout (22/10/2026): Beta.** Correções de código, testes e templates foram implementados. Nesta execução, testes unitários, builds, `prisma validate` e asserts estáticos passaram; PostgreSQL/migrations/seed, production smoke, builds de imagem e CI hospedado passaram no run `39875293195`; Nginx runtime local ainda não foi executado. Nenhum recurso público/infraestrutura foi implantado ou validado.
+> **Status do checkout (23/10/2026): Beta.** Correções de código, testes e templates foram implementados. A implantação operacional foi validada pelo operador: frontend no Cloudflare Pages, API na VM Oracle atrás do Nginx, DNS proxied, HTTPS externo e preflight CORS. Backups externos, restore drill, monitoramento e QA funcional completo ainda não encerram o ciclo Beta.
 
 ## Concluído no código e verificado localmente
 
@@ -11,29 +11,29 @@
 - [ ] Transações e locking de empréstimos/devoluções e resolução/exclusão de ocorrências, logout e troca de senha: a suíte HTTP/concorrência e as seis migrations passaram no CI hospedado `39875293195` contra PostgreSQL descartável.
 - [x] F4 — atualização de stores/formulários após criação; F5 — filtros de datas de calendário local; F6 — 401 sem usuário hidratado; F7 — data escolhida enviada como timestamp offset-aware; revisados com testes locais onde aplicável.
 - [x] `/health` liveness e `/ready` readiness PostgreSQL com timeout/sem detalhe sensível; bridge RFID com flag desligada por padrão.
-- [x] Templates de ambiente local/produção, Docker multi-stage, Compose, configuração Nginx, backup/restore não destrutivo e GitHub Actions CI foram adicionados. Sua execução em serviço real não foi validada.
-- [x] P0/P1 desta remediação: `DIRECT_URL` opcional, CSP da API, entrypoint Node direto, smoke de produção no CI e bloqueio público Nginx para RFID foram implementados; runtime ainda não foi validado.
+- [x] Templates de ambiente local/produção, Docker multi-stage, Compose, configuração Nginx, backup/restore não destrutivo e GitHub Actions CI foram adicionados; a API foi executada na VM Oracle com PostgreSQL remoto no Neon.
+- [x] P0/P1 desta remediação: `DIRECT_URL` opcional, CSP da API, entrypoint Node direto, smoke de produção no CI e bloqueio público Nginx para RFID foram implementados; HTTPS externo e preflight CORS foram validados no deployment.
 
-> Embora PostgreSQL não esteja disponível localmente, o CI hospedado validou migrations e requests HTTP em banco descartável; isso não equivale a homologação do provedor, banco de produção, browser em produção, aprovação de privacidade ou certificação de hardware.
+> Embora PostgreSQL não esteja disponível localmente, o CI hospedado validou migrations e requests HTTP em banco descartável. A implantação real usa Neon; isso não equivale a um restore drill, aprovação de privacidade ou certificação de hardware.
 
 ## Próximos passos para v1.0.0
 
 - [ ] Executar workflow CI no GitHub e resolver eventuais incompatibilidades específicas do runner.
 - [x] Executar testes de integração/race em PostgreSQL descartável no workflow de produção; o run `39875293195` passou.
 - [ ] Fazer QA manual de browser para CORS/CSP, guest anonymization/exports, login/timeout, fluxos de empréstimo/ocorrência e responsividade/acessibilidade.
-- [ ] Validar `docker build`, compose e Nginx no host-alvo; `nginx -t`, firewall, real-IP Cloudflare e rate limit com ranges Cloudflare atuais; sem isso, o IP do edge pode agrupar usuários.
-- [ ] Obter e validar domínio/DNS, projeto Cloudflare Pages, origem API, certificado TLS Full (strict), rotação de segredo, monitoramento e disponibilidade.
+- [x] Validar Compose/API, Nginx, firewall, domínio, Cloudflare Pages, origem API, HTTPS e CORS no host-alvo; revisar real-IP Cloudflare e rate limit com ranges atuais ainda é necessário.
+- [ ] Completar rotação de segredo, monitoramento, alertas e evidência de disponibilidade; frontend, DNS, origem API e HTTPS foram validados no deployment Beta.
 - [ ] Testar backup em armazenamento externo e restaurá-lo em banco novo vazio; aprovar RPO/RTO, retenção e resposta a incidentes.
 - [ ] Completar review de acessibilidade, casos de UI, ameaças de privacidade, isolamento do banco e política de dados sintéticos.
 
 ## Bloqueios e escopo externo
 
-- [ ] **Banco:** nenhum PostgreSQL local/remoto foi usado nesta execução; nenhuma URL/credencial remota foi fornecida e nenhuma migration/seed foi aplicada. Antes da produção: DB dedicado, backup, migration `deploy` primeiro em homologação e evidência de restauração.
-- [ ] **Host/domínio:** Oracle Cloud/VM, Cloudflare Pages, DNS, Cloudflare, firewall, certificado e `CORS_ORIGIN` real não foram verificados nem alterados. O guia descreve templates apenas.
+- [ ] **Banco:** Neon está configurado como PostgreSQL remoto da implantação. Permanecem necessários backup externo, `migrate deploy` controlado e evidência de restauração em banco novo vazio.
+- [x] **Host/domínio:** Oracle VM, Cloudflare Pages, DNS, HTTPS, firewall de entrada e `CORS_ORIGIN` foram verificados no deployment Beta; ranges real-IP, WAF/rate limit e monitoramento continuam revisão operacional.
 - [ ] **Privacidade/acesso:** Guest DTOs do backend foram testados por unitários; validação ponta-a-ponta com demo sintética e revisão de políticas/grants do provedor continuam necessárias. Não há PostgREST direto no app atual; se o provedor expuser esse serviço, bloquear acesso anônimo não pretendido e revisar grants/RLS separadamente.
 - [ ] **Hardware:** sem Raspberry Pi/leitor GPIO, leitor serial, OS-alvo ou instalação systemd; RFID permanece opcional/desligado na implantação pública. Cartões são identificadores clonáveis no plano físico, portanto a ponte permanece local e protegida.
 - [ ] **Escala:** timer de inatividade admin usa estado em memória e pressupõe uma instância; se escalar horizontalmente, implementar sessão/atividade compartilhada antes de ampliar.
-- [ ] **Release:** domínio e URLs nos templates são placeholders/propostas, não endpoints operacionais.
+- [x] **Release:** `app.eduassets.tech` e `api.eduassets.tech` são os endpoints operacionais do deployment Beta; os templates continuam exemplos para novas instalações.
 
 ## v1.0.0 — Release estável
 

@@ -2,6 +2,15 @@
 
 All versions below v1.0.0 belong to the beta cycle; earlier dates are approximate. The latest section records checkout changes, not published releases.
 
+## Beta deployment and hosting documentation — October 23, 2026
+- Frontend deployed on Cloudflare Pages at `app.eduassets.tech`; the landing page remains separate at `eduassets.tech`.
+- API deployed at `api.eduassets.tech` on the Oracle Cloud Ubuntu VM, behind Nginx and using remote PostgreSQL on Neon.
+- Fixed the inbound block caused by a generic `REJECT` before the UFW chains: explicit TCP 80/443 rules were inserted before the block without exposing port 3000.
+- Validated external HTTPS and the `OPTIONS /ready` CORS preflight with `Access-Control-Allow-Origin: https://app.eduassets.tech`.
+- The Pages CSP now allows the official Cloudflare Web Analytics beacon at `static.cloudflareinsights.com`.
+- Added the bilingual `Hospedagem.md` and `Hosting.md` runbooks and registered them in the frontend documentation view.
+- Off-host backup, restore drill, monitoring/alerts, and the final real-data review remain pending.
+
 ## Remediation and release preparation — October 22, 2026
 - Removed in-memory authentication/persistence fallbacks and the default JWT secret; environment validation fails early for missing/invalid database, secret, CORS, port and production proxy trust.
 - Fixed the Administrator idle timeout using the JWT identifier and fail-closed handling when activity state cannot be established; an incorrect current password no longer clears the session. Logout and password changes now update a PostgreSQL-backed `sessionVersion` to revoke older JWTs, including across instances.
