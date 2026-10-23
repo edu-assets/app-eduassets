@@ -22,14 +22,14 @@
 - [x] Execute integration/race/auth tests against disposable PostgreSQL in the production smoke workflow; run `39875293195` passed.
 - [ ] Perform browser QA for CORS/CSP, guest anonymization/exports, login/timeout, loan/occurrence flows, responsiveness and accessibility.
 - [ ] Validate Docker/Compose and Nginx on the target host; run `nginx -t`; check firewall, Cloudflare real-IP ranges and per-client rate limits. Without current ranges, clients may be grouped under an edge IP.
-- [ ] Provision/verify DNS, Vercel project, API origin, Full (strict) TLS, secret rotation, monitoring and availability.
+- [ ] Provision/verify DNS, Cloudflare Pages project, API origin, Full (strict) TLS, secret rotation, monitoring and availability.
 - [ ] Test encrypted off-host backup and restore to a new empty DB; approve RPO/RTO, retention and incident procedure.
 - [ ] Complete accessibility, UI coverage, privacy threat review, DB isolation and synthetic-data policy.
 
 ## External blockers and scope
 
 - [ ] **Database:** no local or remote PostgreSQL was used in this execution; no remote URL/credentials were provided and no migration/seed was applied. Before production: dedicated DB, backup, `migrate deploy` in staging and restore evidence.
-- [ ] **Host/domain:** Oracle VM, Vercel, DNS, Cloudflare, firewall, TLS certificate and real `CORS_ORIGIN` were neither verified nor changed. The guide contains templates only.
+- [ ] **Host/domain:** Oracle VM, Cloudflare Pages, DNS, Cloudflare, firewall, TLS certificate and real `CORS_ORIGIN` were neither verified nor changed. The guide contains templates only.
 - [ ] **Privacy/access:** backend Guest DTOs have unit coverage; end-to-end validation on synthetic demo data and review of provider grants/policies remain necessary. The current app has no direct PostgREST route; if the provider exposes that service, disable unintended anonymous access and review grants/RLS separately.
 - [ ] **Hardware:** no Raspberry Pi/GPIO reader, serial reader, target OS or systemd installation was available; RFID remains optional/off in the public template. Physical cards are clonable identifiers, so the bridge must remain local and protected.
 - [ ] **Scale:** admin inactivity state is process-local and assumes one instance; shared session/activity state is required before horizontal scaling.

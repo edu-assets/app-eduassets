@@ -1,13 +1,13 @@
 # Implantação e operação
 
-> **Status: apenas preparação.** O repositório contém templates, mas nenhum projeto Vercel, VM Oracle Cloud, nome DNS, origem Cloudflare, banco, certificado, firewall, rotina de backup ou conta de monitoramento foi verificado ou alterado. Nenhum hostname de produção está designado aqui; este guia não prova que exista serviço ativo.
+> **Status: apenas preparação.** O repositório contém templates, mas nenhum projeto Cloudflare Pages, VM Oracle Cloud, nome DNS, origem Cloudflare, banco, certificado, firewall, rotina de backup ou conta de monitoramento foi verificado ou alterado. Nenhum hostname de produção está designado aqui; este guia não prova que exista serviço ativo.
 
 ## Topologia escolhida
 
-A arquitetura de referência é frontend estático na Vercel e uma instância Docker do backend em VM dedicada, atrás de Nginx local e Cloudflare em modo Full (strict). O PostgreSQL deve ser dedicado a essa implantação. O container escuta em `0.0.0.0:3000` dentro da rede Docker, mas a VM publica somente `127.0.0.1:3000`. RFID fica desativado na instância pública. Não conectar demo e dados operacionais.
+A arquitetura de referência é frontend estático na Cloudflare Pages e uma instância Docker do backend em VM dedicada, atrás de Nginx local e Cloudflare em modo Full (strict). O PostgreSQL deve ser dedicado a essa implantação. O container escuta em `0.0.0.0:3000` dentro da rede Docker, mas a VM publica somente `127.0.0.1:3000`. RFID fica desativado na instância pública. Não conectar demo e dados operacionais.
 
 ```text
-Navegador → frontend estático Vercel → Cloudflare HTTPS → Nginx :443
+Navegador → frontend estático Cloudflare Pages → Cloudflare HTTPS → Nginx :443
                                                        → 127.0.0.1:3000 API Docker → PostgreSQL
 ```
 
@@ -47,7 +47,7 @@ A migration `20261022110000_user_session_version` rejeita JWTs antigos sem o nov
 
 A imagem multi-stage mantém apenas dependências de produção no runtime, roda como usuário Node sem privilégio, remove capabilities Linux, usa filesystem root somente leitura e tem política de restart. O alvo `migration` contém Prisma CLI/TSX apenas para operação explícita. O build fornece URL sintética loopback para `prisma generate`; ela não é configuração runtime. Migrações nunca rodam automaticamente no startup. `npm ci --omit=dev` sozinho não é fluxo de release: etapa de migração precisa do Prisma CLI, enquanto o runtime é podado após gerar o client.
 
-Na Vercel, definir raiz do projeto `frontend`, instalar pelo `frontend/package-lock.json`, build `npm run build` e variável pública `VITE_API_BASE_URL` com a origem HTTPS verificada pelo operador. Manter `VITE_RFID_BRIDGE_ENABLED=false`. `frontend/vercel.json` é a configuração de headers escolhida; `frontend/public/_headers` foi removido. A política `connect-src` permite `'self'` e o hostname intencional documentado `https://api.eduassets.tech`; se o operador escolher outra origem verificada, atualizar a CSP e a variável de build. DNS, aplicação Vercel e headers reais continuam checagens externas; parse JSON local não prova que a Vercel aplicou esses headers.
+Na Cloudflare Pages, conectar o repositório GitHub, selecionar `main` como branch de produção, definir a raiz como `frontend`, o build como `npm run build` e o diretório de saída como `dist`. Em Settings → Environment variables, definir `VITE_API_BASE_URL=https://api.eduassets.tech` e `VITE_RFID_BRIDGE_ENABLED=false`. O arquivo `frontend/public/_headers` é copiado pelo Vite para a saída e fornece CSP/headers de segurança; o Cloudflare Pages o interpreta no deploy. Adicionar o domínio personalizado `app.eduassets.tech` em Workers & Pages → projeto → Custom domains. Manter a landing page separada em `eduassets.tech`. Na API, definir `CORS_ORIGIN=https://app.eduassets.tech`, sem barra final. DNS, deploy do Pages e headers reais ainda exigem verificação externa.
 
 ## Nginx, proxy confiável e TLS
 
@@ -82,14 +82,14 @@ O script recusa schema público não vazio e nunca usa `pg_restore --clean`. Ver
 
 ## Release e rollback
 
-Antes de release: verificar backup/restauração; build/tag de imagens imutáveis; CI verde; revisar SQL de migração; aplicar migração explicitamente; subir uma API; testar `/health`, `/ready`, CORS, login, allowlists de Guest e fluxos principais; então publicar Vercel com a mesma origem de API. Manter tag de imagem anterior para rollback de código.
+Antes de release: verificar backup/restauração; build/tag de imagens imutáveis; CI verde; revisar SQL de migração; aplicar migração explicitamente; subir uma API; testar `/health`, `/ready`, CORS, login, allowlists de Guest e fluxos principais; então publicar Cloudflare Pages com a mesma origem de API. Manter tag de imagem anterior para rollback de código.
 
-Rollback Git/imagem **não reverte migração**. Usar migrações compatíveis para frente/trás (expand/migrate/contract). Se uma migração não for compatível, restaurar somente por plano aprovado de incidente, avaliando perda de dados; não executar SQL de rollback às cegas. Primeira migração de produção, backups, TLS, firewall, Vercel e monitoramento continuam tarefas externas não verificadas.
+Rollback Git/imagem **não reverte migração**. Usar migrações compatíveis para frente/trás (expand/migrate/contract). Se uma migração não for compatível, restaurar somente por plano aprovado de incidente, avaliando perda de dados; não executar SQL de rollback às cegas. Primeira migração de produção, backups, TLS, firewall, Cloudflare Pages e monitoramento continuam tarefas externas não verificadas.
 
 ## Diagnóstico
 
 - Falha no startup: revisar `JWT_SECRET`, `DATABASE_URL`, `TRUST_PROXY` explícito, `CORS_ORIGIN`, `PORT` e RFID desativado em produção. As mensagens não devem revelar valores secretos.
 - `/health` funciona, `/ready` retorna 503: verificar reachability/credenciais PostgreSQL de forma privada; o endpoint não expõe detalhes.
-- Erro CORS/CSP no navegador: conferir URL de build Vercel, CSP `connect-src`, origem CORS exata, DNS/TLS e headers do proxy. Não ampliar CSP para `*`.
+- Erro CORS/CSP no navegador: conferir domínio personalizado Cloudflare Pages, CSP `connect-src` do `_headers`, origem CORS exata, DNS/TLS e headers do proxy. Não ampliar CSP para `*`.
 - Rate limit agrupa clientes: revisar real-IP Nginx baseado somente em ranges Cloudflare atuais, headers sobrescritos e `TRUST_PROXY=1` coerente com um salto.
 - RFID indisponível em deployment público é intencional.

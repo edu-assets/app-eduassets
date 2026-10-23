@@ -22,14 +22,14 @@
 - [x] Executar testes de integração/race em PostgreSQL descartável no workflow de produção; o run `39875293195` passou.
 - [ ] Fazer QA manual de browser para CORS/CSP, guest anonymization/exports, login/timeout, fluxos de empréstimo/ocorrência e responsividade/acessibilidade.
 - [ ] Validar `docker build`, compose e Nginx no host-alvo; `nginx -t`, firewall, real-IP Cloudflare e rate limit com ranges Cloudflare atuais; sem isso, o IP do edge pode agrupar usuários.
-- [ ] Obter e validar domínio/DNS, projeto Vercel, origem API, certificado TLS Full (strict), rotação de segredo, monitoramento e disponibilidade.
+- [ ] Obter e validar domínio/DNS, projeto Cloudflare Pages, origem API, certificado TLS Full (strict), rotação de segredo, monitoramento e disponibilidade.
 - [ ] Testar backup em armazenamento externo e restaurá-lo em banco novo vazio; aprovar RPO/RTO, retenção e resposta a incidentes.
 - [ ] Completar review de acessibilidade, casos de UI, ameaças de privacidade, isolamento do banco e política de dados sintéticos.
 
 ## Bloqueios e escopo externo
 
 - [ ] **Banco:** nenhum PostgreSQL local/remoto foi usado nesta execução; nenhuma URL/credencial remota foi fornecida e nenhuma migration/seed foi aplicada. Antes da produção: DB dedicado, backup, migration `deploy` primeiro em homologação e evidência de restauração.
-- [ ] **Host/domínio:** Oracle Cloud/VM, Vercel, DNS, Cloudflare, firewall, certificado e `CORS_ORIGIN` real não foram verificados nem alterados. O guia descreve templates apenas.
+- [ ] **Host/domínio:** Oracle Cloud/VM, Cloudflare Pages, DNS, Cloudflare, firewall, certificado e `CORS_ORIGIN` real não foram verificados nem alterados. O guia descreve templates apenas.
 - [ ] **Privacidade/acesso:** Guest DTOs do backend foram testados por unitários; validação ponta-a-ponta com demo sintética e revisão de políticas/grants do provedor continuam necessárias. Não há PostgREST direto no app atual; se o provedor expuser esse serviço, bloquear acesso anônimo não pretendido e revisar grants/RLS separadamente.
 - [ ] **Hardware:** sem Raspberry Pi/leitor GPIO, leitor serial, OS-alvo ou instalação systemd; RFID permanece opcional/desligado na implantação pública. Cartões são identificadores clonáveis no plano físico, portanto a ponte permanece local e protegida.
 - [ ] **Escala:** timer de inatividade admin usa estado em memória e pressupõe uma instância; se escalar horizontalmente, implementar sessão/atividade compartilhada antes de ampliar.

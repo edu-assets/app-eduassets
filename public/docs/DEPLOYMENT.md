@@ -1,13 +1,13 @@
 # Deployment and operations (English)
 
-> **Status: preparation only.** The repository contains deployment templates, but no Vercel project, Oracle Cloud instance, DNS name, Cloudflare origin, database, certificate, firewall, backup job, or monitoring account has been verified or changed. No production hostname is designated here. Do not use this guide as evidence of a live service.
+> **Status: preparation only.** The repository contains deployment templates, but no Cloudflare Pages project, Oracle Cloud instance, DNS name, Cloudflare origin, database, certificate, firewall, backup job, or monitoring account has been verified or changed. No production hostname is designated here. Do not use this guide as evidence of a live service.
 
 ## Selected topology
 
-The intended baseline is a static frontend on Vercel and a single backend Docker service on a dedicated VM behind host Nginx and Cloudflare Full (strict). PostgreSQL is external and dedicated to this deployment. The backend container listens on `0.0.0.0:3000` inside Docker but is published only as `127.0.0.1:3000` on the VM. RFID is disabled on the public instance. Do not connect a demo to operational data.
+The intended baseline is a static frontend on Cloudflare Pages and a single backend Docker service on a dedicated VM behind host Nginx and Cloudflare Full (strict). PostgreSQL is external and dedicated to this deployment. The backend container listens on `0.0.0.0:3000` inside Docker but is published only as `127.0.0.1:3000` on the VM. RFID is disabled on the public instance. Do not connect a demo to operational data.
 
 ```text
-Browser → Vercel static frontend → Cloudflare HTTPS → Nginx :443
+Browser → Cloudflare Pages static frontend → Cloudflare HTTPS → Nginx :443
                                                    → 127.0.0.1:3000 Docker API → PostgreSQL
 ```
 
@@ -47,7 +47,7 @@ Migration `20261022110000_user_session_version` rejects pre-existing JWTs that l
 
 `api` is a multi-stage image with production dependencies only, runs as the unprivileged Node user, drops Linux capabilities, uses a read-only root filesystem and has a restart policy. The `migration` target keeps Prisma CLI/TSX available only for an explicit release command. The image build supplies a synthetic, loopback-only URL for `prisma generate`; it is not used by the running service. Database migration is never run automatically at startup. `npm ci --omit=dev` alone is not the release procedure: the migration stage needs Prisma CLI, while the runtime image is pruned to production dependencies after the client is generated.
 
-For Vercel, set the project root to `frontend`, install from `frontend/package-lock.json`, build with `npm run build`, and set the public build-time variable `VITE_API_BASE_URL` to the operator-verified HTTPS API origin. Keep `VITE_RFID_BRIDGE_ENABLED=false`. `frontend/vercel.json` is the selected header configuration; `frontend/public/_headers` has been removed. Its `connect-src` allows `'self'` and the documented intended `https://api.eduassets.tech`; update both the CSP and build variable if the operator selects a different verified API origin. DNS, Vercel application, and actual response headers remain external checks; a local JSON parse does not prove Vercel applied these headers.
+For Cloudflare Pages, connect the GitHub repository, set the production branch to `main`, set the root directory to `frontend`, build command to `npm run build`, and output directory to `dist`. Set the public build-time variables `VITE_API_BASE_URL=https://api.eduassets.tech` and `VITE_RFID_BRIDGE_ENABLED=false` under Settings → Environment variables. The repository file `frontend/public/_headers` is copied by Vite into the Pages output and supplies CSP/security headers; Cloudflare Pages parses it at deploy time. Add the custom domain `app.eduassets.tech` from Workers & Pages → the project → Custom domains. Keep the separate landing page at `eduassets.tech`. In the API environment, set `CORS_ORIGIN=https://app.eduassets.tech` without a trailing slash. DNS, the Pages deployment, and actual response headers still require external verification.
 
 ## Nginx, trusted proxy and TLS
 
@@ -82,14 +82,14 @@ The script rejects a non-empty public schema and never uses `pg_restore --clean`
 
 ## Release and rollback
 
-Before release: verify backups and restore evidence; build/tag immutable images; run CI; inspect migration SQL; apply migrations as an explicit release step; deploy one API instance; check `/health`, `/ready`, CORS, login, Guest response allowlists and core workflows; then deploy the Vercel build with the same API origin. Keep the prior image tag for code rollback.
+Before release: verify backups and restore evidence; build/tag immutable images; run CI; inspect migration SQL; apply migrations as an explicit release step; deploy one API instance; check `/health`, `/ready`, CORS, login, Guest response allowlists and core workflows; then deploy the Cloudflare Pages build with the same API origin. Keep the prior image tag for code rollback.
 
-A Git/image rollback does **not** reverse a database migration. Use backward-compatible expand/migrate/contract changes. If a migration is not backward-compatible, restore only under an approved incident plan after evaluating data loss; do not run rollback SQL blindly. The first production migration, database backup policy, TLS, origin firewall, Vercel settings and monitoring all remain unverified external tasks.
+A Git/image rollback does **not** reverse a database migration. Use backward-compatible expand/migrate/contract changes. If a migration is not backward-compatible, restore only under an approved incident plan after evaluating data loss; do not run rollback SQL blindly. The first production migration, database backup policy, TLS, origin firewall, Cloudflare Pages settings and monitoring all remain unverified external tasks.
 
 ## Troubleshooting
 
 - Startup fails: check required `JWT_SECRET`, `DATABASE_URL`, explicit `TRUST_PROXY`, `CORS_ORIGIN`, correct `PORT`, and that `RFID_BRIDGE_ENABLED` is false on public deployment. Error messages should not reveal secret values.
 - `/health` works but `/ready` returns 503: inspect PostgreSQL reachability and credentials privately; the endpoint intentionally hides details.
-- Browser CORS/CSP error: verify the Vercel build URL, Vercel CSP `connect-src`, exact backend CORS origin, DNS/TLS, and reverse-proxy headers. Do not broaden CSP to `*`.
+- Browser CORS/CSP error: verify the Cloudflare Pages custom domain, `_headers` CSP `connect-src`, exact backend CORS origin, DNS/TLS, and reverse-proxy headers. Do not broaden CSP to `*`.
 - Rate limits group clients: verify Nginx real-IP configuration is sourced only from current Cloudflare ranges, forwarding headers are overwritten, and `TRUST_PROXY=1` matches the single local Nginx hop.
 - RFID endpoints are unavailable on public deployments by design.

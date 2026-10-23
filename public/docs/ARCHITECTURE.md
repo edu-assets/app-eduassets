@@ -146,5 +146,5 @@ The systemd unit `eduassets-rfid.service` describes an installation under `/opt/
 
 - This document does not claim RLS, a deployed production environment, or a production reverse-proxy/firewall configuration.
 - `127.0.0.1` restrictions reduce the accepted source addresses but do not replace network policy or proxy configuration.
-- The Vite proxy is for development only. Repository release templates target Vercel static frontend + Docker API behind Nginx/Cloudflare, but no infrastructure, DNS, certificate or deployment was verified. See the bilingual deployment guides.
+- The Vite proxy is for development only. Repository release templates target Cloudflare Pages static frontend + Docker API behind Nginx/Cloudflare, but no infrastructure, DNS, certificate or deployment was verified. See the bilingual deployment guides.
 - RFID is optional, and the application remains usable through password authentication without the reader service.
