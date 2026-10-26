@@ -3,10 +3,9 @@ import { entrar, entrarComoConvidado, sair, isAutenticado, isModoConvidadoPersis
 import { isLoginRoute, resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
-import { traduzirErro, t } from "../../core/state/i18nStore.js";
+import { traduzirErro, t, definirIdioma, getIdioma, subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
-import { definirIdioma, getIdioma, subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
-import { definirTema, getPreferenciaTema, subscribe as subscribeTheme } from '../../core/state/themeStore.js';
+import { definirTema, getTemaResolvido, subscribe as subscribeTheme } from '../../core/state/themeStore.js';
 
 export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () => undefined): void {
     els.sidebarFooter.addEventListener('click', (e) => {
@@ -87,16 +86,16 @@ function attachEntryPreferences(): void {
         });
     });
 
-    document.querySelectorAll<HTMLButtonElement>('[data-entry-theme]').forEach((button) => {
-        button.addEventListener('click', () => {
-            const tema = button.dataset.entryTheme;
-            if (tema === 'light' || tema === 'dark' || tema === 'system') definirTema(tema);
-        });
+    document.querySelector<HTMLButtonElement>('[data-entry-theme-toggle]')?.addEventListener('click', () => {
+        definirTema(getTemaResolvido() === 'dark' ? 'light' : 'dark');
     });
 
     updateEntryLanguageSelection();
     updateEntryThemeSelection();
-    subscribeI18n(updateEntryLanguageSelection);
+    subscribeI18n(() => {
+        updateEntryLanguageSelection();
+        updateEntryThemeSelection();
+    });
     subscribeTheme(updateEntryThemeSelection);
 }
 
@@ -105,15 +104,19 @@ function updateEntryLanguageSelection(): void {
         const active = button.dataset.entryLanguage === getIdioma();
         button.classList.toggle('active', active);
         button.setAttribute('aria-pressed', String(active));
+        if (active) button.setAttribute('aria-current', 'true');
+        else button.removeAttribute('aria-current');
     });
 }
 
 function updateEntryThemeSelection(): void {
-    document.querySelectorAll<HTMLButtonElement>('[data-entry-theme]').forEach((button) => {
-        const active = button.dataset.entryTheme === getPreferenciaTema();
-        button.classList.toggle('active', active);
-        button.setAttribute('aria-pressed', String(active));
-    });
+    const button = document.querySelector<HTMLButtonElement>('[data-entry-theme-toggle]');
+    if (!button) return;
+    const dark = getTemaResolvido() === 'dark';
+    const label = t(dark ? 'auth.tema_ativar_claro' : 'auth.tema_ativar_escuro');
+    button.setAttribute('aria-pressed', String(dark));
+    button.setAttribute('aria-label', label);
+    button.title = label;
 }
 
 function mostrarTelaLogin(els: AuthEls): void {

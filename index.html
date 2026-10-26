@@ -2027,21 +2027,42 @@
             </section>
             <section class="login-gate-main">
                 <div class="login-gate-preferences">
-                    <div class="login-gate-preference" role="group" aria-label="Idioma" data-i18n-aria-label="auth.idioma">
-                        <span class="login-gate-preference-label" data-i18n-key="auth.idioma">Idioma</span>
-                        <div class="login-gate-preference-options">
-                            <button type="button" data-entry-language="pt" data-i18n-key="auth.idioma_pt">PT</button>
-                            <button type="button" data-entry-language="en" data-i18n-key="auth.idioma_en">EN</button>
-                        </div>
+                    <div class="lang-switch" role="group" aria-label="Idioma" data-i18n-aria-label="auth.idioma">
+                        <button type="button" data-entry-language="pt" lang="pt-BR" aria-label="Português (Brasil)" data-i18n-aria-label="auth.idioma_pt_nome" title="Português (Brasil)" data-i18n-title="auth.idioma_pt_nome">
+                            <svg class="flag" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+                                <defs><clipPath id="login-flag-br"><circle cx="12" cy="12" r="12"></circle></clipPath></defs>
+                                <g clip-path="url(#login-flag-br)">
+                                    <rect width="24" height="24" fill="#009C3B"></rect>
+                                    <polygon points="12,3.6 21.4,12 12,20.4 2.6,12" fill="#FFDF00"></polygon>
+                                    <circle cx="12" cy="12" r="4.6" fill="#002776"></circle>
+                                    <path d="M7.7 11.2c2.8-1 5.8-.6 8.6 1.4" stroke="#fff" stroke-width="1" fill="none"></path>
+                                </g>
+                            </svg>
+                        </button>
+                        <button type="button" data-entry-language="en" lang="en" aria-label="English" data-i18n-aria-label="auth.idioma_en_nome" title="English" data-i18n-title="auth.idioma_en_nome">
+                            <svg class="flag" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+                                <defs><clipPath id="login-flag-us"><circle cx="12" cy="12" r="12"></circle></clipPath></defs>
+                                <g clip-path="url(#login-flag-us)">
+                                    <rect width="24" height="24" fill="#fff"></rect>
+                                    <rect y="0" width="24" height="1.846" fill="#B22234"></rect>
+                                    <rect y="3.692" width="24" height="1.846" fill="#B22234"></rect>
+                                    <rect y="7.384" width="24" height="1.846" fill="#B22234"></rect>
+                                    <rect y="11.076" width="24" height="1.846" fill="#B22234"></rect>
+                                    <rect y="14.768" width="24" height="1.846" fill="#B22234"></rect>
+                                    <rect y="18.46" width="24" height="1.846" fill="#B22234"></rect>
+                                    <rect y="22.152" width="24" height="1.846" fill="#B22234"></rect>
+                                    <rect width="11" height="12.9" fill="#3C3B6E"></rect>
+                                    <circle cx="2.4" cy="2.6" r=".55" fill="#fff"></circle><circle cx="5.5" cy="2.6" r=".55" fill="#fff"></circle><circle cx="8.6" cy="2.6" r=".55" fill="#fff"></circle>
+                                    <circle cx="2.4" cy="6.2" r=".55" fill="#fff"></circle><circle cx="5.5" cy="6.2" r=".55" fill="#fff"></circle><circle cx="8.6" cy="6.2" r=".55" fill="#fff"></circle>
+                                    <circle cx="2.4" cy="9.8" r=".55" fill="#fff"></circle><circle cx="5.5" cy="9.8" r=".55" fill="#fff"></circle><circle cx="8.6" cy="9.8" r=".55" fill="#fff"></circle>
+                                </g>
+                            </svg>
+                        </button>
                     </div>
-                    <div class="login-gate-preference" role="group" aria-label="Tema" data-i18n-aria-label="auth.tema">
-                        <span class="login-gate-preference-label" data-i18n-key="auth.tema">Tema</span>
-                        <div class="login-gate-preference-options">
-                            <button type="button" data-entry-theme="light" data-i18n-key="auth.tema_claro">Claro</button>
-                            <button type="button" data-entry-theme="dark" data-i18n-key="auth.tema_escuro">Escuro</button>
-                            <button type="button" data-entry-theme="system" data-i18n-key="auth.tema_sistema">Sistema</button>
-                        </div>
-                    </div>
+                    <button type="button" class="icon-btn theme-toggle" data-entry-theme-toggle aria-label="Ativar tema escuro" data-i18n-aria-label="auth.tema_ativar_escuro" title="Ativar tema escuro" aria-pressed="false">
+                        <span class="theme-toggle__moon"><span class="material-symbols-outlined" aria-hidden="true">dark_mode</span></span>
+                        <span class="theme-toggle__sun"><span class="material-symbols-outlined" aria-hidden="true">light_mode</span></span>
+                    </button>
                 </div>
                 <header class="login-gate-heading">
                     <p class="login-gate-overline" data-i18n-key="auth.autenticacao">AUTENTICAÇÃO</p>
