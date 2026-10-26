@@ -77,7 +77,7 @@
   --text-primary: #1f2d3d;
   --text-secondary: #5a6a85;
   --text-on-primary: #ffffff;
-  --text-muted: #8492a6;
+  --text-muted: #52617B;
 
   /* States */
   --hover-primary: #2747d6;
@@ -149,7 +149,7 @@ html[data-theme="dark"] {
   --text-primary: var(--slate-50);
   --text-secondary: var(--slate-300);
   --text-on-primary: #ffffff;
-  --text-muted: var(--slate-400);
+  --text-muted: var(--slate-200);
 
   --hover-primary: var(--primary-300);
   --hover-light: var(--slate-800);

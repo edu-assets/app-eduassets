@@ -187,7 +187,7 @@
   "shell.administradores_e_pessoas_autorizadas_a_": "Administradores e pessoas autorizadas a acessar e alterar o sistema.",
   "shell.alertas_de_devolucao": "Alertas de devolução",
   "shell.alertas_de_emprestimo": "Alertas de empréstimo",
-  "shell.alteracoes_salvam_automaticamente_assim_": "Alterações salvam automaticamente assim que você clicar em salvar.",
+  "shell.alteracoes_aplicadas_ao_salvar": "As alterações só serão aplicadas depois de clicar em Salvar Configurações.",
   "shell.altere_sua_senha_regularmente_para_mante": "Altere sua senha regularmente para manter sua conta segura.",
   "shell.aparencia": "Aparência",
   "shell.arquitetura": "Arquitetura",

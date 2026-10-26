@@ -187,7 +187,7 @@
   "shell.administradores_e_pessoas_autorizadas_a_": "Administrators and people authorized to access and modify the system.",
   "shell.alertas_de_devolucao": "Return alerts",
   "shell.alertas_de_emprestimo": "Loan alerts",
-  "shell.alteracoes_salvam_automaticamente_assim_": "Changes save automatically as soon as you click save.",
+  "shell.alteracoes_aplicadas_ao_salvar": "Changes are applied only after you select Save Settings.",
   "shell.altere_sua_senha_regularmente_para_mante": "Change your password regularly to keep your account secure.",
   "shell.aparencia": "Appearance",
   "shell.arquitetura": "Architecture",
