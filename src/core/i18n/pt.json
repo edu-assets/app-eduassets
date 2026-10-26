@@ -63,7 +63,7 @@
   "auth.autenticacao": "AUTENTICAÇÃO",
   "auth.bem_vindo": "Bem-vindo",
   "auth.entrar_eduassets": "Acessar eduAssets",
-  "auth.instrucao_login": "Entre com as credenciais da sua instituição para acessar as operações autorizadas.",
+  "auth.instrucao_login": "Entre com as suas credenciais para acessar as operações autorizadas.",
   "auth.ou": "ou",
   "auth.continuar_convidado": "Continuar como convidado",
   "auth.convidado_somente_leitura": "O modo convidado permite consulta, sem operações de alteração.",
