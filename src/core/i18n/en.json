@@ -84,7 +84,7 @@
   "feedback.selecione_equipamento_exportar": "Select at least one item of equipment to export.",
   "feedback.senha_alterada": "Password changed successfully",
   "feedback.login_realizado": "Signed in successfully.",
-  "feedback.sessao_encerrada": "Session ended. You are back in Guest Mode.",
+  "feedback.sessao_encerrada": "Session ended. Sign in again or choose to continue as a guest.",
   "feedback.sessao_expirada": "Session expired due to inactivity. Please sign in again.",
   "feedback.token_copiado": "Token copied.",
   "feedback.cartao_revogado": "Card revoked successfully.",

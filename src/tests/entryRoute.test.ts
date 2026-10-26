@@ -6,15 +6,15 @@ import {
 } from '../core/layout/entryRoute.js';
 
 describe('entry route', () => {
-    it('uses #login for a fresh visitor unless a guest choice was persisted', () => {
+    it('requires authentication or an explicit guest choice before opening #app', () => {
         expect(resolveEntryDestination('', false, false, false)).toBe('login');
         expect(resolveEntryDestination(APP_ROUTE_HASH, false, false, false)).toBe('login');
         expect(resolveEntryDestination(APP_ROUTE_HASH, false, true, false)).toBe('app');
     });
 
-    it('keeps an explicitly requested login screen separate from the app route', () => {
+    it('keeps an explicit #login request even if guest access was granted earlier in this tab', () => {
         expect(resolveEntryDestination(LOGIN_ROUTE_HASH, false, true, false)).toBe('login');
-        expect(resolveEntryDestination(APP_ROUTE_HASH, false, true, false)).toBe('app');
+        expect(resolveEntryDestination(LOGIN_ROUTE_HASH, false, false, false)).toBe('login');
     });
 
     it('keeps a valid login in the app and returns rejected sessions to #login', () => {

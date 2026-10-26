@@ -15,6 +15,7 @@ vi.mock('../core/api/auth.js', () => ({
 describe('authStore logout', () => {
   let storedToken: string | null;
   let storedGuestMode: string | null;
+  let storedGuestEntry: string | null;
   const storage = {
     getItem: vi.fn((key: string) => key === 'eduassets_token' ? storedToken : key === 'eduassets_guest_mode' ? storedGuestMode : null),
     setItem: vi.fn((key: string, value: string) => {
@@ -26,13 +27,24 @@ describe('authStore logout', () => {
       if (key === 'eduassets_guest_mode') storedGuestMode = null;
     }),
   };
+  const sessionStorageMock = {
+    getItem: vi.fn((key: string) => key === 'eduassets_guest_entry_authorized' ? storedGuestEntry : null),
+    setItem: vi.fn((key: string, value: string) => {
+      if (key === 'eduassets_guest_entry_authorized') storedGuestEntry = value;
+    }),
+    removeItem: vi.fn((key: string) => {
+      if (key === 'eduassets_guest_entry_authorized') storedGuestEntry = null;
+    }),
+  };
 
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
     storedToken = null;
     storedGuestMode = null;
+    storedGuestEntry = null;
     vi.stubGlobal('localStorage', storage);
+    vi.stubGlobal('sessionStorage', sessionStorageMock);
     apiMocks.login.mockResolvedValue({
       token: 'synthetic-jwt-token',
       user: { id: 5, nome: 'Synthetic user', login: 'user@example.invalid', nivelAcesso: 'EDITOR' },
@@ -53,36 +65,43 @@ describe('authStore logout', () => {
   });
 
   it('enters Guest Mode without keeping a token or requesting server logout', async () => {
-    const { entrar, entrarComoConvidado, isAutenticado, getUsuario, isModoConvidadoPersistido } = await import('../core/state/authStore.js');
+    const { entrar, entrarComoConvidado, isAutenticado, getUsuario, isAcessoConvidadoAutorizado } = await import('../core/state/authStore.js');
     await entrar('user@example.invalid', 'Synthetic-Password-01');
     expect(isAutenticado()).toBe(true);
 
     entrarComoConvidado();
 
     expect(storage.removeItem).toHaveBeenCalledWith('eduassets_token');
-    expect(storage.setItem).toHaveBeenCalledWith('eduassets_guest_mode', 'true');
+    expect(sessionStorageMock.setItem).toHaveBeenCalledWith('eduassets_guest_entry_authorized', 'true');
     expect(apiMocks.logoutSession).not.toHaveBeenCalled();
     expect(isAutenticado()).toBe(false);
     expect(getUsuario()).toBeNull();
-    expect(isModoConvidadoPersistido()).toBe(true);
+    expect(isAcessoConvidadoAutorizado()).toBe(true);
 
     vi.resetModules();
     const afterReload = await import('../core/state/authStore.js');
-    expect(afterReload.isModoConvidadoPersistido()).toBe(true);
+    expect(afterReload.isAcessoConvidadoAutorizado()).toBe(true);
   });
 
-  it('clears guest preference when login succeeds or a stored token is rejected', async () => {
-    const { entrar, iniciarSessao, isModoConvidadoPersistido, persistirModoConvidado } = await import('../core/state/authStore.js');
-    persistirModoConvidado(true);
-    await entrar('user@example.invalid', 'Synthetic-Password-01');
-    expect(isModoConvidadoPersistido()).toBe(false);
+  it('does not treat an old persistent guest preference as permission to enter the app', async () => {
+    storedGuestMode = 'true';
+    const { isAcessoConvidadoAutorizado } = await import('../core/state/authStore.js');
+    expect(isAcessoConvidadoAutorizado()).toBe(false);
     expect(storage.removeItem).toHaveBeenCalledWith('eduassets_guest_mode');
+  });
 
-    storedToken = 'expired-synthetic-token';
-    persistirModoConvidado(true);
+  it('clears guest access after login succeeds or a stored token is rejected', async () => {
+    const { entrar, entrarComoConvidado, iniciarSessao, isAcessoConvidadoAutorizado, atualizarToken } = await import('../core/state/authStore.js');
+    entrarComoConvidado();
+    await entrar('user@example.invalid', 'Synthetic-Password-01');
+    expect(isAcessoConvidadoAutorizado()).toBe(false);
+    expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('eduassets_guest_entry_authorized');
+
+    entrarComoConvidado();
+    atualizarToken('expired-synthetic-token');
     apiMocks.fetchMe.mockRejectedValueOnce(new Error('synthetic expired token'));
     await iniciarSessao();
-    expect(isModoConvidadoPersistido()).toBe(false);
+    expect(isAcessoConvidadoAutorizado()).toBe(false);
     expect(storedToken).toBeNull();
   });
 });

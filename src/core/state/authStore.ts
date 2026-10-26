@@ -2,13 +2,14 @@ import { fetchMe, login as loginRequest, logoutSession } from '../api/auth.js';
 import { getToken, setToken } from './tokenStore.js';
 import type { AuthUser, AuthState } from '../../types/index.js';
 
-const GUEST_MODE_STORAGE_KEY = 'eduassets_guest_mode';
+const GUEST_ENTRY_SESSION_KEY = 'eduassets_guest_entry_authorized';
+localStorage.removeItem('eduassets_guest_mode');
 
 type AuthListener = (state: AuthState) => void;
 
 let user: AuthUser | null = null;
 let listeners: AuthListener[] = [];
-let modoConvidadoPersistido = localStorage.getItem(GUEST_MODE_STORAGE_KEY) === 'true';
+let acessoConvidadoAutorizado = sessionStorage.getItem(GUEST_ENTRY_SESSION_KEY) === 'true';
 
 export function isAutenticado(): boolean {
     return getToken() !== null && user !== null;
@@ -18,14 +19,14 @@ export function getUsuario(): AuthUser | null {
     return user;
 }
 
-export function isModoConvidadoPersistido(): boolean {
-    return modoConvidadoPersistido;
+export function isAcessoConvidadoAutorizado(): boolean {
+    return acessoConvidadoAutorizado;
 }
 
-export function persistirModoConvidado(ativo: boolean): void {
-    modoConvidadoPersistido = ativo;
-    if (ativo) localStorage.setItem(GUEST_MODE_STORAGE_KEY, 'true');
-    else localStorage.removeItem(GUEST_MODE_STORAGE_KEY);
+function definirAcessoConvidadoAutorizado(ativo: boolean): void {
+    acessoConvidadoAutorizado = ativo;
+    if (ativo) sessionStorage.setItem(GUEST_ENTRY_SESSION_KEY, 'true');
+    else sessionStorage.removeItem(GUEST_ENTRY_SESSION_KEY);
 }
 
 export async function iniciarSessao(): Promise<void> {
@@ -39,7 +40,7 @@ export async function iniciarSessao(): Promise<void> {
     } catch {
         setToken(null);
         user = null;
-        persistirModoConvidado(false);
+        definirAcessoConvidadoAutorizado(false);
     }
     notify();
 }
@@ -48,14 +49,14 @@ export async function entrar(login: string, senha: string): Promise<void> {
     const resposta = await loginRequest(login, senha);
     setToken(resposta.token);
     user = resposta.user;
-    persistirModoConvidado(false);
+    definirAcessoConvidadoAutorizado(false);
     notify();
 }
 
 export function entrarComoConvidado(): void {
     setToken(null);
     user = null;
-    persistirModoConvidado(true);
+    definirAcessoConvidadoAutorizado(true);
     notify();
 }
 
@@ -66,7 +67,7 @@ export function sair(revogarNoServidor = true): void {
     }
     setToken(null);
     user = null;
-    persistirModoConvidado(false);
+    definirAcessoConvidadoAutorizado(false);
     notify();
 }
 

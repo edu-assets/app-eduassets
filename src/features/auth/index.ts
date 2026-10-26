@@ -1,4 +1,4 @@
-import { iniciarSessao, isAutenticado, getUsuario, isModoConvidadoPersistido, persistirModoConvidado } from '../../core/state/authStore.js';
+import { iniciarSessao, isAutenticado, getUsuario, isAcessoConvidadoAutorizado } from '../../core/state/authStore.js';
 import { getToken } from '../../core/state/tokenStore.js';
 import { LOGIN_ROUTE_HASH, resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
 import { openModal } from '../../core/ui/index.js';
@@ -30,13 +30,12 @@ export async function initAuth(): Promise<void> {
     attachAuthEvents(els, liberarEntrada);
     await iniciarSessao();
     const autenticado = isAutenticado();
-    if (autenticado) persistirModoConvidado(false);
     renderAuthStatus(els, autenticado, getUsuario());
 
     const destino = resolveEntryDestination(
         window.location.hash,
         autenticado,
-        isModoConvidadoPersistido(),
+        isAcessoConvidadoAutorizado(),
         hadTokenAtStartup
     );
 

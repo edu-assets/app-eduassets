@@ -1,5 +1,5 @@
 import { closeModal, openModal, showToast } from '../../core/ui/index.js';
-import { entrar, entrarComoConvidado, sair, isAutenticado, isModoConvidadoPersistido, persistirModoConvidado, subscribe } from '../../core/state/authStore.js';
+import { entrar, entrarComoConvidado, sair, isAutenticado, isAcessoConvidadoAutorizado, subscribe } from '../../core/state/authStore.js';
 import { isLoginRoute, resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
@@ -23,9 +23,8 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
         if (target.closest('#btn-user-menu-sair')) {
             fecharDropdown();
             sair();
-            persistirModoConvidado(true);
-            setEntryRoute('app');
-            showToast('Sessão encerrada. Você voltou ao Modo Convidado.', 'success');
+            setEntryRoute('login');
+            showToast(t('feedback.sessao_encerrada'), 'success');
             return;
         }
 
@@ -51,9 +50,8 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     els.btnHeroLogin?.addEventListener('click', () => {
         if (isAutenticado()) {
             sair();
-            persistirModoConvidado(true);
-            setEntryRoute('app');
-            showToast('Sessão encerrada. Você voltou ao Modo Convidado.', 'success');
+            setEntryRoute('login');
+            showToast(t('feedback.sessao_encerrada'), 'success');
             return;
         }
         mostrarTelaLogin(els);
@@ -131,7 +129,7 @@ function sincronizarRotaLogin(els: AuthEls): void {
     const destino = resolveEntryDestination(
         window.location.hash,
         isAutenticado(),
-        isModoConvidadoPersistido(),
+        isAcessoConvidadoAutorizado(),
         false
     );
 

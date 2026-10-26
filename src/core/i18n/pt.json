@@ -84,7 +84,7 @@
   "feedback.selecione_equipamento_exportar": "Selecione ao menos um equipamento para exportar.",
   "feedback.senha_alterada": "Senha alterada com sucesso",
   "feedback.login_realizado": "Login realizado com sucesso.",
-  "feedback.sessao_encerrada": "Sessão encerrada. Você voltou ao Modo Convidado.",
+  "feedback.sessao_encerrada": "Sessão encerrada. Faça login novamente ou escolha continuar como convidado.",
   "feedback.sessao_expirada": "Sessão expirada por inatividade. Faça login novamente.",
   "feedback.token_copiado": "Token copiado.",
   "feedback.cartao_revogado": "Cartão revogado com sucesso.",
