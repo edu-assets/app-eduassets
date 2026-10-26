@@ -1,6 +1,7 @@
 import { sair, getUsuario, subscribe } from '../state/authStore.js';
 import { getToken } from '../state/tokenStore.js';
 import { showToast, openModal } from '../ui/index.js';
+import { setEntryRoute } from '../layout/entryRoute.js';
 
 const IDLE_LIMIT_MS = 30 * 60 * 1000;
 const EVENTOS_ATIVIDADE = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'] as const;
@@ -12,6 +13,7 @@ function expirarSessao(): void {
     const eraAdmin = getUsuario()?.nivelAcesso === 'ADMINISTRADOR';
     sair();
     showToast(eraAdmin ? 'Sessão expirada por inatividade. Faça login novamente.' : 'Sessão expirada. Faça login novamente.', 'warning');
+    setEntryRoute('login');
     openModal('modal-login');
 }
 

@@ -1,5 +1,6 @@
 import { closeModal, openModal, showToast } from '../../core/ui/index.js';
-import { entrar, entrarComoConvidado, sair, isAutenticado, subscribe } from '../../core/state/authStore.js';
+import { entrar, entrarComoConvidado, sair, isAutenticado, isModoConvidadoPersistido, persistirModoConvidado, subscribe } from '../../core/state/authStore.js';
+import { isLoginRoute, resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
 import { traduzirErro, t } from "../../core/state/i18nStore.js";
@@ -21,13 +22,14 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
         if (target.closest('#btn-user-menu-sair')) {
             fecharDropdown();
             sair();
+            persistirModoConvidado(true);
+            setEntryRoute('app');
             showToast('Sessão encerrada. Você voltou ao Modo Convidado.', 'success');
             return;
         }
 
         if (target.closest('#btn-auth-toggle')) {
-            mostrarErroLogin(els, '');
-            openModal('modal-login');
+            mostrarTelaLogin(els);
             return;
         }
 
@@ -48,16 +50,18 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     els.btnHeroLogin?.addEventListener('click', () => {
         if (isAutenticado()) {
             sair();
+            persistirModoConvidado(true);
+            setEntryRoute('app');
             showToast('Sessão encerrada. Você voltou ao Modo Convidado.', 'success');
             return;
         }
-        mostrarErroLogin(els, '');
-        openModal('modal-login');
+        mostrarTelaLogin(els);
     });
 
     els.btnContinuarConvidado.addEventListener('click', () => {
         entrarComoConvidado();
         mostrarErroLogin(els, '');
+        setEntryRoute('app');
         closeModal('modal-login');
         onInitialAccess();
     });
@@ -67,8 +71,36 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     });
     els.emailInput.addEventListener('input', () => mostrarErroLogin(els, ''));
     els.senhaInput.addEventListener('input', () => mostrarErroLogin(els, ''));
+    window.addEventListener('hashchange', () => sincronizarRotaLogin(els));
 
     subscribe(({ autenticado, usuario }) => renderAuthStatus(els, autenticado, usuario));
+}
+
+function mostrarTelaLogin(els: AuthEls): void {
+    mostrarErroLogin(els, '');
+    setEntryRoute('login');
+    const modal = document.getElementById('modal-login');
+    if (!modal?.classList.contains('active')) openModal('modal-login');
+    els.emailInput.focus();
+}
+
+function sincronizarRotaLogin(els: AuthEls): void {
+    const destino = resolveEntryDestination(
+        window.location.hash,
+        isAutenticado(),
+        isModoConvidadoPersistido(),
+        false
+    );
+
+    if (destino === 'login') {
+        mostrarTelaLogin(els);
+        return;
+    }
+
+    if (isLoginRoute()) setEntryRoute('app');
+    if (document.getElementById('modal-login')?.classList.contains('active')) {
+        closeModal('modal-login');
+    }
 }
 
 function fecharDropdown(): void {
@@ -90,6 +122,7 @@ async function fazerLogin(els: AuthEls, onInitialAccess: () => void): Promise<vo
     els.btnContinuarConvidado.disabled = true;
     try {
         await entrar(login, senha);
+        setEntryRoute('app');
         closeModal('modal-login');
         els.emailInput.value = '';
         els.senhaInput.value = '';

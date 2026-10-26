@@ -1,4 +1,6 @@
-import { iniciarSessao, isAutenticado, getUsuario } from '../../core/state/authStore.js';
+import { iniciarSessao, isAutenticado, getUsuario, isModoConvidadoPersistido, persistirModoConvidado } from '../../core/state/authStore.js';
+import { getToken } from '../../core/state/tokenStore.js';
+import { LOGIN_ROUTE_HASH, resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
 import { openModal } from '../../core/ui/index.js';
 import { attachAuthEvents } from './events.js';
 import { renderAuthStatus } from './render.js';
@@ -12,6 +14,7 @@ export async function initAuth(): Promise<void> {
     const escolhaInicial = new Promise<void>((resolve) => {
         liberarEntrada = resolve;
     });
+    const hadTokenAtStartup = getToken() !== null;
 
     const els: AuthEls = {
         sidebarFooter,
@@ -26,10 +29,23 @@ export async function initAuth(): Promise<void> {
 
     attachAuthEvents(els, liberarEntrada);
     await iniciarSessao();
-    renderAuthStatus(els, isAutenticado(), getUsuario());
-    if (!isAutenticado()) {
+    const autenticado = isAutenticado();
+    if (autenticado) persistirModoConvidado(false);
+    renderAuthStatus(els, autenticado, getUsuario());
+
+    const destino = resolveEntryDestination(
+        window.location.hash,
+        autenticado,
+        isModoConvidadoPersistido(),
+        hadTokenAtStartup
+    );
+
+    if (destino === 'login') {
+        setEntryRoute('login');
         openModal('modal-login');
         els.emailInput.focus();
         await escolhaInicial;
+    } else if (!window.location.hash || window.location.hash === LOGIN_ROUTE_HASH) {
+        setEntryRoute('app');
     }
 }
