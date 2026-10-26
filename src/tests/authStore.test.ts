@@ -107,6 +107,28 @@ describe('authStore logout', () => {
     expect(storedToken).toBeNull();
   });
 
+  it('accepts a cookie-only login response without storing a bearer token in localStorage', async () => {
+    apiMocks.login.mockResolvedValueOnce({
+      user: { id: 5, nome: 'Synthetic user', login: 'user@example.invalid', nivelAcesso: 'EDITOR' },
+    });
+    const { entrar, isAutenticado } = await import('../core/state/authStore.js');
+
+    await entrar('user@example.invalid', 'Synthetic-Password-01');
+
+    expect(isAutenticado()).toBe(true);
+    expect(storedToken).toBeNull();
+  });
+
+  it('preserves an explicitly authorized Guest Mode when /auth/me has no session cookie', async () => {
+    storedGuestEntry = 'true';
+    apiMocks.fetchMe.mockRejectedValueOnce(new Error('no cookie session'));
+    const { iniciarSessao, isAcessoConvidadoAutorizado } = await import('../core/state/authStore.js');
+
+    await iniciarSessao();
+
+    expect(isAcessoConvidadoAutorizado()).toBe(true);
+  });
+
   it('restores a persisted unexpired session after reload only after validating it with the API', async () => {
     const expiresAt = (Math.floor(Date.now() / 1000) + 3600) * 1000;
     const token = syntheticJwt(expiresAt / 1000);

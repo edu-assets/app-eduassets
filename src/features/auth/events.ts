@@ -49,9 +49,10 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
 
     els.btnHeroLogin?.addEventListener('click', () => {
         if (isAutenticado()) {
-            sair();
-            setEntryRoute('login');
-            showToast(t('feedback.sessao_encerrada'), 'success');
+            void sair().then(() => {
+                setEntryRoute('login');
+                showToast(t('feedback.sessao_encerrada'), 'success');
+            });
             return;
         }
         mostrarTelaLogin(els);

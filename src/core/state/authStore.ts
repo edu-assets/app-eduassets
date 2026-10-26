@@ -12,7 +12,7 @@ let listeners: AuthListener[] = [];
 let acessoConvidadoAutorizado = sessionStorage.getItem(GUEST_ENTRY_SESSION_KEY) === 'true';
 
 export function isAutenticado(): boolean {
-    return getToken() !== null && user !== null;
+    return user !== null;
 }
 
 export function getUsuario(): AuthUser | null {
@@ -30,29 +30,28 @@ function definirAcessoConvidadoAutorizado(ativo: boolean): void {
 }
 
 export async function iniciarSessao(): Promise<void> {
-    if (!getToken()) {
-        notify();
-        return;
-    }
+    const hadLegacyToken = getToken() !== null;
 
     try {
         user = await fetchMe();
+        definirAcessoConvidadoAutorizado(false);
     } catch {
         setToken(null);
         user = null;
-        definirAcessoConvidadoAutorizado(false);
+        if (hadLegacyToken || !acessoConvidadoAutorizado) definirAcessoConvidadoAutorizado(false);
     }
     notify();
 }
 
 export async function entrar(login: string, senha: string): Promise<void> {
     const resposta = await loginRequest(login, senha);
-    if (!setToken(resposta.token)) {
+    if (resposta.token && !setToken(resposta.token)) {
         user = null;
         definirAcessoConvidadoAutorizado(false);
         notify();
         throw new Error('auth.token_invalido');
     }
+    if (!resposta.token) setToken(null);
     user = resposta.user;
     definirAcessoConvidadoAutorizado(false);
     notify();
@@ -65,15 +64,15 @@ export function entrarComoConvidado(): void {
     notify();
 }
 
-export function sair(revogarNoServidor = true): void {
-    if (revogarNoServidor && getToken()) {
-        // Local cleanup is immediate even if the best-effort server request fails.
-        void logoutSession().catch(() => undefined);
-    }
+export function sair(revogarNoServidor = true): Promise<void> {
+    const revogacao = revogarNoServidor && user
+        ? logoutSession().catch(() => undefined)
+        : Promise.resolve();
     setToken(null);
     user = null;
     definirAcessoConvidadoAutorizado(false);
     notify();
+    return revogacao;
 }
 
 export function atualizarToken(novoToken: string): void {

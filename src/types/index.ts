@@ -82,7 +82,7 @@ export interface AuthUser {
 }
 
 export interface LoginResponse {
-    token: string;
+    token?: string;
     user: AuthUser;
 }
 

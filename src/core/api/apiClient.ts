@@ -29,6 +29,38 @@ export class ApiError extends Error {
     }
 }
 
+let cookieSessionSupport: boolean | null = null;
+let cookieSessionSupportCheck: Promise<boolean> | null = null;
+
+export function supportsHttpOnlySession(): Promise<boolean> {
+    if (cookieSessionSupport !== null) return Promise.resolve(cookieSessionSupport);
+    if (!cookieSessionSupportCheck) {
+        cookieSessionSupportCheck = (async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/session-capabilities`, {
+                    method: 'GET',
+                    credentials: 'omit',
+                    cache: 'no-store',
+                    headers: { Accept: 'application/json' },
+                });
+                if (response.status === 404) {
+                    cookieSessionSupport = false;
+                    return false;
+                }
+                if (!response.ok) return false;
+                const result = await response.json() as { cookieSession?: unknown };
+                cookieSessionSupport = result.cookieSession === true;
+                return cookieSessionSupport;
+            } catch {
+                return false;
+            } finally {
+                cookieSessionSupportCheck = null;
+            }
+        })();
+    }
+    return cookieSessionSupportCheck;
+}
+
 function formatarDetalhesValidacao(detalhes: ValidationErrorDetail[] | null | undefined): string | null {
     if (!Array.isArray(detalhes) || detalhes.length === 0) return null;
 
@@ -59,18 +91,22 @@ function formatarMensagemErro(payload: ApiErrorPayload | null, status: number): 
 interface RequestOptions {
     method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
     body?: unknown;
+    authMode?: 'cookie';
 }
 
-async function request<T>(path: string, { method = 'GET', body }: RequestOptions = {}): Promise<T> {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+async function request<T>(path: string, { method = 'GET', body, authMode }: RequestOptions = {}): Promise<T> {
     const token = getToken();
+    const cookieSession = await supportsHttpOnlySession();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
+    if (authMode === 'cookie' && cookieSession) headers['X-Auth-Mode'] = 'cookie';
 
     let response: Response;
     try {
         response = await fetch(`${API_BASE_URL}${path}`, {
             method,
             headers,
+            credentials: cookieSession ? 'include' : 'omit',
             body: body !== undefined ? JSON.stringify(body) : undefined
         });
     } catch {
@@ -111,7 +147,7 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
 
 export const http = {
     get: <T>(path: string): Promise<T> => request<T>(path),
-    post: <T>(path: string, body?: unknown): Promise<T> => request<T>(path, { method: 'POST', body }),
-    patch: <T>(path: string, body?: unknown): Promise<T> => request<T>(path, { method: 'PATCH', body }),
+    post: <T>(path: string, body?: unknown, options: Pick<RequestOptions, 'authMode'> = {}): Promise<T> => request<T>(path, { ...options, method: 'POST', body }),
+    patch: <T>(path: string, body?: unknown, options: Pick<RequestOptions, 'authMode'> = {}): Promise<T> => request<T>(path, { ...options, method: 'PATCH', body }),
     delete: <T>(path: string): Promise<T> => request<T>(path, { method: 'DELETE' })
 };

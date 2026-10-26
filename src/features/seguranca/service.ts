@@ -14,8 +14,8 @@ export async function trocarSenha(senhaAtual: string, novaSenha: string, confirm
     }
 
     try {
-        const { token } = await alterarSenha(senhaAtual, novaSenha);
-        atualizarToken(token);
+        const resposta = await alterarSenha(senhaAtual, novaSenha);
+        if (resposta?.token) atualizarToken(resposta.token);
     } catch (erro) {
         throw new Error(erro instanceof ApiError ? erro.message : 'feedback.erro_alterar_senha');
     }
