@@ -20,5 +20,6 @@ export function isLoginRoute(): boolean {
 
 export function setEntryRoute(destination: EntryDestination): void {
     const nextHash = destination === 'login' ? LOGIN_ROUTE_HASH : APP_ROUTE_HASH;
+    document.documentElement.dataset.entryState = destination;
     if (window.location.hash !== nextHash) window.location.hash = nextHash;
 }

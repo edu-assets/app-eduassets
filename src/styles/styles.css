@@ -37,3 +37,13 @@
 
 /* utils */
 @import "utils/touch-reset.css";
+
+/* Keep protected app content out of the first paint until the entry route is resolved. */
+html[data-entry-state="pending"] .app-container,
+html[data-entry-state="login"] .app-container {
+    visibility: hidden;
+}
+
+html[data-entry-state="login"] #modal-login {
+    display: flex;
+}

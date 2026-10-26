@@ -1,6 +1,6 @@
 import { iniciarSessao, isAutenticado, getUsuario, isAcessoConvidadoAutorizado } from '../../core/state/authStore.js';
 import { getToken } from '../../core/state/tokenStore.js';
-import { LOGIN_ROUTE_HASH, resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
+import { resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
 import { openModal } from '../../core/ui/index.js';
 import { attachAuthEvents } from './events.js';
 import { renderAuthStatus } from './render.js';
@@ -44,7 +44,7 @@ export async function initAuth(): Promise<void> {
         openModal('modal-login');
         els.emailInput.focus();
         await escolhaInicial;
-    } else if (!window.location.hash || window.location.hash === LOGIN_ROUTE_HASH) {
+    } else {
         setEntryRoute('app');
     }
 }
