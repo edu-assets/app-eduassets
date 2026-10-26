@@ -248,7 +248,7 @@
   "shell.emprestimos_em_aberto_aguardando_devoluc": "Empréstimos em aberto aguardando devolução.",
   "shell.emprestimos_em_andamento": "Empréstimos em andamento",
   "shell.equipamento": "Equipamento",
-  "shell.escolha_entre_o_tema_claro_ou_escuro": "Escolha entre o tema claro ou escuro.",
+  "shell.alterne_entre_temas_ou_siga_dispositivo": "Alterne entre claro/escuro ou siga o tema do dispositivo.",
   "shell.escolha_o_formato_do_arquivo": "Escolha o formato do arquivo.",
   "shell.esta_acao_nao_pode_ser_desfeita": "Esta ação não pode ser desfeita.",
   "shell.estado_atual_do_inventario_de_equipament": "Estado atual do inventário de equipamentos.",

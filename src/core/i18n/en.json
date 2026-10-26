@@ -248,7 +248,7 @@
   "shell.emprestimos_em_aberto_aguardando_devoluc": "Open loans awaiting return.",
   "shell.emprestimos_em_andamento": "Loans in progress",
   "shell.equipamento": "Equipment",
-  "shell.escolha_entre_o_tema_claro_ou_escuro": "Choose between light or dark theme.",
+  "shell.alterne_entre_temas_ou_siga_dispositivo": "Switch between light/dark or follow your device theme.",
   "shell.escolha_o_formato_do_arquivo": "Choose the file format.",
   "shell.esta_acao_nao_pode_ser_desfeita": "This action cannot be undone.",
   "shell.estado_atual_do_inventario_de_equipament": "Current state of the equipment inventory.",

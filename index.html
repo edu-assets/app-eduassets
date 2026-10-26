@@ -1382,38 +1382,28 @@
                                 </div>
                             </div>
 
-                            <div class="config-item">
+                            <div class="config-item config-item--control">
                                 <div class="config-item-info">
                                     <span class="config-item-icon config-item-icon-neutral">
-                                        <span class="material-symbols-outlined">light_mode</span>
+                                        <span class="material-symbols-outlined">contrast</span>
                                     </span>
                                     <div class="config-item-text">
                                         <span class="config-item-title">Tema</span>
-                                        <span class="config-item-desc">Escolha entre o tema claro ou escuro.</span>
+                                        <span class="config-item-desc" data-i18n-key="shell.alterne_entre_temas_ou_siga_dispositivo">Alterne entre claro/escuro ou siga o tema do dispositivo.</span>
                                     </div>
                                 </div>
-                                <div class="config-toggle-group" id="config-tema-group">
-                                    <button type="button" class="config-toggle-btn" data-tema="light">
-                                        <span class="config-theme-icon config-theme-icon--light" aria-hidden="true">
-                                            <span class="material-symbols-outlined">light_mode</span>
-                                        </span>
-                                        <span>Claro</span>
+                                <div class="config-theme-controls" id="config-tema-group" role="group" aria-label="Tema" data-i18n-aria-label="shell.tema">
+                                    <button type="button" class="config-theme-toggle icon-btn theme-toggle" data-config-theme-toggle aria-label="Ativar tema escuro" data-i18n-aria-label="auth.tema_ativar_escuro" title="Ativar tema escuro" data-i18n-title="auth.tema_ativar_escuro" aria-pressed="false">
+                                        <span class="theme-toggle__moon"><span class="material-symbols-outlined" aria-hidden="true">dark_mode</span></span>
+                                        <span class="theme-toggle__sun"><span class="material-symbols-outlined" aria-hidden="true">light_mode</span></span>
                                     </button>
-                                    <button type="button" class="config-toggle-btn" data-tema="dark">
-                                        <span class="config-theme-icon config-theme-icon--dark" aria-hidden="true">
-                                            <span class="material-symbols-outlined">dark_mode</span>
-                                        </span>
-                                        <span>Escuro</span>
-                                    </button>
-                                    <button type="button" class="config-toggle-btn" data-tema="system">
-                                        <span class="config-theme-icon config-theme-icon--system" aria-hidden="true">
-                                            <span class="material-symbols-outlined">brightness_auto</span>
-                                        </span>
-                                        <span>Sistema</span>
+                                    <button type="button" class="config-system-toggle" data-tema="system" aria-label="Sistema" data-i18n-aria-label="auth.tema_sistema" title="Sistema" data-i18n-title="auth.tema_sistema" aria-pressed="false">
+                                        <span class="material-symbols-outlined" aria-hidden="true">brightness_auto</span>
+                                        <span data-i18n-key="shell.sistema">Sistema</span>
                                     </button>
                                 </div>
                             </div>
-                            <div class="config-item">
+                            <div class="config-item config-item--control">
                                 <div class="config-item-info">
                                     <span class="config-item-icon config-item-icon-neutral">
                                         <span class="material-symbols-outlined">language</span>
@@ -1423,8 +1413,8 @@
                                         <span class="config-item-desc">Escolha o idioma da interface.</span>
                                     </div>
                                 </div>
-                                <div class="config-toggle-group" id="config-idioma-group">
-                                    <button type="button" class="config-toggle-btn" data-idioma="pt">
+                                <div class="config-lang-switch" id="config-idioma-group" role="group" aria-label="Idioma" data-i18n-aria-label="auth.idioma">
+                                    <button type="button" class="config-toggle-btn" data-idioma="pt" lang="pt-BR" aria-label="Português (Brasil)" data-i18n-aria-label="auth.idioma_pt_nome" title="Português (Brasil)" data-i18n-title="auth.idioma_pt_nome" aria-pressed="false">
                                         <span class="config-flag config-flag--pt" aria-hidden="true">
                                             <svg viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
                                                 <clipPath id="flag-br-clip">
@@ -1451,9 +1441,8 @@
                                                 </g>
                                             </svg>
                                         </span>
-                                        <span>Português</span>
                                     </button>
-                                    <button type="button" class="config-toggle-btn" data-idioma="en">
+                                    <button type="button" class="config-toggle-btn" data-idioma="en" lang="en" aria-label="English" data-i18n-aria-label="auth.idioma_en_nome" title="English" data-i18n-title="auth.idioma_en_nome" aria-pressed="false">
                                         <span class="config-flag config-flag--en" aria-hidden="true">
                                             <svg viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
                                                 <clipPath id="flag-us-clip">
@@ -1498,7 +1487,6 @@
                                                 </g>
                                             </svg>
                                         </span>
-                                        <span>English</span>
                                     </button>
                                 </div>
                             </div>

@@ -1,9 +1,9 @@
 import { showToast } from '../../core/ui/index.js';
 import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
-import { getPreferenciaTema, definirTema } from '../../core/state/themeStore.js';
-import { getIdioma, definirIdioma } from '../../core/state/i18nStore.js';
+import { getPreferenciaTema, getTemaResolvido, definirTema, subscribe as subscribeTema } from '../../core/state/themeStore.js';
+import { getIdioma, definirIdioma, subscribe as subscribeI18n, t } from '../../core/state/i18nStore.js';
 import { marcarTemaAtivo, marcarIdiomaAtivo } from './render.js';
-import type { TemaPreferencia, IdiomaPreferencia } from './render.js';
+import type { IdiomaPreferencia } from './render.js';
 
 let idiomaSwapTimers: number[] = [];
 
@@ -51,16 +51,27 @@ export function attachConfigEvents(btnSalvar: HTMLElement): void {
 }
 
 export function attachTemaToggle(grupoTema: HTMLElement): void {
-    const botoes = grupoTema.querySelectorAll<HTMLElement>('.config-toggle-btn');
-    marcarTemaAtivo(grupoTema, getPreferenciaTema());
+    const toggle = grupoTema.querySelector<HTMLButtonElement>('[data-config-theme-toggle]');
+    const systemButton = grupoTema.querySelector<HTMLButtonElement>('[data-tema="system"]');
 
-    botoes.forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const tema = btn.dataset.tema as TemaPreferencia;
-            definirTema(tema);
-            marcarTemaAtivo(grupoTema, tema);
-        });
+    const sincronizarEstado = (): void => {
+        marcarTemaAtivo(grupoTema, getPreferenciaTema());
+        if (!toggle) return;
+        const temaEscuro = getTemaResolvido() === 'dark';
+        const label = t(temaEscuro ? 'auth.tema_ativar_claro' : 'auth.tema_ativar_escuro');
+        toggle.setAttribute('aria-pressed', String(temaEscuro));
+        toggle.setAttribute('aria-label', label);
+        toggle.title = label;
+    };
+
+    toggle?.addEventListener('click', () => {
+        definirTema(getTemaResolvido() === 'dark' ? 'light' : 'dark');
     });
+    systemButton?.addEventListener('click', () => definirTema('system'));
+
+    sincronizarEstado();
+    subscribeTema(sincronizarEstado);
+    subscribeI18n(sincronizarEstado);
 }
 
 export function attachIdiomaToggle(grupoIdioma: HTMLElement): void {
@@ -74,4 +85,6 @@ export function attachIdiomaToggle(grupoIdioma: HTMLElement): void {
             animarTrocaIdioma(grupoIdioma, idioma);
         });
     });
+
+    subscribeI18n(() => marcarIdiomaAtivo(grupoIdioma, getIdioma()));
 }
