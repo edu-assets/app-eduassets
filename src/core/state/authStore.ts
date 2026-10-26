@@ -47,7 +47,12 @@ export async function iniciarSessao(): Promise<void> {
 
 export async function entrar(login: string, senha: string): Promise<void> {
     const resposta = await loginRequest(login, senha);
-    setToken(resposta.token);
+    if (!setToken(resposta.token)) {
+        user = null;
+        definirAcessoConvidadoAutorizado(false);
+        notify();
+        throw new Error('auth.token_invalido');
+    }
     user = resposta.user;
     definirAcessoConvidadoAutorizado(false);
     notify();
@@ -72,7 +77,12 @@ export function sair(revogarNoServidor = true): void {
 }
 
 export function atualizarToken(novoToken: string): void {
-    setToken(novoToken);
+    if (!setToken(novoToken)) {
+        user = null;
+        definirAcessoConvidadoAutorizado(false);
+        notify();
+        throw new Error('auth.token_invalido');
+    }
 }
 
 export function subscribe(callback: AuthListener): () => void {

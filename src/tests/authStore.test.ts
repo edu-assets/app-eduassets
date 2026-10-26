@@ -6,6 +6,11 @@ const apiMocks = vi.hoisted(() => ({
   logoutSession: vi.fn(),
 }));
 
+function syntheticJwt(exp = Math.floor(Date.now() / 1000) + 3600): string {
+  const base64url = (value: string) => btoa(value).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  return `${base64url('{"alg":"HS256","typ":"JWT"}')}.${base64url(JSON.stringify({ exp }))}.synthetic-signature`;
+}
+
 vi.mock('../core/api/auth.js', () => ({
   login: apiMocks.login,
   fetchMe: apiMocks.fetchMe,
@@ -46,7 +51,7 @@ describe('authStore logout', () => {
     vi.stubGlobal('localStorage', storage);
     vi.stubGlobal('sessionStorage', sessionStorageMock);
     apiMocks.login.mockResolvedValue({
-      token: 'synthetic-jwt-token',
+      token: syntheticJwt(),
       user: { id: 5, nome: 'Synthetic user', login: 'user@example.invalid', nivelAcesso: 'EDITOR' },
     });
     apiMocks.logoutSession.mockRejectedValue(new Error('synthetic offline failure'));
@@ -90,6 +95,36 @@ describe('authStore logout', () => {
     expect(storage.removeItem).toHaveBeenCalledWith('eduassets_guest_mode');
   });
 
+  it('rejects a login response without a valid future JWT expiration', async () => {
+    apiMocks.login.mockResolvedValueOnce({
+      token: 'malformed-token',
+      user: { id: 5, nome: 'Synthetic user', login: 'user@example.invalid', nivelAcesso: 'EDITOR' },
+    });
+    const { entrar, isAutenticado } = await import('../core/state/authStore.js');
+
+    await expect(entrar('user@example.invalid', 'Synthetic-Password-01')).rejects.toThrow('auth.token_invalido');
+    expect(isAutenticado()).toBe(false);
+    expect(storedToken).toBeNull();
+  });
+
+  it('restores a persisted unexpired session after reload only after validating it with the API', async () => {
+    const expiresAt = (Math.floor(Date.now() / 1000) + 3600) * 1000;
+    const token = syntheticJwt(expiresAt / 1000);
+    storedToken = JSON.stringify({ token, expiresAt });
+    apiMocks.fetchMe.mockResolvedValueOnce({
+      id: 5,
+      nome: 'Synthetic user',
+      login: 'user@example.invalid',
+      nivelAcesso: 'EDITOR',
+    });
+    const { iniciarSessao, isAutenticado } = await import('../core/state/authStore.js');
+
+    await iniciarSessao();
+
+    expect(apiMocks.fetchMe).toHaveBeenCalledTimes(1);
+    expect(isAutenticado()).toBe(true);
+  });
+
   it('clears guest access after login succeeds or a stored token is rejected', async () => {
     const { entrar, entrarComoConvidado, iniciarSessao, isAcessoConvidadoAutorizado, atualizarToken } = await import('../core/state/authStore.js');
     entrarComoConvidado();
@@ -98,7 +133,7 @@ describe('authStore logout', () => {
     expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('eduassets_guest_entry_authorized');
 
     entrarComoConvidado();
-    atualizarToken('expired-synthetic-token');
+    atualizarToken(syntheticJwt());
     apiMocks.fetchMe.mockRejectedValueOnce(new Error('synthetic expired token'));
     await iniciarSessao();
     expect(isAcessoConvidadoAutorizado()).toBe(false);

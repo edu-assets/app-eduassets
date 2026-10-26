@@ -9,7 +9,7 @@ const EVENTOS_ATIVIDADE = ['mousemove', 'keydown', 'click', 'scroll', 'touchstar
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 function expirarSessao(): void {
-    if (!getToken()) return;
+    if (!getToken() && !getUsuario()) return;
     const eraAdmin = getUsuario()?.nivelAcesso === 'ADMINISTRADOR';
     sair();
     showToast(eraAdmin ? 'Sessão expirada por inatividade. Faça login novamente.' : 'Sessão expirada. Faça login novamente.', 'warning');

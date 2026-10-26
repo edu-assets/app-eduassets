@@ -37,8 +37,8 @@ function conectar(): void {
 
     if (isAutenticado()) return;
 
-    setToken(dados.token);
     try {
+      if (!setToken(dados.token)) throw new Error('Token RFID inválido ou expirado.');
       await fetchMe();
       window.location.reload();
     } catch {

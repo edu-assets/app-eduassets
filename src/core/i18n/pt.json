@@ -38,6 +38,7 @@
   "auth.login": "Login",
   "auth.meu_perfil": "Meu perfil",
   "auth.sair": "Sair",
+  "auth.token_invalido": "A sessão recebida é inválida ou já expirou. Tente entrar novamente.",
   "auth.acesso_sistema": "ACESSO AO SISTEMA",
   "auth.escopo_projeto": "ESCOPO DO PROJETO",
   "auth.escopo_funcional": "ESCOPO FUNCIONAL",

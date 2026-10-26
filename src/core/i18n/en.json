@@ -38,6 +38,7 @@
   "auth.login": "Log in",
   "auth.meu_perfil": "My profile",
   "auth.sair": "Log out",
+  "auth.token_invalido": "The session token is invalid or has expired. Please sign in again.",
   "auth.acesso_sistema": "SYSTEM ACCESS",
   "auth.escopo_projeto": "PROJECT SCOPE",
   "auth.escopo_funcional": "FUNCTIONAL SCOPE",
