@@ -4,11 +4,12 @@ import type { AuthUser } from '../../types/index.js';
 export interface AuthEls {
     sidebarFooter: HTMLElement;
     btnHeroLogin: HTMLElement | null;
+    form: HTMLFormElement;
     emailInput: HTMLInputElement;
     senhaInput: HTMLInputElement;
     erro: HTMLElement;
     btnEntrar: HTMLButtonElement;
-    btnContinuarConvidado: HTMLElement;
+    btnContinuarConvidado: HTMLButtonElement;
 }
 
 export function renderAuthStatus(els: AuthEls, autenticado: boolean, usuario: AuthUser | null): void {

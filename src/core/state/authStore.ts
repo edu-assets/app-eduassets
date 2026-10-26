@@ -37,6 +37,12 @@ export async function entrar(login: string, senha: string): Promise<void> {
     notify();
 }
 
+export function entrarComoConvidado(): void {
+    setToken(null);
+    user = null;
+    notify();
+}
+
 export function sair(revogarNoServidor = true): void {
     if (revogarNoServidor && getToken()) {
         // Local cleanup is immediate even if the best-effort server request fails.

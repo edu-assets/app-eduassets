@@ -2000,43 +2000,59 @@
         </div>
     </div>
 
-    <!-- login modal -->
-    <div class="modal-overlay" id="modal-login" data-close-on-overlay="false">
-        <div class="modal-box">
-            <div class="modal-header">
-                <span class="modal-header-icon modal-header-icon-primary">
-                    <span class="material-symbols-outlined">lock</span>
-                </span>
-                <div class="modal-header-titles">
-                    <h3>Login de Administrador</h3>
-                    <p class="modal-subtitle">Acesse sua conta para continuar.</p>
+    <!-- Entry gate: the application remains behind this screen until sign-in or Guest Mode is selected. -->
+    <div class="modal-overlay login-gate" id="modal-login" data-close-on-overlay="false">
+        <div class="modal-box login-gate-card" role="dialog" aria-modal="true" aria-labelledby="login-title"
+            aria-describedby="login-instruction" tabindex="-1">
+            <section class="login-gate-aside" aria-label="eduAssets">
+                <a class="login-gate-brand" href="index.html" aria-label="eduAssets">
+                    <img src="/assets/logos/eduAssets_logo-header.webp" alt="eduAssets">
+                </a>
+                <div class="login-gate-intro">
+                    <span class="login-gate-eyebrow" data-i18n-key="auth.acesso_sistema">ACESSO AO SISTEMA</span>
+                    <h2 data-i18n-key="auth.gestao_materiais">Gestão de materiais escolares, sem complicação.</h2>
+                    <p data-i18n-key="auth.gestao_descricao">Acompanhe inventário, empréstimos e devoluções em um só lugar.</p>
                 </div>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="login-email">E-mail / Login</label>
-                    <input type="text" id="login-email" placeholder="usuario@escola.com" autocomplete="username">
+                <div class="login-gate-features" aria-label="Recursos do eduAssets">
+                    <span><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span><span data-i18n-key="auth.recurso_inventario">Inventário</span></span>
+                    <span><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span><span data-i18n-key="auth.recurso_emprestimos">Empréstimos</span></span>
+                    <span><span class="material-symbols-outlined" aria-hidden="true">assignment_return</span><span data-i18n-key="auth.recurso_devolucoes">Devoluções</span></span>
                 </div>
-                <div class="form-group">
-                    <label for="login-senha">Senha</label>
-                    <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
+            </section>
+            <section class="login-gate-main">
+                <header class="login-gate-heading">
+                    <p class="login-gate-overline" data-i18n-key="auth.bem_vindo">Bem-vindo</p>
+                    <h1 id="login-title" data-i18n-key="auth.entrar_eduassets">Entrar no eduAssets</h1>
+                    <p id="login-instruction" data-i18n-key="auth.instrucao_login">Use suas credenciais para acessar sua conta.</p>
+                </header>
+                <form id="login-form" class="login-gate-form">
+                    <div class="form-group">
+                        <label for="login-email" data-i18n-key="cadastros.campo_email_login">E-mail / Login</label>
+                        <input type="text" id="login-email" name="username" autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-senha" data-i18n-key="cadastros.campo_senha">Senha</label>
+                        <input type="password" id="login-senha" name="password" autocomplete="current-password" required>
+                    </div>
+                    <p class="login-erro" id="login-erro" role="alert" aria-live="polite"></p>
+                    <button class="btn btn-primary btn-block login-gate-submit" id="login-btn-entrar" type="submit">
+                        <span data-i18n-key="shell.entrar">Entrar</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                    </button>
+                    <div class="login-gate-divider" aria-hidden="true"><span data-i18n-key="auth.ou">ou</span></div>
+                    <button class="btn btn-neutral btn-block login-gate-guest" id="login-continuar-convidado" type="button">
+                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                        <span data-i18n-key="auth.continuar_convidado">Continuar como convidado</span>
+                    </button>
+                    <p class="login-gate-guest-note" id="login-guest-note" data-i18n-key="auth.convidado_somente_leitura">
+                        No modo convidado, o acesso é somente para consulta.
+                    </p>
+                </form>
+                <div class="login-gate-footnote">
+                    <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                    <span data-i18n-key="auth.acesso_protegido">Acesso protegido pelas credenciais da sua instituição.</span>
                 </div>
-                <p class="login-erro" id="login-erro"></p>
-                <div class="modal-callout modal-callout-info">
-                    <span class="icon-badge icon-badge--sm icon-badge--neutral">
-                        <span class="material-symbols-outlined">shield</span>
-                    </span>
-                    <span>Acesso restrito ao administrador. Seus dados de login não são compartilhados.</span>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-neutral" id="login-continuar-convidado" type="button"
-                    data-i18n-key="auth.contate_administrador">
-                    <span class="material-symbols-outlined">lock_reset</span>Contate o administrador
-                </button>
-                <button class="btn btn-primary" id="login-btn-entrar" type="button"><span
-                        class="material-symbols-outlined">start</span>Entrar</button>
-            </div>
+            </section>
         </div>
     </div>
     <!-- Modal de confirmar exclusão -->

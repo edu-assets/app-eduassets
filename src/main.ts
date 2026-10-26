@@ -20,13 +20,13 @@ import { initDocumentation } from './features/sobre/index.js';
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initI18n();
+    initModals();
     await initAuth();
     await initAuthDataSync();
 
     const inits: Array<() => void | Promise<void>> = [
         initNavigation,
         initMobileNavigation,
-        initModals,
         initConfirm,
         initSessionTimeout,
         initDashboard,

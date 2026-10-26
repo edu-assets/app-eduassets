@@ -43,4 +43,17 @@ describe('authStore logout', () => {
     expect(storage.removeItem).toHaveBeenCalledWith('eduassets_token');
     expect(isAutenticado()).toBe(false);
   });
+
+  it('enters Guest Mode without keeping a token or requesting server logout', async () => {
+    const { entrar, entrarComoConvidado, isAutenticado, getUsuario } = await import('../core/state/authStore.js');
+    await entrar('user@example.invalid', 'Synthetic-Password-01');
+    expect(isAutenticado()).toBe(true);
+
+    entrarComoConvidado();
+
+    expect(storage.removeItem).toHaveBeenCalledWith('eduassets_token');
+    expect(apiMocks.logoutSession).not.toHaveBeenCalled();
+    expect(isAutenticado()).toBe(false);
+    expect(getUsuario()).toBeNull();
+  });
 });

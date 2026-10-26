@@ -1,10 +1,11 @@
 import { closeModal, openModal, showToast } from '../../core/ui/index.js';
-import { entrar, sair, isAutenticado, subscribe } from '../../core/state/authStore.js';
+import { entrar, entrarComoConvidado, sair, isAutenticado, subscribe } from '../../core/state/authStore.js';
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
 import { traduzirErro, t } from "../../core/state/i18nStore.js";
+import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 
-export function attachAuthEvents(els: AuthEls): void {
+export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () => undefined): void {
     els.sidebarFooter.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
 
@@ -55,12 +56,17 @@ export function attachAuthEvents(els: AuthEls): void {
     });
 
     els.btnContinuarConvidado.addEventListener('click', () => {
-        showToast(t('auth.contate_administrador_senha_mensagem'), 'warning');
+        entrarComoConvidado();
+        mostrarErroLogin(els, '');
+        closeModal('modal-login');
+        onInitialAccess();
     });
-    els.btnEntrar.addEventListener('click', () => fazerLogin(els));
-    els.senhaInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') fazerLogin(els);
+    els.form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        void fazerLogin(els, onInitialAccess);
     });
+    els.emailInput.addEventListener('input', () => mostrarErroLogin(els, ''));
+    els.senhaInput.addEventListener('input', () => mostrarErroLogin(els, ''));
 
     subscribe(({ autenticado, usuario }) => renderAuthStatus(els, autenticado, usuario));
 }
@@ -70,7 +76,8 @@ function fecharDropdown(): void {
     document.getElementById('user-menu-trigger')?.setAttribute('aria-expanded', 'false');
 }
 
-async function fazerLogin(els: AuthEls): Promise<void> {
+async function fazerLogin(els: AuthEls, onInitialAccess: () => void): Promise<void> {
+    if (els.btnEntrar.disabled) return;
     const login = els.emailInput.value.trim();
     const senha = els.senhaInput.value;
 
@@ -79,16 +86,19 @@ async function fazerLogin(els: AuthEls): Promise<void> {
         return;
     }
 
-    els.btnEntrar.disabled = true;
+    setButtonLoading(els.btnEntrar, true);
+    els.btnContinuarConvidado.disabled = true;
     try {
         await entrar(login, senha);
         closeModal('modal-login');
         els.emailInput.value = '';
         els.senhaInput.value = '';
-        showToast('Login realizado com sucesso.', 'success');
+        showToast(t('feedback.login_realizado'), 'success');
+        onInitialAccess();
     } catch (erro) {
         mostrarErroLogin(els, traduzirErro(erro, 'feedback.erro_entrar'));
     } finally {
-        els.btnEntrar.disabled = false;
+        setButtonLoading(els.btnEntrar, false);
+        els.btnContinuarConvidado.disabled = false;
     }
 }
