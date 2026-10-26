@@ -5,6 +5,8 @@ import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
 import { traduzirErro, t } from "../../core/state/i18nStore.js";
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
+import { definirIdioma, getIdioma, subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
+import { definirTema, getPreferenciaTema, subscribe as subscribeTheme } from '../../core/state/themeStore.js';
 
 export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () => undefined): void {
     els.sidebarFooter.addEventListener('click', (e) => {
@@ -72,8 +74,46 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     els.emailInput.addEventListener('input', () => mostrarErroLogin(els, ''));
     els.senhaInput.addEventListener('input', () => mostrarErroLogin(els, ''));
     window.addEventListener('hashchange', () => sincronizarRotaLogin(els));
+    attachEntryPreferences();
 
     subscribe(({ autenticado, usuario }) => renderAuthStatus(els, autenticado, usuario));
+}
+
+function attachEntryPreferences(): void {
+    document.querySelectorAll<HTMLButtonElement>('[data-entry-language]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const idioma = button.dataset.entryLanguage;
+            if (idioma === 'pt' || idioma === 'en') definirIdioma(idioma);
+        });
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('[data-entry-theme]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const tema = button.dataset.entryTheme;
+            if (tema === 'light' || tema === 'dark' || tema === 'system') definirTema(tema);
+        });
+    });
+
+    updateEntryLanguageSelection();
+    updateEntryThemeSelection();
+    subscribeI18n(updateEntryLanguageSelection);
+    subscribeTheme(updateEntryThemeSelection);
+}
+
+function updateEntryLanguageSelection(): void {
+    document.querySelectorAll<HTMLButtonElement>('[data-entry-language]').forEach((button) => {
+        const active = button.dataset.entryLanguage === getIdioma();
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+}
+
+function updateEntryThemeSelection(): void {
+    document.querySelectorAll<HTMLButtonElement>('[data-entry-theme]').forEach((button) => {
+        const active = button.dataset.entryTheme === getPreferenciaTema();
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
 }
 
 function mostrarTelaLogin(els: AuthEls): void {

@@ -2004,26 +2004,49 @@
     <div class="modal-overlay login-gate" id="modal-login" data-close-on-overlay="false">
         <div class="modal-box login-gate-card" role="dialog" aria-modal="true" aria-labelledby="login-title"
             aria-describedby="login-instruction" tabindex="-1">
-            <section class="login-gate-aside" aria-label="eduAssets">
-                <a class="login-gate-brand" href="index.html" aria-label="eduAssets">
-                    <img src="/assets/logos/eduAssets_logo-header.webp" alt="eduAssets">
+            <section class="login-gate-aside" aria-label="eduAssets" data-i18n-aria-label="auth.marca_eduassets">
+                <a class="login-gate-brand" href="index.html" aria-label="eduAssets" data-i18n-aria-label="auth.marca_eduassets">
+                    <img src="/assets/logos/eduAssets_logo-header.webp" alt="eduAssets" data-i18n-alt="auth.marca_eduassets">
                 </a>
                 <div class="login-gate-intro">
-                    <span class="login-gate-eyebrow" data-i18n-key="auth.acesso_sistema">ACESSO AO SISTEMA</span>
-                    <h2 data-i18n-key="auth.gestao_materiais">Gestão de materiais escolares, sem complicação.</h2>
-                    <p data-i18n-key="auth.gestao_descricao">Acompanhe inventário, empréstimos e devoluções em um só lugar.</p>
+                    <span class="login-gate-eyebrow" data-i18n-key="auth.escopo_projeto">ESCOPO DO PROJETO</span>
+                    <h2 data-i18n-key="auth.gestao_materiais">Gestão de ativos escolares</h2>
+                    <p data-i18n-key="auth.gestao_descricao">Aplicação para registrar equipamentos, acompanhar empréstimos e devoluções, documentar ocorrências e consultar o histórico do inventário.</p>
                 </div>
-                <div class="login-gate-features" aria-label="Recursos do eduAssets">
-                    <span><span class="material-symbols-outlined" aria-hidden="true">inventory_2</span><span data-i18n-key="auth.recurso_inventario">Inventário</span></span>
-                    <span><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span><span data-i18n-key="auth.recurso_emprestimos">Empréstimos</span></span>
-                    <span><span class="material-symbols-outlined" aria-hidden="true">assignment_return</span><span data-i18n-key="auth.recurso_devolucoes">Devoluções</span></span>
+                <div class="login-gate-scope">
+                    <span class="login-gate-scope-label" data-i18n-key="auth.escopo_funcional">ESCOPO FUNCIONAL</span>
+                    <div class="login-gate-features" aria-label="Módulos do sistema" data-i18n-aria-label="auth.modulos_sistema">
+                        <span data-i18n-key="auth.recurso_inventario">Inventário</span>
+                        <span data-i18n-key="auth.recurso_emprestimos">Empréstimos</span>
+                        <span data-i18n-key="auth.recurso_devolucoes">Devoluções</span>
+                        <span data-i18n-key="auth.recurso_ocorrencias">Ocorrências</span>
+                        <span data-i18n-key="auth.recurso_relatorios">Relatórios</span>
+                    </div>
                 </div>
+                <p class="login-gate-architecture" data-i18n-key="auth.arquitetura_resumo">Interface web modular · API de backend · permissões por perfil</p>
             </section>
             <section class="login-gate-main">
+                <div class="login-gate-preferences">
+                    <div class="login-gate-preference" role="group" aria-label="Idioma" data-i18n-aria-label="auth.idioma">
+                        <span class="login-gate-preference-label" data-i18n-key="auth.idioma">Idioma</span>
+                        <div class="login-gate-preference-options">
+                            <button type="button" data-entry-language="pt" data-i18n-key="auth.idioma_pt">PT</button>
+                            <button type="button" data-entry-language="en" data-i18n-key="auth.idioma_en">EN</button>
+                        </div>
+                    </div>
+                    <div class="login-gate-preference" role="group" aria-label="Tema" data-i18n-aria-label="auth.tema">
+                        <span class="login-gate-preference-label" data-i18n-key="auth.tema">Tema</span>
+                        <div class="login-gate-preference-options">
+                            <button type="button" data-entry-theme="light" data-i18n-key="auth.tema_claro">Claro</button>
+                            <button type="button" data-entry-theme="dark" data-i18n-key="auth.tema_escuro">Escuro</button>
+                            <button type="button" data-entry-theme="system" data-i18n-key="auth.tema_sistema">Sistema</button>
+                        </div>
+                    </div>
+                </div>
                 <header class="login-gate-heading">
-                    <p class="login-gate-overline" data-i18n-key="auth.bem_vindo">Bem-vindo</p>
-                    <h1 id="login-title" data-i18n-key="auth.entrar_eduassets">Entrar no eduAssets</h1>
-                    <p id="login-instruction" data-i18n-key="auth.instrucao_login">Use suas credenciais para acessar sua conta.</p>
+                    <p class="login-gate-overline" data-i18n-key="auth.autenticacao">AUTENTICAÇÃO</p>
+                    <h1 id="login-title" data-i18n-key="auth.entrar_eduassets">Acessar eduAssets</h1>
+                    <p id="login-instruction" data-i18n-key="auth.instrucao_login">Entre com as credenciais da sua instituição para acessar as operações autorizadas.</p>
                 </header>
                 <form id="login-form" class="login-gate-form">
                     <div class="form-group">
@@ -2045,7 +2068,7 @@
                         <span data-i18n-key="auth.continuar_convidado">Continuar como convidado</span>
                     </button>
                     <p class="login-gate-guest-note" id="login-guest-note" data-i18n-key="auth.convidado_somente_leitura">
-                        No modo convidado, o acesso é somente para consulta.
+                        O modo convidado permite consulta, sem operações de alteração.
                     </p>
                 </form>
             </section>
