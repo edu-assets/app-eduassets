@@ -96,7 +96,7 @@ Content: <current public IP of the Oracle VM>
 Proxy status: Proxied
 ```
 
-During the validated deployment, the VM public IP was `137.131.185.105`. If the IP changes, update DNS and do not document the new value together with secrets.
+The VM's public origin IP is intentionally omitted from this guide. Retrieve the current value from the authorized infrastructure inventory when an approved DNS change requires it; do not include the origin address in public documentation.
 
 Keep one record for `api.eduassets.tech`; remove duplicate records for the same hostname. `app` and the apex domain may continue to point to their respective Cloudflare projects.
 

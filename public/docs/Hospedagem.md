@@ -96,7 +96,7 @@ Content: <IP público atual da VM Oracle>
 Proxy status: Proxied
 ```
 
-Na implantação validada, o IP público da VM era `137.131.185.105`. Se o IP mudar, atualize o registro DNS e não documente o novo valor junto com segredos.
+O IP público de origem da VM foi intencionalmente omitido deste guia. Consulte o inventário de infraestrutura autorizado para obter o valor atual quando uma alteração de DNS aprovada exigir; não inclua o endereço de origem em documentação pública.
 
 Mantenha um único registro para `api.eduassets.tech`; registros duplicados para o mesmo hostname devem ser removidos. `app` e o domínio raiz podem continuar apontando para seus projetos Cloudflare respectivos.
 
