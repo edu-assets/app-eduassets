@@ -1,10 +1,10 @@
 # Deployment and operations (English)
 
-> **Status: Beta deployment validated on October 23, 2026.** The operator verified the Cloudflare Pages frontend at `app.eduassets.tech`, the Oracle VM/Nginx API at `api.eduassets.tech`, Neon connectivity configuration, external HTTPS reachability, and the CORS preflight. Off-host backup, restore drill, monitoring, and final real-data security review remain operational tasks. See `Hosting.md` for the complete runbook and the exact firewall incident resolution.
+> **Historical record (October 23, 2026):** the operator validated the Cloudflare Pages frontend at `app.eduassets.tech`, the Nginx API at `api.eduassets.tech`, Neon connection configuration, external HTTPS, and CORS preflight at that time. This record does not verify current remote state. Off-host backup, restore drill, monitoring, and final real-data security review remain operational tasks. See `Hosting.md` for the runbook.
 
 ## Selected topology
 
-The intended baseline is a static frontend on Cloudflare Pages and a single backend Docker service on a dedicated VM behind host Nginx and Cloudflare Full (strict). PostgreSQL is external and dedicated to this deployment. The backend container listens on `0.0.0.0:3000` inside Docker but is published only as `127.0.0.1:3000` on the VM. RFID is disabled on the public instance. Do not connect a demo to operational data.
+The reference topology is a static frontend on Cloudflare Pages and one backend Docker service on a dedicated VM behind host Nginx and Cloudflare Full (strict). PostgreSQL is external and dedicated to this deployment. The `api` service uses port 3000 inside the Docker network; the VM publishes the API on loopback port 3000 only. RFID is disabled on the public instance. Do not connect a demo to operational data.
 
 ```text
 Browser → Cloudflare Pages static frontend → Cloudflare HTTPS → Nginx :443
@@ -47,29 +47,29 @@ Migration `20261022110000_user_session_version` rejects pre-existing JWTs that l
 
 `api` is a multi-stage image with production dependencies only, runs as the unprivileged Node user, drops Linux capabilities, uses a read-only root filesystem and has a restart policy. The `migration` target keeps Prisma CLI/TSX available only for an explicit release command. The image build supplies a synthetic, loopback-only URL for `prisma generate`; it is not used by the running service. Database migration is never run automatically at startup. `npm ci --omit=dev` alone is not the release procedure: the migration stage needs Prisma CLI, while the runtime image is pruned to production dependencies after the client is generated.
 
-For the validated Cloudflare Pages deployment, connect `edu-assets/app-eduassets`, set the production branch to `main`, root directory to `/`, build command to `npm run build`, and output directory to `dist`. Set `VITE_API_BASE_URL=https://api.eduassets.tech` and `VITE_RFID_BRIDGE_ENABLED=false`. After `docs-eduassets` is publicly readable, set `VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public` to let the About modal load canonical Markdown; the app keeps a bundled fallback. Add the custom domain `app.eduassets.tech`; keep the separate landing page at `eduassets.tech`. In the API environment, set `CORS_ORIGIN=https://app.eduassets.tech` without a trailing slash. The deployed CSP allows the API, GitHub Raw, and `https://static.cloudflareinsights.com` for the official Pages Analytics beacon. See `Hosting.md` for DNS, Nginx, Docker, firewall, CORS, and troubleshooting procedures.
+For a Cloudflare Pages build, use repository root `/`, build command `npm run build`, and output directory `dist`. Set `VITE_API_BASE_URL=https://api.eduassets.tech` and `VITE_RFID_BRIDGE_ENABLED=false`. `VITE_DOCS_BASE_URL` is optional: when empty, the app uses `https://docs.eduassets.tech`; when set, it must contain the base origin without `/docs`. The local fallback is used when the remote request fails or is unsuccessful. Set `CORS_ORIGIN=https://app.eduassets.tech` in the API environment, without a trailing slash. The frontend CSP must allow the API, `https://docs.eduassets.tech`, and the official Cloudflare Analytics beacon. CI validates code and templates; it does not publish Pages or deploy to the VM. See `Hosting.md` for DNS, Nginx, Docker, firewall, CORS, and troubleshooting.
 
 ## Nginx, trusted proxy and TLS
 
-Review `deploy/nginx/eduassets-api.conf.example`, replace the proposed host and certificate paths with verified values, and install only after creating the Cloudflare real-IP include. The template returns 404 for `/auth/rfid` and `/ws/rfid` case-insensitively, including trailing-slash variants, then forwards the remaining HTTP traffic under `/` to the API; it does **not** enable WebSocket upgrades. A loopback address observed by Nginx is not proof that the original caller is local, so RFID remains a separate kiosk concern. It sets `X-Forwarded-For` to Nginx's sanitized `$remote_addr`, not to an arbitrary client-supplied chain, and uses modest body/read/send timeouts. Run `nginx -t` and reload only after an operator review. `TRUST_PROXY=1` means exactly one proxy hop; never set it to `true` or trust unvalidated forwarded headers. Without correctly maintained Cloudflare ranges, Express sees the edge address and rate limits may group many clients; this production IP/rate-limit behavior remains an external verification gate.
+Review `deploy/nginx/eduassets-api.conf.example`, replace the proposed hostname and certificate paths with verified values, and install only after creating a Cloudflare real-IP include with current official ranges. The include must trust only those ranges; the template overwrites `X-Forwarded-For` with Nginx’s sanitized address rather than a client-supplied chain. Client-IP attribution in Nginx/Express and rate limits depend on the proxy chain and current trusted ranges; missing or stale ranges may prevent correct attribution. Validate the chain on the host before considering the configuration complete. The template blocks `/auth/rfid` and `/ws/rfid` and does not enable WebSocket upgrades. Run `nginx -t` and reload only after operator review.
 
 The backend defaults to loopback for direct non-production service use; the container deliberately binds inside its isolated network while Docker publishes only loopback. Public RFID remains off (`RFID_BRIDGE_ENABLED=false` and `VITE_RFID_BRIDGE_ENABLED=false`); no `/ws` proxy route is configured. Do not put the RFID kiosk on the public API instance.
 
 
-For public deployments, add a reviewed Cloudflare WAF/rate-limiting rule for `POST /auth/login` in addition to the application limiter. This is an external configuration requirement and is not configured or verified by this repository.
+- For public deployments, add a reviewed Cloudflare WAF/rate-limiting rule for `POST /auth/login` in addition to the application limiter. This external setting is not created or verified by this repository.
 
 ## Health, logs and monitoring
 
 - `GET /health` is liveness and intentionally does not depend on PostgreSQL.
 - `GET /ready` executes a bounded `SELECT 1`; it returns only `{status:"ready"}` or HTTP 503 `{status:"unavailable"}`.
-- Docker health checks `/ready`. Configure independent external uptime checks and alerts for HTTPS `/health` and `/ready`, HTTP 5xx, disk space, PostgreSQL availability, certificate expiry, backup failure, and CPU/memory pressure. A successful repository test does not configure monitoring.
+- Docker health-checks `/ready`; PostgreSQL unavailability may mark the container `unhealthy`. `restart: unless-stopped` does not restart a container solely because it is `unhealthy`; monitor and alert on that state separately.
 - Logs go to stdout/stderr and Docker rotation is capped at 10 MB × 5 files per container; inspect with `docker compose ... logs --since=1h api`. Do not log bearer tokens, RFID token contents, bridge secrets or raw personal data.
 
 ## Backup, retention and recovery
 
-Run `deploy/scripts/backup-postgres.sh` using a protected environment file or secret manager; the output is custom-format `pg_dump`, mode 0600. Schedule it through the approved host/backup service; this repository does not install a schedule. Store backups encrypted and off the VM, separate from the live DB credentials. A recommended starting retention policy is 30 daily and 12 monthly recovery points, adjusted to an approved RPO/RTO and applicable privacy retention policy. The script intentionally does not delete old backups; implement retention in the approved backup storage system and alert on failed/missing jobs.
+From the backend repository checkout, run [`deploy/scripts/backup-postgres.sh`](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) using a protected environment file or secret manager; the output is custom-format `pg_dump`, mode 0600. Schedule it through the approved host/backup service; the backend repository does not install a schedule. Store backups encrypted and off the VM, separate from the live DB credentials. A recommended starting retention policy is 30 daily and 12 monthly recovery points, adjusted to an approved RPO/RTO and applicable privacy retention policy. The script intentionally does not delete old backups; implement retention in the approved backup storage system and alert on failed/missing jobs.
 
-For a restore drill, create a **new, empty, disposable** database, then run:
+For a restore drill, create a **new, empty, disposable** database. From the same backend checkout, review [`deploy/scripts/restore-postgres-empty-db.sh`](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/restore-postgres-empty-db.sh), then run:
 
 ```bash
 DATABASE_URL='postgresql://...new-empty-test-db...' \
@@ -78,11 +78,11 @@ RESTORE_CONFIRM=RESTORE_TO_EMPTY_DATABASE \
 ./deploy/scripts/restore-postgres-empty-db.sh
 ```
 
-The script rejects a non-empty public schema and never uses `pg_restore --clean`. Verify the restored schema and a small synthetic smoke test. Do not restore over production as a rollback shortcut.
+The script refuses pre-existing objects in any non-system schema and never uses `pg_restore --clean`. Verify the restored schema and run a synthetic smoke test. Do not restore over production as a rollback shortcut.
 
 ## Release and rollback
 
-Before release: verify backups and restore evidence; build/tag immutable images; run CI; inspect migration SQL; apply migrations as an explicit release step; deploy one API instance; check `/health`, `/ready`, CORS, login, Guest response allowlists and core workflows; then deploy the Cloudflare Pages build with the same API origin. Keep the prior image tag for code rollback.
+Before release: verify backups and restore evidence; build/tag immutable images and set `EDUASSETS_IMAGE_TAG` explicitly, recording the previous tag; run CI; inspect migration SQL; apply it as an explicit release step; deploy one API instance; check `/health`, `/ready`, CORS, login, Guest response allowlists, and core workflows; then publish the Cloudflare Pages build manually. Current CI workflows validate code and smoke tests but do not publish/deploy automatically.
 
 A Git/image rollback does **not** reverse a database migration. Use backward-compatible expand/migrate/contract changes. If a migration is not backward-compatible, restore only under an approved incident plan after evaluating data loss; do not run rollback SQL blindly. The first production migration, database backup policy, TLS, origin firewall, Cloudflare Pages settings and monitoring all remain unverified external tasks.
 

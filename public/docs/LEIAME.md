@@ -15,4 +15,4 @@ Esta é a página de entrada em português para os guias da aplicação de naveg
 - [Operação e recuperação](OPERACAO_E_RECUPERACAO.md)
 - [Histórico de alterações](CHANGELOG.md) · [Roadmap](ROADMAP.md)
 
-O painel Sobre mantém o catálogo, a busca, o índice e o renderizador Markdown no repositório do frontend. O modal pode buscar estes arquivos no repositório central quando `VITE_DOCS_BASE_URL` está configurada e o conteúdo está publicamente acessível; caso contrário, usa o fallback de mesma origem incluído no app.
+O painel Sobre mantém o catálogo, a busca, o índice e o renderizador Markdown no repositório do frontend. Por padrão, ele carrega o Markdown canônico de https://docs.eduassets.tech; `VITE_DOCS_BASE_URL` pode substituir a URL-base. Se a requisição remota falhar ou retornar resposta sem sucesso, o app usa o fallback de mesma origem incluído no frontend.

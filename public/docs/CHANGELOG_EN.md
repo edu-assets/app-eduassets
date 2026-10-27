@@ -7,7 +7,7 @@ All versions below v1.0.0 belong to the beta cycle; earlier dates are approximat
 - Cookie-mode RFID login exchanges a one-time code that expires in 30 seconds for a browser session; legacy channels may still use the JWT event.
 - The `#login` entry route prevents the protected app from flashing during bootstrap; direct `#app` access waits for session/Guest authorization.
 - Theme/language controls in Settings were aligned with the login screen; PT/EN UI copy now describes explicit save behavior.
-- The About page and documentation modal now render cards from the same registry. Bilingual API and development guides were added, and deployment guides were registered.
+- The About page and documentation modal now render cards from the same registry. Bilingual API/development guides and deployment/hosting guides are registered. The `site-eduassets` portfolio now reads Markdown from `docs.eduassets.tech` in an accessible dialog with search, table of contents, internal links, and sanitization; the reader supports PT-BR/EN.
 - READMEs, manuals, architecture, data model, hosting, roadmap, and changelogs were reconciled with source/recorded CI; release instructions now distinguish schema-free updates from backup-and-migrate releases.
 
 ## Beta deployment and hosting documentation — October 23, 2026
@@ -28,6 +28,7 @@ All versions below v1.0.0 belong to the beta cycle; earlier dates are approximat
 - `/health` is liveness and `/ready` probes PostgreSQL with a timeout; responses do not reveal connection/provider details. Backend build and Prisma Client generation work without `DIRECT_URL` via the `DATABASE_URL` fallback.
 - Added separate local env templates and production template, a multi-stage backend Dockerfile and Compose file with loopback-only host binding, RFID disabled, sanitized Nginx/Cloudflare proxy template, backup/restore scripts restricted to empty DB, PostgreSQL CI workflow and integration/race tests.
 - Seed display names are synthetic and existing passwords are not overwritten; seed execution remains explicit and requires configured `SEED_*` variables.
+- Local `npm run dev` no longer applies migrations automatically; `npm run dev:db` is the explicit development-database preparation command. The frontend waits for `/ready` and stops with the backend if the backend process fails.
 - Sandbox verification on Oct 22: 36 frontend tests across 9 files, 30 backend unit tests, frontend typecheck/build, backend TypeScript build, Prisma generation, JSON/YAML validation and `prisma validate` passed. PostgreSQL, migrations, seed, the 9 HTTP/concurrency integration tests, production image build and readiness were not run locally because those services/tools were unavailable in the sandbox; hosted CI run `39875293195` passed both `verify` and `production-smoke`, including those checks.
 - Browser QA, hardware, Cloudflare Pages, DNS, firewall, Cloudflare on the target host, certificates, backups/restore and monitoring remain unverified. No remote database, public resource or production environment was accessed or changed.
 

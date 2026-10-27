@@ -8,11 +8,12 @@
 - [x] Prisma/Express backend: no in-memory fallback, required JWT secret, validated config, TypeScript build, `prisma validate` with omitted/empty `DIRECT_URL`, and 30 unit tests passed.
 - [x] JWT/roles and current DB user authorization reviewed; admin timeout uses jti and fails closed; PostgreSQL-backed `sessionVersion` revokes tokens on logout/password change; 401 clears the session while 403/network errors remain distinct.
 - [x] Guest Mode preserved with minimized, server-side allowlisted projections; `/responsaveis` and `/usuarios` require auth; backend authorizes writes.
-- [ ] Loan/return and occurrence transaction/locking paths, logout and password-change revocation require the HTTP/concurrency suite and six migrations against disposable PostgreSQL; they passed in hosted run `39875293195`.
+- [x] Loan/return and occurrence transaction/locking paths, logout, and password-change revocation: the HTTP/concurrency suite and six migrations passed in hosted CI run `39875293195`; this records that run, not a rerun on the current HEAD.
 - [x] F4 — dependent stores/forms refresh after creation; F5 — local-calendar date filters; F6 — 401 without hydrated user; F7 — selected return time sent as an offset-aware timestamp; locally reviewed/tested where applicable.
 - [x] `/health` liveness and timeout-bounded, non-disclosing PostgreSQL `/ready`; reference deployment templates set RFID off (`RFID_BRIDGE_ENABLED=false`).
 - [x] Cookie-first browser sessions with `HttpOnly`/`SameSite=Lax`, `Secure` on HTTPS, Origin validation for mutations, legacy Bearer fallback, and one-time-code RFID exchange; `#login` entry no longer flashes protected content.
 - [x] About page cards use the same registry as the documentation modal; API, development, and deployment guides are listed in the center.
+- [x] Canonical documentation is hosted at `docs.eduassets.tech`; the frontend uses it by default with a local fallback only on remote failure, and the portfolio includes an accessible PT-BR/EN reader with search, table of contents, and sanitization.
 - [x] Local/production environment templates, multi-stage Docker, Compose, Nginx config, non-destructive backup/restore scripts, and GitHub Actions CI added; the API was run on the Oracle VM with remote PostgreSQL on Neon.
 - [x] P0/P1 remediation: optional `DIRECT_URL`, API CSP, direct Node entrypoint, production CI smoke workflow, and public Nginx RFID blocks implemented; external HTTPS and CORS preflight were validated in the deployment.
 
@@ -33,7 +34,7 @@
 - [ ] **Database:** Neon is configured as the deployment's remote PostgreSQL. Off-host backup, controlled `migrate deploy`, and restore evidence in a new empty database are still required.
 - [x] **Host/domain:** Oracle VM, Cloudflare Pages, DNS, HTTPS, inbound firewall, and real `CORS_ORIGIN` were verified in the Beta deployment; real-IP ranges, WAF/rate limiting, and monitoring remain operational reviews.
 - [ ] **Privacy/access:** backend Guest DTOs have unit coverage; end-to-end validation on synthetic demo data and review of provider grants/policies remain necessary. The current app has no direct PostgREST route; if the provider exposes that service, disable unintended anonymous access and review grants/RLS separately.
-- [ ] **Hardware:** no Raspberry Pi/GPIO reader, serial reader, target OS or systemd installation was available; RFID remains optional/off in the public template. Physical cards are clonable identifiers, so the bridge must remain local and protected.
+- [ ] **Hardware:** the SPI/GPIO and serial RFID bridge and `systemd` unit exist in `eduAssets/rpi/rfid/`; target hardware, OS, and operational installation have not been validated. RFID remains optional and disabled in the public Compose configuration.
 - [ ] **Scale:** admin inactivity state is process-local and assumes one instance; shared session/activity state is required before horizontal scaling.
 - [x] **Release:** `app.eduassets.tech` and `api.eduassets.tech` are the operational endpoints for the Beta deployment; templates remain examples for new installations.
 

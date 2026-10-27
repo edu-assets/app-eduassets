@@ -1,6 +1,6 @@
 # Data Model — eduAssets
 
-> **Source and scope:** this document is derived from `backend/prisma/schema.prisma`. Business behavior is included only where it was verified in `emprestimo.service.ts`, `estoque.service.ts`, `ocorrencia.service.ts`, and `usuario.service.ts`.
+> **Source and scope:** this document is derived from `backend/prisma/schema.prisma`. Business behavior is included only where it was verified in `emprestimo.service.ts`, `estoque.service.ts`, `ocorrencia.service.ts`, `usuario.service.ts`, and `equipamento.service.ts`.
 
 The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their schema type ends in `?`; relation fields below are Prisma relations, not persisted columns.
 

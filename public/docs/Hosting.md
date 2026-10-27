@@ -1,6 +1,6 @@
 # EduAssets hosting and operations
 
-> **Status:** Beta, with the operator-validated deployment completed on October 23, 2026. The validation covered the Oracle VM API, the Nginx HTTPS proxy, proxied Cloudflare DNS, the Cloudflare Pages frontend, and the CORS preflight. Off-host backups, a restore drill, monitoring, and the final security review for real data remain separate operational tasks.
+> **Historical record (October 23, 2026):** the operator validated the Oracle VM API, Nginx HTTPS proxy, proxied Cloudflare DNS, Cloudflare Pages frontend, and CORS preflight at that time. This records the observed topology on that date; it does not verify current remote state. Off-host backups, restore drill, monitoring, and final security review for real data remain pending.
 
 ## 1. Deployed topology
 
@@ -8,7 +8,8 @@ The deployment uses three distinct hostnames:
 
 - `eduassets.tech`: an independent landing page hosted by another Cloudflare project;
 - `app.eduassets.tech`: the static EduAssets frontend hosted on Cloudflare Pages;
-- `api.eduassets.tech`: the Node.js/Express backend running in Docker on an Oracle Cloud Ubuntu VM.
+- `api.eduassets.tech`: the Node.js/Express backend running in Docker on an Oracle Cloud Ubuntu VM;
+- `docs.eduassets.tech`: public Markdown documentation served by its dedicated Cloudflare Pages project.
 
 PostgreSQL remains remote on Neon. The VM has only 1 GB of RAM, so it does not host the database locally.
 
@@ -70,17 +71,17 @@ In the frontend Pages project:
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
-# Optional: set only after docs-eduassets is publicly readable; otherwise leave unset.
-VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public
+# Optional; when unset, the app uses https://docs.eduassets.tech. The local fallback is used only if the remote request fails.
+VITE_DOCS_BASE_URL=https://docs.eduassets.tech
 ```
 
 7. Custom domain: `app.eduassets.tech`.
 
-`public/_headers` is copied to `dist/_headers`. The CSP allows the API and the official Cloudflare Web Analytics beacon:
+`public/_headers` is copied to `dist/_headers`. The production CSP must allow the API, hosted documentation, and the official Cloudflare Web Analytics beacon:
 
 ```text
 script-src 'self' https://static.cloudflareinsights.com
-connect-src 'self' https://api.eduassets.tech https://raw.githubusercontent.com https://cloudflareinsights.com
+connect-src 'self' https://api.eduassets.tech https://docs.eduassets.tech https://raw.githubusercontent.com https://cloudflareinsights.com
 ```
 
 The Analytics beacon was blocked when the policy contained only `script-src 'self'`. After changing `_headers`, wait for a new Pages deployment and perform a hard refresh in the browser.
@@ -165,7 +166,7 @@ Migrations and seeding are explicit operations. Never seed an unknown or product
 
 ## 6. Nginx
 
-Nginx receives HTTPS on `0.0.0.0:443` and forwards to the local API. Validate before reloading:
+Nginx accepts HTTPS connections on TCP port 443, according to the reviewed configuration bind, and forwards to the local API. Validate before reloading:
 
 ```bash
 sudo nginx -t
@@ -181,7 +182,7 @@ curl -vk --max-time 10 \
   https://api.eduassets.tech/health
 ```
 
-The public configuration keeps RFID disabled. `/auth/rfid` and `/ws/rfid` must remain blocked in both Nginx and the backend. The RFID kiosk is a separate local deployment.
+A `--resolve` test forces a direct origin connection and bypasses the Cloudflare proxy; it may not reproduce the trusted-proxy/client-IP chain used by normal traffic. Run it only with the reviewed Nginx/real-IP configuration and treat it as an origin test, not a complete public-path test. The public configuration keeps RFID disabled.
 
 ## 7. Firewall: incident and fix
 
@@ -294,13 +295,13 @@ docker compose \
   logs --tail=100 api
 ```
 
-`/health` is liveness and does not depend on PostgreSQL. `/ready` checks the Neon connection and may return `503` when the database is unavailable. The container uses `restart: unless-stopped`, so it remains active across a Docker daemon restart as long as the Compose service and restart policy are preserved.
+`/health` checks process liveness and does not depend on PostgreSQL. `/ready` checks the Neon connection and may return `503` when the database is unavailable. The Compose health check may mark the container `unhealthy`; `restart: unless-stopped` does not restart a process solely for that state, so configure separate monitoring/alerts. The policy keeps the service running after a Docker daemon restart, provided Compose was started and the restart policy remains in place.
 
 Configure external monitoring separately for `/health`, `/ready`, 5xx responses, TLS expiry, disk space, memory, Neon availability, and backup failures. The repository does not create this monitoring automatically.
 
 ## 11. Backup and recovery
 
-Before migrations on an operational database, run `deploy/scripts/backup-postgres.sh` with a protected URL compatible with `pg_dump`. For Neon PostgreSQL 18, use `pg_dump` major version 18 or newer; do not use a version 16 client against a version 18 server.
+Before migrations on an operational database, run [backup-postgres.sh](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) from the root of the backend repository checkout, with a protected URL compatible with `pg_dump`. For Neon PostgreSQL 18, use `pg_dump` major version 18 or newer; do not use a version 16 client against a version 18 server.
 
 When sourcing an environment file, avoid externally duplicated quote characters. For `pg_dump`, keep a dedicated libpq URL if Prisma parameters differ. Never place real URLs in this document.
 
@@ -317,7 +318,7 @@ Backups must be encrypted, copied off the VM, and tested by restoring into a new
 - [x] Port 80/443 input rules fixed before the generic `REJECT`.
 - [x] External HTTPS reaches the API.
 - [x] CORS preflight returns the exact frontend origin.
-- [x] CSP allows the API and official Cloudflare beacon.
+- [x] CSP allows the API, hosted documentation, and official Cloudflare beacon.
 - [ ] Off-host backup and restore drill documented with operational evidence.
 - [ ] External monitoring and alerts configured.
 - [ ] Final privacy, database grants, and retention review for real data.

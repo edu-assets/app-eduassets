@@ -66,15 +66,15 @@ Set these public build-time variables for Production and Preview as needed:
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
-# Set after docs-eduassets is public; until then, leave unset to use bundled docs.
-VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public
+# Optional override; the default is https://docs.eduassets.tech; local Markdown is used only if the remote request fails.
+VITE_DOCS_BASE_URL=https://docs.eduassets.tech
 ```
 
 `public/_headers` supplies the static response security headers copied into the build output. The frontend build does not deploy or configure the API, database, DNS, or Cloudflare account settings.
 
 ## Documentation
 
-The canonical bilingual guides are maintained in [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets/tree/main/public/docs). The copies in `public/docs/` remain a same-origin fallback during migration; the About modal catalog and renderer stay in this repository. Set `VITE_DOCS_BASE_URL` to `https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public` only after the docs repository is publicly readable. If remote loading fails, the modal falls back to the bundled Markdown.
+The canonical bilingual guides are maintained in [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets/tree/main/public/docs) and hosted at https://docs.eduassets.tech. The About modal defaults to that host; `VITE_DOCS_BASE_URL` is an optional override. Markdown in `public/docs/` is a fallback used only when the remote request fails or returns a non-success response.
 
 Main guides in the central repository:
 
@@ -83,6 +83,7 @@ Main guides in the central repository:
 - [API reference](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/API_REFERENCE.md) · [Referência da API](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/REFERENCIA_API.md)
 - [Development](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/DEVELOPMENT.md) · [Desenvolvimento](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/DESENVOLVIMENTO.md)
 - [Deployment](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/DEPLOYMENT.md) · [Implantação](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/GUIA_IMPLANTACAO.md)
+- [Hosting](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/Hosting.md) · [Hospedagem](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/Hospedagem.md)
 - [Operations and recovery](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/OPERATIONS_AND_RECOVERY.md) · [Operação e recuperação](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/OPERACAO_E_RECUPERACAO.md)
 - [Changelog](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/CHANGELOG_EN.md) · [Histórico de alterações](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/CHANGELOG.md)
 

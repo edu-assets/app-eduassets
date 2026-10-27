@@ -13,7 +13,7 @@ npm ci
 cp .env.example .env
 ```
 
-No desenvolvimento local, deixe vazias as URLs base da API e da documentação; o Vite encaminha as requisições da API e o modal usa o fallback Markdown incluído no app:
+No desenvolvimento local, deixe `VITE_API_BASE_URL` vazia para usar o proxy Vite. `VITE_DOCS_BASE_URL` vazia usa `https://docs.eduassets.tech` por padrão; o fallback Markdown local é usado somente se a requisição remota falhar ou não tiver sucesso:
 
 ```env
 VITE_API_BASE_URL=
@@ -21,7 +21,7 @@ VITE_RFID_BRIDGE_ENABLED=false
 VITE_DOCS_BASE_URL=
 ```
 
-Execute a API separadamente a partir de `edu-assets/eduAssets`. A configuração local do backend, PostgreSQL e migrations está na [Referência da API](REFERENCIA_API.md) central. Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador. Depois que `docs-eduassets` estiver publicamente acessível, o build de produção pode definir `VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public`; se o arquivo remoto falhar, o modal mantém o fallback local.
+Execute a API separadamente a partir de `edu-assets/eduAssets`. Builds de produção exigem `VITE_API_BASE_URL` apontando para a origem da API; `VITE_DOCS_BASE_URL` é opcional e, quando omitida, usa `https://docs.eduassets.tech`. Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador. Se a origem remota da documentação falhar, o modal usa o fallback local incluído no app.
 
 ## Execução e verificações
 
@@ -33,7 +33,7 @@ npm run build
 npm run preview
 ```
 
-O servidor Vite escuta na porta **5173** e encaminha as rotas da API e o caminho WebSocket suportado para `127.0.0.1:3000`. O build Cloudflare Pages de produção usa a raiz `/`, comando `npm run build` e diretório de saída `dist`. `public/_headers` é copiado para a saída. Esses comandos não fazem deploy nem se conectam a serviços de produção.
+O servidor Vite escuta na porta **5173** e encaminha as rotas de API configuradas, `/ready` e o caminho WebSocket suportado para a API local na porta 3000. O build Cloudflare Pages de produção usa a raiz `/`, comando `npm run build` e diretório de saída `dist`. `public/_headers` é copiado para a saída. Esses comandos não fazem deploy nem se conectam a serviços de produção.
 
 ## Estrutura e convenções
 

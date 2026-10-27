@@ -14,7 +14,7 @@ The current browser flow prefers cookie sessions when `GET /auth/session-capabil
 
 For authenticated cookie-based state-changing requests (`POST`, `PUT`, `PATCH`, or `DELETE`), the backend requires an `Origin` allowed by the CORS configuration. Do not remove that check to work around CORS failures. Browsers must use an authorized web origin and proxy/TLS configuration that correctly conveys HTTPS.
 
-The authentication middleware also accepts `Authorization: Bearer <JWT>` for older clients and fallback modes. The frontend uses this option only when the API does not advertise cookie support. Avoid storing JavaScript-readable access tokens when an HttpOnly cookie is available. Never include real cookies, JWTs, passwords, or secrets in logs or examples.
+The authentication middleware also accepts `Authorization: Bearer <JWT>` for older clients and fallback modes. The current client includes `Authorization` whenever a local token exists, even when it also sends a cookie; the backend gives the cookie session precedence. Avoid storing JavaScript-readable tokens when an `HttpOnly` cookie is available. Never include real cookies, JWTs, passwords, or secrets in logs or examples.
 
 ## Authentication and health
 

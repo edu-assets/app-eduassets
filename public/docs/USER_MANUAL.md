@@ -23,7 +23,8 @@ The current data model tracks quantities by **category/model**. It does not prov
 1. On the entry screen, enter **E-mail / Login** and **Password**; for limited read-only access, choose **Continue as guest**.
 2. Click **Sign in**. After sign-in, the user menu shows the account name and role.
 3. To end the session, open the user menu and click **Log out**. The system requests revocation from the backend and returns to the login screen.
-5. **Contact the administrator** does not recover a password; it is the guidance shown when an account has no available password-recovery path.
+
+**Password recovery:** the system does not provide automatic recovery. Contact the installation administrator if no password is available.
 
 Sessions use an `HttpOnly` cookie when the backend advertises support, with a JWT lifetime of up to 8 hours; page JavaScript cannot read that cookie. On production HTTPS, the cookie is also `Secure`. **Administrator** sessions expire after 30 minutes of inactivity and return to the login screen. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
 
@@ -85,7 +86,7 @@ Displayed stock is derived from open loans and maintenance/broken issues. Check 
 ### Create or edit a record
 
 1. Click **New** and choose **Observation**, **Maintenance**, or **Broken**.
-2. In the form, select **Category** and **Model**, enter **Number**, choose the **Issue**, and fill in **Description**. Available issue choices include **Screen**, **Audio**, **Battery**, **Cable**, **Touchscreen**, **Keyboard**, **Button**, **Casing**, and **Other**.
+2. In the form, select **Category** and **Model**, enter **Number**, choose the **Issue**, and optionally fill in **Description**; an empty description is stored as “—”. Available issue choices include **Screen**, **Audio**, **Battery**, **Cable**, **Touchscreen**, **Keyboard**, **Button**, **Casing**, and **Other**.
 3. Click **Save**. For an existing row, select it, click **Edit**, change the fields, and save.
 
 **Observation** is a note and does not change stock. **Maintenance** removes the affected quantity from available stock until resolution. **Broken** also removes it from available stock and increments the broken count.
@@ -135,7 +136,7 @@ In **Settings**:
 - **Appearance → Theme:** choose **Light**, **Dark**, or **System**.
 - **Language:** choose **Português** or **English**; the interface switches immediately.
 - **Notifications:** switch **Loan alerts** and **Return alerts** between **Enabled** and **Disabled**.
-- Click **Save Settings** when the UI offers it. Saving is restricted to **Administrator**.
+- **Save Settings:** the button available to Administrators currently shows a visual confirmation but does not persist alerts in the backend. Theme and language are saved automatically as preferences in this browser.
 
 Theme and language are browser preferences. The notification interface is present, but the inspected code exposes no backend route for persisting alerts; do not treat the visual switch state as proof that a notification was delivered.
 

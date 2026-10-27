@@ -1,10 +1,10 @@
 # Implantação e operação
 
-> **Status: implantação Beta validada em 23/10/2026.** O operador verificou o frontend Cloudflare Pages em `app.eduassets.tech`, a API Nginx na VM Oracle em `api.eduassets.tech`, a configuração de conexão com o Neon, o HTTPS externo e o preflight CORS. Backup externo, ensaio de restauração, monitoramento e revisão final para dados reais continuam tarefas operacionais. Consulte `Hospedagem.md` para o runbook completo e a correção exata do incidente de firewall.
+> **Registro histórico (23/10/2026):** o operador validou naquele momento o frontend Cloudflare Pages em `app.eduassets.tech`, a API Nginx na VM Oracle em `api.eduassets.tech`, a configuração de conexão com o Neon, o HTTPS externo e o preflight CORS. Este registro não verifica o estado remoto atual. Backup externo, ensaio de restauração, monitoramento e revisão final para dados reais continuam tarefas operacionais. Consulte `Hospedagem.md` para o runbook.
 
 ## Topologia escolhida
 
-A arquitetura de referência é frontend estático na Cloudflare Pages e uma instância Docker do backend em VM dedicada, atrás de Nginx local e Cloudflare em modo Full (strict). O PostgreSQL deve ser dedicado a essa implantação. O container escuta em `0.0.0.0:3000` dentro da rede Docker, mas a VM publica somente `127.0.0.1:3000`. RFID fica desativado na instância pública. Não conectar demo e dados operacionais.
+A arquitetura de referência é frontend estático na Cloudflare Pages e uma instância Docker do backend em VM dedicada, atrás de Nginx local e Cloudflare em modo Full (strict). O PostgreSQL é externo e dedicado a essa implantação. O serviço `api` usa a porta 3000 dentro da rede Docker; a VM publica a API somente em loopback na porta 3000. RFID fica desativado na instância pública. Não conectar demo e dados operacionais.
 
 ```text
 Navegador → frontend estático Cloudflare Pages → Cloudflare HTTPS → Nginx :443
@@ -47,29 +47,29 @@ A migration `20261022110000_user_session_version` rejeita JWTs antigos sem o nov
 
 A imagem multi-stage mantém apenas dependências de produção no runtime, roda como usuário Node sem privilégio, remove capabilities Linux, usa filesystem root somente leitura e tem política de restart. O alvo `migration` contém Prisma CLI/TSX apenas para operação explícita. O build fornece URL sintética loopback para `prisma generate`; ela não é configuração runtime. Migrações nunca rodam automaticamente no startup. `npm ci --omit=dev` sozinho não é fluxo de release: etapa de migração precisa do Prisma CLI, enquanto o runtime é podado após gerar o client.
 
-Na implantação Cloudflare Pages validada, conectar `edu-assets/app-eduassets`, selecionar `main` como branch de produção, definir a raiz como `/`, o build como `npm run build` e o diretório de saída como `dist`. Definir `VITE_API_BASE_URL=https://api.eduassets.tech` e `VITE_RFID_BRIDGE_ENABLED=false`. Depois que `docs-eduassets` estiver publicamente acessível, definir `VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public` para o modal Sobre buscar o Markdown canônico; o app mantém fallback incluído. Adicionar o domínio personalizado `app.eduassets.tech` e manter a landing page separada em `eduassets.tech`. Na API, definir `CORS_ORIGIN=https://app.eduassets.tech`, sem barra final. A CSP publicada permite API, GitHub Raw e `https://static.cloudflareinsights.com` para o beacon oficial do Pages Analytics. Consulte `Hospedagem.md` para procedimentos de DNS, Nginx, Docker, firewall, CORS e diagnóstico.
+Na configuração de build do Cloudflare Pages, use raiz `/`, comando `npm run build` e diretório `dist`. Defina `VITE_API_BASE_URL=https://api.eduassets.tech` e `VITE_RFID_BRIDGE_ENABLED=false`. `VITE_DOCS_BASE_URL` é opcional: se vazia, o app usa `https://docs.eduassets.tech`; se definida, deve conter a origem base, sem `/docs`. O fallback local é usado se a requisição remota falhar ou não tiver sucesso. Configure `CORS_ORIGIN=https://app.eduassets.tech` na API, sem barra final. A CSP do frontend deve permitir API, `https://docs.eduassets.tech` e o beacon oficial Cloudflare Analytics. CI valida código e templates, mas não publica Pages nem implanta na VM. Consulte `Hospedagem.md` para DNS, Nginx, Docker, firewall, CORS e diagnóstico.
 
 ## Nginx, proxy confiável e TLS
 
-Revise `deploy/nginx/eduassets-api.conf.example`, substitua hostname e caminhos de certificado pelos valores verificados e instale apenas após criar o include Cloudflare real-IP. O template retorna 404 para `/auth/rfid` e `/ws/rfid` de forma case-insensitive, incluindo variantes com barra final, e encaminha o restante em `/` para a API; não habilita upgrades WebSocket. O endereço de loopback observado pelo Nginx não prova que o chamador original é local, portanto RFID permanece restrito ao quiosque separado. Define `X-Forwarded-For` com `$remote_addr` saneado pelo Nginx, não com uma cadeia arbitrária enviada pelo cliente, e usa limites razoáveis de corpo/timeout. Rode `nginx -t` e recarregue após revisão do operador. `TRUST_PROXY=1` significa exatamente um salto; nunca usar `true` nem confiar em forwarded headers sem validação. Sem ranges Cloudflare atualizados, Express vê o IP de edge e rate limits podem agrupar clientes; a validação em produção de IP/rate limits permanece pendente externa.
+Revise `deploy/nginx/eduassets-api.conf.example`, substitua hostname e caminhos de certificado pelos valores verificados e instale somente após criar o include de real-IP da Cloudflare com os ranges oficiais atualizados. O include deve confiar apenas nessas faixas; o template sobrescreve `X-Forwarded-For` com o endereço saneado pelo Nginx, não com uma cadeia enviada pelo cliente. A atribuição do IP do cliente no Nginx/Express e os rate limits dependem da cadeia de proxy e das faixas confiáveis atuais; faixas ausentes ou obsoletas podem impedir a identificação correta. Valide essa cadeia no host antes de concluir a configuração. O template bloqueia `/auth/rfid` e `/ws/rfid` e não habilita upgrades WebSocket. Rode `nginx -t` e recarregue somente após revisão do operador.
 
 O backend usa loopback como padrão de serviço direto fora de produção; o container escuta na sua rede isolada, publicado só em loopback da VM. RFID público permanece off (`RFID_BRIDGE_ENABLED=false`, `VITE_RFID_BRIDGE_ENABLED=false`); não há rota proxy `/ws`. Não colocar quiosque RFID na instância pública.
 
 
-For public deployments, add a reviewed Cloudflare WAF/rate-limiting rule for `POST /auth/login` in addition to the application limiter. This is an external configuration requirement and is not configured or verified by this repository.
+Para deployments públicos, configure uma regra Cloudflare WAF/limite de taxa revisada para `POST /auth/login`, além do limitador da aplicação. Essa configuração externa não é criada nem verificada por este repositório.
 
 ## Saúde, logs e monitoramento
 
 - `GET /health` é liveness e deliberadamente não depende do PostgreSQL.
 - `GET /ready` executa `SELECT 1` com timeout limitado; retorna só `{status:"ready"}` ou HTTP 503 `{status:"unavailable"}`.
-- Docker monitora `/ready`. Configurar monitoramento externo de HTTPS `/health` e `/ready`, alertas para 5xx, disco, banco, expiração TLS, falha/ausência de backup e CPU/memória. Teste local não configura monitoramento.
+- Docker monitora `/ready`; indisponibilidade do PostgreSQL pode deixar o container `unhealthy`. `restart: unless-stopped` não reinicia um container apenas porque está `unhealthy`; monitore e alerte esse estado separadamente.
 - Logs vão para stdout/stderr e a rotação Docker está limitada a 10 MB × 5 arquivos por container; consultar `docker compose ... logs --since=1h api`. Não registrar bearer tokens, tokens RFID, segredos da ponte ou dados pessoais brutos.
 
 ## Backup, retenção e recuperação
 
-Execute `deploy/scripts/backup-postgres.sh` com env file protegido ou secret manager. O backup custom-format (`pg_dump`) recebe permissão 0600. Agende-o pelo serviço de backup/host aprovado; este repositório não instala um agendamento. Armazene-o criptografado fora da VM e separado das credenciais do banco. Política inicial recomendada: 30 pontos diários e 12 mensais, ajustada a RPO/RTO aprovados e regras de retenção de dados. O script não exclui backups antigos; retenção deve ficar no sistema de armazenamento aprovado, com alerta de falhas.
+No checkout do backend, execute [`deploy/scripts/backup-postgres.sh`](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) com env file protegido ou secret manager. O backup custom-format (`pg_dump`) recebe permissão 0600. Agende-o pelo serviço de backup/host aprovado; o repositório backend não instala um agendamento. Armazene-o criptografado fora da VM e separado das credenciais do banco. Política inicial recomendada: 30 pontos diários e 12 mensais, ajustada a RPO/RTO aprovados e regras de retenção de dados. O script não exclui backups antigos; retenção deve ficar no sistema de armazenamento aprovado, com alerta de falhas.
 
-Para ensaio, crie banco **novo, vazio e descartável** e execute:
+Para ensaio, crie banco **novo, vazio e descartável**. No mesmo checkout do backend, consulte [`deploy/scripts/restore-postgres-empty-db.sh`](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/restore-postgres-empty-db.sh) e execute:
 
 ```bash
 DATABASE_URL='postgresql://...novo-banco-vazio-de-teste...' \
@@ -78,11 +78,11 @@ RESTORE_CONFIRM=RESTORE_TO_EMPTY_DATABASE \
 ./deploy/scripts/restore-postgres-empty-db.sh
 ```
 
-O script recusa schema público não vazio e nunca usa `pg_restore --clean`. Verifique schema restaurado e smoke test sintético. Não restaurar sobre produção como atalho de rollback.
+O script recusa objetos preexistentes em qualquer schema não sistêmico e não usa `pg_restore --clean`. Verifique o schema restaurado e execute smoke test sintético. Não restaure sobre produção como atalho de rollback.
 
 ## Release e rollback
 
-Antes de release: verificar backup/restauração; build/tag de imagens imutáveis; CI verde; revisar SQL de migração; aplicar migração explicitamente; subir uma API; testar `/health`, `/ready`, CORS, login, allowlists de Guest e fluxos principais; então publicar Cloudflare Pages com a mesma origem de API. Manter tag de imagem anterior para rollback de código.
+Antes de release: verificar backup e evidência de restauração; buildar/taguear imagens imutáveis e definir `EDUASSETS_IMAGE_TAG` explicitamente, mantendo registrada a tag anterior; executar CI; revisar SQL da migration; aplicá-la como etapa explícita; subir uma instância da API; testar `/health`, `/ready`, CORS, login, allowlists do Guest e fluxos principais; então publicar manualmente o build do Cloudflare Pages. Os workflows atuais de CI validam código e smoke tests, mas não publicam/deployam automaticamente.
 
 Rollback Git/imagem **não reverte migração**. Usar migrações compatíveis para frente/trás (expand/migrate/contract). Se uma migração não for compatível, restaurar somente por plano aprovado de incidente, avaliando perda de dados; não executar SQL de rollback às cegas. Primeira migração de produção, backups, TLS, firewall, Cloudflare Pages e monitoramento continuam tarefas externas não verificadas.
 

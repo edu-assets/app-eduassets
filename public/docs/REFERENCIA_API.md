@@ -14,7 +14,7 @@ O fluxo atual prefere sessão em cookie quando `GET /auth/session-capabilities` 
 
 Em requisições mutáveis autenticadas por cookie (`POST`, `PUT`, `PATCH` ou `DELETE`), o backend exige um cabeçalho `Origin` permitido pela configuração CORS. Não remova essa validação para resolver erros de CORS. Navegadores devem usar a origem web autorizada no servidor e uma configuração proxy/TLS que preserve corretamente a informação de HTTPS.
 
-O middleware também aceita `Authorization: Bearer <JWT>` para compatibilidade com clientes antigos e modos de fallback. O frontend usa essa opção somente quando a API não anuncia suporte a cookie; evite persistir tokens em armazenamento acessível a JavaScript quando cookie HttpOnly estiver disponível. Não inclua cookies, JWTs, senhas ou segredos em logs ou exemplos reais.
+O middleware também aceita `Authorization: Bearer <JWT>` para compatibilidade com clientes antigos e modos de fallback. O cliente atual envia `Authorization` quando existe token local mesmo se também usar cookie; o backend prioriza a sessão do cookie. Evite persistir tokens acessíveis a JavaScript quando o cookie `HttpOnly` estiver disponível. Não inclua cookies, JWTs, senhas ou segredos reais em logs ou exemplos.
 
 ## Autenticação e saúde
 

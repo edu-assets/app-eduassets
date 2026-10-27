@@ -1,6 +1,6 @@
 # Hospedagem e operação do EduAssets
 
-> **Status:** Beta, com implantação operacional validada pelo operador em 23/10/2026. A validação cobriu a API na VM Oracle, o proxy HTTPS do Nginx, o DNS proxied da Cloudflare, o frontend no Cloudflare Pages e o preflight CORS. Backups externos, restore drill, monitoramento e revisão de segurança para uso com dados reais continuam sendo tarefas operacionais separadas.
+> **Registro histórico (23/10/2026):** o operador validou naquele momento a API na VM Oracle, o proxy HTTPS do Nginx, DNS proxied da Cloudflare, frontend Cloudflare Pages e preflight CORS. Este texto registra a topologia observada naquela data; não verifica o estado remoto atual. Backup externo, restore drill, monitoramento e revisão final de segurança para dados reais continuam pendentes.
 
 ## 1. Topologia implantada
 
@@ -8,7 +8,8 @@ A implantação usa três hostnames distintos:
 
 - `eduassets.tech`: landing page independente, publicada em outro projeto Cloudflare;
 - `app.eduassets.tech`: frontend estático do EduAssets, publicado no Cloudflare Pages;
-- `api.eduassets.tech`: backend Node.js/Express, executado em um container Docker na VM Ubuntu da Oracle Cloud.
+- `api.eduassets.tech`: backend Node.js/Express, executado em um container Docker na VM Ubuntu da Oracle Cloud;
+- `docs.eduassets.tech`: documentação Markdown pública servida pelo projeto Cloudflare Pages dedicado.
 
 O PostgreSQL permanece remoto no Neon. A VM tem somente 1 GB de RAM, portanto não hospeda o banco localmente.
 
@@ -70,17 +71,17 @@ No projeto Pages do frontend:
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
-# Opcional: configure só depois que docs-eduassets estiver público; antes, deixe vazio.
-VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public
+# Opcional; sem esta variável, o app usa https://docs.eduassets.tech. O fallback local só entra se a origem remota falhar.
+VITE_DOCS_BASE_URL=https://docs.eduassets.tech
 ```
 
 7. Domínio personalizado: `app.eduassets.tech`.
 
-O arquivo `public/_headers` é copiado para `dist/_headers`. A CSP permite a API e o beacon oficial do Cloudflare Web Analytics:
+O arquivo `public/_headers` é copiado para `dist/_headers`. A CSP de produção deve permitir API, documentação hospedada e o beacon oficial do Cloudflare Web Analytics:
 
 ```text
 script-src 'self' https://static.cloudflareinsights.com
-connect-src 'self' https://api.eduassets.tech https://raw.githubusercontent.com https://cloudflareinsights.com
+connect-src 'self' https://api.eduassets.tech https://docs.eduassets.tech https://raw.githubusercontent.com https://cloudflareinsights.com
 ```
 
 O beacon do Analytics era bloqueado quando a política continha apenas `script-src 'self'`. Depois de alterar `_headers`, é necessário aguardar um novo deploy do Pages e fazer um recarregamento completo no navegador.
@@ -165,7 +166,7 @@ Migrações e seed são operações explícitas. Não execute seed contra um ban
 
 ## 6. Nginx
 
-O Nginx recebe HTTPS em `0.0.0.0:443` e encaminha para a API local. Valide antes de recarregar:
+O Nginx aceita conexões HTTPS na porta TCP 443, conforme o bind da configuração revisada, e encaminha para a API local. Valide antes de recarregar:
 
 ```bash
 sudo nginx -t
@@ -181,7 +182,7 @@ curl -vk --max-time 10 \
   https://api.eduassets.tech/health
 ```
 
-A configuração pública mantém RFID desligado. `/auth/rfid` e `/ws/rfid` devem continuar bloqueados no Nginx e no backend. O quiosque RFID é uma implantação separada e local.
+O teste com `--resolve` força acesso direto à origem e contorna o proxy Cloudflare; ele pode não reproduzir a cadeia de proxy/IP confiável do tráfego normal. Execute-o somente com a configuração Nginx/real-IP revisada e interprete-o como teste de origem, não como teste completo do caminho público. A configuração pública mantém RFID desligado.
 
 ## 7. Firewall: falha encontrada e correção
 
@@ -294,13 +295,13 @@ docker compose \
   logs --tail=100 api
 ```
 
-`/health` verifica liveness e não depende do PostgreSQL. `/ready` verifica a conexão com o Neon e pode retornar `503` quando o banco estiver indisponível. O container usa `restart: unless-stopped`, portanto permanece ativo após reinício do daemon Docker, desde que o Compose tenha sido iniciado e a política de restart esteja preservada.
+`/health` verifica liveness e não depende do PostgreSQL. `/ready` verifica a conexão com o Neon e pode retornar `503` quando o banco estiver indisponível. O healthcheck do Compose pode marcar o container como `unhealthy`; `restart: unless-stopped` não reinicia o processo só por esse estado, então configure monitoramento/alerta separado. A política mantém o serviço após reinício do daemon Docker, desde que o Compose tenha sido iniciado e a política de restart preservada.
 
 Configure separadamente monitoramento externo para `/health`, `/ready`, respostas 5xx, expiração TLS, espaço em disco, memória, disponibilidade do Neon e falha de backup. Essa configuração não é criada automaticamente pelo repositório.
 
 ## 11. Backup e recuperação
 
-Antes de migrations em banco operacional, faça backup com `deploy/scripts/backup-postgres.sh`, usando uma URL protegida e compatível com `pg_dump`. Para o Neon PostgreSQL 18, use `pg_dump` major 18 ou mais recente; não use um cliente 16 contra o servidor 18.
+Antes de migrations em banco operacional, execute [backup-postgres.sh](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) a partir da raiz do checkout do repositório backend, usando uma URL protegida e compatível com `pg_dump`. Para o Neon PostgreSQL 18, use `pg_dump` major 18 ou mais recente; não use um cliente 16 contra o servidor 18.
 
 Quando o `.env` for carregado com `source`, prefira valores sem aspas externas duplicadas. Para operações com `pg_dump`, mantenha uma URL libpq própria se os parâmetros do Prisma forem diferentes. Nunca coloque URLs reais neste documento.
 
@@ -317,7 +318,7 @@ O backup deve ser criptografado, enviado para fora da VM e testado com restaura�
 - [x] Regras de entrada 80/443 corrigidas antes do `REJECT` genérico.
 - [x] HTTPS externo alcança a API.
 - [x] Preflight CORS retorna a origem exata do frontend.
-- [x] CSP permite API e beacon oficial do Cloudflare.
+- [x] CSP permite API, documentação hospedada e beacon oficial do Cloudflare.
 - [ ] Backup externo e restore drill documentados com evidência operacional.
 - [ ] Monitoramento externo e alertas configurados.
 - [ ] Revisão final de privacidade, grants do banco e política de retenção para dados reais.

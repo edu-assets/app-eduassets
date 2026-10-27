@@ -23,7 +23,8 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 1. Na tela de entrada, preencha **E-mail / Login** e **Senha**; para leitura limitada, selecione **Continuar como convidado**.
 2. Clique em **Entrar**. Após o login, o menu mostra o nome e o papel da conta.
 3. Para encerrar a sessão, abra o menu do usuário e clique em **Sair**. O sistema solicita a revogação ao backend e retorna à tela de login.
-5. **Contate o administrador** não recupera senha: é apenas a orientação exibida quando a conta não tem uma senha disponível.
+
+**Recuperação de senha:** o sistema não oferece recuperação automática. Contate o administrador da instalação se não houver uma senha disponível.
 
 As sessões usam cookie `HttpOnly` quando o backend anuncia suporte, com prazo do JWT de até 8 horas; JavaScript da página não pode ler esse cookie. Em produção HTTPS, o cookie também usa `Secure`. Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam à tela de login. O código atual não aplica esse limite às sessões de **Editor**. O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
 
@@ -85,7 +86,7 @@ O painel **Controle** separa os registros nas abas **Observação**, **Manutenç
 ### Criar ou editar um registro
 
 1. Clique em **Novo** e escolha **Observação**, **Manutenção** ou **Quebrado**.
-2. No formulário, selecione **Categoria** e **Modelo**, informe **Número**, escolha o **Problema** e preencha **Descrição**. Os tipos de problema disponíveis incluem **Tela**, **Áudio**, **Bateria**, **Cabo**, **Touch**, **Teclado**, **Botão**, **Carcaça** e **Outro**.
+2. No formulário, selecione **Categoria** e **Modelo**, informe **Número**, escolha o **Problema** e, se quiser, preencha **Descrição**; se ficar vazia, o sistema registra “—”. Os tipos de problema disponíveis incluem **Tela**, **Áudio**, **Bateria**, **Cabo**, **Touch**, **Teclado**, **Botão**, **Carcaça** e **Outro**.
 3. Clique em **Salvar**. Para uma linha existente, selecione-a, clique em **Editar**, ajuste os campos e salve.
 
 **Observação** é uma anotação e não altera o estoque. **Manutenção** retira a quantidade afetada de disponíveis até a resolução. **Quebrado** também retira de disponíveis e incrementa a contagem de quebrados.
@@ -135,7 +136,7 @@ Em **Configurações**:
 - **Aparência → Tema:** escolha **Claro**, **Escuro** ou **Sistema**.
 - **Idioma / Language:** escolha **Português** ou **English**; a interface troca de idioma imediatamente.
 - **Notificações:** altere **Alertas de empréstimo** e **Alertas de devolução** entre **Ativado** e **Desativado**.
-- Clique em **Salvar Configurações** quando a UI oferecer essa ação. O salvamento é restrito a **Administrador**.
+- **Salvar Configurações:** o botão disponível ao Administrador mostra uma confirmação visual, mas não persiste alertas no backend. Tema e idioma são salvos automaticamente como preferências deste navegador.
 
 O tema e o idioma são preferências do navegador. A interface de notificações está presente, mas o código inspecionado não expõe uma rota de backend para persistir alertas; não trate o estado visual como prova de entrega de notificações.
 
