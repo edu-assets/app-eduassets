@@ -1,6 +1,6 @@
 # Frontend do eduAssets
 
-[README em inglês](README.md) · [Português](README_PT.md)
+[English](README.md) · [Repositório da API/backend](https://github.com/edu-assets/eduAssets)
 
 > **Status: Beta.** Este repositório contém a aplicação web do eduAssets. É uma aplicação single-page em Vite/TypeScript; a API e o banco de dados são mantidos separadamente.
 
