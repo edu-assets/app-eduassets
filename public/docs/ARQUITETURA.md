@@ -39,7 +39,7 @@ O proxy do Vite é configuração de desenvolvimento, não uma política de rede
 
 ## Frontend
 
-O frontend é uma aplicação TypeScript construída com Vite e módulos ES nativos. O ponto de entrada é `frontend/src/main.ts`:
+O código-fonte do frontend é mantido separadamente no repositório `edu-assets/app-eduassets`. É uma aplicação TypeScript construída com Vite e módulos ES nativos. O ponto de entrada é `src/main.ts`:
 
 1. Em `DOMContentLoaded`, inicializa tema e internacionalização. Antes do carregamento completo dos estilos/scripts, um marcador síncrono oculta o conteúdo protegido: acesso direto a `#login` apresenta o gate imediatamente, enquanto `#app` fica oculto até resolver sessão/autorização de convidado.
 2. Executa a inicialização da autenticação e as cargas iniciais de equipamentos, responsáveis, empréstimos e ocorrências com `Promise.allSettled`.

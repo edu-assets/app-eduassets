@@ -1,72 +1,63 @@
-# Desenvolvimento e validação — eduAssets
+# Desenvolvimento e validação do frontend
 
-> Guia para quem trabalha no checkout do repositório. Os valores de ambiente são locais; nunca copie segredos de produção para o Git, screenshots, testes ou documentação.
+Este repositório contém a aplicação de navegador do eduAssets. O código-fonte da API é mantido separadamente em [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets), no diretório `backend/`. Os dois repositórios podem ser instalados e implantados independentemente.
 
 ## Requisitos
 
-- Node.js **22.12 ou superior** e npm;
-- PostgreSQL local ou ambiente de teste descartável para executar a API e as migrações;
-- Git; Docker apenas para os fluxos de imagem/Compose e validação de deployment.
+- Node.js **22.12 ou mais recente** e npm;
+- Git;
+- uma API local/de teste em `127.0.0.1:3000` para fluxos autenticados e validações manuais completas.
 
-O monorepo contém três projetos npm: a raiz (utilitário `concurrently`), `backend` e `frontend`. Instale cada árvore separadamente:
+## Instalação e configuração
 
 ```bash
 npm ci
-npm --prefix backend ci
-npm --prefix frontend ci
+cp .env.example .env
 ```
 
-## Configuração local
+Use a configuração local padrão para que o Vite encaminhe as requisições para a API:
 
-Copie `.env.example` para `backend/.env` e preencha valores locais. Configure `DATABASE_URL` para um banco PostgreSQL de desenvolvimento e `JWT_SECRET` como um valor aleatório com pelo menos 32 caracteres. `DIRECT_URL` é opcional e usa `DATABASE_URL` como fallback. Não use banco de produção para testes ou migrações exploratórias.
-
-Para uma build do frontend independente do proxy Vite, configure `VITE_API_BASE_URL` com a origem da API local (por exemplo, `http://127.0.0.1:3000`). A flag RFID permanece desligada por padrão; não a habilite sem uma rede, bridge e segredo isolados.
-
-## Executar
-
-Na raiz, `npm run dev` inicia frontend e API juntos. Em separado, use:
-
-```bash
-npm --prefix backend run dev
-npm --prefix frontend run dev
+```env
+VITE_API_BASE_URL=
+VITE_RFID_BRIDGE_ENABLED=false
 ```
 
-O Vite usa a porta 5173 e encaminha a API local para o backend na porta 3000. O backend também aceita `PORT`, com precedência sobre `BACKEND_PORT`. O assistente local de provisionamento RFID, quando instalado separadamente, usa `127.0.0.1:3001`; não é a API web.
+Execute a API separadamente a partir do repositório `edu-assets/eduAssets`. A configuração local do backend, PostgreSQL e migrations estão documentados nesse repositório e na [Referência da API](REFERENCIA_API.md). Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador.
 
-## Testes, tipos e build
+## Execução local
 
 ```bash
-# Frontend
-npm --prefix frontend test
-npm --prefix frontend run typecheck
-npm --prefix frontend run build
+npm run dev
+```
 
-# Backend (carrega os valores locais de backend/.env)
-JWT_SECRET='substitua-por-um-segredo-local-com-32-caracteres' npm --prefix backend test
-npm --prefix backend run build
+O servidor de desenvolvimento Vite escuta na porta **5173**. Seu proxy encaminha as rotas da API e o caminho WebSocket suportado para `127.0.0.1:3000`. `VITE_API_BASE_URL` pode apontar para outra origem de API em um preview, mas é configuração pública e deve corresponder à política CORS dessa API.
 
-# Build combinado da raiz (backend antes do frontend)
+## Verificações
+
+```bash
+npm run typecheck
+npm test
 npm run build
+npm run preview
 ```
 
-Os testes de integração do backend e as migrações precisam de PostgreSQL descartável configurado conforme os scripts e jobs de CI. Não rode `migrate:deploy`, `db:seed` ou testes de integração contra a base operacional. `npm run build` inclui `prisma generate`; gerar o cliente não substitui executar migrações no banco.
+`npm run build` grava o site estático de produção em `dist/`; `public/_headers` é copiado para a saída. Essas verificações não fazem deploy nem se conectam a serviços de produção.
 
 ## Estrutura e convenções
 
-- `frontend/src/core`: infraestrutura compartilhada, estado, API, autenticação, roteamento e utilitários.
-- `frontend/src/features`: módulos de interface e fluxos de negócio, organizados por feature.
-- `frontend/src/shared`: componentes e helpers reutilizáveis entre features.
-- `backend/src/routes`, `middlewares`, `controllers`, `services`, `schemas` e `lib`: transporte HTTP, autorização, validação e regras do backend.
-- `backend/prisma`: schema, migrations e seed.
-- `rpi/rfid`: bridge física opcional; requer testes no hardware/OS de destino.
-- `frontend/public/docs`: Markdown público consumido pela Central de Documentação. Ao adicionar um documento, registre-o em `frontend/src/core/docs/registry.ts`; a página Sobre e o modal usam o mesmo registry.
+- `src/core/` — cliente de API, autenticação, rotas, estado, localização, tema e utilitários globais;
+- `src/features/` — telas e fluxos organizados por funcionalidade;
+- `src/shared/` — elementos de interface e utilitários compartilhados;
+- `src/types/` — contratos TypeScript;
+- `public/docs/` — Markdown público exibido pela Central de Documentação;
+- `src/core/docs/registry.ts` — fonte única dos itens do painel Sobre e do modal de documentação.
 
-Siga também as instruções compartilhadas `skills.md` e `architectureskills.md` do projeto. Evite duplicar regras de autorização no frontend: o backend é a fronteira de segurança.
+Não trate proteções de interface como autorização: a fronteira de segurança é o backend. Siga `skills.md` e `architectureskills.md` compartilhados no contexto do projeto.
 
-## Pull requests e evidências
+## Checklist de contribuição
 
-Antes de enviar alterações, execute as checagens pertinentes acima, revise `git diff --check` e descreva testes que não puderam ser executados (por exemplo, hardware RFID, proxy real, restauração de backup ou provedor externo). Use dados sintéticos nos fixtures. Não inclua `.env`, dumps, cookies, JWTs ou dados pessoais reais.
+Antes de propor alterações, execute as verificações relevantes acima e `git diff --check`; registre validações que não puderam ser feitas (por exemplo, navegador, proxy real ou hardware RFID). Use dados sintéticos. Nunca faça commit de `.env`, cookies, JWTs, dumps do banco ou dados pessoais reais.
 
 ## Referências
 
-Consulte também [README em português](LEIAME.md), [Arquitetura](ARQUITETURA.md), [Referência da API](REFERENCIA_API.md), [Modelo de Dados](MODELO_DE_DADOS.md) e [Guia de implantação](GUIA_IMPLANTACAO.md).
+Consulte também [README](README.md), [Arquitetura](ARQUITETURA.md), [Referência da API](REFERENCIA_API.md), [Modelo de dados](MODELO_DE_DADOS.md) e o [guia de implantação](GUIA_IMPLANTACAO.md).

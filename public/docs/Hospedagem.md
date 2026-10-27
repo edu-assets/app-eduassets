@@ -60,9 +60,9 @@ RFID_BRIDGE_ENABLED=false
 
 No projeto Pages do frontend:
 
-1. Repositório: `edu-assets/eduAssets`.
+1. Repositório: `edu-assets/app-eduassets`.
 2. Branch de produção: `main`.
-3. Diretório-raiz: `frontend`.
+3. Diretório-raiz: `/` (raiz do repositório).
 4. Comando de build: `npm run build`.
 5. Diretório de saída: `dist`.
 6. Variáveis públicas de build:
@@ -74,7 +74,7 @@ VITE_RFID_BRIDGE_ENABLED=false
 
 7. Domínio personalizado: `app.eduassets.tech`.
 
-O arquivo `frontend/public/_headers` é copiado para `dist/_headers`. A CSP permite a API e o beacon oficial do Cloudflare Web Analytics:
+O arquivo `public/_headers` é copiado para `dist/_headers`. A CSP permite a API e o beacon oficial do Cloudflare Web Analytics:
 
 ```text
 script-src 'self' https://static.cloudflareinsights.com

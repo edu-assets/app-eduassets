@@ -39,7 +39,7 @@ The Vite proxy is a development configuration, not a general network policy. It 
 
 ## Frontend
 
-The frontend is a TypeScript application built with Vite and native ES modules. The entrypoint is `frontend/src/main.ts`:
+The frontend source is maintained in the separate `edu-assets/app-eduassets` repository. It is a TypeScript application built with Vite and native ES modules. The entrypoint is `src/main.ts`:
 
 1. On `DOMContentLoaded`, it initializes theme and internationalization. Before styles/scripts finish loading, a synchronous entry marker hides protected app content; direct `#login` access paints the login gate immediately, while `#app` remains hidden until session/guest authorization is resolved.
 2. It runs authentication initialization and the initial loads for equipment, responsible people, loans, and occurrences with `Promise.allSettled`.

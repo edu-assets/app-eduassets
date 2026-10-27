@@ -66,7 +66,7 @@ The authentication middleware also accepts `Authorization: Bearer <JWT>` for old
 
 ## Source references
 
-- Route mounting: `backend/src/routes/index.ts` and `backend/src/app.ts`.
-- Authentication and cookies: `backend/src/routes/auth.ts`, `backend/src/middlewares/auth.ts`, `backend/src/middlewares/csrf.ts`, and `backend/src/lib/sessionCookie.ts`.
-- Schemas: `backend/src/schemas/`.
-- Browser client: `frontend/src/core/api/apiClient.ts` and `frontend/src/core/api/auth.ts`.
+- Route mounting: [`backend/src/routes/index.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/routes/index.ts) and [`backend/src/app.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/app.ts) in the backend repository.
+- Authentication and cookies: backend files [`auth.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/routes/auth.ts), [`auth middleware`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/middlewares/auth.ts), [`CSRF middleware`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/middlewares/csrf.ts), and [`sessionCookie.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/lib/sessionCookie.ts).
+- Schemas: [`backend/src/schemas/`](https://github.com/edu-assets/eduAssets/tree/main/backend/src/schemas) in the backend repository.
+- Browser client: `src/core/api/apiClient.ts` and `src/core/api/auth.ts` in this frontend repository.

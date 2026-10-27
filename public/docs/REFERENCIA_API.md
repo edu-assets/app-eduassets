@@ -66,7 +66,7 @@ O middleware também aceita `Authorization: Bearer <JWT>` para compatibilidade c
 
 ## Referências no código
 
-- Montagem: `backend/src/routes/index.ts` e `backend/src/app.ts`.
-- Autenticação e cookies: `backend/src/routes/auth.ts`, `backend/src/middlewares/auth.ts`, `backend/src/middlewares/csrf.ts` e `backend/src/lib/sessionCookie.ts`.
-- Schemas: `backend/src/schemas/`.
-- Cliente do navegador: `frontend/src/core/api/apiClient.ts` e `frontend/src/core/api/auth.ts`.
+- Montagem: [`backend/src/routes/index.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/routes/index.ts) e [`backend/src/app.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/app.ts) no repositório do backend.
+- Autenticação e cookies: arquivos do backend [`auth.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/routes/auth.ts), [`middleware auth`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/middlewares/auth.ts), [`middleware CSRF`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/middlewares/csrf.ts) e [`sessionCookie.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/lib/sessionCookie.ts).
+- Schemas: [`backend/src/schemas/`](https://github.com/edu-assets/eduAssets/tree/main/backend/src/schemas) no repositório do backend.
+- Cliente do navegador: `src/core/api/apiClient.ts` e `src/core/api/auth.ts` neste repositório frontend.
