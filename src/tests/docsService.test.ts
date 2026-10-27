@@ -38,6 +38,25 @@ describe('documentation Markdown source', () => {
         expect(document.markdown).toBe('# Central guide');
     });
 
+    it('uses docs.eduassets.tech by default when no override is configured', async () => {
+        vi.stubEnv('VITE_DOCS_BASE_URL', '');
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            text: async () => '# Hosted guide',
+        });
+        vi.stubGlobal('fetch', fetchMock);
+
+        const { loadDocument } = await import('../core/docs/docsService.js');
+        const document = await loadDocument('manual-usuario');
+
+        expect(fetchMock).toHaveBeenCalledOnce();
+        expect(fetchMock).toHaveBeenCalledWith(
+            'https://docs.eduassets.tech/docs/MANUAL_USUARIO.md',
+        );
+        expect(document.markdown).toBe('# Hosted guide');
+    });
+
     it('falls back to the bundled same-origin Markdown when the central source is unavailable', async () => {
         vi.stubEnv('VITE_DOCS_BASE_URL', 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public');
         const fetchMock = vi.fn()

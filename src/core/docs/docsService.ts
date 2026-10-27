@@ -19,7 +19,8 @@ export interface SearchResultado {
 const cache = new Map<string, LoadedDocument>();
 const inflight = new Map<string, Promise<LoadedDocument>>();
 
-const DOCS_BASE_URL = (import.meta.env.VITE_DOCS_BASE_URL ?? '').trim().replace(/\/+$/, '');
+const DOCS_BASE_URL = (import.meta.env.VITE_DOCS_BASE_URL ?? '').trim().replace(/\/+$/, '')
+    || 'https://docs.eduassets.tech';
 
 async function buscarMarkdown(file: string): Promise<string> {
     if (DOCS_BASE_URL) {
