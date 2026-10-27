@@ -1,0 +1,85 @@
+# eduAssets Frontend
+
+[English](README.md) · [Português](README_PT.md)
+
+> **Status: Beta.** This repository contains the browser application for eduAssets. It is a Vite/TypeScript single-page application; the API and database are maintained separately.
+
+## Overview
+
+The frontend supports school-equipment inventory and loan workflows, including equipment and stock views, loan registration and returns, occurrence management, administrative screens, CSV/Excel/PDF exports, guest read-only access, and optional RFID-related UI. It also provides Portuguese and English interfaces and persistent light/dark theme selection.
+
+The application uses feature-first TypeScript modules and native DOM rendering. The backend remains the security boundary: frontend route guards and disabled controls are usability measures, not authorization. In production, the app communicates with the API at `https://api.eduassets.tech`; authentication uses the backend's secure session flow where supported.
+
+## Repository layout
+
+- `src/core/` — application-wide services, API client, routing, state, theme and localization;
+- `src/features/` — feature-specific screens and workflows;
+- `src/shared/` — shared UI and utilities;
+- `src/types/` — shared TypeScript types;
+- `public/` — static assets, security headers and project documentation;
+- `scripts/` — frontend asset and icon utilities.
+
+## Requirements
+
+- Node.js **22.12 or newer** and npm;
+- a running eduAssets API for full local workflows. In the current development setup, Vite proxies API paths to `http://127.0.0.1:3000`.
+
+## Local development
+
+```bash
+npm ci
+cp .env.example .env
+npm run dev
+```
+
+On Windows PowerShell, use `Copy-Item .env.example .env` instead of `cp`. Keep the API base empty for local development so Vite uses its proxy:
+
+```env
+VITE_API_BASE_URL=
+VITE_RFID_BRIDGE_ENABLED=false
+```
+
+Run the API separately. Its source currently lives in the `backend/` directory of [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets). Do not put passwords, tokens, or other secrets in `VITE_*` variables; these values are public in the built browser assets.
+
+## Available commands
+
+```bash
+npm run dev        # Vite development server at http://localhost:5173
+npm run typecheck  # TypeScript check
+npm test           # Frontend test suite
+npm run build      # Production build to dist/
+npm run preview    # Preview the production build locally
+```
+
+## Cloudflare Pages deployment
+
+The production site is served at `https://app.eduassets.tech`. For the Cloudflare Pages project connected to this repository, use:
+
+- Production branch: `main`;
+- Root directory: `/` (repository root);
+- Build command: `npm run build`;
+- Build output directory: `dist`;
+- Node.js: `22.13.0` or another supported version satisfying `>=22.12.0`.
+
+Set these public build-time variables for Production and Preview as needed:
+
+```env
+VITE_API_BASE_URL=https://api.eduassets.tech
+VITE_RFID_BRIDGE_ENABLED=false
+```
+
+`public/_headers` supplies the static response security headers copied into the build output. The frontend build does not deploy or configure the API, database, DNS, or Cloudflare account settings.
+
+## Documentation
+
+The full bilingual guides are in [`public/docs/`](public/docs/):
+
+- [User manual](public/docs/USER_MANUAL.md) · [Manual do usuário](public/docs/MANUAL_USUARIO.md)
+- [Architecture](public/docs/ARCHITECTURE.md) · [Arquitetura](public/docs/ARQUITETURA.md)
+- [API reference](public/docs/API_REFERENCE.md) · [Referência da API](public/docs/REFERENCIA_API.md)
+- [Development](public/docs/DEVELOPMENT.md) · [Desenvolvimento](public/docs/DESENVOLVIMENTO.md)
+- [Deployment](public/docs/DEPLOYMENT.md) · [Implantação](public/docs/GUIA_IMPLANTACAO.md)
+- [Operations and recovery](public/docs/OPERATIONS_AND_RECOVERY.md) · [Operação e recuperação](public/docs/OPERACAO_E_RECUPERACAO.md)
+- [Changelog](public/docs/CHANGELOG_EN.md) · [Histórico de alterações](public/docs/CHANGELOG.md)
+
+For API and infrastructure changes, consult the backend source and its documentation in [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets).
