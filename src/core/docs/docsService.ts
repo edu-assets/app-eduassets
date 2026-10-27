@@ -19,7 +19,19 @@ export interface SearchResultado {
 const cache = new Map<string, LoadedDocument>();
 const inflight = new Map<string, Promise<LoadedDocument>>();
 
+const DOCS_BASE_URL = (import.meta.env.VITE_DOCS_BASE_URL ?? '').trim().replace(/\/+$/, '');
+
 async function buscarMarkdown(file: string): Promise<string> {
+    if (DOCS_BASE_URL) {
+        const remoteUrl = `${DOCS_BASE_URL}${file.startsWith('/') ? file : `/${file}`}`;
+        try {
+            const remota = await fetch(remoteUrl);
+            if (remota.ok) return remota.text();
+        } catch (erro) {
+            console.warn(`[eduAssets] Falha ao carregar documento remoto "${file}"; usando fallback local.`, erro);
+        }
+    }
+
     const resposta = await fetch(file);
     if (!resposta.ok) {
         throw new Error(`Não foi possível carregar o documento: ${file} (${resposta.status})`);

@@ -66,20 +66,24 @@ Configure estas variáveis públicas de build para Production e Preview conforme
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
+# Configure após tornar docs-eduassets público; antes, deixe vazio para usar os docs locais.
+VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public
 ```
 
 O arquivo `public/_headers` fornece cabeçalhos de segurança estáticos, copiados para a saída da build. O build do frontend não implanta nem configura a API, o banco de dados, o DNS ou as configurações da conta Cloudflare.
 
 ## Documentação
 
-Os guias bilíngues completos estão em [`public/docs/`](public/docs/):
+Os guias bilíngues canônicos são mantidos em [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets/tree/main/public/docs). As cópias em `public/docs/` permanecem como fallback de mesma origem durante a migração; o catálogo e o renderizador do modal Sobre continuam neste repositório. Configure `VITE_DOCS_BASE_URL` como `https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public` somente depois que o repositório de docs estiver publicamente acessível. Se o carregamento remoto falhar, o modal usa os Markdown incluídos no frontend.
 
-- [Manual do usuário](public/docs/MANUAL_USUARIO.md) · [User manual](public/docs/USER_MANUAL.md)
-- [Arquitetura](public/docs/ARQUITETURA.md) · [Architecture](public/docs/ARCHITECTURE.md)
-- [Referência da API](public/docs/REFERENCIA_API.md) · [API reference](public/docs/API_REFERENCE.md)
-- [Desenvolvimento](public/docs/DESENVOLVIMENTO.md) · [Development](public/docs/DEVELOPMENT.md)
-- [Implantação](public/docs/GUIA_IMPLANTACAO.md) · [Deployment](public/docs/DEPLOYMENT.md)
-- [Operação e recuperação](public/docs/OPERACAO_E_RECUPERACAO.md) · [Operations and recovery](public/docs/OPERATIONS_AND_RECOVERY.md)
-- [Histórico de alterações](public/docs/CHANGELOG.md) · [Changelog](public/docs/CHANGELOG_EN.md)
+Guias principais no repositório central:
+
+- [Manual do usuário](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/MANUAL_USUARIO.md) · [User manual](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/USER_MANUAL.md)
+- [Arquitetura](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/ARQUITETURA.md) · [Architecture](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/ARCHITECTURE.md)
+- [Referência da API](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/REFERENCIA_API.md) · [API reference](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/API_REFERENCE.md)
+- [Desenvolvimento](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/DESENVOLVIMENTO.md) · [Development](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/DEVELOPMENT.md)
+- [Implantação](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/GUIA_IMPLANTACAO.md) · [Deployment](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/DEPLOYMENT.md)
+- [Operação e recuperação](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/OPERACAO_E_RECUPERACAO.md) · [Operations and recovery](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/OPERATIONS_AND_RECOVERY.md)
+- [Histórico de alterações](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/CHANGELOG.md) · [Changelog](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/CHANGELOG_EN.md)
 
 Para alterações na API e na infraestrutura, consulte o código do backend e sua documentação em [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets).

@@ -1,12 +1,10 @@
 # Desenvolvimento e validação do frontend
 
-Este repositório contém a aplicação de navegador do eduAssets. O código-fonte da API é mantido separadamente em [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets), no diretório `backend/`. Os dois repositórios podem ser instalados e implantados independentemente.
+Este guia se aplica à aplicação de navegador em [`edu-assets/app-eduassets`](https://github.com/edu-assets/app-eduassets). O código da API é mantido separadamente em [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets), no diretório `backend/`. O Markdown bilíngue canônico é mantido em [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets).
 
 ## Requisitos
 
-- Node.js **22.12 ou mais recente** e npm;
-- Git;
-- uma API local/de teste em `127.0.0.1:3000` para fluxos autenticados e validações manuais completas.
+Use Node.js **22.12 ou mais recente** e npm. Uma API local/de teste em `127.0.0.1:3000` é necessária para fluxos autenticados e validações manuais completas.
 
 ## Instalação e configuração
 
@@ -15,49 +13,34 @@ npm ci
 cp .env.example .env
 ```
 
-Use a configuração local padrão para que o Vite encaminhe as requisições para a API:
+No desenvolvimento local, deixe vazias as URLs base da API e da documentação; o Vite encaminha as requisições da API e o modal usa o fallback Markdown incluído no app:
 
 ```env
 VITE_API_BASE_URL=
 VITE_RFID_BRIDGE_ENABLED=false
+VITE_DOCS_BASE_URL=
 ```
 
-Execute a API separadamente a partir do repositório `edu-assets/eduAssets`. A configuração local do backend, PostgreSQL e migrations estão documentados nesse repositório e na [Referência da API](REFERENCIA_API.md). Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador.
+Execute a API separadamente a partir de `edu-assets/eduAssets`. A configuração local do backend, PostgreSQL e migrations está na [Referência da API](REFERENCIA_API.md) central. Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador. Depois que `docs-eduassets` estiver publicamente acessível, o build de produção pode definir `VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public`; se o arquivo remoto falhar, o modal mantém o fallback local.
 
-## Execução local
+## Execução e verificações
 
 ```bash
 npm run dev
-```
-
-O servidor de desenvolvimento Vite escuta na porta **5173**. Seu proxy encaminha as rotas da API e o caminho WebSocket suportado para `127.0.0.1:3000`. `VITE_API_BASE_URL` pode apontar para outra origem de API em um preview, mas é configuração pública e deve corresponder à política CORS dessa API.
-
-## Verificações
-
-```bash
 npm run typecheck
 npm test
 npm run build
 npm run preview
 ```
 
-`npm run build` grava o site estático de produção em `dist/`; `public/_headers` é copiado para a saída. Essas verificações não fazem deploy nem se conectam a serviços de produção.
+O servidor Vite escuta na porta **5173** e encaminha as rotas da API e o caminho WebSocket suportado para `127.0.0.1:3000`. O build Cloudflare Pages de produção usa a raiz `/`, comando `npm run build` e diretório de saída `dist`. `public/_headers` é copiado para a saída. Esses comandos não fazem deploy nem se conectam a serviços de produção.
 
 ## Estrutura e convenções
 
-- `src/core/` — cliente de API, autenticação, rotas, estado, localização, tema e utilitários globais;
-- `src/features/` — telas e fluxos organizados por funcionalidade;
-- `src/shared/` — elementos de interface e utilitários compartilhados;
-- `src/types/` — contratos TypeScript;
-- `public/docs/` — Markdown público exibido pela Central de Documentação;
-- `src/core/docs/registry.ts` — fonte única dos itens do painel Sobre e do modal de documentação.
+`src/core/` contém serviços globais, cliente de API, autenticação, rotas, estado, localização e tema. `src/features/` é responsável pelos fluxos das telas; `src/shared/` contém UI reutilizável; `src/types/` centraliza contratos TypeScript. `src/core/docs/registry.ts` é a fonte única dos documentos exibidos em Sobre; o Markdown e os PDFs canônicos estão em `public/docs/` no repositório de documentação. A cópia no frontend é fallback temporário e não deve virar uma segunda fonte de edição.
 
-Não trate proteções de interface como autorização: a fronteira de segurança é o backend. Siga `skills.md` e `architectureskills.md` compartilhados no contexto do projeto.
-
-## Checklist de contribuição
-
-Antes de propor alterações, execute as verificações relevantes acima e `git diff --check`; registre validações que não puderam ser feitas (por exemplo, navegador, proxy real ou hardware RFID). Use dados sintéticos. Nunca faça commit de `.env`, cookies, JWTs, dumps do banco ou dados pessoais reais.
+Não trate proteções de interface como autorização: a fronteira de segurança é o backend. Use fixtures sintéticas e nunca faça commit de `.env`, cookies, JWTs, dumps do banco ou dados pessoais reais.
 
 ## Referências
 
-Consulte também [README](README.md), [Arquitetura](ARQUITETURA.md), [Referência da API](REFERENCIA_API.md), [Modelo de dados](MODELO_DE_DADOS.md) e o [guia de implantação](GUIA_IMPLANTACAO.md).
+Consulte o [README do repositório frontend](https://github.com/edu-assets/app-eduassets/blob/main/README_PT.md), [Arquitetura](ARQUITETURA.md), [Referência da API](REFERENCIA_API.md), [Modelo de dados](MODELO_DE_DADOS.md) e [Guia de implantação](GUIA_IMPLANTACAO.md).

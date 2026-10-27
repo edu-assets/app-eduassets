@@ -70,6 +70,8 @@ In the frontend Pages project:
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
+# Optional: set only after docs-eduassets is publicly readable; otherwise leave unset.
+VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public
 ```
 
 7. Custom domain: `app.eduassets.tech`.
@@ -78,7 +80,7 @@ VITE_RFID_BRIDGE_ENABLED=false
 
 ```text
 script-src 'self' https://static.cloudflareinsights.com
-connect-src 'self' https://api.eduassets.tech https://cloudflareinsights.com
+connect-src 'self' https://api.eduassets.tech https://raw.githubusercontent.com https://cloudflareinsights.com
 ```
 
 The Analytics beacon was blocked when the policy contained only `script-src 'self'`. After changing `_headers`, wait for a new Pages deployment and perform a hard refresh in the browser.

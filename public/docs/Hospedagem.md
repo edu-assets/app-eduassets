@@ -70,6 +70,8 @@ No projeto Pages do frontend:
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
+# Opcional: configure só depois que docs-eduassets estiver público; antes, deixe vazio.
+VITE_DOCS_BASE_URL=https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public
 ```
 
 7. Domínio personalizado: `app.eduassets.tech`.
@@ -78,7 +80,7 @@ O arquivo `public/_headers` é copiado para `dist/_headers`. A CSP permite a API
 
 ```text
 script-src 'self' https://static.cloudflareinsights.com
-connect-src 'self' https://api.eduassets.tech https://cloudflareinsights.com
+connect-src 'self' https://api.eduassets.tech https://raw.githubusercontent.com https://cloudflareinsights.com
 ```
 
 O beacon do Analytics era bloqueado quando a política continha apenas `script-src 'self'`. Depois de alterar `_headers`, é necessário aguardar um novo deploy do Pages e fazer um recarregamento completo no navegador.

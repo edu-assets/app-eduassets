@@ -13,9 +13,9 @@ export interface DocRegistryItem {
 }
 
 /**
- * Fonte única de verdade sobre quais documentos existem. Para adicionar um novo
- * documento: crie os Markdown localizados em public/docs/ e adicione uma entrada
- * aqui — cards da página Sobre, sidebar, busca, TOC e metadados usam este catálogo.
+ * Fonte única de verdade sobre quais documentos aparecem no modal. O Markdown
+ * canônico fica em docs-eduassets/public/docs; public/docs no app é fallback local
+ * até a origem remota ser validada. Cards, sidebar, busca, TOC e metadados usam o catálogo.
  */
 interface DocumentoRegistrado extends Omit<DocRegistryItem, 'title' | 'file'> {
     title: Record<IdiomaDocumentacao, string>;
