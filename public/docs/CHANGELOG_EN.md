@@ -2,6 +2,14 @@
 
 All versions below v1.0.0 belong to the beta cycle; earlier dates are approximate. The latest section records checkout changes, not published releases.
 
+## Sessions, entry gate, and documentation center — October 26–27, 2026
+- The browser negotiates session support through `/auth/session-capabilities`; when available, sessions use an `HttpOnly`, `SameSite=Lax` cookie, `Secure` on HTTPS, and Origin validation for state-changing requests. Bearer remains for compatibility/fallback only.
+- Cookie-mode RFID login exchanges a one-time code that expires in 30 seconds for a browser session; legacy channels may still use the JWT event.
+- The `#login` entry route prevents the protected app from flashing during bootstrap; direct `#app` access waits for session/Guest authorization.
+- Theme/language controls in Settings were aligned with the login screen; PT/EN UI copy now describes explicit save behavior.
+- The About page and documentation modal now render cards from the same registry. Bilingual API and development guides were added, and deployment guides were registered.
+- READMEs, manuals, architecture, data model, hosting, roadmap, and changelogs were reconciled with source/recorded CI; release instructions now distinguish schema-free updates from backup-and-migrate releases.
+
 ## Beta deployment and hosting documentation — October 23, 2026
 - Frontend deployed on Cloudflare Pages at `app.eduassets.tech`; the landing page remains separate at `eduassets.tech`.
 - API deployed at `api.eduassets.tech` on the Oracle Cloud Ubuntu VM, behind Nginx and using remote PostgreSQL on Neon.

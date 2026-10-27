@@ -8,7 +8,7 @@
 
 [Português](LEIAME.md)
 
-> **Status: Beta.** eduAssets is a TypeScript school-equipment loan and inventory application. Authentication, guest read-only access, loans/returns, occurrences, exports and an optional RFID integration are present in the current checkout. No public deployment is assumed by this documentation.
+> **Status: Beta.** eduAssets is a TypeScript school-equipment loan and inventory application. Authentication, guest read-only access, loans/returns, occurrences, exports and optional RFID are present in the current checkout. The changelog records an operator-reported Cloudflare Pages/Oracle deployment on October 23, 2026; this documentation update did not re-verify the remote services.
 
 ## What it does
 
@@ -44,7 +44,7 @@ Browser :5173 ── Vite proxy ── API :3000 ── PostgreSQL
 - **Editor:** authenticated operational actions allowed by the route policy, including loan/return flows and occurrence creation/editing.
 - **Administrator:** administrative CRUD, account/password actions and RFID-token provisioning in addition to operational actions.
 
-JWT authentication is sent as `Authorization: Bearer <token>`. Backend authorization is authoritative; frontend disabled controls are only a UX layer. Administrator activity expires after 30 minutes per JWT; backend activity state is process-local, so the current timeout model assumes a single instance. Logout calls `POST /auth/logout`, which increments a database-backed per-user session version and revokes all previously issued JWTs for that account; the browser clears its token immediately, so a failed/offline revocation request can leave copied tokens valid until expiry. A successful password change also revokes all other sessions and returns a replacement token for the current browser. There is no password-recovery flow; an authenticated user can change their own password with `PATCH /auth/senha`.
+The browser negotiates an `HttpOnly`, `SameSite=Lax` session cookie through `/auth/session-capabilities`; on production HTTPS it is `Secure` and uses the `__Host-` prefix. Mutating cookie-authenticated requests require a trusted `Origin`. `Authorization: Bearer <token>` remains available for older clients and compatibility fallback. Backend authorization is authoritative; frontend disabled controls are only a UX layer. Administrator activity expires after 30 minutes; backend activity state is process-local, so the current timeout model assumes a single instance. Logout calls `POST /auth/logout`, which increments a database-backed per-user session version, revokes earlier sessions, and clears the cookie. A successful password change also revokes earlier sessions and reissues the current browser session. There is no password-recovery flow; an authenticated user can change their own password with `PATCH /auth/senha`. See [API Reference](API_REFERENCE.md) for the route and session contract.
 
 ## Backend and data model
 

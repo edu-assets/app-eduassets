@@ -16,14 +16,15 @@ Express application (backend :3000)
 PostgreSQL
 
 Optional RFID path:
-RFID reader → Python bridge → POST /auth/rfid ──► backend
-                                             │
-                                             └─► WS /ws/rfid → open browser tabs
+RFID reader (SPI or Arduino serial) → Python bridge → POST /auth/rfid ──► backend
+                                                                          │
+                                                                          └─► WS /ws/rfid → local tabs
 
-Browser/admin → POST 127.0.0.1:3001/provision → Python bridge → RFID reader
+Browser → API: POST /usuarios/:id/rfid-token
+backend → POST 127.0.0.1:3001/provision → Python bridge → RFID reader
 ```
 
-The RFID path is optional and disabled by default. Password login remains the supported path when no reader is attached. The public deployment template forces RFID off.
+The RFID path is optional; reference deployment settings set `RFID_BRIDGE_ENABLED=false`, while endpoints are enabled when the variable is `true`. Password login remains the supported path without a reader. The public deployment template forces RFID off.
 
 ## Runtime boundaries and ports
 
@@ -40,7 +41,7 @@ The Vite proxy is a development configuration, not a general network policy. It 
 
 The frontend is a TypeScript application built with Vite and native ES modules. The entrypoint is `frontend/src/main.ts`:
 
-1. On `DOMContentLoaded`, it initializes theme and internationalization.
+1. On `DOMContentLoaded`, it initializes theme and internationalization. Before styles/scripts finish loading, a synchronous entry marker hides protected app content; direct `#login` access paints the login gate immediately, while `#app` remains hidden until session/guest authorization is resolved.
 2. It runs authentication initialization and the initial loads for equipment, responsible people, loans, and occurrences with `Promise.allSettled`.
 3. A rejected initial data load produces an error toast; the remaining initialization functions are then run independently so one feature failure does not stop every feature.
 4. It initializes navigation, UI helpers, the administrator session timeout, the feature modules, the RFID listener, profile/security/configuration screens, and documentation.
@@ -53,10 +54,11 @@ The observed frontend layers are:
 
 ### State and API flow
 
-- `tokenStore` keeps the current bearer token in memory and mirrors it to `localStorage` under `eduassets_token`. Clearing the token removes that key. The source does not implement a refresh-token flow.
-- `apiClient` reads `VITE_API_BASE_URL` through `apiConfig`, adds `Authorization: Bearer <token>` when available, sends JSON, parses structured API errors, and emits `eduassets:sessao-expirada` after an HTTP 401.
+- `apiClient` first discovers cookie support through `GET /auth/session-capabilities` (`no-store`). With a compatible backend it sends `credentials: include`; the login/password-change requests indicate cookie mode and the browser keeps the `HttpOnly` cookie outside JavaScript storage. Requests retain Bearer authentication only when a legacy token is present.
+- `tokenStore` stores a JWT and its signed `exp`-bounded expiry in memory and `localStorage` under `eduassets_token` only for legacy/fallback Bearer mode. It does not extend signed expiry and does not implement a refresh-token flow.
+- Mutating cookie-authenticated requests require an allowed `Origin` at the backend. The client reads `VITE_API_BASE_URL` through `apiConfig`, sends JSON, parses structured API errors, and emits `eduassets:sessao-expirada` after an HTTP 401.
 - In development, an empty API base makes requests relative, allowing the Vite proxy to forward them. A production frontend build fails if `VITE_API_BASE_URL` is empty.
-- The RFID listener has a separate build-time gate: it connects only when `VITE_RFID_BRIDGE_ENABLED=true`, derives the WebSocket URL from the API base (or the current browser host), reconnects after 3 seconds, stores the received token, validates it with `/auth/me`, and reloads the page.
+- The RFID listener has a separate build-time gate: it connects only when `VITE_RFID_BRIDGE_ENABLED=true`, discovers cookie support, derives the WebSocket URL, and reconnects after 3 seconds. Cookie mode exchanges a random one-time login code (30-second lifetime) through `/auth/rfid/session`; the legacy channel may still deliver a JWT for fallback validation with `/auth/me`.
 
 ### HTML safety contract
 
@@ -84,11 +86,11 @@ The mounted routers are `/auth`, `/categorias`, `/equipamentos`, `/responsaveis`
 
 - Password login is `POST /auth/login`. The JWT module signs HS256 tokens for **8 hours** and accepts only HS256 on verification. The payload contains numeric `sub`, `nivelAcesso` equal to `ADMINISTRADOR` or `EDITOR`, and a non-negative `sessionVersion`.
 - `JWT_SECRET` is mandatory and must have at least 32 characters; the application fails during JWT module initialization if it is missing or weak.
-- `requireAuth` requires `Authorization: Bearer ...`, verifies the token, confirms that the user still exists in PostgreSQL, compares the token's `sessionVersion` with the database value, and refreshes the access level from the database before placing it in `req.user`.
+- `requireAuth` accepts the HttpOnly session cookie or a legacy `Authorization: Bearer ...` token, verifies it, confirms that the user still exists in PostgreSQL, compares `sessionVersion` with the database value, and reads the current access level from the database. Cookie-authenticated mutations additionally require an allowed `Origin`.
 - `requireAdmin` composes `requireAuth` and requires the current database level to be `ADMINISTRADOR`. The users router is administrator-only. Loan and occurrence mutations require `requireAuth` and input validation. A wrong current password on `PATCH /auth/senha` returns a business error without logging the session out.
 - Administrator inactivity is limited to 30 minutes. Backend activity tracking is a process-memory `Map`, so the behavior is consistent for one backend instance only; horizontal scaling requires shared state. The frontend also logs an administrator out after 30 minutes without activity and reacts to the API client's 401 event.
-- `POST /auth/logout` increments a per-user `sessionVersion` in PostgreSQL and revokes all previously issued JWTs for that account across backend instances. The browser clears its token immediately and sends revocation best-effort; if offline/the request fails, copied tokens remain valid until expiry. A successful password change also increments the version and returns a replacement JWT to the current browser.
-- `POST /auth/rfid` is rate-limited, validates its input, and is not a JWT-authenticated browser route. The card stores a random 32-character opaque lookup credential; only its SHA-256 hash is persisted in `Usuario.rfidTokenHash`, not a JWT. Successful lookup still broadcasts a short-lived signed JWT to accepted local WebSocket clients; the card credential remains clonable at the physical layer, so the complete flow must stay isolated and disabled in public deployment. The service requires a loopback source address and a constant-time match of `X-RFID-Bridge-Secret` against `RFID_BRIDGE_SECRET`, hashes the 32-character RFID token with SHA-256, looks up `Usuario.rfidTokenHash`, and publishes a signed JWT event when the card is recognized.
+- `POST /auth/logout` increments the per-user `sessionVersion` in PostgreSQL and clears the session cookie on a successful cookie-mode request, revoking prior sessions across instances. If the request fails, local UI state is cleared but server revocation cannot be confirmed. Cookie-mode password change reissues the cookie; the legacy Bearer mode receives a replacement JWT.
+- `POST /auth/rfid` is rate-limited, validates input, and is not a browser JWT-authenticated route. The card stores a random 32-character opaque lookup credential; only its SHA-256 hash is persisted in `Usuario.rfidTokenHash`. In cookie mode, the local WebSocket sends a random one-time login code with a 30-second lifetime, which `/auth/rfid/session` exchanges for the browser cookie; legacy clients may still receive a JWT event. Administrative provisioning calls `POST /usuarios/:id/rfid-token`; the backend requires an administrator and an existing user, requests a write from the local bridge at `127.0.0.1:3001/provision`, and persists the hash only after success. `DELETE /usuarios/:id/rfid-token` revokes the link by clearing the hash. `rpi/rfid/rfid_reader.py` handles the SPI/MFRC522 variant; `rpi/rfid/serial_rfid_reader.py` uses the Arduino firmware at `eduStation/firmware/arduino_rfid_bridge/arduino_rfid_bridge.ino`. The physical credential can be cloned, so keep the flow isolated and blocked at public edges. The bridge requires a loopback source address and constant-time matching of `X-RFID-Bridge-Secret` against `RFID_BRIDGE_SECRET`.
 
 ### Persistence
 

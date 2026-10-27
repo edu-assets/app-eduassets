@@ -14,8 +14,8 @@ export interface DocRegistryItem {
 
 /**
  * Fonte única de verdade sobre quais documentos existem. Para adicionar um novo
- * documento: crie o .md em public/docs/ e adicione uma entrada aqui — sidebar,
- * busca, TOC e metadata funcionam automaticamente.
+ * documento: crie os Markdown localizados em public/docs/ e adicione uma entrada
+ * aqui — cards da página Sobre, sidebar, busca, TOC e metadados usam este catálogo.
  */
 interface DocumentoRegistrado extends Omit<DocRegistryItem, 'title' | 'file'> {
     title: Record<IdiomaDocumentacao, string>;
@@ -30,7 +30,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
         version: 'Beta',
-        updatedAt: '2026-10-22'
+        updatedAt: '2026-10-27'
     },
     {
         id: 'readme',
@@ -39,7 +39,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/LEIAME.md', en: '/docs/README.md' },
         category: 'geral',
         version: 'Beta',
-        updatedAt: '2026-10-22'
+        updatedAt: '2026-10-27'
     },
     {
         id: 'architecture',
@@ -48,7 +48,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/ARQUITETURA.md', en: '/docs/ARCHITECTURE.md' },
         category: 'tecnico',
         version: 'Beta',
-        updatedAt: '2026-10-22'
+        updatedAt: '2026-10-27'
     },
     {
         id: 'hosting',
@@ -66,7 +66,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/MODELO_DE_DADOS.md', en: '/docs/DATA_MODEL.md' },
         category: 'tecnico',
         version: 'Beta',
-        updatedAt: '2026-10-22'
+        updatedAt: '2026-10-27'
     },
     {
         id: 'roadmap',
@@ -75,7 +75,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/ROADMAP.md', en: '/docs/ROADMAP_EN.md' },
         category: 'geral',
         version: 'Beta',
-        updatedAt: '2026-10-22'
+        updatedAt: '2026-10-27'
     },
     {
         id: 'changelog',
@@ -84,7 +84,43 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
         version: 'Beta',
-        updatedAt: '2026-10-22'
+        updatedAt: '2026-10-27'
+    },
+    {
+        id: 'api-reference',
+        title: { pt: 'Referência da API', en: 'API Reference' },
+        icon: 'api',
+        file: { pt: '/docs/REFERENCIA_API.md', en: '/docs/API_REFERENCE.md' },
+        category: 'tecnico',
+        version: 'Beta',
+        updatedAt: '2026-10-27'
+    },
+    {
+        id: 'development',
+        title: { pt: 'Desenvolvimento', en: 'Development' },
+        icon: 'code',
+        file: { pt: '/docs/DESENVOLVIMENTO.md', en: '/docs/DEVELOPMENT.md' },
+        category: 'tecnico',
+        version: 'Beta',
+        updatedAt: '2026-10-27'
+    },
+    {
+        id: 'deployment',
+        title: { pt: 'Guia de Implantação', en: 'Deployment Guide' },
+        icon: 'rocket_launch',
+        file: { pt: '/docs/GUIA_IMPLANTACAO.md', en: '/docs/DEPLOYMENT.md' },
+        category: 'tecnico',
+        version: 'Beta',
+        updatedAt: '2026-10-27'
+    },
+    {
+        id: 'operations-recovery',
+        title: { pt: 'Operação e Recuperação', en: 'Operations and Recovery' },
+        icon: 'health_and_safety',
+        file: { pt: '/docs/OPERACAO_E_RECUPERACAO.md', en: '/docs/OPERATIONS_AND_RECOVERY.md' },
+        category: 'tecnico',
+        version: 'Beta',
+        updatedAt: '2026-10-27'
     }
 ];
 

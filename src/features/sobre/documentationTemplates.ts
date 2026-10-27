@@ -17,6 +17,20 @@ export function renderSidebar(docs: DocRegistryItem[], docAtivoId: string | null
     return docs.map((doc) => renderSidebarItem(doc, doc.id === docAtivoId)).join('');
 }
 
+export function renderAboutDocTiles(docs: DocRegistryItem[]): string {
+    return docs.map((doc) => {
+        const color = doc.category === 'geral' ? 'primary' : 'secondary';
+        return `
+            <button type="button" class="sobre-doc-tile" data-abrir-doc="${escapeHtml(doc.id)}">
+                <span class="sobre-doc-tile-icon sobre-doc-tile-icon-${color}" aria-hidden="true">
+                    <span class="material-symbols-outlined">${escapeHtml(doc.icon)}</span>
+                </span>
+                <span class="sobre-doc-tile-nome">${escapeHtml(doc.title)}</span>
+            </button>
+        `;
+    }).join('');
+}
+
 export function renderFooterMetadata(doc: LoadedDocument): string {
     return `
         <div class="doc-footer">

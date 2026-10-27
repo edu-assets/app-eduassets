@@ -3,7 +3,7 @@ import { showToast } from '../../core/ui/index.js';
 import { getAllDocuments, loadDocument, preloadAllDocuments, searchDocuments } from '../../core/docs/docsService.js';
 import type { LoadedDocument } from '../../core/docs/docsService.js';
 import { iniciarScrollSpy, scrollParaSecao } from '../../core/docs/toc.js';
-import { renderSidebar, renderFooterMetadata, renderToc, renderSearchResults } from './documentationTemplates.js';
+import { renderSidebar, renderFooterMetadata, renderToc, renderSearchResults, renderAboutDocTiles } from './documentationTemplates.js';
 import { subscribe as subscribeI18n, t } from '../../core/state/i18nStore.js';
 
 const MODAL_ID = 'modal-documentacao';
@@ -142,6 +142,11 @@ export function abrirDocumentacao(docId: string = 'manual-usuario'): void {
 export function initDocumentation(): void {
     const painelSobre = document.getElementById('panel-sobre');
     if (!painelSobre) return;
+    const renderizarTiles = () => {
+        const grid = painelSobre.querySelector<HTMLElement>('#sobre-doc-grid');
+        if (grid) grid.innerHTML = renderAboutDocTiles(getAllDocuments());
+    };
+    renderizarTiles();
 
     const acionarPreload = () => {
         if (preloadIniciado) return;
@@ -156,14 +161,15 @@ export function initDocumentation(): void {
         if (link) acionarPreload();
     });
 
-    document.querySelectorAll<HTMLElement>('[data-abrir-doc]').forEach((el) => {
-        el.addEventListener('click', (e) => {
-            e.preventDefault();
-            abrirDocumentacao(el.dataset.abrirDoc || 'manual-usuario');
-        });
+    painelSobre.addEventListener('click', (e) => {
+        const link = (e.target as HTMLElement).closest<HTMLElement>('[data-abrir-doc]');
+        if (!link || !painelSobre.contains(link)) return;
+        e.preventDefault();
+        abrirDocumentacao(link.dataset.abrirDoc || 'manual-usuario');
     });
 
     subscribeI18n(() => {
+        renderizarTiles();
         preloadAllDocuments();
         if (docAtivoId && els?.overlay.classList.contains('active')) abrirDocumento(docAtivoId);
     });

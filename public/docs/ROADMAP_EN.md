@@ -1,6 +1,6 @@
 # Roadmap — eduAssets
 
-> **Checkout status (October 23, 2026): Beta.** Code fixes, tests and deployment templates are present. The operator validated the deployment: Cloudflare Pages frontend, Oracle VM API behind Nginx, proxied DNS, external HTTPS, and the CORS preflight. Off-host backups, a restore drill, monitoring, and complete functional QA remain before leaving Beta.
+> **Documented checkout status (October 23, 2026): Beta.** The changelog/roadmap record that the operator validated the Cloudflare Pages frontend, Oracle VM/Nginx API, proxied DNS, external HTTPS and CORS preflight at that time. This documentation pass did not re-verify those services. Off-host backup, restore drill, monitoring, and complete functional QA remain pending.
 
 ## Completed in code and locally verified
 
@@ -10,7 +10,9 @@
 - [x] Guest Mode preserved with minimized, server-side allowlisted projections; `/responsaveis` and `/usuarios` require auth; backend authorizes writes.
 - [ ] Loan/return and occurrence transaction/locking paths, logout and password-change revocation require the HTTP/concurrency suite and six migrations against disposable PostgreSQL; they passed in hosted run `39875293195`.
 - [x] F4 — dependent stores/forms refresh after creation; F5 — local-calendar date filters; F6 — 401 without hydrated user; F7 — selected return time sent as an offset-aware timestamp; locally reviewed/tested where applicable.
-- [x] `/health` liveness and timeout-bounded, non-disclosing PostgreSQL `/ready`; RFID bridge remains disabled by default.
+- [x] `/health` liveness and timeout-bounded, non-disclosing PostgreSQL `/ready`; reference deployment templates set RFID off (`RFID_BRIDGE_ENABLED=false`).
+- [x] Cookie-first browser sessions with `HttpOnly`/`SameSite=Lax`, `Secure` on HTTPS, Origin validation for mutations, legacy Bearer fallback, and one-time-code RFID exchange; `#login` entry no longer flashes protected content.
+- [x] About page cards use the same registry as the documentation modal; API, development, and deployment guides are listed in the center.
 - [x] Local/production environment templates, multi-stage Docker, Compose, Nginx config, non-destructive backup/restore scripts, and GitHub Actions CI added; the API was run on the Oracle VM with remote PostgreSQL on Neon.
 - [x] P0/P1 remediation: optional `DIRECT_URL`, API CSP, direct Node entrypoint, production CI smoke workflow, and public Nginx RFID blocks implemented; external HTTPS and CORS preflight were validated in the deployment.
 
@@ -18,7 +20,7 @@
 
 ## Next steps toward v1.0.0
 
-- [ ] Run GitHub CI and resolve any runner-specific incompatibilities.
+- [x] Run GitHub CI; run `39875293195` passed `verify` and `production-smoke` for commit `a8cd39b`. This documentation does not show a rerun on the current HEAD.
 - [x] Execute integration/race/auth tests against disposable PostgreSQL in the production smoke workflow; run `39875293195` passed.
 - [ ] Perform browser QA for CORS/CSP, guest anonymization/exports, login/timeout, loan/occurrence flows, responsiveness and accessibility.
 - [x] Validate Compose/API, Nginx, firewall, domain, Cloudflare Pages, API origin, HTTPS and CORS on the target host; review Cloudflare real-IP ranges and rate limits with current ranges still remains.

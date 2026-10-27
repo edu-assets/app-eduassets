@@ -168,28 +168,12 @@
 }
 
 .sobre-doc-tile-icon-primary { background-color: var(--primary-bg); color: var(--primary-color); }
-.sobre-doc-tile-icon-info { background-color: var(--info-bg); color: var(--info-color); }
 .sobre-doc-tile-icon-secondary { background-color: var(--secondary-bg); color: var(--secondary-color); }
-.sobre-doc-tile-icon-warning { background-color: var(--warning-bg); color: var(--warning-color); }
-.sobre-doc-tile-icon-error { background-color: var(--error-bg); color: var(--error-color); }
-.sobre-doc-tile-icon-neutral { background-color: var(--neutral-bg); color: var(--text-secondary); }
 
 .sobre-doc-tile-nome {
     font-size: 0.88rem;
     font-weight: 700;
     color: var(--text-primary);
-}
-
-.sobre-doc-tile-pendente {
-    opacity: 0.75;
-}
-
-.sobre-doc-tile-tag {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--text-muted);
 }
 
 /* ===== Sistema: versão + descrição + tecnologias ===== */

@@ -122,7 +122,9 @@ docker compose \
   up -d api
 ```
 
-Após `git pull` ou alteração do ambiente:
+O comando abreviado abaixo serve apenas para alteração de código/configuração **sem migration de banco**. Se a release incluir migration de schema, siga o [Guia de Implantação](GUIA_IMPLANTACAO.md): backup verificado, execução explícita do serviço `migrate` e só então inicialização/atualização da API. A CI valida código e executa smoke em ambiente descartável; não publica no Cloudflare nem faz deploy na VM Oracle.
+
+Após `git pull` ou alteração do ambiente sem migration:
 
 ```bash
 git pull --ff-only origin main

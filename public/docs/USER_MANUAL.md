@@ -20,15 +20,14 @@ The current data model tracks quantities by **category/model**. It does not prov
 
 ### Log in and Guest Mode
 
-1. Click **Log in** on the home screen or in the sidebar footer.
-2. In the **Administrator Login** modal, fill in **E-mail / Login** and **Password**.
-3. Click **Sign in**. After sign-in, the user menu shows the account name and role.
-4. To finish, open the user menu and click **Log out**. The interface returns to **Guest Mode**.
+1. On the entry screen, enter **E-mail / Login** and **Password**; for limited read-only access, choose **Continue as guest**.
+2. Click **Sign in**. After sign-in, the user menu shows the account name and role.
+3. To end the session, open the user menu and click **Log out**. The system requests revocation from the backend and returns to the login screen.
 5. **Contact the administrator** does not recover a password; it is the guidance shown when an account has no available password-recovery path.
 
-**Administrator** sessions expire after 30 minutes of inactivity and return to the login modal. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
+Sessions use an `HttpOnly` cookie when the backend advertises support, with a JWT lifetime of up to 8 hours; page JavaScript cannot read that cookie. On production HTTPS, the cookie is also `Secure`. **Administrator** sessions expire after 30 minutes of inactivity and return to the login screen. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
 
-**Security note:** **Log out** clears the current browser token immediately and asks the server to revoke every earlier token for that account. A successful password change also revokes other sessions while keeping this browser signed in with a replacement token. If the browser is offline or the revocation request fails, a copied token may remain usable until its 8-hour expiry (subject to account checks and the Administrator inactivity limit). Use only trusted devices and contact the installation administrator promptly if a token may be exposed.
+**Security note:** **Log out** asks the server to revoke the account's session version and remove the cookie. A successful password change also revokes earlier sessions while keeping this browser signed in with a renewed session. If the API is unavailable during logout, server-side revocation cannot be confirmed; retry when connectivity returns. Use trusted devices and contact the installation administrator if you suspect the account was exposed. Older deployments without cookie support retain a Bearer-token compatibility fallback.
 
 ### RFID (optional)
 

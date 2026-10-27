@@ -1,6 +1,6 @@
 # Roadmap — eduAssets
 
-> **Status do checkout (23/10/2026): Beta.** Correções de código, testes e templates foram implementados. A implantação operacional foi validada pelo operador: frontend no Cloudflare Pages, API na VM Oracle atrás do Nginx, DNS proxied, HTTPS externo e preflight CORS. Backups externos, restore drill, monitoramento e QA funcional completo ainda não encerram o ciclo Beta.
+> **Status documental do checkout (23/10/2026): Beta.** Changelog/roadmap registram que o operador validou naquele momento o frontend Cloudflare Pages, API na VM Oracle/Nginx, DNS proxied, HTTPS externo e preflight CORS. Esta revisão documental não revalidou os serviços. Backup externo, ensaio de restauração, monitoramento e QA funcional completo ainda são pendentes.
 
 ## Concluído no código e verificado localmente
 
@@ -10,7 +10,9 @@
 - [x] Guest Mode preservado com projeções server-side allowlisted e minimizadas; `/responsaveis` e `/usuarios` exigem auth; mutações exigem autorização no backend.
 - [ ] Transações e locking de empréstimos/devoluções e resolução/exclusão de ocorrências, logout e troca de senha: a suíte HTTP/concorrência e as seis migrations passaram no CI hospedado `39875293195` contra PostgreSQL descartável.
 - [x] F4 — atualização de stores/formulários após criação; F5 — filtros de datas de calendário local; F6 — 401 sem usuário hidratado; F7 — data escolhida enviada como timestamp offset-aware; revisados com testes locais onde aplicável.
-- [x] `/health` liveness e `/ready` readiness PostgreSQL com timeout/sem detalhe sensível; bridge RFID com flag desligada por padrão.
+- [x] `/health` liveness e `/ready` readiness PostgreSQL com timeout/sem detalhe sensível; templates de deployment de referência definem RFID desligado (`RFID_BRIDGE_ENABLED=false`).
+- [x] Sessão de navegador cookie-first com cookie `HttpOnly`/`SameSite=Lax`, `Secure` em HTTPS, proteção de mutações por `Origin`, fallback Bearer legado e troca RFID por código de uso único; entrada `#login` sem flash de conteúdo protegido.
+- [x] Central Sobre gera os cards do mesmo registry do modal; documentos API, desenvolvimento e implantação possuem entradas na Central.
 - [x] Templates de ambiente local/produção, Docker multi-stage, Compose, configuração Nginx, backup/restore não destrutivo e GitHub Actions CI foram adicionados; a API foi executada na VM Oracle com PostgreSQL remoto no Neon.
 - [x] P0/P1 desta remediação: `DIRECT_URL` opcional, CSP da API, entrypoint Node direto, smoke de produção no CI e bloqueio público Nginx para RFID foram implementados; HTTPS externo e preflight CORS foram validados no deployment.
 
@@ -18,7 +20,7 @@
 
 ## Próximos passos para v1.0.0
 
-- [ ] Executar workflow CI no GitHub e resolver eventuais incompatibilidades específicas do runner.
+- [x] Executar workflow GitHub CI; run `39875293195` passou `verify` e `production-smoke` para commit `a8cd39b`. Reexecução no HEAD atual não está evidenciada nesta documentação.
 - [x] Executar testes de integração/race em PostgreSQL descartável no workflow de produção; o run `39875293195` passou.
 - [ ] Fazer QA manual de browser para CORS/CSP, guest anonymization/exports, login/timeout, fluxos de empréstimo/ocorrência e responsividade/acessibilidade.
 - [x] Validar Compose/API, Nginx, firewall, domínio, Cloudflare Pages, origem API, HTTPS e CORS no host-alvo; revisar real-IP Cloudflare e rate limit com ranges atuais ainda é necessário.

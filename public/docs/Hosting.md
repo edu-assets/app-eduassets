@@ -122,7 +122,9 @@ docker compose \
   up -d api
 ```
 
-After `git pull` or a code change:
+The abbreviated command below is only for code/configuration changes **without a database migration**. If a release includes a schema migration, follow the [Deployment Guide](DEPLOYMENT.md): verify a backup, explicitly run the `migrate` service, and only then start/update the API. CI validates code and runs smoke checks against disposable infrastructure; it does not publish to Cloudflare or deploy to the Oracle VM.
+
+After `git pull` or an environment change without migrations:
 
 ```bash
 git pull --ff-only origin main

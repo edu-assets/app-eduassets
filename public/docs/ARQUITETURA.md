@@ -16,14 +16,15 @@ Aplicação Express (backend :3000)
 PostgreSQL
 
 Caminho RFID opcional:
-Leitor RFID → bridge Python → POST /auth/rfid ──► backend
-                                             │
-                                             └─► WS /ws/rfid → abas abertas
+Leitor RFID (SPI ou Arduino serial) → bridge Python → POST /auth/rfid ──► backend
+                                                                        │
+                                                                        └─► WS /ws/rfid → abas locais
 
-Navegador/admin → POST 127.0.0.1:3001/provision → bridge Python → leitor RFID
+Navegador → API: POST /usuarios/:id/rfid-token
+backend → POST 127.0.0.1:3001/provision → bridge Python → leitor RFID
 ```
 
-O caminho RFID é opcional e desativado por padrão nas configurações de implantação. O login por senha continua sendo o caminho normal quando não há leitor conectado; o Compose público força RFID desligado e não publica `/ws`.
+O caminho RFID é opcional; as configurações de implantação de referência definem `RFID_BRIDGE_ENABLED=false`, mas os endpoints são habilitados quando a variável é `true`. O login por senha continua sendo o caminho normal sem leitor; o Compose de produção força RFID desligado e o Nginx público bloqueia o WebSocket.
 
 ## Fronteiras de execução e portas
 
@@ -40,7 +41,7 @@ O proxy do Vite é configuração de desenvolvimento, não uma política de rede
 
 O frontend é uma aplicação TypeScript construída com Vite e módulos ES nativos. O ponto de entrada é `frontend/src/main.ts`:
 
-1. Em `DOMContentLoaded`, inicializa tema e internacionalização.
+1. Em `DOMContentLoaded`, inicializa tema e internacionalização. Antes do carregamento completo dos estilos/scripts, um marcador síncrono oculta o conteúdo protegido: acesso direto a `#login` apresenta o gate imediatamente, enquanto `#app` fica oculto até resolver sessão/autorização de convidado.
 2. Executa a inicialização da autenticação e as cargas iniciais de equipamentos, responsáveis, empréstimos e ocorrências com `Promise.allSettled`.
 3. Uma falha em uma carga inicial mostra um toast de erro; as demais inicializações continuam de forma independente, para que uma falha de feature não interrompa todas as outras.
 4. Inicializa navegação, helpers de UI, timeout de sessão administrativa, módulos de feature, listener RFID, telas de perfil/segurança/configuração e documentação.
@@ -53,10 +54,11 @@ As camadas observadas do frontend são:
 
 ### Estado e fluxo da API
 
-- `tokenStore` mantém o bearer token atual em memória e o espelha no `localStorage` sob `eduassets_token`. Limpar o token remove essa chave. O código não implementa fluxo de refresh token.
-- `apiClient` lê `VITE_API_BASE_URL` por meio de `apiConfig`, adiciona `Authorization: Bearer <token>` quando disponível, envia JSON, interpreta erros estruturados da API e emite `eduassets:sessao-expirada` após um HTTP 401.
+- `apiClient` descobre suporte a cookie por `GET /auth/session-capabilities` (`no-store`). Com backend compatível, envia `credentials: include`; login/troca de senha sinalizam modo cookie e o navegador mantém o cookie `HttpOnly` fora do armazenamento acessível a JavaScript. Bearer é mantido apenas quando existe token de fallback legado.
+- `tokenStore` guarda JWT e validade limitada pelo `exp` assinado em memória e `localStorage` (`eduassets_token`) somente no modo Bearer legado/fallback. Não estende o prazo assinado nem implementa refresh token.
+- Alterações autenticadas por cookie exigem `Origin` permitido no backend. O cliente lê `VITE_API_BASE_URL` por `apiConfig`, envia JSON, interpreta erros estruturados e emite `eduassets:sessao-expirada` após um HTTP 401.
 - Em desenvolvimento, uma base de API vazia torna as requisições relativas, permitindo que o proxy do Vite as encaminhe. O build de produção do frontend falha se `VITE_API_BASE_URL` estiver vazio.
-- O listener RFID tem um gate próprio de build: conecta somente quando `VITE_RFID_BRIDGE_ENABLED=true`, deriva a URL WebSocket da base da API (ou do host atual do navegador), tenta reconectar após 3 segundos, armazena o token recebido, valida-o por `/auth/me` e recarrega a página.
+- O listener RFID tem gate próprio: conecta somente com `VITE_RFID_BRIDGE_ENABLED=true`, descobre suporte a cookie, deriva a URL WebSocket e tenta reconectar após 3 segundos. No modo cookie troca um código aleatório de uso único (validade de 30 segundos) por `/auth/rfid/session`; o canal legado ainda pode entregar JWT para validação por `/auth/me`.
 
 ### Contrato de segurança para HTML
 
@@ -84,17 +86,17 @@ Os routers montados são `/auth`, `/categorias`, `/equipamentos`, `/responsaveis
 
 - O login por senha é `POST /auth/login`. O módulo JWT assina tokens HS256 com validade de **8 horas** e aceita somente HS256 na verificação. O payload contém `sub` numérico, `nivelAcesso` igual a `ADMINISTRADOR` ou `EDITOR` e `sessionVersion` não negativa.
 - `JWT_SECRET` é obrigatório e deve ter pelo menos 32 caracteres; o processo falha durante a inicialização do módulo JWT se estiver ausente ou fraco.
-- `requireAuth` exige `Authorization: Bearer ...`, verifica o token, confirma que o usuário ainda existe no PostgreSQL, compara `sessionVersion` do JWT ao valor no banco e atualiza o nível de acesso a partir do banco antes de colocá-lo em `req.user`.
+- `requireAuth` aceita cookie de sessão `HttpOnly` ou token legado `Authorization: Bearer ...`, verifica o token, confirma usuário no PostgreSQL, compara `sessionVersion` ao banco e lê o nível de acesso atual. Mutações autenticadas por cookie também exigem um `Origin` permitido.
 - `requireAdmin` compõe `requireAuth` e exige que o nível atual no banco seja `ADMINISTRADOR`. O router de usuários é exclusivo de administradores. Mutações de empréstimos e ocorrências exigem `requireAuth` e validação. Senha atual incorreta em `PATCH /auth/senha` retorna erro de negócio sem encerrar a sessão.
 - A inatividade de administradores é limitada a 30 minutos. O backend mantém a atividade em um `Map` na memória do processo, portanto o comportamento é consistente somente em uma instância do backend; escala horizontal exige estado compartilhado. O frontend também encerra a sessão de administrador após 30 minutos sem atividade e reage ao evento 401 do cliente da API.
-- `POST /auth/logout` incrementa `sessionVersion` por usuário no PostgreSQL e revoga todos os JWTs anteriores da conta, inclusive entre instâncias. O navegador limpa o token imediatamente e envia a revogação em modo best-effort; se estiver offline/falhar, cópias continuam válidas até expirar. Troca de senha bem-sucedida também incrementa a versão e retorna JWT substituto para o navegador atual.
-- `POST /auth/rfid` tem rate limit, valida a entrada e não é uma rota de navegador autenticada por JWT. O serviço exige origem loopback e comparação em tempo constante do header `X-RFID-Bridge-Secret` com `RFID_BRIDGE_SECRET`, aplica SHA-256 ao token RFID de 32 caracteres, procura `Usuario.rfidTokenHash` e publica um evento JWT assinado quando o cartão é reconhecido.
+- `POST /auth/logout` incrementa `sessionVersion` por usuário no PostgreSQL e, em cookie mode, remove o cookie quando a solicitação é bem-sucedida, revogando sessões anteriores entre instâncias. Se a requisição falhar, o estado local da UI é limpo, mas a revogação no servidor não pode ser confirmada. Troca de senha reemite o cookie no modo atual; o modo Bearer legado recebe JWT substituto.
+- `POST /auth/rfid` tem rate limit, valida entrada e não é uma rota de navegador autenticada por JWT. O cartão contém credencial opaca aleatória de 32 caracteres e apenas seu SHA-256 é persistido em `Usuario.rfidTokenHash`. No modo cookie, o WebSocket local envia código aleatório de uso único com validade de 30 segundos e `/auth/rfid/session` o troca pelo cookie; clientes legados ainda podem receber evento JWT. O fluxo administrativo chama `POST /usuarios/:id/rfid-token`; o backend exige administrador/usuário existente, solicita a gravação à bridge local em `127.0.0.1:3001/provision` e persiste o hash somente após sucesso. `DELETE /usuarios/:id/rfid-token` revoga o vínculo apagando o hash. `rpi/rfid/rfid_reader.py` atende a variante SPI/MFRC522; `rpi/rfid/serial_rfid_reader.py` usa o firmware Arduino em `eduStation/firmware/arduino_rfid_bridge/arduino_rfid_bridge.ino`. A credencial física pode ser clonada, portanto mantenha o fluxo isolado e bloqueado na borda pública. A bridge exige origem loopback e comparação em tempo constante de `X-RFID-Bridge-Secret` com `RFID_BRIDGE_SECRET`.
 
 ### Persistência
 
 `prisma.ts` exporta um `PrismaClient` único e o helper `runTransaction`. Os limites padrão de uma transação interativa são **15.000 ms de timeout** e **5.000 ms de espera máxima**; o chamador pode fornecer um nível de isolamento.
 
-O datasource Prisma é PostgreSQL; `DATABASE_URL` é obrigatório fora de `NODE_ENV=test` e `DIRECT_URL` é opcional, com fallback a `DATABASE_URL` definido em `prisma.config.ts`. O schema contém atualmente `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` e `Ocorrencia`, além dos enums de acesso/status declarados no schema. Há índices de status para empréstimos e ocorrências, e a credencial RFID é armazenada como hash único opcional em `Usuario`.
+O datasource Prisma é PostgreSQL; `DATABASE_URL` é obrigatório fora de `NODE_ENV=test` e `DIRECT_URL` é opcional, com fallback a `DATABASE_URL` definido em `prisma.config.ts`. O schema contém `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` e `Ocorrencia`, além dos enums de acesso/status. A migration `20261022090000_stock_checks_and_fk_indexes` instala constraints SQL `CHECK` para quantidades e índices de disponibilidade/FKs; a migration `20261022110000_user_session_version` adiciona `Usuario.sessionVersion`. As ações de FK no SQL inicial são `ON DELETE RESTRICT` e `ON UPDATE CASCADE`; consulte migrations junto com o schema Prisma. A credencial RFID é armazenada somente como hash único opcional em `Usuario`.
 
 Não há políticas RLS no schema Prisma. A autorização é implementada no código da aplicação e nos middlewares de rota; o schema não deve ser interpretado como isolamento por linha.
 
