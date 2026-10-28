@@ -13,15 +13,14 @@ npm ci
 cp .env.example .env
 ```
 
-No desenvolvimento local, deixe `VITE_API_BASE_URL` vazia para usar o proxy Vite. `VITE_DOCS_BASE_URL` vazia usa `https://docs.eduassets.tech` por padrão; o fallback Markdown local é usado somente se a requisição remota falhar ou não tiver sucesso:
+No desenvolvimento local, deixe `VITE_API_BASE_URL` vazia para usar o proxy Vite. A origem do Markdown é fixada em um commit imutável no `src/core/docs/docsService.ts`; não é necessária uma variável de URL-base dos guias. O fallback local é usado somente se a requisição remota fixada falhar ou não tiver sucesso:
 
 ```env
 VITE_API_BASE_URL=
 VITE_RFID_BRIDGE_ENABLED=false
-VITE_DOCS_BASE_URL=
 ```
 
-Execute a API separadamente a partir de `edu-assets/eduAssets`. Builds de produção exigem `VITE_API_BASE_URL` apontando para a origem da API; `VITE_DOCS_BASE_URL` é opcional e, quando omitida, usa `https://docs.eduassets.tech`. Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador. Se a origem remota da documentação falhar, o modal usa o fallback local incluído no app.
+Execute a API separadamente a partir de `edu-assets/eduAssets`. Builds de produção exigem `VITE_API_BASE_URL` apontando para a origem da API. Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador. O frontend carrega o Markdown fixado por `raw.githubusercontent.com` e usa o fallback local somente se essa requisição falhar.
 
 ## Execução e verificações
 

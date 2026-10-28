@@ -31,4 +31,14 @@ jobs:
           if (!csp.includes('https://static.cloudflareinsights.com')) {
             throw new Error('CSP does not allow the official Cloudflare Insights script');
           }
+          const connectSrc = csp.match(/(?:^|;)\s*connect-src\s+([^;]+)/)?.[1] ?? '';
+          for (const origin of ['https://docs.eduassets.tech', 'https://raw.githubusercontent.com']) {
+            if (!connectSrc.split(/\s+/).includes(origin)) {
+              throw new Error(`CSP connect-src does not allow the documentation origin: ${origin}`);
+            }
+          }
+          const docsSource = fs.readFileSync('src/core/docs/docsService.ts', 'utf8');
+          if (!/https:\/\/raw\.githubusercontent\.com\/edu-assets\/docs-eduassets\/[0-9a-f]{40}\/public/.test(docsSource)) {
+            throw new Error('The central Markdown source must be pinned to an immutable docs commit SHA');
+          }
           NODE

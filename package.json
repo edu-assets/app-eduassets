@@ -18,12 +18,14 @@
   "devDependencies": {
     "@types/flatpickr": "^3.0.2",
     "@vitest/mocker": "^5.0.1",
+    "jsdom": "^26.1.0",
     "subset-font": "^2.5.0",
     "typescript": "^7.0.2",
     "vite": "^8.2.0",
     "vitest": "^5.0.1"
   },
   "dependencies": {
+    "dompurify": "^3.4.17",
     "exceljs": "^4.4.0",
     "flatpickr": "^4.6.13",
     "jspdf": "^4.2.1",

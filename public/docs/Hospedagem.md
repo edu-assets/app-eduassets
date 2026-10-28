@@ -71,13 +71,11 @@ No projeto Pages do frontend:
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
-# Opcional; sem esta variável, o app usa https://docs.eduassets.tech. O fallback local só entra se a origem remota falhar.
-VITE_DOCS_BASE_URL=https://docs.eduassets.tech
 ```
 
 7. Domínio personalizado: `app.eduassets.tech`.
 
-O arquivo `public/_headers` é copiado para `dist/_headers`. A CSP de produção deve permitir API, documentação hospedada e o beacon oficial do Cloudflare Web Analytics:
+O navegador carrega o Markdown por um commit imutável fixado em `src/core/docs/docsService.ts`, via `raw.githubusercontent.com`. `docs.eduassets.tech` continua como site público dos guias, mas não é a origem de busca padrão do app. O arquivo `public/_headers` é copiado para `dist/_headers`. A CSP de produção deve permitir a API, a origem fixada dos guias e o beacon oficial do Cloudflare Web Analytics:
 
 ```text
 script-src 'self' https://static.cloudflareinsights.com

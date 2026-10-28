@@ -1,5 +1,4 @@
 import { iniciarSessao, isAutenticado, getUsuario, isAcessoConvidadoAutorizado } from '../../core/state/authStore.js';
-import { getToken } from '../../core/state/tokenStore.js';
 import { resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
 import { openModal } from '../../core/ui/index.js';
 import { attachAuthEvents } from './events.js';
@@ -14,8 +13,6 @@ export async function initAuth(): Promise<void> {
     const escolhaInicial = new Promise<void>((resolve) => {
         liberarEntrada = resolve;
     });
-    const hadTokenAtStartup = getToken() !== null;
-
     const els: AuthEls = {
         sidebarFooter,
         btnHeroLogin: document.getElementById('btn-abrir-login-hero'),
@@ -35,8 +32,7 @@ export async function initAuth(): Promise<void> {
     const destino = resolveEntryDestination(
         window.location.hash,
         autenticado,
-        isAcessoConvidadoAutorizado(),
-        hadTokenAtStartup
+        isAcessoConvidadoAutorizado()
     );
 
     if (destino === 'login') {

@@ -43,11 +43,11 @@ curl --fail "${API_ORIGIN%/}/health"
 curl --fail "${API_ORIGIN%/}/ready"
 ```
 
-A migration `20261022110000_user_session_version` rejeita JWTs antigos sem o novo claim; planeje novo login dos usuários após esta release.
+A migration `20261022110000_user_session_version` rejeita JWTs antigos sem o novo claim; planeje novo login dos usuários. A migration `20261028173000_user_management_audit` adiciona o schema de gestão de usuários e auditoria atribuída ao ator e deve ser aplicada antes de iniciar a API atualizada.
 
 A imagem multi-stage mantém apenas dependências de produção no runtime, roda como usuário Node sem privilégio, remove capabilities Linux, usa filesystem root somente leitura e tem política de restart. O alvo `migration` contém Prisma CLI/TSX apenas para operação explícita. O build fornece URL sintética loopback para `prisma generate`; ela não é configuração runtime. Migrações nunca rodam automaticamente no startup. `npm ci --omit=dev` sozinho não é fluxo de release: etapa de migração precisa do Prisma CLI, enquanto o runtime é podado após gerar o client.
 
-Na configuração de build do Cloudflare Pages, use raiz `/`, comando `npm run build` e diretório `dist`. Defina `VITE_API_BASE_URL=https://api.eduassets.tech` e `VITE_RFID_BRIDGE_ENABLED=false`. `VITE_DOCS_BASE_URL` é opcional: se vazia, o app usa `https://docs.eduassets.tech`; se definida, deve conter a origem base, sem `/docs`. O fallback local é usado se a requisição remota falhar ou não tiver sucesso. Configure `CORS_ORIGIN=https://app.eduassets.tech` na API, sem barra final. A CSP do frontend deve permitir API, `https://docs.eduassets.tech` e o beacon oficial Cloudflare Analytics. CI valida código e templates, mas não publica Pages nem implanta na VM. Consulte `Hospedagem.md` para DNS, Nginx, Docker, firewall, CORS e diagnóstico.
+Na configuração de build do Cloudflare Pages, use raiz `/`, comando `npm run build` e diretório `dist`. Defina `VITE_API_BASE_URL=https://api.eduassets.tech` e `VITE_RFID_BRIDGE_ENABLED=false`; não existe configuração `VITE_DOCS_BASE_URL`. O frontend carrega Markdown de um commit imutável, fixado em `src/core/docs/docsService.ts`, por `https://raw.githubusercontent.com`; o fallback local é usado somente se essa requisição falhar. Configure `CORS_ORIGIN=https://app.eduassets.tech` na API, sem barra final. A CSP do frontend deve permitir a API, `https://raw.githubusercontent.com` e o beacon oficial Cloudflare Analytics. CI valida código e templates, mas não publica Pages nem implanta na VM. Consulte `Hospedagem.md` para DNS, Nginx, Docker, firewall, CORS e diagnóstico.
 
 ## Nginx, proxy confiável e TLS
 

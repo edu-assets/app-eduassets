@@ -1,6 +1,5 @@
 import { alterarSenha } from '../../core/api/auth.js';
 import { ApiError } from '../../core/api/index.js';
-import { atualizarToken } from '../../core/state/authStore.js';
 
 export async function trocarSenha(senhaAtual: string, novaSenha: string, confirmarSenha: string): Promise<void> {
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
@@ -14,8 +13,7 @@ export async function trocarSenha(senhaAtual: string, novaSenha: string, confirm
     }
 
     try {
-        const resposta = await alterarSenha(senhaAtual, novaSenha);
-        if (resposta?.token) atualizarToken(resposta.token);
+        await alterarSenha(senhaAtual, novaSenha);
     } catch (erro) {
         throw new Error(erro instanceof ApiError ? erro.message : 'feedback.erro_alterar_senha');
     }

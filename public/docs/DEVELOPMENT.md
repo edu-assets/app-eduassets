@@ -13,15 +13,14 @@ npm ci
 cp .env.example .env
 ```
 
-For local development, leave `VITE_API_BASE_URL` empty to use the Vite proxy. An empty `VITE_DOCS_BASE_URL` defaults to `https://docs.eduassets.tech`; bundled Markdown is used only if the remote request fails or is not successful:
+For local development, leave `VITE_API_BASE_URL` empty to use the Vite proxy. The app's Markdown source is pinned to an immutable docs commit in `src/core/docs/docsService.ts`; no docs-base environment variable is needed. Bundled Markdown is used only if the pinned remote request fails or is not successful:
 
 ```env
 VITE_API_BASE_URL=
 VITE_RFID_BRIDGE_ENABLED=false
-VITE_DOCS_BASE_URL=
 ```
 
-Run the API separately from `edu-assets/eduAssets`. Production builds require `VITE_API_BASE_URL` to point to the API origin; `VITE_DOCS_BASE_URL` is optional and defaults to `https://docs.eduassets.tech`. Never put a password, token, database URL, or other secret in a `VITE_*` variable; Vite embeds these values in public browser assets. If the remote documentation request fails, the modal uses the bundled local fallback.
+Run the API separately from `edu-assets/eduAssets`. Production builds require `VITE_API_BASE_URL` to point to the API origin. Never put a password, token, database URL, or other secret in a `VITE_*` variable; Vite embeds these values in public browser assets. The frontend fetches the pinned Markdown through `raw.githubusercontent.com` and uses the bundled local fallback only if that request fails.
 
 ## Run and validate
 

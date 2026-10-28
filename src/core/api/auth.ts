@@ -21,6 +21,6 @@ export function logoutSession(): Promise<void> {
     return http.post<void>('/auth/logout');
 }
 
-export function alterarSenha(senhaAtual: string, novaSenha: string): Promise<{ token?: string } | null> {
-    return http.patch<{ token?: string }>('/auth/senha', { senhaAtual, novaSenha }, { authMode: 'cookie' });
+export function alterarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
+    return http.patch<void>('/auth/senha', { senhaAtual, novaSenha }, { authMode: 'cookie' });
 }

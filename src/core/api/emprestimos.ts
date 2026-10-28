@@ -1,8 +1,12 @@
 import { http } from './apiClient.js';
 import type { Emprestimo, EmprestimoCreatePayload, ItemEmprestimoPayload } from '../../types/index.js';
 
+type EmprestimoPage = { items: Emprestimo[]; nextCursor: number | null };
+
 export function listarEmprestimos(): Promise<Emprestimo[]> {
-    return http.get<Emprestimo[]>('/emprestimos');
+    return http.get<Emprestimo[] | EmprestimoPage>('/emprestimos').then((response) =>
+        Array.isArray(response) ? response : response.items
+    );
 }
 
 export function criarEmprestimo(dados: EmprestimoCreatePayload): Promise<Emprestimo> {

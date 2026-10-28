@@ -66,15 +66,13 @@ Set these public build-time variables for Production and Preview as needed:
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
-# Optional override; the default is https://docs.eduassets.tech; local Markdown is used only if the remote request fails.
-VITE_DOCS_BASE_URL=https://docs.eduassets.tech
 ```
 
 `public/_headers` supplies the static response security headers copied into the build output. The frontend build does not deploy or configure the API, database, DNS, or Cloudflare account settings.
 
 ## Documentation
 
-The canonical bilingual guides are maintained in [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets/tree/main/public/docs) and hosted at https://docs.eduassets.tech. The About modal defaults to that host; `VITE_DOCS_BASE_URL` is an optional override. Markdown in `public/docs/` is a fallback used only when the remote request fails or returns a non-success response.
+The canonical bilingual guides are maintained in [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets/tree/main/public/docs) and hosted at https://docs.eduassets.tech. The About modal fetches Markdown from an immutable docs commit pinned in `src/core/docs/docsService.ts` via `raw.githubusercontent.com`; `VITE_DOCS_BASE_URL` is not supported. Markdown in `public/docs/` is used only when the pinned request fails or returns a non-success response. The production CSP must allow the API and `https://raw.githubusercontent.com`.
 
 Main guides in the central repository:
 

@@ -28,6 +28,9 @@ export const ICONE_POR_TIPO: Record<string, string> = {
 };
 
 export function renderControleMenuAcoes(tipo: string): string {
+    const opcaoEditar = tipo !== 'resolvidos'
+        ? html`<span class="registros-row-menu-opcao" data-acao="editar" data-requires-auth>${t('controle.editar')}</span>`
+        : '';
     const opcaoResolver = (tipo === 'manutencao' || tipo === 'quebrado')
         ? html`<span class="registros-row-menu-opcao" data-acao="resolver" data-requires-auth>${t('controle.resolver')}</span>`
         : '';
@@ -39,7 +42,7 @@ export function renderControleMenuAcoes(tipo: string): string {
             </button>
             <div class="registros-row-menu">
                 ${raw(opcaoResolver)}
-                <span class="registros-row-menu-opcao" data-acao="editar" data-requires-auth>${t('controle.editar')}</span>
+                ${raw(opcaoEditar)}
                 <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir" data-requires-admin>${t('controle.excluir')}</span>
             </div>
         </span>

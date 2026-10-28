@@ -1,5 +1,4 @@
 import { API_BASE_URL } from './apiConfig.js';
-import { getToken } from '../state/tokenStore.js';
 import { t } from '../state/i18nStore.js';
 
 export interface ValidationErrorDetail {
@@ -95,11 +94,13 @@ interface RequestOptions {
 }
 
 async function request<T>(path: string, { method = 'GET', body, authMode }: RequestOptions = {}): Promise<T> {
-    const token = getToken();
     const cookieSession = await supportsHttpOnlySession();
+    if (authMode === 'cookie' && !cookieSession) {
+        const payload = { erro: 'backend.geral.api_indisponivel' };
+        throw new ApiError(t(payload.erro), 503, payload);
+    }
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (token) headers.Authorization = `Bearer ${token}`;
-    if (authMode === 'cookie' && cookieSession) headers['X-Auth-Mode'] = 'cookie';
+    if (authMode === 'cookie') headers['X-Auth-Mode'] = 'cookie';
 
     let response: Response;
     try {

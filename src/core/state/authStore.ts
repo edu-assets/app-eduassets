@@ -1,5 +1,5 @@
 import { fetchMe, login as loginRequest, logoutSession } from '../api/auth.js';
-import { getToken, setToken } from './tokenStore.js';
+import { setToken } from './tokenStore.js';
 import type { AuthUser, AuthState } from '../../types/index.js';
 
 const GUEST_ENTRY_SESSION_KEY = 'eduassets_guest_entry_authorized';
@@ -30,28 +30,20 @@ function definirAcessoConvidadoAutorizado(ativo: boolean): void {
 }
 
 export async function iniciarSessao(): Promise<void> {
-    const hadLegacyToken = getToken() !== null;
-
     try {
         user = await fetchMe();
         definirAcessoConvidadoAutorizado(false);
     } catch {
         setToken(null);
         user = null;
-        if (hadLegacyToken || !acessoConvidadoAutorizado) definirAcessoConvidadoAutorizado(false);
+        if (!acessoConvidadoAutorizado) definirAcessoConvidadoAutorizado(false);
     }
     notify();
 }
 
 export async function entrar(login: string, senha: string): Promise<void> {
     const resposta = await loginRequest(login, senha);
-    if (resposta.token && !setToken(resposta.token)) {
-        user = null;
-        definirAcessoConvidadoAutorizado(false);
-        notify();
-        throw new Error('auth.token_invalido');
-    }
-    if (!resposta.token) setToken(null);
+    setToken(null);
     user = resposta.user;
     definirAcessoConvidadoAutorizado(false);
     notify();

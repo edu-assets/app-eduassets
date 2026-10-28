@@ -1,5 +1,4 @@
 import { sair, getUsuario, subscribe } from '../state/authStore.js';
-import { getToken } from '../state/tokenStore.js';
 import { showToast, openModal } from '../ui/index.js';
 import { setEntryRoute } from '../layout/entryRoute.js';
 
@@ -9,7 +8,7 @@ const EVENTOS_ATIVIDADE = ['mousemove', 'keydown', 'click', 'scroll', 'touchstar
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 function expirarSessao(): void {
-    if (!getToken() && !getUsuario()) return;
+    if (!getUsuario()) return;
     const eraAdmin = getUsuario()?.nivelAcesso === 'ADMINISTRADOR';
     sair();
     showToast(eraAdmin ? 'Sessão expirada por inatividade. Faça login novamente.' : 'Sessão expirada. Faça login novamente.', 'warning');

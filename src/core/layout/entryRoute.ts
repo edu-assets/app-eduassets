@@ -6,10 +6,8 @@ export type EntryDestination = 'login' | 'app';
 export function resolveEntryDestination(
     currentHash: string,
     authenticated: boolean,
-    guestEntryAuthorized: boolean,
-    hadTokenAtStartup: boolean
+    guestEntryAuthorized: boolean
 ): EntryDestination {
-    if (hadTokenAtStartup && !authenticated) return 'login';
     if (currentHash === LOGIN_ROUTE_HASH) return authenticated ? 'app' : 'login';
     return authenticated || guestEntryAuthorized ? 'app' : 'login';
 }

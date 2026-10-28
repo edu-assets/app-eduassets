@@ -160,7 +160,7 @@ export function atualizarToolbar(els: ControleEls, estado: ControleEstado): void
     const tipoSelecionado = estado.linhaSelecionada?.closest<HTMLElement>('.controle-tab-content')?.dataset.tipo;
     const podeResolver = temSelecao && (tipoSelecionado === 'manutencao' || tipoSelecionado === 'quebrado');
 
-    if (els.btnEditar) els.btnEditar.disabled = !temSelecao;
+    if (els.btnEditar) els.btnEditar.disabled = !temSelecao || tipoSelecionado === 'resolvidos';
     if (els.btnDeletar) els.btnDeletar.disabled = !temSelecao;
     if (els.btnResolver) els.btnResolver.disabled = !podeResolver;
 }
@@ -219,7 +219,7 @@ export function abrirNovoRegistro(els: ControleEls, estado: ControleEstado, tipo
 export function abrirEdicaoRegistro(els: ControleEls, estado: ControleEstado, row: HTMLElement): void {
     const tabContent = row.closest<HTMLElement>('.controle-tab-content');
     const tipo = tabContent ? tabContent.dataset.tipo : null;
-    if (!tipo) return;
+    if (!tipo || tipo === 'resolvidos') return;
 
     estado.tipoAtual = tipo;
     estado.idEditando = row.dataset.id ?? null;

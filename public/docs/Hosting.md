@@ -71,13 +71,11 @@ In the frontend Pages project:
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
-# Optional; when unset, the app uses https://docs.eduassets.tech. The local fallback is used only if the remote request fails.
-VITE_DOCS_BASE_URL=https://docs.eduassets.tech
 ```
 
 7. Custom domain: `app.eduassets.tech`.
 
-`public/_headers` is copied to `dist/_headers`. The production CSP must allow the API, hosted documentation, and the official Cloudflare Web Analytics beacon:
+The browser app fetches its Markdown from an immutable docs commit pinned in `src/core/docs/docsService.ts` via `raw.githubusercontent.com`. `docs.eduassets.tech` remains the public guide site; it is not the app's default fetch host. `public/_headers` is copied to `dist/_headers`. The production CSP must allow the API, the pinned docs origin, and the official Cloudflare Web Analytics beacon:
 
 ```text
 script-src 'self' https://static.cloudflareinsights.com

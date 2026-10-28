@@ -66,15 +66,13 @@ Configure estas variáveis públicas de build para Production e Preview conforme
 ```env
 VITE_API_BASE_URL=https://api.eduassets.tech
 VITE_RFID_BRIDGE_ENABLED=false
-# Substituição opcional; o padrão é https://docs.eduassets.tech; o Markdown local só é usado se a requisição remota falhar.
-VITE_DOCS_BASE_URL=https://docs.eduassets.tech
 ```
 
 O arquivo `public/_headers` fornece cabeçalhos de segurança estáticos, copiados para a saída da build. O build do frontend não implanta nem configura a API, o banco de dados, o DNS ou as configurações da conta Cloudflare.
 
 ## Documentação
 
-Os guias bilíngues canônicos são mantidos em [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets/tree/main/public/docs) e hospedados em https://docs.eduassets.tech. O modal Sobre usa esse host por padrão; `VITE_DOCS_BASE_URL` é uma substituição opcional. O Markdown em `public/docs/` é fallback, usado somente quando a requisição remota falha ou retorna resposta sem sucesso.
+Os guias bilíngues canônicos são mantidos em [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets/tree/main/public/docs) e hospedados em https://docs.eduassets.tech. O modal Sobre carrega Markdown de um commit imutável, fixado em `src/core/docs/docsService.ts`, por `raw.githubusercontent.com`; `VITE_DOCS_BASE_URL` não é suportada. O Markdown em `public/docs/` é fallback, usado somente quando a requisição fixada falha ou retorna resposta sem sucesso. A CSP de produção deve permitir a API e `https://raw.githubusercontent.com`.
 
 Guias principais no repositório central:
 

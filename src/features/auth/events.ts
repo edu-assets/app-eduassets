@@ -130,8 +130,7 @@ function sincronizarRotaLogin(els: AuthEls): void {
     const destino = resolveEntryDestination(
         window.location.hash,
         isAutenticado(),
-        isAcessoConvidadoAutorizado(),
-        false
+        isAcessoConvidadoAutorizado()
     );
 
     if (destino === 'login') {

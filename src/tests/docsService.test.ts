@@ -9,6 +9,8 @@ vi.mock('../core/docs/markdownRenderer.js', () => ({
     renderizarMarkdown: async (markdown: string) => ({ html: `<p>${markdown}</p>`, headings: [] }),
 }));
 
+const PINNED_DOCS_BASE_URL = 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/30ba3a141f335fde3b247279aacfe683e126b70b/public';
+
 describe('documentation Markdown source', () => {
     beforeEach(() => {
         vi.resetModules();
@@ -19,12 +21,12 @@ describe('documentation Markdown source', () => {
         vi.unstubAllGlobals();
     });
 
-    it('loads from the configured central repository when it is available', async () => {
-        vi.stubEnv('VITE_DOCS_BASE_URL', 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public/');
+    it('loads the pinned central release and ignores a mutable source override', async () => {
+        vi.stubEnv('VITE_DOCS_BASE_URL', 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public');
         const fetchMock = vi.fn().mockResolvedValue({
             ok: true,
             status: 200,
-            text: async () => '# Central guide',
+            text: async () => '# Pinned central guide',
         });
         vi.stubGlobal('fetch', fetchMock);
 
@@ -32,18 +34,16 @@ describe('documentation Markdown source', () => {
         const document = await loadDocument('manual-usuario');
 
         expect(fetchMock).toHaveBeenCalledOnce();
-        expect(fetchMock).toHaveBeenCalledWith(
-            'https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public/docs/MANUAL_USUARIO.md',
-        );
-        expect(document.markdown).toBe('# Central guide');
+        expect(fetchMock).toHaveBeenCalledWith(`${PINNED_DOCS_BASE_URL}/docs/MANUAL_USUARIO.md`);
+        expect(document.markdown).toBe('# Pinned central guide');
     });
 
-    it('uses docs.eduassets.tech by default when no override is configured', async () => {
+    it('uses the immutable release URL by default', async () => {
         vi.stubEnv('VITE_DOCS_BASE_URL', '');
         const fetchMock = vi.fn().mockResolvedValue({
             ok: true,
             status: 200,
-            text: async () => '# Hosted guide',
+            text: async () => '# Pinned guide',
         });
         vi.stubGlobal('fetch', fetchMock);
 
@@ -51,14 +51,11 @@ describe('documentation Markdown source', () => {
         const document = await loadDocument('manual-usuario');
 
         expect(fetchMock).toHaveBeenCalledOnce();
-        expect(fetchMock).toHaveBeenCalledWith(
-            'https://docs.eduassets.tech/docs/MANUAL_USUARIO.md',
-        );
-        expect(document.markdown).toBe('# Hosted guide');
+        expect(fetchMock).toHaveBeenCalledWith(`${PINNED_DOCS_BASE_URL}/docs/MANUAL_USUARIO.md`);
+        expect(document.markdown).toBe('# Pinned guide');
     });
 
-    it('falls back to the bundled same-origin Markdown when the central source is unavailable', async () => {
-        vi.stubEnv('VITE_DOCS_BASE_URL', 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public');
+    it('uses the bundled same-origin Markdown only when the pinned source is unavailable', async () => {
         const fetchMock = vi.fn()
             .mockResolvedValueOnce({ ok: false, status: 404, text: async () => '' })
             .mockResolvedValueOnce({ ok: true, status: 200, text: async () => '# Local fallback' });
@@ -67,10 +64,7 @@ describe('documentation Markdown source', () => {
         const { loadDocument } = await import('../core/docs/docsService.js');
         const document = await loadDocument('manual-usuario');
 
-        expect(fetchMock).toHaveBeenNthCalledWith(
-            1,
-            'https://raw.githubusercontent.com/edu-assets/docs-eduassets/main/public/docs/MANUAL_USUARIO.md',
-        );
+        expect(fetchMock).toHaveBeenNthCalledWith(1, `${PINNED_DOCS_BASE_URL}/docs/MANUAL_USUARIO.md`);
         expect(fetchMock).toHaveBeenNthCalledWith(2, '/docs/MANUAL_USUARIO.md');
         expect(document.markdown).toBe('# Local fallback');
     });
