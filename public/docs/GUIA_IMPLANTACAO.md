@@ -1,6 +1,6 @@
 # Implantação e operação
 
-> **Registro histórico (23/10/2026):** o operador validou naquele momento o frontend Cloudflare Pages em `app.eduassets.tech`, a API Nginx na VM Oracle em `api.eduassets.tech`, a configuração de conexão com o Neon, o HTTPS externo e o preflight CORS. Este registro não verifica o estado remoto atual. Backup externo, ensaio de restauração, monitoramento e revisão final para dados reais continuam tarefas operacionais. Consulte `Hospedagem.md` para o runbook.
+> **Registro histórico (23/10/2026):** o operador validou naquele momento o frontend Cloudflare Pages em `app.eduassets.tech`, a API Nginx na VM Oracle em `api.eduassets.tech`, a configuração do Neon, HTTPS externo e preflight CORS. Em 28/10/2026, o operador também registrou uma execução manual de backup criptografado em R2, aplicação da migration de auditoria e respostas bem-sucedidas de `/health` e `/ready`; os detalhes e limites estão no registro v1.0.1 abaixo. Esses registros são datados e não representam monitoramento contínuo.
 
 ## Topologia escolhida
 
@@ -21,33 +21,60 @@ Navegador → frontend estático Cloudflare Pages → Cloudflare HTTPS → Nginx
 
 ## Build, migração e início
 
-Na VM, a partir de um checkout de release revisado:
+O backend é mantido no repositório separado [`edu-assets/api-eduassets`](https://github.com/edu-assets/api-eduassets). Na atualização registrada, o checkout de produção ficava em `/opt/api-eduassets` e o projeto Compose se chamava `eduassets`. Use um commit revisado, não uma alteração local desconhecida. Depois de aprovar o commit e o CI:
 
 ```bash
-cp .env.production.example .env.production
+cd /opt/api-eduassets
+git fetch origin main
+git switch main
+git pull --ff-only origin main
+git rev-parse --short=12 HEAD
 chmod 600 .env.production
-# Edite após verificar DNS, banco e certificado.
-docker compose --env-file .env.production -f docker-compose.production.yml build api migrate seed
-# Fazer e conferir backup novo antes de mudança de schema.
-set -a; . ./.env.production; set +a
-DATABASE_URL="$DATABASE_URL" BACKUP_DIR=./backups ./deploy/scripts/backup-postgres.sh
-# Conferir que o dump existe/não está vazio; idealmente restaurá-lo em outro banco vazio de teste.
-docker compose --env-file .env.production -f docker-compose.production.yml --profile release run --rm migrate
-docker compose --env-file .env.production -f docker-compose.production.yml --profile release run --rm seed
-# Verifique login administrativo pela UI/API usando valores do arquivo protegido.
-# Depois altere a senha no fluxo autenticado e remova/limpe SEED_ADMIN_* de .env.production.
-docker compose --env-file .env.production -f docker-compose.production.yml up -d api
-docker compose --env-file .env.production -f docker-compose.production.yml ps
-API_ORIGIN="${API_ORIGIN:?defina a origem da API verificada pelo operador}"
-curl --fail "${API_ORIGIN%/}/health"
-curl --fail "${API_ORIGIN%/}/ready"
+export EDUASSETS_IMAGE_TAG="$(git rev-parse --short=12 HEAD)"
+docker compose -p eduassets --env-file .env.production -f docker-compose.production.yml config --quiet
+docker compose -p eduassets --env-file .env.production -f docker-compose.production.yml build --pull api migrate
 ```
 
-A migration `20261022110000_user_session_version` rejeita JWTs antigos sem o novo claim; planeje novo login dos usuários. A migration `20261028173000_user_management_audit` adiciona o schema de gestão de usuários e auditoria atribuída ao ator e deve ser aplicada antes de iniciar a API atualizada.
+Confirme um backup criptografado antes de migrations. Use uma URL **Direct** compatível com libpq, sem senha; para PostgreSQL 18, use `pg_dump` major 18 ou posterior. Armazene a senha em `/etc/eduassets/pgpass` (modo `0600`) e use apenas a chave pública `age` na VM; mantenha a identidade privada fora da VM. Exemplo de ambiente, sem credenciais reais:
 
-A imagem multi-stage mantém apenas dependências de produção no runtime, roda como usuário Node sem privilégio, remove capabilities Linux, usa filesystem root somente leitura e tem política de restart. O alvo `migration` contém Prisma CLI/TSX apenas para operação explícita. O build fornece URL sintética loopback para `prisma generate`; ela não é configuração runtime. Migrações nunca rodam automaticamente no startup. `npm ci --omit=dev` sozinho não é fluxo de release: etapa de migração precisa do Prisma CLI, enquanto o runtime é podado após gerar o client.
+```bash
+export DATABASE_URL='postgresql://USUARIO@HOST_DIRECT:5432/BANCO?sslmode=require&channel_binding=require'
+export PGPASSFILE='/etc/eduassets/pgpass'
+export AGE_RECIPIENT="$(< /etc/eduassets/age-recipient.txt)"
+export RCLONE_DESTINATION='offsite:<bucket>/postgres'
+export BACKUP_DIR='/var/backups/eduassets'
+export PATH="/usr/lib/postgresql/18/bin:$PATH"
+./deploy/scripts/backup-postgres.sh
+ls -lh "$BACKUP_DIR"/*.dump.age
+rclone ls "$RCLONE_DESTINATION"
+```
 
-Na configuração de build do Cloudflare Pages, use raiz `/`, comando `npm run build` e diretório `dist`. Defina `VITE_API_BASE_URL=https://api.eduassets.tech` e `VITE_RFID_BRIDGE_ENABLED=false`; não existe configuração `VITE_DOCS_BASE_URL`. O frontend carrega Markdown de um commit imutável, fixado em `src/core/docs/docsService.ts`, por `https://raw.githubusercontent.com`; o fallback local é usado somente se essa requisição falhar. Configure `CORS_ORIGIN=https://app.eduassets.tech` na API, sem barra final. A CSP do frontend deve permitir a API, `https://raw.githubusercontent.com` e o beacon oficial Cloudflare Analytics. CI valida código e templates, mas não publica Pages nem implanta na VM. Consulte `Hospedagem.md` para DNS, Nginx, Docker, firewall, CORS e diagnóstico.
+Interrompa a release se o script falhar ou o objeto novo não aparecer no armazenamento externo. A listagem confirma transferência, não uma restauração. Este repositório não agenda backups nem implementa retenção automática.
+
+Aplique a migration como etapa explícita e reinicie somente o serviço da API:
+
+```bash
+docker compose -p eduassets --env-file .env.production -f docker-compose.production.yml --profile release run --rm --no-deps migrate
+docker compose -p eduassets --env-file .env.production -f docker-compose.production.yml up -d --no-build --force-recreate api
+docker compose -p eduassets --env-file .env.production -f docker-compose.production.yml ps
+docker compose -p eduassets --env-file .env.production -f docker-compose.production.yml logs --since=10m --tail=100 api
+curl --fail --show-error http://127.0.0.1:3000/health
+curl --fail --show-error http://127.0.0.1:3000/ready
+curl --fail --show-error https://api.eduassets.tech/health
+curl --fail --show-error https://api.eduassets.tech/ready
+```
+
+Não rode `seed` em atualização normal. O serviço `seed` é somente para provisionamento inicial revisado, com banco correto e variáveis `SEED_*` temporárias. `20261028173000_user_management_audit` cria o schema de gestão de usuários/auditoria e precisa ser aplicada antes de iniciar a API correspondente.
+
+A imagem multi-stage mantém apenas dependências de produção no runtime, roda sem privilégios, remove capabilities Linux, usa filesystem root somente leitura e possui política de restart. O alvo de migration mantém Prisma CLI/TSX para a etapa de release explícita. A geração do Prisma Client usa URL sintética local somente durante build; migrations nunca rodam automaticamente no startup.
+
+Na configuração do Cloudflare Pages, use raiz `/`, `npm run build` e diretório `dist`; defina `VITE_API_BASE_URL=https://api.eduassets.tech` e `VITE_RFID_BRIDGE_ENABLED=false`. Não existe `VITE_DOCS_BASE_URL`. O frontend carrega Markdown de um commit imutável fixado em `src/core/docs/docsService.ts` por `raw.githubusercontent.com`; use o fallback local apenas se a requisição falhar. Configure `CORS_ORIGIN=https://app.eduassets.tech`, sem barra final. A CSP precisa permitir a API, `https://raw.githubusercontent.com` e o beacon oficial do Cloudflare Analytics. CI valida código/templates, mas não implanta Pages nem a VM.
+
+## Registro da release de produção — 28 de outubro de 2026
+
+O operador confirmou a atualização da API no repositório `edu-assets/api-eduassets`, commit `14b0716110750857daa27d0e979e3bec574e39e0`. As imagens `eduassets-backend` e `eduassets-backend-migration` foram construídas com a tag curta `14b071611075`; `20261028173000_user_management_audit` foi aplicada e o serviço `api` foi recriado sem rebuild. Os endpoints `/health` e `/ready` responderam com os estados esperados tanto via loopback da VM quanto por `https://api.eduassets.tech`. A primeira leitura de `docker compose ps` ocorreu durante `health: starting`; não foi registrada uma leitura posterior de `healthy`.
+
+Antes da migration, o operador gerou `eduassets-20261028T223140Z.dump.age` com `pg_dump` 18.6 contra Neon 18.6 usando URL Direct sem senha e `PGPASSFILE` modo `0600`; `age` criptografou o dump e o `rclone` transferiu o ciphertext para o bucket Cloudflare R2 `eduassets-postgres-backups`. O objeto de 328366 bytes foi listado no R2. O primeiro `PUT` recebeu HTTP 501, mas a tentativa automática seguinte concluiu o envio. O teste de restore local em banco descartável está registrado separadamente no runbook da API; **não foi realizado restore desse objeto de produção**. Esta implantação também não configurou agendamento/retention do backup nem alterou Nginx/firewall/Cloudflare.
 
 ## Nginx, proxy confiável e TLS
 
@@ -67,9 +94,9 @@ Para deployments públicos, configure uma regra Cloudflare WAF/limite de taxa re
 
 ## Backup, retenção e recuperação
 
-No checkout do backend, execute [`deploy/scripts/backup-postgres.sh`](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) com env file protegido ou secret manager. O backup custom-format (`pg_dump`) recebe permissão 0600. Agende-o pelo serviço de backup/host aprovado; o repositório backend não instala um agendamento. Armazene-o criptografado fora da VM e separado das credenciais do banco. Política inicial recomendada: 30 pontos diários e 12 mensais, ajustada a RPO/RTO aprovados e regras de retenção de dados. O script não exclui backups antigos; retenção deve ficar no sistema de armazenamento aprovado, com alerta de falhas.
+No checkout do backend, execute [`deploy/scripts/backup-postgres.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/backup-postgres.sh) com env file protegido ou secret manager. O backup custom-format (`pg_dump`) recebe permissão 0600. Agende-o pelo serviço de backup/host aprovado; o repositório backend não instala um agendamento. Armazene-o criptografado fora da VM e separado das credenciais do banco. Política inicial recomendada: 30 pontos diários e 12 mensais, ajustada a RPO/RTO aprovados e regras de retenção de dados. O script não exclui backups antigos; retenção deve ficar no sistema de armazenamento aprovado, com alerta de falhas.
 
-Para ensaio, crie banco **novo, vazio e descartável**. No mesmo checkout do backend, consulte [`deploy/scripts/restore-postgres-empty-db.sh`](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/restore-postgres-empty-db.sh) e execute:
+Para ensaio, crie banco **novo, vazio e descartável**. No mesmo checkout do backend, consulte [`deploy/scripts/restore-postgres-empty-db.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/restore-postgres-empty-db.sh) e execute:
 
 ```bash
 DATABASE_URL='postgresql://...novo-banco-vazio-de-teste...' \

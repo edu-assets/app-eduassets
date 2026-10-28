@@ -1,6 +1,17 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.0.0 oficial**, publicada em 28/10/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.0.1 oficial**, publicada em 28/10/2026; entradas anteriores permanecem como histórico.
+
+## v1.0.1 — Correções de segurança e operação — 28 de outubro de 2026
+
+- Remediação do frontend: sanitização dos documentos com DOMPurify, allowlist restrita de elementos/atributos/esquemas de URL, remoção de imagens remotas e regressões para `javascript:` com CR/LF/TAB, `data:` e `vbscript:`; proteção de identificadores brutos.
+- Sessões de navegador passaram a ser somente por cookie protegido; tokens JWT não são persistidos em `localStorage`. A API valida `Origin` nas mutações autenticadas por cookie.
+- Fonte de Markdown fixada em commit imutável; CSP e CI verificam a origem necessária, com fallback local sincronizado. A listagem pública de empréstimos usa cursor, padrão 50 e máximo de 100 registros por página.
+- API: registros `AuditLog` atribuídos ao ator na mesma transação das mutações de usuário, categoria, equipamento, responsável, ocorrência e empréstimo; ordenação determinística de IDs em transações de estoque e conflitos Prisma P2034 retornam HTTP 409. Provisionamento RFID não retorna segredo; WebSocket restringe caminho/origem e usa código de uso único no modo cookie.
+- Hardening complementar: limites Zod, limite de 72 bytes para senhas, redação de credenciais/PII em logs, correção de campos de exportação e cache headers; imagens Node de produção fixadas por digest e templates Nginx limitam o acesso de origem às faixas Cloudflare.
+- Deploy da API em produção registrado no commit `14b0716110750857daa27d0e979e3bec574e39e0`; migration `20261028173000_user_management_audit` aplicada, imagens de API/migration construídas e serviço reiniciado. `/health` e `/ready` responderam com sucesso localmente e por `https://api.eduassets.tech`.
+- Antes da migration, foi gerado um backup PostgreSQL 18.6 custom-format, criptografado com `age` e transferido para Cloudflare R2. A senha foi lida por `PGPASSFILE` (modo 0600); o objeto foi listado no destino. O primeiro upload recebeu HTTP 501, mas a repetição automática teve sucesso. Esta foi uma execução manual; não registra agendamento, política de retenção ou restauração do objeto de produção.
+- CI hospedado da API, run `40769671846`, concluiu `verify` e `production-smoke` com sucesso. Os guias detalham a sequência e distinguem verificações de código, registro do operador e itens não exercitados no banco de produção.
 
 ## v1.0.0 — Versão oficial — 28 de outubro de 2026
 

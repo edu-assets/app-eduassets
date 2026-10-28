@@ -27,10 +27,11 @@ Não peça ao usuário que envie senha, cookie, JWT, código de uso único RFID 
 
 ## Restauração e retorno ao serviço
 
-Backups e migrations são operações de alto impacto. No checkout do backend, [backup-postgres.sh](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) gera dump `pg_dump` custom-format; [restore-postgres-empty-db.sh](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/restore-postgres-empty-db.sh) exige confirmação e só aceita destino descartável sem objetos em schemas não sistêmicos, sem usar `--clean`. Siga o [procedimento de implantação e restore](GUIA_IMPLANTACAO.md), teste em destino isolado, verifique integridade/contagem sem expor dados e obtenha autorização antes de alterar produção. Este documento não comprova restore real nem estabelece retenção/RPO/RTO.
+Backups e migrations são operações de alto impacto. No checkout do backend, [backup-postgres.sh](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/backup-postgres.sh) gera dump `pg_dump` custom-format; [restore-postgres-empty-db.sh](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/restore-postgres-empty-db.sh) exige confirmação e só aceita destino descartável sem objetos em schemas não sistêmicos, sem usar `--clean`. Siga o [procedimento de implantação e restore](GUIA_IMPLANTACAO.md), teste em destino isolado, verifique integridade/contagem sem expor dados e obtenha autorização antes de alterar produção. Este documento não comprova restore real nem estabelece retenção/RPO/RTO.
 
 Após uma intervenção autorizada, registre versão, migrations aplicadas, resultado de `/health` e `/ready`, responsável pela ação e riscos remanescentes. Não declare incidente encerrado somente porque o container iniciou: valide login, uma consulta de leitura apropriada, logs sem erros e disponibilidade do backup.
 
+**Registro do operador — 28/10/2026:** release API v1.0.1 no commit `14b0716110750857daa27d0e979e3bec574e39e0`; migration `20261028173000_user_management_audit` aplicada; backup age criptografado listado no R2; `/health` e `/ready` responderam localmente e no domínio público. Este registro não comprova restauração do backup de produção, agendamento/retention ou monitoramento contínuo.
 ## Documentação relacionada
 
 - [Guia de Hospedagem](Hospedagem.md) / [Hosting Guide](Hosting.md)

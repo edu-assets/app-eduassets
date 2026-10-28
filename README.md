@@ -1,14 +1,14 @@
 # eduAssets Frontend
 
-[Português](README_PT.md) · [Backend API repository](https://github.com/edu-assets/eduAssets)
+[Português](README_PT.md) · [Backend API repository](https://github.com/edu-assets/api-eduassets)
 
-> **Status: Official version 1.0.0.** This repository contains the browser application for eduAssets. It is a Vite/TypeScript single-page application; the API and database are maintained separately.
+> **Status: Official version 1.0.1.** This repository contains the browser application for eduAssets. It is a Vite/TypeScript single-page application; the API and database are maintained separately.
 
 ## Overview
 
 The frontend supports school-equipment inventory and loan workflows, including equipment and stock views, loan registration and returns, occurrence management, administrative screens, CSV/Excel/PDF exports, guest read-only access, and optional RFID-related UI. It also provides Portuguese and English interfaces and persistent light/dark theme selection.
 
-The application uses feature-first TypeScript modules and native DOM rendering. The backend remains the security boundary: frontend route guards and disabled controls are usability measures, not authorization. In production, the app communicates with the API at `https://api.eduassets.tech`; authentication uses the backend's secure session flow where supported.
+The application uses feature-first TypeScript modules and native DOM rendering. The backend remains the security boundary: frontend route guards and disabled controls are usability measures, not authorization. In production, the app communicates with `https://api.eduassets.tech` using cookie-only sessions (`HttpOnly`, `SameSite=Lax`, and `Secure` on HTTPS); the browser never stores a JWT in `localStorage`. If cookie-session capability cannot be confirmed, login fails closed.
 
 ## Repository layout
 
@@ -39,7 +39,7 @@ VITE_API_BASE_URL=
 VITE_RFID_BRIDGE_ENABLED=false
 ```
 
-Run the API separately. Its source currently lives in the `backend/` directory of [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets). Do not put passwords, tokens, or other secrets in `VITE_*` variables; these values are public in the built browser assets.
+Run the API separately. Its source currently lives in the `backend/` directory of [`edu-assets/api-eduassets`](https://github.com/edu-assets/api-eduassets). Do not put passwords, tokens, or other secrets in `VITE_*` variables; these values are public in the built browser assets.
 
 ## Available commands
 
@@ -85,4 +85,4 @@ Main guides in the central repository:
 - [Operations and recovery](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/OPERATIONS_AND_RECOVERY.md) · [Operação e recuperação](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/OPERACAO_E_RECUPERACAO.md)
 - [Changelog](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/CHANGELOG_EN.md) · [Histórico de alterações](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/CHANGELOG.md)
 
-For API and infrastructure changes, consult the backend source and its documentation in [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets).
+For API and infrastructure changes, consult the backend source and its documentation in [`edu-assets/api-eduassets`](https://github.com/edu-assets/api-eduassets).

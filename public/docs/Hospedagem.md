@@ -299,7 +299,7 @@ Configure separadamente monitoramento externo para `/health`, `/ready`, resposta
 
 ## 11. Backup e recuperação
 
-Antes de migrations em banco operacional, execute [backup-postgres.sh](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) a partir da raiz do checkout do repositório backend, usando uma URL protegida e compatível com `pg_dump`. Para o Neon PostgreSQL 18, use `pg_dump` major 18 ou mais recente; não use um cliente 16 contra o servidor 18.
+Antes de migrations em banco operacional, execute [backup-postgres.sh](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/backup-postgres.sh) a partir da raiz do checkout do repositório backend, usando uma URL protegida e compatível com `pg_dump`. Para o Neon PostgreSQL 18, use `pg_dump` major 18 ou mais recente; não use um cliente 16 contra o servidor 18.
 
 Quando o `.env` for carregado com `source`, prefira valores sem aspas externas duplicadas. Para operações com `pg_dump`, mantenha uma URL libpq própria se os parâmetros do Prisma forem diferentes. Nunca coloque URLs reais neste documento.
 
@@ -317,3 +317,9 @@ Na implantação documentada naquela data, foram observados:
 - CSP permitindo a API, a documentação hospedada e o beacon oficial do Cloudflare.
 
 Este registro é datado e não representa uma checagem em tempo real dos serviços.
+
+## 13. Registro de implantação da API em 28/10/2026
+
+O operador relatou a implantação da API v1.0.1 no commit `14b0716110750857daa27d0e979e3bec574e39e0`, com a migration `20261028173000_user_management_audit`. O backup de 328366 bytes foi criado antes da migration, criptografado com `age` e listado no bucket R2 `eduassets-postgres-backups`; a transferência passou após uma repetição automática de HTTP 501. `pg_dump` 18.6 foi usado contra Neon 18.6, com senha via `PGPASSFILE` modo `0600`.
+
+Os comandos do operador retornaram sucesso em `/health` e `/ready` por loopback e por `https://api.eduassets.tech`. O primeiro snapshot do Compose ainda mostrava `health: starting`; não houve registro posterior de estado `healthy`. Não foi realizado restore do objeto de produção, não foi configurado agendamento/retention e não houve alteração de Nginx, firewall ou Cloudflare nessa atualização. Este histórico não substitui monitoramento contínuo nem política de recuperação.

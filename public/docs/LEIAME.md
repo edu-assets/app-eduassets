@@ -2,7 +2,7 @@
 
 [English](README.md) · [Repositório de documentação](https://github.com/edu-assets/docs-eduassets) · [Código-fonte do frontend](https://github.com/edu-assets/app-eduassets)
 
-Esta é a página de entrada em português para os guias da aplicação de navegador eduAssets. O código-fonte do frontend fica em `edu-assets/app-eduassets`; a API fica em `edu-assets/eduAssets`; a documentação bilíngue canônica é mantida em `edu-assets/docs-eduassets`.
+Esta é a página de entrada em português para os guias da aplicação de navegador eduAssets. O código-fonte do frontend fica em `edu-assets/app-eduassets`; a API fica em `edu-assets/api-eduassets`; a documentação bilíngue canônica é mantida em `edu-assets/docs-eduassets`.
 
 ## Guias
 

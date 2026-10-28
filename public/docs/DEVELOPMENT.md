@@ -1,6 +1,6 @@
 # Frontend development and validation
 
-This guide applies to the browser application in [`edu-assets/app-eduassets`](https://github.com/edu-assets/app-eduassets). The API source is maintained separately in [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets), under `backend/`. The canonical bilingual Markdown is maintained in [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets).
+This guide applies to the browser application in [`edu-assets/app-eduassets`](https://github.com/edu-assets/app-eduassets). The API source is maintained separately in [`edu-assets/api-eduassets`](https://github.com/edu-assets/api-eduassets), under `backend/`. The canonical bilingual Markdown is maintained in [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets).
 
 ## Requirements
 
@@ -20,7 +20,7 @@ VITE_API_BASE_URL=
 VITE_RFID_BRIDGE_ENABLED=false
 ```
 
-Run the API separately from `edu-assets/eduAssets`. Production builds require `VITE_API_BASE_URL` to point to the API origin. Never put a password, token, database URL, or other secret in a `VITE_*` variable; Vite embeds these values in public browser assets. The frontend fetches the pinned Markdown through `raw.githubusercontent.com` and uses the bundled local fallback only if that request fails.
+Run the API separately from `edu-assets/api-eduassets`. Production builds require `VITE_API_BASE_URL` to point to the API origin. Never put a password, token, database URL, or other secret in a `VITE_*` variable; Vite embeds these values in public browser assets. The frontend fetches the pinned Markdown through `raw.githubusercontent.com` and uses the bundled local fallback only if that request fails.
 
 ## Run and validate
 

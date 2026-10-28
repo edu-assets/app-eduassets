@@ -1,18 +1,18 @@
 # Roadmap — eduAssets
 
-> **Official version 1.0.0 — October 28, 2026.** This page describes product scope and future directions; it is not a live infrastructure-availability dashboard.
+> **Official version 1.0.1 — October 28, 2026.** This page describes product scope and future directions; it is not a live infrastructure-availability dashboard.
 
-## Version 1.0.0 — official
+## Version 1.0.1 — official
 
-The official version brings together the TypeScript/Vite web frontend, Node.js/Express API, and PostgreSQL persistence through Prisma in separate repositories. The system supports equipment management, aggregate inventory, loans, returns, and occurrences, with Guest, Editor, and Administrator access, reports, and exports.
+Official version 1.0.1 retains the functional scope of 1.0.0 and includes the security remediation and operational update recorded in the changelog. It brings together the TypeScript/Vite web frontend, Node.js/Express API, and PostgreSQL persistence through Prisma in separate repositories. The system supports equipment management, aggregate inventory, loans, returns, and occurrences, with Guest, Editor, and Administrator access, reports, and exports.
 
-Authentication supports secure cookie sessions where available in the backend, Origin validation for authenticated mutations, controlled compatibility with legacy Bearer tokens, and a one-time-code exchange for RFID login. Guest Mode receives minimized server-side data projections; effective permissions are enforced by the API.
+The browser uses secure cookie-only sessions; if support cannot be confirmed, login fails closed and no JWT is persisted in `localStorage`. The backend validates Origin on authenticated mutations and may retain Bearer compatibility for legacy non-browser clients. Browser RFID login exchanges a one-time code for a session cookie. Guest Mode receives minimized server-side data projections; effective permissions are enforced by the API.
 
 The product includes canonical bilingual documentation, an in-app reader, and a separate portfolio site. RFID remains optional and public deployment templates keep it disabled by default.
 
 ## Operations and architecture
 
-The API is the authorization boundary; interface controls are usability measures. Administrator-timeout state is process-local, so the documented configuration assumes a single instance. Deployment, hosting, and recovery guides describe operational and database procedures. Version 1.0.0 is a product release status, not a real-time reading of hosted services.
+The API is the authorization boundary; interface controls are usability measures. Administrator-timeout state is process-local, so the documented configuration assumes a single instance. Deployment, hosting, and recovery guides describe operational and database procedures. Version 1.0.1 is a product release status, not a real-time reading of hosted services.
 
 ## Future directions
 

@@ -26,19 +26,19 @@ The current data model tracks quantities by **category/model**. It does not prov
 
 **Password recovery:** the system does not provide automatic recovery. Contact the installation administrator if no password is available.
 
-Sessions use an `HttpOnly` cookie when the backend advertises support, with a JWT lifetime of up to 8 hours; page JavaScript cannot read that cookie. On production HTTPS, the cookie is also `Secure`. **Administrator** sessions expire after 30 minutes of inactivity and return to the login screen. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
+The browser uses cookie-only sessions with an `HttpOnly` cookie and a JWT lifetime of up to 8 hours; page JavaScript cannot read that cookie. On production HTTPS, the cookie is also `Secure`. If the API cannot confirm cookie support, login fails closed without a Bearer fallback or a JWT written to `localStorage`. **Administrator** sessions expire after 30 minutes of inactivity and return to the login screen. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
 
-**Security note:** **Log out** asks the server to revoke the account's session version and remove the cookie. A successful password change also revokes earlier sessions while keeping this browser signed in with a renewed session. If the API is unavailable during logout, server-side revocation cannot be confirmed; retry when connectivity returns. Use trusted devices and contact the installation administrator if you suspect the account was exposed. Older deployments without cookie support retain a Bearer-token compatibility fallback.
+**Security note:** **Log out** asks the server to revoke the account's session version and remove the cookie. A successful password change also revokes earlier sessions while keeping this browser signed in with a renewed session. If the API is unavailable during logout, server-side revocation cannot be confirmed; retry when connectivity returns. Use trusted devices and contact the installation administrator if you suspect the account was exposed. The current browser app has no Bearer fallback.
 
 ### RFID (optional)
 
 RFID is an alternative login path, not a system requirement or a replacement for password login.
 
 1. An **Administrator** opens **Records → System Users** and selects **Link card** next to the account.
-2. In the **RFID Card** modal, use **Generate token and link card**. The token is shown only once; copy it if needed.
-3. With the bridge and reader ready, follow the README procedure to write the card. The UI may show **Recording mode active** and ask you to hold the card near the reader for the next 30 seconds.
+2. In the **RFID Card** modal, use **Generate token and link card**. The backend sends the credential to the bridge for writing and returns confirmation only; the API response does not expose the RFID token.
+3. With the bridge and reader ready, follow the README procedure and tap the card within the next 30 seconds to write it.
 4. Once linked, the modal shows **Card linked**. **Generate new token** replaces the current token; **Revoke card** invalidates that card for automatic login.
-5. For browser-side tap login, the installation must also enable the RFID listener. While in Guest Mode, tap the card; the browser validates the token and reloads the linked account session.
+5. For browser-side tap login, the installation must also enable the RFID listener. While in Guest Mode, tap the card; the bridge sends a one-time code that the browser exchanges for an `HttpOnly` session cookie, without receiving a raw JWT.
 
 The flow works only when configuration, networking, the local bridge, dependencies, and compatible hardware are correct. The backend requires loopback communication for `/auth/rfid` and `/ws/rfid`; a Raspberry Pi on the same LAN is not automatically sufficient. If it fails, use **Log in** with **E-mail / Login** and **Password**.
 

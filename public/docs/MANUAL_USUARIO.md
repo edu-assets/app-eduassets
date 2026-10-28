@@ -26,19 +26,19 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 
 **Recuperação de senha:** o sistema não oferece recuperação automática. Contate o administrador da instalação se não houver uma senha disponível.
 
-As sessões usam cookie `HttpOnly` quando o backend anuncia suporte, com prazo do JWT de até 8 horas; JavaScript da página não pode ler esse cookie. Em produção HTTPS, o cookie também usa `Secure`. Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam à tela de login. O código atual não aplica esse limite às sessões de **Editor**. O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
+O navegador usa exclusivamente sessão por cookie `HttpOnly`, com validade do JWT de até 8 horas; JavaScript da página não pode ler o cookie. Em produção HTTPS, ele também usa `Secure`. Se a API não confirmar suporte a cookie, o login falha fechado, sem token Bearer de fallback e sem gravar JWT em `localStorage`. Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam à tela de login. O código atual não aplica esse limite às sessões de **Editor**. O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
 
-**Nota de segurança:** **Sair** solicita ao servidor a revogação da versão de sessão da conta e a remoção do cookie. A troca de senha também revoga sessões anteriores e mantém este navegador conectado com uma sessão renovada. Se a API estiver indisponível durante o logout, a revogação do lado do servidor não pode ser confirmada; tente novamente quando a conexão voltar. Use dispositivos confiáveis e informe o administrador da instalação se suspeitar que sua conta foi exposta. Em deployments antigos sem suporte a cookie, existe fallback compatível por token Bearer.
+**Nota de segurança:** **Sair** solicita ao servidor a revogação da versão de sessão da conta e a remoção do cookie. A troca de senha também revoga sessões anteriores e mantém este navegador conectado com uma sessão renovada. Se a API estiver indisponível durante o logout, a revogação do lado do servidor não pode ser confirmada; tente novamente quando a conexão voltar. Use dispositivos confiáveis e informe o administrador da instalação se suspeitar que sua conta foi exposta. O app atual não oferece fallback Bearer no navegador.
 
 ### RFID (opcional)
 
 O RFID é um caminho alternativo de login, não um requisito do sistema nem um substituto do login por senha.
 
 1. Um **Administrador** abre **Cadastros → Usuários** e seleciona **Vincular cartão** ao lado da conta.
-2. No modal **Cartão RFID**, use **Gerar token e vincular cartão**. O token é exibido uma única vez; copie-o se necessário.
-3. Com a ponte e o leitor preparados, siga o procedimento do README para gravar o cartão. A UI pode mostrar **Modo de gravação ativo** e pedir que o cartão seja aproximado nos próximos 30 segundos.
+2. No modal **Cartão RFID**, use **Gerar token e vincular cartão**. O backend envia a credencial ao bridge para gravação e retorna somente uma confirmação; a resposta da API não expõe o token RFID.
+3. Com a ponte e o leitor preparados, siga o procedimento do README e aproxime o cartão dentro dos próximos 30 segundos para gravá-lo.
 4. Quando o cartão estiver vinculado, o modal mostra **Cartão vinculado**. **Gerar novo token** substitui o atual; **Revogar cartão** invalida o cartão para login automático.
-5. Para o login por aproximação no navegador, a instalação também precisa habilitar o listener RFID. Em uma sessão de convidado, aproxime o cartão; o navegador valida o token e recarrega a sessão da conta vinculada.
+5. Para o login por aproximação no navegador, a instalação também precisa habilitar o listener RFID. Em uma sessão de convidado, aproxime o cartão; o bridge encaminha um código de uso único e o navegador o troca por uma sessão em cookie `HttpOnly`, sem receber JWT bruto.
 
 O fluxo só funciona quando a configuração, a rede, a ponte local, as dependências e o hardware compatível estão corretos. O backend exige comunicação de loopback para `/auth/rfid` e `/ws/rfid`; um Raspberry Pi na mesma LAN não é automaticamente suficiente. Se algo falhar, use **Login** com **E-mail / Login** e **Senha**.
 

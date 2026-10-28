@@ -1,6 +1,17 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.0.0**, released on October 28, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.0.1**, released on October 28, 2026; earlier entries remain historical.
+
+## v1.0.1 — Security and operations patch — October 28, 2026
+
+- Frontend remediation: documentation sanitization now uses DOMPurify with restricted element/attribute/URL-scheme allowlists, remote images are removed, and regressions cover `javascript:` with CR/LF/TAB, `data:`, and `vbscript:` inputs; raw identifiers are protected.
+- Browser authentication is cookie-only; JWTs are not persisted in `localStorage`. The API validates `Origin` on cookie-authenticated mutations.
+- Markdown source is pinned to an immutable commit; CSP and CI check the required origin, with a synchronized local fallback. The public loan list uses a cursor, with a default of 50 and maximum of 100 rows per page.
+- API: actor-attributed `AuditLog` rows are written in the same transaction for user, category, equipment, responsible-party, occurrence, and loan mutations; inventory transaction IDs are deterministically sorted and Prisma P2034 conflicts map to HTTP 409. RFID provisioning no longer returns a secret; WebSocket path/origin are restricted and cookie mode uses a one-time code.
+- Additional hardening: Zod bounds, 72-byte password limit, credential/PII log redaction, export-field correction and cache headers; production Node images are pinned by digest and Nginx templates restrict origin access to Cloudflare ranges.
+- Production API deployment recorded at commit `14b0716110750857daa27d0e979e3bec574e39e0`; migration `20261028173000_user_management_audit` was applied, API/migration images were built, and the service was restarted. `/health` and `/ready` succeeded locally and through `https://api.eduassets.tech`.
+- Before migration, a PostgreSQL 18.6 custom-format backup was created, encrypted with `age`, and transferred to Cloudflare R2. The password was read through mode-0600 `PGPASSFILE`; the object was listed at the destination. The first upload returned HTTP 501, but the automatic retry succeeded. This was a manual run; it does not record a schedule, retention policy, or restore of the production object.
+- Hosted API CI run `40769671846` completed both `verify` and `production-smoke` successfully. The guides distinguish code checks, operator-reported production evidence, and operations not exercised against the production database.
 
 ## v1.0.0 — Official release — October 28, 2026
 

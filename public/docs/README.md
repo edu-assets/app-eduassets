@@ -2,7 +2,7 @@
 
 [Português](LEIAME.md) · [Documentation repository](https://github.com/edu-assets/docs-eduassets) · [Frontend source](https://github.com/edu-assets/app-eduassets)
 
-This is the English entry point for the eduAssets browser-application guides. The frontend source code is maintained in `edu-assets/app-eduassets`; the API is in `edu-assets/eduAssets`; the canonical bilingual documentation is maintained in `edu-assets/docs-eduassets`.
+This is the English entry point for the eduAssets browser-application guides. The frontend source code is maintained in `edu-assets/app-eduassets`; the API is in `edu-assets/api-eduassets`; the canonical bilingual documentation is maintained in `edu-assets/docs-eduassets`.
 
 ## Guides
 

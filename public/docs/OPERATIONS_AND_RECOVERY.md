@@ -27,10 +27,11 @@ Never ask users to send passwords, cookies, JWTs, RFID one-time codes, or databa
 
 ## Restore and service recovery
 
-Backups and migrations are high-impact operations. In a backend repository checkout, [backup-postgres.sh](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) creates a custom-format `pg_dump`; [restore-postgres-empty-db.sh](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/restore-postgres-empty-db.sh) requires confirmation and accepts only a disposable destination with no objects in non-system schemas, without `--clean`. Follow the [deployment and restore procedure](DEPLOYMENT.md), test against an isolated destination, verify integrity/counts without exposing data, and obtain authorization before changing production. This document does not prove a live restore or establish retention/RPO/RTO.
+Backups and migrations are high-impact operations. In a backend repository checkout, [backup-postgres.sh](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/backup-postgres.sh) creates a custom-format `pg_dump`; [restore-postgres-empty-db.sh](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/restore-postgres-empty-db.sh) requires confirmation and accepts only a disposable destination with no objects in non-system schemas, without `--clean`. Follow the [deployment and restore procedure](DEPLOYMENT.md), test against an isolated destination, verify integrity/counts without exposing data, and obtain authorization before changing production. This document does not prove a live restore or establish retention/RPO/RTO.
 
 After an authorized intervention, record the version, applied migrations, `/health` and `/ready` results, responsible operator, and residual risks. Do not close an incident merely because a container started: validate login, an appropriate read-only request, clean logs, and backup availability.
 
+**Operator record — October 28, 2026:** API v1.0.1 release at commit `14b0716110750857daa27d0e979e3bec574e39e0`; migration `20261028173000_user_management_audit` applied; encrypted `age` backup listed in R2; `/health` and `/ready` succeeded locally and on the public domain. This record does not prove restoration of the production backup, scheduled retention, or continuous monitoring.
 ## Related documentation
 
 - [Hosting Guide](Hosting.md) / [Guia de Hospedagem](Hospedagem.md)

@@ -1,6 +1,6 @@
 # Desenvolvimento e validação do frontend
 
-Este guia se aplica à aplicação de navegador em [`edu-assets/app-eduassets`](https://github.com/edu-assets/app-eduassets). O código da API é mantido separadamente em [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets), no diretório `backend/`. O Markdown bilíngue canônico é mantido em [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets).
+Este guia se aplica à aplicação de navegador em [`edu-assets/app-eduassets`](https://github.com/edu-assets/app-eduassets). O código da API é mantido separadamente em [`edu-assets/api-eduassets`](https://github.com/edu-assets/api-eduassets), no diretório `backend/`. O Markdown bilíngue canônico é mantido em [`edu-assets/docs-eduassets`](https://github.com/edu-assets/docs-eduassets).
 
 ## Requisitos
 
@@ -20,7 +20,7 @@ VITE_API_BASE_URL=
 VITE_RFID_BRIDGE_ENABLED=false
 ```
 
-Execute a API separadamente a partir de `edu-assets/eduAssets`. Builds de produção exigem `VITE_API_BASE_URL` apontando para a origem da API. Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador. O frontend carrega o Markdown fixado por `raw.githubusercontent.com` e usa o fallback local somente se essa requisição falhar.
+Execute a API separadamente a partir de `edu-assets/api-eduassets`. Builds de produção exigem `VITE_API_BASE_URL` apontando para a origem da API. Nunca inclua senha, token, URL de banco ou outro segredo em variável `VITE_*`; o Vite incorpora esses valores nos arquivos públicos do navegador. O frontend carrega o Markdown fixado por `raw.githubusercontent.com` e usa o fallback local somente se essa requisição falhar.
 
 ## Execução e verificações
 

@@ -1,14 +1,14 @@
 # Frontend do eduAssets
 
-[English](README.md) · [Repositório da API/backend](https://github.com/edu-assets/eduAssets)
+[English](README.md) · [Repositório da API/backend](https://github.com/edu-assets/api-eduassets)
 
-> **Status: Versão oficial 1.0.0.** Este repositório contém a aplicação web do eduAssets. É uma aplicação single-page em Vite/TypeScript; a API e o banco de dados são mantidos separadamente.
+> **Status: Versão oficial 1.0.1.** Este repositório contém a aplicação web do eduAssets. É uma aplicação single-page em Vite/TypeScript; a API e o banco de dados são mantidos separadamente.
 
 ## Visão geral
 
 O frontend oferece fluxos de inventário e empréstimo de equipamentos escolares, incluindo consultas de equipamentos e estoque, registro de empréstimos e devoluções, gerenciamento de ocorrências, telas administrativas, exportações CSV/Excel/PDF, acesso de convidado somente leitura e interface para recursos opcionais relacionados a RFID. Também oferece interface em português e inglês e persistência do tema claro/escuro.
 
-A aplicação usa módulos TypeScript organizados por funcionalidade e renderização nativa do DOM. O backend continua sendo a fronteira de segurança: proteções de rotas e controles desabilitados no frontend são medidas de usabilidade, não autorização. Em produção, o app se comunica com a API em `https://api.eduassets.tech`; quando suportado, a autenticação usa o fluxo seguro de sessão do backend.
+A aplicação usa módulos TypeScript organizados por funcionalidade e renderização nativa do DOM. O backend continua sendo a fronteira de segurança: proteções de rotas e controles desabilitados no frontend são medidas de usabilidade, não autorização. Em produção, o app se comunica com `https://api.eduassets.tech` por sessões exclusivamente em cookie (`HttpOnly`, `SameSite=Lax` e `Secure` em HTTPS); o navegador nunca armazena JWT em `localStorage`. Se não for possível confirmar suporte a cookie de sessão, o login falha fechado.
 
 ## Estrutura do repositório
 
@@ -39,7 +39,7 @@ VITE_API_BASE_URL=
 VITE_RFID_BRIDGE_ENABLED=false
 ```
 
-Execute a API separadamente. Seu código-fonte está atualmente no diretório `backend/` de [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets). Não coloque senhas, tokens ou outros segredos em variáveis `VITE_*`; esses valores ficam públicos nos arquivos compilados para o navegador.
+Execute a API separadamente. Seu código-fonte está atualmente no diretório `backend/` de [`edu-assets/api-eduassets`](https://github.com/edu-assets/api-eduassets). Não coloque senhas, tokens ou outros segredos em variáveis `VITE_*`; esses valores ficam públicos nos arquivos compilados para o navegador.
 
 ## Comandos disponíveis
 
@@ -85,4 +85,4 @@ Guias principais no repositório central:
 - [Operação e recuperação](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/OPERACAO_E_RECUPERACAO.md) · [Operations and recovery](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/OPERATIONS_AND_RECOVERY.md)
 - [Histórico de alterações](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/CHANGELOG.md) · [Changelog](https://github.com/edu-assets/docs-eduassets/blob/main/public/docs/CHANGELOG_EN.md)
 
-Para alterações na API e na infraestrutura, consulte o código do backend e sua documentação em [`edu-assets/eduAssets`](https://github.com/edu-assets/eduAssets).
+Para alterações na API e na infraestrutura, consulte o código do backend e sua documentação em [`edu-assets/api-eduassets`](https://github.com/edu-assets/api-eduassets).

@@ -299,7 +299,7 @@ Configure external monitoring separately for `/health`, `/ready`, 5xx responses,
 
 ## 11. Backup and recovery
 
-Before migrations on an operational database, run [backup-postgres.sh](https://github.com/edu-assets/eduAssets/blob/main/deploy/scripts/backup-postgres.sh) from the root of the backend repository checkout, with a protected URL compatible with `pg_dump`. For Neon PostgreSQL 18, use `pg_dump` major version 18 or newer; do not use a version 16 client against a version 18 server.
+Before migrations on an operational database, run [backup-postgres.sh](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/backup-postgres.sh) from the root of the backend repository checkout, with a protected URL compatible with `pg_dump`. For Neon PostgreSQL 18, use `pg_dump` major version 18 or newer; do not use a version 16 client against a version 18 server.
 
 When sourcing an environment file, avoid externally duplicated quote characters. For `pg_dump`, keep a dedicated libpq URL if Prisma parameters differ. Never place real URLs in this document.
 
@@ -317,3 +317,9 @@ The deployment record for that date noted:
 - CSP allowing the API, hosted documentation, and official Cloudflare beacon.
 
 This dated record is not a real-time service check.
+
+## 13. API deployment record — October 28, 2026
+
+The operator reported deploying API v1.0.1 at commit `14b0716110750857daa27d0e979e3bec574e39e0`, with migration `20261028173000_user_management_audit`. A 328366-byte backup was created before migration, encrypted with `age`, and listed in Cloudflare R2 bucket `eduassets-postgres-backups`; transfer completed after an automatic retry of HTTP 501. `pg_dump` 18.6 was used against Neon 18.6, with the password supplied through mode-0600 `PGPASSFILE`.
+
+The operator's commands returned success from `/health` and `/ready` through VM loopback and `https://api.eduassets.tech`. The first Compose snapshot still showed `health: starting`; no later `healthy` state was recorded. The production object was not restored, backup scheduling/retention was not configured, and this API update did not change Nginx, firewall, or Cloudflare settings. This record is not a substitute for continuous monitoring or a recovery policy.

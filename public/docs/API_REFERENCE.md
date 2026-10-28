@@ -10,11 +10,11 @@ JSON routes use `Content-Type: application/json`. The API validates request bodi
 
 ## Sessions, credentials, and CSRF
 
-The current browser flow prefers cookie sessions when `GET /auth/session-capabilities` returns `{"cookieSession":true}`. This endpoint sets `Cache-Control: no-store`. The frontend then sends requests with `credentials: include`; login requests `X-Auth-Mode: cookie` and receives the user profile without exposing the JWT in the response. The cookie is `HttpOnly`, `SameSite=Lax`, scoped to `/`, and expires with the JWT. On production HTTPS it is `Secure` and named `__Host-eduassets_session`.
+The browser uses cookie-only sessions. The frontend checks `GET /auth/session-capabilities` (`Cache-Control: no-store`); login requests `X-Auth-Mode: cookie`, sends `credentials: include`, and receives the user profile without exposing a JWT. If the capability request fails or returns anything other than `cookieSession: true`, login fails closed with no Bearer fallback and no token written to `localStorage`. The cookie is `HttpOnly`, `SameSite=Lax`, scoped to `/`, expires with the JWT, and on production HTTPS is `Secure` and named `__Host-eduassets_session`.
 
 For authenticated cookie-based state-changing requests (`POST`, `PUT`, `PATCH`, or `DELETE`), the backend requires an `Origin` allowed by the CORS configuration. Do not remove that check to work around CORS failures. Browsers must use an authorized web origin and proxy/TLS configuration that correctly conveys HTTPS.
 
-The authentication middleware also accepts `Authorization: Bearer <JWT>` for older clients and fallback modes. The current client includes `Authorization` whenever a local token exists, even when it also sends a cookie; the backend gives the cookie session precedence. Avoid storing JavaScript-readable tokens when an `HttpOnly` cookie is available. Never include real cookies, JWTs, passwords, or secrets in logs or examples.
+The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-browser integrations. The current browser app does not send that header, keep a token fallback, or persist JWTs in `localStorage`; cookie-authenticated mutations require an allowed `Origin`. Never include real cookies, JWTs, passwords, or secrets in logs or examples.
 
 ## Authentication and health
 
@@ -41,7 +41,7 @@ The authentication middleware also accepts `Authorization: Bearer <JWT>` for old
 | `POST` | `/categorias` | Administrator. |
 | `GET` | `/equipamentos` | Public/guest or authenticated. |
 | `POST`, `PATCH` | `/equipamentos`, `/equipamentos/:id` | Administrator. |
-| `GET` | `/emprestimos` | Public/guest or authenticated; reduced public projection. |
+| `GET` | `/emprestimos` | Public/guest or authenticated. Without a session, accepts `limit` (default 50, maximum 100) and a positive `cursor`; returns `{ items, nextCursor, limit }` in descending ID order with a reduced public projection. |
 | `POST` | `/emprestimos` | Authenticated user (editor or administrator). |
 | `PATCH` | `/emprestimos/:id` | Authenticated user; updates loan items. |
 | `PATCH` | `/emprestimos/:id/devolver` | Authenticated user; records a return. |
@@ -66,7 +66,7 @@ The authentication middleware also accepts `Authorization: Bearer <JWT>` for old
 
 ## Source references
 
-- Route mounting: [`backend/src/routes/index.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/routes/index.ts) and [`backend/src/app.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/app.ts) in the backend repository.
-- Authentication and cookies: backend files [`auth.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/routes/auth.ts), [`auth middleware`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/middlewares/auth.ts), [`CSRF middleware`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/middlewares/csrf.ts), and [`sessionCookie.ts`](https://github.com/edu-assets/eduAssets/blob/main/backend/src/lib/sessionCookie.ts).
-- Schemas: [`backend/src/schemas/`](https://github.com/edu-assets/eduAssets/tree/main/backend/src/schemas) in the backend repository.
+- Route mounting: [`backend/src/routes/index.ts`](https://github.com/edu-assets/api-eduassets/blob/main/backend/src/routes/index.ts) and [`backend/src/app.ts`](https://github.com/edu-assets/api-eduassets/blob/main/backend/src/app.ts) in the backend repository.
+- Authentication and cookies: backend files [`auth.ts`](https://github.com/edu-assets/api-eduassets/blob/main/backend/src/routes/auth.ts), [`auth middleware`](https://github.com/edu-assets/api-eduassets/blob/main/backend/src/middlewares/auth.ts), [`CSRF middleware`](https://github.com/edu-assets/api-eduassets/blob/main/backend/src/middlewares/csrf.ts), and [`sessionCookie.ts`](https://github.com/edu-assets/api-eduassets/blob/main/backend/src/lib/sessionCookie.ts).
+- Schemas: [`backend/src/schemas/`](https://github.com/edu-assets/api-eduassets/tree/main/backend/src/schemas) in the backend repository.
 - Browser client: `src/core/api/apiClient.ts` and `src/core/api/auth.ts` in this frontend repository.
