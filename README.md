@@ -2,7 +2,7 @@
 
 [Português](README_PT.md) · [Backend API repository](https://github.com/edu-assets/eduAssets)
 
-> **Status: Beta.** This repository contains the browser application for eduAssets. It is a Vite/TypeScript single-page application; the API and database are maintained separately.
+> **Status: Official version 1.0.0.** This repository contains the browser application for eduAssets. It is a Vite/TypeScript single-page application; the API and database are maintained separately.
 
 ## Overview
 

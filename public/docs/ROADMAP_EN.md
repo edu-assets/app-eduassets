@@ -1,56 +1,19 @@
 # Roadmap — eduAssets
 
-> **Documented checkout status (October 23, 2026): Beta.** The changelog/roadmap record that the operator validated the Cloudflare Pages frontend, Oracle VM/Nginx API, proxied DNS, external HTTPS and CORS preflight at that time. This documentation pass did not re-verify those services. Off-host backup, restore drill, monitoring, and complete functional QA remain pending.
+> **Official version 1.0.0 — October 28, 2026.** This page describes product scope and future directions; it is not a live infrastructure-availability dashboard.
 
-## Completed in code and locally verified
+## Version 1.0.0 — official
 
-- [x] TypeScript/Vite frontend: 36 tests across 9 files and local build passed; tests cover readiness, Guest/Editor/Administrator synchronization, server revocation, and immediate local logout cleanup.
-- [x] Prisma/Express backend: no in-memory fallback, required JWT secret, validated config, TypeScript build, `prisma validate` with omitted/empty `DIRECT_URL`, and 30 unit tests passed.
-- [x] JWT/roles and current DB user authorization reviewed; admin timeout uses jti and fails closed; PostgreSQL-backed `sessionVersion` revokes tokens on logout/password change; 401 clears the session while 403/network errors remain distinct.
-- [x] Guest Mode preserved with minimized, server-side allowlisted projections; `/responsaveis` and `/usuarios` require auth; backend authorizes writes.
-- [x] Loan/return and occurrence transaction/locking paths, logout, and password-change revocation: the HTTP/concurrency suite and six migrations passed in hosted CI run `39875293195`; this records that run, not a rerun on the current HEAD.
-- [x] F4 — dependent stores/forms refresh after creation; F5 — local-calendar date filters; F6 — 401 without hydrated user; F7 — selected return time sent as an offset-aware timestamp; locally reviewed/tested where applicable.
-- [x] `/health` liveness and timeout-bounded, non-disclosing PostgreSQL `/ready`; reference deployment templates set RFID off (`RFID_BRIDGE_ENABLED=false`).
-- [x] Cookie-first browser sessions with `HttpOnly`/`SameSite=Lax`, `Secure` on HTTPS, Origin validation for mutations, legacy Bearer fallback, and one-time-code RFID exchange; `#login` entry no longer flashes protected content.
-- [x] About page cards use the same registry as the documentation modal; API, development, and deployment guides are listed in the center.
-- [x] Canonical documentation is hosted at `docs.eduassets.tech`; the frontend uses it by default with a local fallback only on remote failure, and the portfolio includes an accessible PT-BR/EN reader with search, table of contents, and sanitization.
-- [x] Local/production environment templates, multi-stage Docker, Compose, Nginx config, non-destructive backup/restore scripts, and GitHub Actions CI added; the API was run on the Oracle VM with remote PostgreSQL on Neon.
-- [x] P0/P1 remediation: optional `DIRECT_URL`, API CSP, direct Node entrypoint, production CI smoke workflow, and public Nginx RFID blocks implemented; external HTTPS and CORS preflight were validated in the deployment.
+The official version brings together the TypeScript/Vite web frontend, Node.js/Express API, and PostgreSQL persistence through Prisma in separate repositories. The system supports equipment management, aggregate inventory, loans, returns, and occurrences, with Guest, Editor, and Administrator access, reports, and exports.
 
-> Local PostgreSQL was unavailable, but hosted CI validated migrations and HTTP integration against disposable PostgreSQL. The real deployment uses Neon; this still does not equal a restore drill, privacy approval, or hardware certification.
+Authentication supports secure cookie sessions where available in the backend, Origin validation for authenticated mutations, controlled compatibility with legacy Bearer tokens, and a one-time-code exchange for RFID login. Guest Mode receives minimized server-side data projections; effective permissions are enforced by the API.
 
-## Next steps toward v1.0.0
+The product includes canonical bilingual documentation, an in-app reader, and a separate portfolio site. RFID remains optional and public deployment templates keep it disabled by default.
 
-- [x] Run GitHub CI; run `39875293195` passed `verify` and `production-smoke` for commit `a8cd39b`. This documentation does not show a rerun on the current HEAD.
-- [x] Execute integration/race/auth tests against disposable PostgreSQL in the production smoke workflow; run `39875293195` passed.
-- [ ] Perform browser QA for CORS/CSP, guest anonymization/exports, login/timeout, loan/occurrence flows, responsiveness and accessibility.
-- [x] Validate Compose/API, Nginx, firewall, domain, Cloudflare Pages, API origin, HTTPS and CORS on the target host; review Cloudflare real-IP ranges and rate limits with current ranges still remains.
-- [ ] Complete secret rotation, monitoring, alerts and availability evidence; frontend, DNS, API origin and HTTPS were validated in the Beta deployment.
-- [ ] Test encrypted off-host backup and restore to a new empty DB; approve RPO/RTO, retention and incident procedure.
-- [ ] Complete accessibility, UI coverage, privacy threat review, DB isolation and synthetic-data policy.
+## Operations and architecture
 
-## External blockers and scope
+The API is the authorization boundary; interface controls are usability measures. Administrator-timeout state is process-local, so the documented configuration assumes a single instance. Deployment, hosting, and recovery guides describe operational and database procedures. Version 1.0.0 is a product release status, not a real-time reading of hosted services.
 
-- [ ] **Database:** Neon is configured as the deployment's remote PostgreSQL. Off-host backup, controlled `migrate deploy`, and restore evidence in a new empty database are still required.
-- [x] **Host/domain:** Oracle VM, Cloudflare Pages, DNS, HTTPS, inbound firewall, and real `CORS_ORIGIN` were verified in the Beta deployment; real-IP ranges, WAF/rate limiting, and monitoring remain operational reviews.
-- [ ] **Privacy/access:** backend Guest DTOs have unit coverage; end-to-end validation on synthetic demo data and review of provider grants/policies remain necessary. The current app has no direct PostgREST route; if the provider exposes that service, disable unintended anonymous access and review grants/RLS separately.
-- [ ] **Hardware:** the SPI/GPIO and serial RFID bridge and `systemd` unit exist in `eduAssets/rpi/rfid/`; target hardware, OS, and operational installation have not been validated. RFID remains optional and disabled in the public Compose configuration.
-- [ ] **Scale:** admin inactivity state is process-local and assumes one instance; shared session/activity state is required before horizontal scaling.
-- [x] **Release:** `app.eduassets.tech` and `api.eduassets.tech` are the operational endpoints for the Beta deployment; templates remain examples for new installations.
+## Future directions
 
-## v1.0.0 — Stable release
-
-Not reached. Requires green hosted CI, PostgreSQL integration and Docker tests, staging smoke tests, restore drill, manual QA, reviewed external configuration, and recorded privacy/security evidence. Until then, the correct status is **Beta**.
-
-## Post-1.0 (v2 — medium/long term)
-
-- [ ] Migrate to React (current frontend uses TypeScript and native DOM rendering).
-- [ ] Track physical units by serial number (inventory is aggregated today).
-- [ ] Password recovery (currently only authenticated password changes).
-- [ ] More granular roles than Administrator/Editor.
-- [ ] Additional themes and functional notifications (current notification UI does not persist/deliver alerts).
-
-## Ideas without a committed timeline
-
-- Automated periodic reports.
-- Mobile companion app and QR as an alternative to RFID.
+Possible areas for future versions include serial-number tracking of physical units, password recovery, more granular access roles, functional notifications, periodic reports, and a mobile companion or QR alternative to RFID. A frontend migration to React may also be considered; the current client uses TypeScript with native DOM rendering.

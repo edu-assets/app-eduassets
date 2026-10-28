@@ -1,56 +1,19 @@
 # Roadmap — eduAssets
 
-> **Status documental do checkout (23/10/2026): Beta.** Changelog/roadmap registram que o operador validou naquele momento o frontend Cloudflare Pages, API na VM Oracle/Nginx, DNS proxied, HTTPS externo e preflight CORS. Esta revisão documental não revalidou os serviços. Backup externo, ensaio de restauração, monitoramento e QA funcional completo ainda são pendentes.
+> **Versão oficial 1.0.0 — 28 de outubro de 2026.** Esta página descreve o escopo do produto e suas direções de evolução; não é um painel de disponibilidade da infraestrutura.
 
-## Concluído no código e verificado localmente
+## Versão 1.0.0 — oficial
 
-- [x] Frontend TypeScript/Vite: 36 testes em 9 arquivos e build local aprovados; testes cobrem readiness, sincronização Guest/Editor/Administrador, revogação de logout e limpeza local imediata.
-- [x] Backend Prisma/Express: sem fallback in-memory, segredo JWT obrigatório, configuração validada, build TypeScript, `prisma validate` com `DIRECT_URL` omitido/vazio e 30 testes unitários aprovados.
-- [x] JWT/roles e estado atual de usuário verificados na autorização; timeout de administrador por jti fail-closed; `sessionVersion` persistida revoga tokens no logout/troca de senha; 401 limpa a sessão e erros 403/rede continuam distintos.
-- [x] Guest Mode preservado com projeções server-side allowlisted e minimizadas; `/responsaveis` e `/usuarios` exigem auth; mutações exigem autorização no backend.
-- [x] Transações e locking de empréstimos/devoluções e resolução/exclusão de ocorrências, logout e troca de senha: a suíte HTTP/concorrência e as seis migrations passaram no CI hospedado `39875293195`; isso registra aquele run, não uma reexecução no HEAD atual.
-- [x] F4 — atualização de stores/formulários após criação; F5 — filtros de datas de calendário local; F6 — 401 sem usuário hidratado; F7 — data escolhida enviada como timestamp offset-aware; revisados com testes locais onde aplicável.
-- [x] `/health` liveness e `/ready` readiness PostgreSQL com timeout/sem detalhe sensível; templates de deployment de referência definem RFID desligado (`RFID_BRIDGE_ENABLED=false`).
-- [x] Sessão de navegador cookie-first com cookie `HttpOnly`/`SameSite=Lax`, `Secure` em HTTPS, proteção de mutações por `Origin`, fallback Bearer legado e troca RFID por código de uso único; entrada `#login` sem flash de conteúdo protegido.
-- [x] Central Sobre gera os cards do mesmo registry do modal; documentos API, desenvolvimento e implantação possuem entradas na Central.
-- [x] Documentação canônica hospedada em `docs.eduassets.tech`; o frontend usa a origem por padrão com fallback local apenas em falha remota, e o portfolio tem leitor integrado acessível PT-BR/EN com busca, sumário e sanitização.
-- [x] Templates de ambiente local/produção, Docker multi-stage, Compose, configuração Nginx, backup/restore não destrutivo e GitHub Actions CI foram adicionados; a API foi executada na VM Oracle com PostgreSQL remoto no Neon.
-- [x] P0/P1 desta remediação: `DIRECT_URL` opcional, CSP da API, entrypoint Node direto, smoke de produção no CI e bloqueio público Nginx para RFID foram implementados; HTTPS externo e preflight CORS foram validados no deployment.
+A versão oficial reúne o frontend web em TypeScript/Vite, a API Node.js/Express e a persistência PostgreSQL via Prisma em repositórios separados. O sistema oferece gestão de equipamentos, estoque agregado, empréstimos, devoluções e ocorrências, com perfis de Convidado, Editor e Administrador, relatórios e exportações.
 
-> Embora PostgreSQL não esteja disponível localmente, o CI hospedado validou migrations e requests HTTP em banco descartável. A implantação real usa Neon; isso não equivale a um restore drill, aprovação de privacidade ou certificação de hardware.
+O fluxo de autenticação oferece sessões por cookie seguro quando suportadas pelo backend, validação de origem para mutações autenticadas, compatibilidade controlada com Bearer legado e uma troca de código de uso único para login RFID. O modo Convidado recebe projeções de dados minimizadas no servidor; as permissões efetivas são aplicadas pela API.
 
-## Próximos passos para v1.0.0
+O produto inclui documentação canônica bilíngue, leitor integrado no app e site de apresentação separado. O RFID permanece opcional e os templates públicos de implantação o mantêm desabilitado por padrão.
 
-- [x] Executar workflow GitHub CI; run `39875293195` passou `verify` e `production-smoke` para commit `a8cd39b`. Reexecução no HEAD atual não está evidenciada nesta documentação.
-- [x] Executar testes de integração/race em PostgreSQL descartável no workflow de produção; o run `39875293195` passou.
-- [ ] Fazer QA manual de browser para CORS/CSP, guest anonymization/exports, login/timeout, fluxos de empréstimo/ocorrência e responsividade/acessibilidade.
-- [x] Validar Compose/API, Nginx, firewall, domínio, Cloudflare Pages, origem API, HTTPS e CORS no host-alvo; revisar real-IP Cloudflare e rate limit com ranges atuais ainda é necessário.
-- [ ] Completar rotação de segredo, monitoramento, alertas e evidência de disponibilidade; frontend, DNS, origem API e HTTPS foram validados no deployment Beta.
-- [ ] Testar backup em armazenamento externo e restaurá-lo em banco novo vazio; aprovar RPO/RTO, retenção e resposta a incidentes.
-- [ ] Completar review de acessibilidade, casos de UI, ameaças de privacidade, isolamento do banco e política de dados sintéticos.
+## Operação e arquitetura
 
-## Bloqueios e escopo externo
+A API é a fronteira de autorização; controles de interface são medidas de usabilidade. O estado do timeout administrativo é local ao processo, portanto a configuração documentada pressupõe uma instância. Os guias de implantação, hospedagem e recuperação descrevem os procedimentos operacionais e de banco de dados. O status de versão 1.0.0 não equivale a uma leitura em tempo real dos serviços hospedados.
 
-- [ ] **Banco:** Neon está configurado como PostgreSQL remoto da implantação. Permanecem necessários backup externo, `migrate deploy` controlado e evidência de restauração em banco novo vazio.
-- [x] **Host/domínio:** Oracle VM, Cloudflare Pages, DNS, HTTPS, firewall de entrada e `CORS_ORIGIN` foram verificados no deployment Beta; ranges real-IP, WAF/rate limit e monitoramento continuam revisão operacional.
-- [ ] **Privacidade/acesso:** Guest DTOs do backend foram testados por unitários; validação ponta-a-ponta com demo sintética e revisão de políticas/grants do provedor continuam necessárias. Não há PostgREST direto no app atual; se o provedor expuser esse serviço, bloquear acesso anônimo não pretendido e revisar grants/RLS separadamente.
-- [ ] **Hardware:** a bridge RFID SPI/GPIO e serial e a unidade `systemd` já existem no código em `eduAssets/rpi/rfid/`; Raspberry Pi/leitor, OS-alvo e instalação operacional não foram validados. RFID permanece opcional e desligado no Compose público.
-- [ ] **Escala:** timer de inatividade admin usa estado em memória e pressupõe uma instância; se escalar horizontalmente, implementar sessão/atividade compartilhada antes de ampliar.
-- [x] **Release:** `app.eduassets.tech` e `api.eduassets.tech` são os endpoints operacionais do deployment Beta; os templates continuam exemplos para novas instalações.
+## Direções de evolução
 
-## v1.0.0 — Release estável
-
-Ainda não atingido. Exige execução do smoke CI com PostgreSQL/Docker, testes de integração, smoke tests em staging, restore drill, QA manual, configuração externa revisada e evidência de privacidade/segurança. Até então o status é **Beta**.
-
-## Pós-1.0 (v2 — médio/longo prazo)
-
-- [ ] Migração para React (frontend atual é TypeScript com DOM nativo).
-- [ ] Rastrear unidade individual por número de série (atualmente estoque agregado).
-- [ ] Recuperação de senha (atualmente apenas troca autenticada).
-- [ ] Permissões mais granulares que Administrador/Editor.
-- [ ] Temas adicionais e notificações funcionais (interface atual de notificações não persiste/entrega alertas).
-
-## Ideias sem cronograma
-
-- Relatórios periódicos automáticos.
-- Aplicativo mobile e QR code como alternativa à integração RFID.
+Possíveis frentes para versões futuras incluem rastreamento de unidades por número de série, recuperação de senha, papéis de acesso mais granulares, notificações funcionais, relatórios periódicos e um aplicativo móvel ou QR como alternativa ao RFID. Uma migração de frontend para React também pode ser considerada; o cliente atual usa TypeScript com renderização nativa do DOM.

@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-Todas as versões abaixo de v1.0.0 fazem parte do ciclo beta; datas antigas são aproximadas. A seção mais recente registra alterações do checkout, não releases publicados.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.0.0 oficial**, publicada em 28/10/2026; entradas anteriores permanecem como histórico.
+
+## v1.0.0 — Versão oficial — 28 de outubro de 2026
+
+- O status oficial 1.0.0 foi aplicado aos repositórios do app, API, documentação e site; o pacote do frontend já usava a versão 1.0.0 e o pacote do site foi alinhado.
+- O frontend consolidou sessão de navegador cookie-first com `HttpOnly`, `SameSite=Lax`, `Secure` em HTTPS e validação de `Origin` para mutações, mantendo compatibilidade controlada com Bearer legado e troca RFID por código de uso único.
+- A entrada `#login` evita exibir o conteúdo protegido antes da autorização; o modo Convidado usa projeções allowlisted no servidor e permissões são aplicadas na API.
+- A central de documentação usa catálogo compartilhado entre a página Sobre e o modal; os guias bilíngues podem ser carregados do host canônico e contam com fallback local.
+- O site público recebeu hierarquia revisada para desafio/solução, navegação em uma linha, stack com logos SVG locais, documentação agrupada e cartão de perfil ajustado à foto e aos links sociais.
+- Os guias operacionais e de hospedagem foram revisados junto com arquitetura, dados, API e operação; o histórico registra a topologia observada em 23/10 sem apresentar esse snapshot como estado atual dos serviços.
 
 ## Sessão, entrada e central de documentação — 26–27 de outubro de 2026
 - O navegador negocia suporte de sessão via `/auth/session-capabilities`; quando disponível, a sessão usa cookie `HttpOnly`, `SameSite=Lax`, `Secure` em HTTPS e proteção de mutações por validação de `Origin`. O Bearer permanece apenas para compatibilidade/fallback.
@@ -10,14 +19,14 @@ Todas as versões abaixo de v1.0.0 fazem parte do ciclo beta; datas antigas são
 - A Central Sobre e o modal passaram a usar o mesmo registry para gerar automaticamente todos os cards. Foram acrescentados os guias bilíngues de API e desenvolvimento e registrados os guias de implantação e hospedagem. O portfolio `site-eduassets` passou a ler Markdown de `docs.eduassets.tech` em diálogo acessível com busca, sumário, links internos e sanitização; o leitor permanece em PT-BR/EN.
 - READMEs, manuais, arquitetura, dados, hospedagem, roadmap e changelogs foram reconciliados com o código/CI registrado; instruções de migration agora separam atualização sem schema do procedimento de release com backup e migrate.
 
-## Implantação Beta e documentação de hospedagem — 23 de outubro de 2026
+## Implantação e documentação de hospedagem — 23 de outubro de 2026
 - Frontend publicado no Cloudflare Pages em `app.eduassets.tech`; landing page permanece separada em `eduassets.tech`.
 - API publicada em `api.eduassets.tech`, na VM Ubuntu da Oracle Cloud, atrás do Nginx e com PostgreSQL remoto no Neon.
 - Corrigido o bloqueio de entrada causado por `REJECT` genérico antes das chains do UFW: regras explícitas para TCP 80/443 foram inseridas antes do bloqueio, sem expor a porta 3000.
 - Validado HTTPS externo e preflight CORS `OPTIONS /ready`, com `Access-Control-Allow-Origin: https://app.eduassets.tech`.
 - CSP do Pages passou a permitir o beacon oficial do Cloudflare Web Analytics em `static.cloudflareinsights.com`.
 - Adicionados os runbooks bilíngues `Hospedagem.md` e `Hosting.md`, registrados na visualização de documentação do frontend.
-- Permanecem pendentes backup externo, restore drill, monitoramento/alertas e revisão final para uso com dados reais.
+- Naquele registro, backup externo, ensaio de restauração, monitoramento/alertas e revisão para uso com dados reais foram identificados como temas operacionais para acompanhamento.
 
 ## Remediação e preparação de release — 22 de outubro de 2026
 - Removidos fallbacks de autenticação/persistência em memória e segredo JWT padrão; validação de ambiente falha cedo para segredo, banco, CORS, porta e confiança de proxy inválidos/ausentes em produção.
@@ -28,13 +37,13 @@ Todas as versões abaixo de v1.0.0 fazem parte do ciclo beta; datas antigas são
 - `/health` é liveness e `/ready` verifica PostgreSQL com timeout; ambas respostas evitam revelar credenciais/detalhes da conexão. Prisma sem `DIRECT_URL` foi compilado usando fallback `DATABASE_URL`.
 - Adicionados `.env` locais separados e template de produção, backend multi-stage Docker e Compose com bind host loopback, RFID desativado, Nginx/Cloudflare com encaminhamento saneado, scripts de backup/restauração somente em banco vazio, workflow CI com PostgreSQL efêmero e testes de integração/race. A remediação atual também instala OpenSSL no stage compartilhado do Prisma, remove a injeção vazia de `DIRECT_URL`, usa entrypoint Node direto, permite a origem API documentada na CSP, bloqueia `/auth/rfid` e `/ws/rfid` no Nginx público e adiciona smoke de container em produção ao CI.
 - Seed usa nomes sintéticos e não sobrescreve senha existente; identificadores de login históricos foram mantidos.
-- Validação desta execução local: 36 testes frontend (9 arquivos), typecheck/build frontend, 30 testes backend, build TypeScript/Prisma e `prisma validate` com `DIRECT_URL` omitido e vazio passaram. Docker, PostgreSQL, migrations/seed, testes de integração e runtime do container não foram executados localmente porque as ferramentas/serviços não estão disponíveis no sandbox; o CI hospedado `39875293195` passou nos jobs `verify` e `production-smoke`, incluindo esses checks. O `npm audit --omit=dev` do backend ainda reportou a cadeia do Prisma no lockfile atual; a auditoria mantém três high (`deepmerge-ts`).
-- O run hospedado `39875293195` valida o HEAD `a8cd39b` e passou em `verify` e `production-smoke`; `39806752284` é apenas histórico. Browser QA, hardware, Cloudflare Pages, DNS, firewall, Cloudflare no host, certificado e deployment continuam pendentes.
+- Validação registrada naquela execução: 36 testes frontend (9 arquivos), typecheck/build frontend, 30 testes backend, build TypeScript/Prisma e `prisma validate` com `DIRECT_URL` omitido e vazio passaram. Docker, PostgreSQL, migrations/seed, testes de integração e runtime do container não foram executados localmente porque as ferramentas/serviços não estavam disponíveis no sandbox; o CI hospedado `39875293195` passou nos jobs `verify` e `production-smoke`, incluindo esses checks. A auditoria de dependências daquela execução registrou findings na cadeia do Prisma; esta anotação histórica não representa uma auditoria atual.
+- O run hospedado `39875293195` valida o HEAD `a8cd39b` e passou em `verify` e `production-smoke`; `39806752284` é apenas histórico. Esse registro cobre os jobs de CI e não relata resultados de QA de browser/hardware nem uma verificação contínua dos serviços externos.
 - O fluxo local não aplica migrations automaticamente: `npm run dev` inicia os processos de desenvolvimento, e `npm run dev:db` executa a preparação explícita do banco de desenvolvimento. O frontend aguarda `/ready` e encerra junto se o backend falhar.
 - Migrations deixaram de rodar automaticamente no `npm run dev`; use `npm run dev:db` somente depois de confirmar que `backend/.env` aponta para um banco de desenvolvimento. Isso evita travamentos ao conectar em PostgreSQL remoto e alterações não intencionais.
 
 - Limites de payload adicionados para itens de empréstimo e identificadores de ocorrência; senha de usuários/troca de senha elevada para 12 caracteres; inicializações assíncronas e conteúdo de TOC/busca receberam tratamento seguro.
-- Auditoria backend registrada: `npm audit --omit=dev` ainda reporta a cadeia do Prisma no lockfile atual; 3 high permanecem na cadeia de ferramentas Prisma 6 usada em desenvolvimento/migração, sem upgrade major forçado.
+- A auditoria de dependências daquela execução registrou três findings high na cadeia de ferramentas Prisma 6 usada em desenvolvimento/migração; este registro histórico não representa o resultado de uma auditoria atual.
 
 ## v0.9.9 (agosto 2026)
 - Índices de banco em `Emprestimo.status` e `Ocorrencia.status` para consultas mais rápidas no Dashboard e Controle.

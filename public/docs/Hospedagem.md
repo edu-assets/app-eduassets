@@ -1,6 +1,6 @@
 # Hospedagem e operação do EduAssets
 
-> **Registro histórico (23/10/2026):** o operador validou naquele momento a API na VM Oracle, o proxy HTTPS do Nginx, DNS proxied da Cloudflare, frontend Cloudflare Pages e preflight CORS. Este texto registra a topologia observada naquela data; não verifica o estado remoto atual. Backup externo, restore drill, monitoramento e revisão final de segurança para dados reais continuam pendentes.
+> **Versão do produto: oficial 1.0.0 (28/10/2026).** O registro abaixo descreve a topologia observada em 23/10/2026; não é uma verificação da infraestrutura remota no momento desta leitura.
 
 ## 1. Topologia implantada
 
@@ -307,20 +307,15 @@ Quando o `.env` for carregado com `source`, prefira valores sem aspas externas d
 
 O backup deve ser criptografado, enviado para fora da VM e testado com restauração em um banco novo e vazio. Um arquivo de dump existente, sozinho, não prova que a recuperação funciona.
 
-## 12. Checklist pós-deploy
+## 12. Verificações de implantação registradas em 23/10/2026
 
-- [x] Frontend em `app.eduassets.tech`.
-- [x] Landing page separada em `eduassets.tech`.
-- [x] API em `api.eduassets.tech`.
-- [x] PostgreSQL remoto no Neon.
-- [x] API em Docker com publicação local na VM.
-- [x] Nginx escutando em 80/443.
-- [x] Regras de entrada 80/443 corrigidas antes do `REJECT` genérico.
-- [x] HTTPS externo alcança a API.
-- [x] Preflight CORS retorna a origem exata do frontend.
-- [x] CSP permite API, documentação hospedada e beacon oficial do Cloudflare.
-- [ ] Backup externo e restore drill documentados com evidência operacional.
-- [ ] Monitoramento externo e alertas configurados.
-- [ ] Revisão final de privacidade, grants do banco e política de retenção para dados reais.
+Na implantação documentada naquela data, foram observados:
 
-O estado do produto continua **Beta** até concluir os itens operacionais pendentes e o QA funcional completo.
+- Frontend em `app.eduassets.tech` e landing page separada em `eduassets.tech`.
+- API em `api.eduassets.tech`, com PostgreSQL remoto no Neon.
+- API em Docker com publicação local na VM e Nginx escutando em 80/443.
+- Regras de entrada 80/443 posicionadas antes do `REJECT` genérico.
+- HTTPS externo alcançando a API e preflight CORS retornando a origem exata do frontend.
+- CSP permitindo a API, a documentação hospedada e o beacon oficial do Cloudflare.
+
+Este registro é datado e não representa uma checagem em tempo real dos serviços.

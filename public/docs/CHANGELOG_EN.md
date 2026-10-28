@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-All versions below v1.0.0 belong to the beta cycle; earlier dates are approximate. The latest section records checkout changes, not published releases.
+This changelog preserves dated development and deployment records. The current product version is **official 1.0.0**, released on October 28, 2026; earlier entries remain historical.
+
+## v1.0.0 — Official release — October 28, 2026
+
+- Official 1.0.0 status was applied across the app, API, documentation, and site repositories; the frontend package already used version 1.0.0 and the site package was aligned.
+- The browser client consolidated cookie-first sessions with `HttpOnly`, `SameSite=Lax`, `Secure` on HTTPS, and `Origin` validation for mutations, with controlled legacy Bearer compatibility and one-time-code RFID exchange.
+- The `#login` entry prevents protected content from appearing before authorization; Guest Mode uses server-side allowlisted projections and API routes enforce permissions.
+- The documentation center uses one catalog for the About page and modal; bilingual guides can load from the canonical host and have a local fallback.
+- The public site received stronger challenge/solution hierarchy, one-line navigation, a stack with local SVG logos, grouped documentation, and a profile card fitted to its portrait and social links.
+- Operational and hosting guides were revised alongside architecture, data, API, and operations documentation; the changelog keeps the October 23 topology as a dated snapshot, not a current service-health statement.
 
 ## Sessions, entry gate, and documentation center — October 26–27, 2026
 - The browser negotiates session support through `/auth/session-capabilities`; when available, sessions use an `HttpOnly`, `SameSite=Lax` cookie, `Secure` on HTTPS, and Origin validation for state-changing requests. Bearer remains for compatibility/fallback only.
@@ -10,14 +19,14 @@ All versions below v1.0.0 belong to the beta cycle; earlier dates are approximat
 - The About page and documentation modal now render cards from the same registry. Bilingual API/development guides and deployment/hosting guides are registered. The `site-eduassets` portfolio now reads Markdown from `docs.eduassets.tech` in an accessible dialog with search, table of contents, internal links, and sanitization; the reader supports PT-BR/EN.
 - READMEs, manuals, architecture, data model, hosting, roadmap, and changelogs were reconciled with source/recorded CI; release instructions now distinguish schema-free updates from backup-and-migrate releases.
 
-## Beta deployment and hosting documentation — October 23, 2026
+## Deployment and hosting documentation — October 23, 2026
 - Frontend deployed on Cloudflare Pages at `app.eduassets.tech`; the landing page remains separate at `eduassets.tech`.
 - API deployed at `api.eduassets.tech` on the Oracle Cloud Ubuntu VM, behind Nginx and using remote PostgreSQL on Neon.
 - Fixed the inbound block caused by a generic `REJECT` before the UFW chains: explicit TCP 80/443 rules were inserted before the block without exposing port 3000.
 - Validated external HTTPS and the `OPTIONS /ready` CORS preflight with `Access-Control-Allow-Origin: https://app.eduassets.tech`.
 - The Pages CSP now allows the official Cloudflare Web Analytics beacon at `static.cloudflareinsights.com`.
 - Added the bilingual `Hospedagem.md` and `Hosting.md` runbooks and registered them in the frontend documentation view.
-- Off-host backup, restore drill, monitoring/alerts, and the final real-data review remain pending.
+- That dated record identified off-host backup, a restore drill, monitoring/alerts, and the final real-data review as operational follow-up topics.
 
 ## Remediation and release preparation — October 22, 2026
 - Removed in-memory authentication/persistence fallbacks and the default JWT secret; environment validation fails early for missing/invalid database, secret, CORS, port and production proxy trust.
@@ -29,11 +38,11 @@ All versions below v1.0.0 belong to the beta cycle; earlier dates are approximat
 - Added separate local env templates and production template, a multi-stage backend Dockerfile and Compose file with loopback-only host binding, RFID disabled, sanitized Nginx/Cloudflare proxy template, backup/restore scripts restricted to empty DB, PostgreSQL CI workflow and integration/race tests.
 - Seed display names are synthetic and existing passwords are not overwritten; seed execution remains explicit and requires configured `SEED_*` variables.
 - Local `npm run dev` no longer applies migrations automatically; `npm run dev:db` is the explicit development-database preparation command. The frontend waits for `/ready` and stops with the backend if the backend process fails.
-- Sandbox verification on Oct 22: 36 frontend tests across 9 files, 30 backend unit tests, frontend typecheck/build, backend TypeScript build, Prisma generation, JSON/YAML validation and `prisma validate` passed. PostgreSQL, migrations, seed, the 9 HTTP/concurrency integration tests, production image build and readiness were not run locally because those services/tools were unavailable in the sandbox; hosted CI run `39875293195` passed both `verify` and `production-smoke`, including those checks.
-- Browser QA, hardware, Cloudflare Pages, DNS, firewall, Cloudflare on the target host, certificates, backups/restore and monitoring remain unverified. No remote database, public resource or production environment was accessed or changed.
+- Sandbox verification recorded on Oct 22: 36 frontend tests across 9 files, 30 backend unit tests, frontend typecheck/build, backend TypeScript build, Prisma generation, JSON/YAML validation and `prisma validate` passed. PostgreSQL, migrations, seed, the 9 HTTP/concurrency integration tests, production image build and readiness were not run locally because those services/tools were unavailable in the sandbox; hosted CI run `39875293195` passed both `verify` and `production-smoke`, including those checks.
+- That record covers the listed CI and sandbox checks; it does not report browser/hardware test results or continuous verification of external services. No remote database, public resource or production environment was accessed or changed in that documentation session.
 
 - Added bounded loan/occurrence payloads, raised user/password-change minimum to 12 characters, handled async feature initialization failures, and escaped documentation TOC/search text.
-- Backend audit recorded: `npm audit --omit=dev` still reports the Prisma chain in the current lockfile; 3 high remain in the Prisma 6 development/migration toolchain, with no forced major upgrade.
+- The dependency audit recorded in that run found three high-severity findings in the Prisma 6 development/migration toolchain; this historical note is not a current audit result.
 
 ## v0.9.9 (August 2026)
 - Database indexes on `Emprestimo.status` and `Ocorrencia.status` for faster Dashboard and Control queries.

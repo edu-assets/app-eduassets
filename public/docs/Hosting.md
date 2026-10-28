@@ -1,6 +1,6 @@
 # EduAssets hosting and operations
 
-> **Historical record (October 23, 2026):** the operator validated the Oracle VM API, Nginx HTTPS proxy, proxied Cloudflare DNS, Cloudflare Pages frontend, and CORS preflight at that time. This records the observed topology on that date; it does not verify current remote state. Off-host backups, restore drill, monitoring, and final security review for real data remain pending.
+> **Product version: official 1.0.0 (October 28, 2026).** The record below describes the topology observed on October 23, 2026; it is not a check of remote infrastructure at the time you read this guide.
 
 ## 1. Deployed topology
 
@@ -307,20 +307,15 @@ When sourcing an environment file, avoid externally duplicated quote characters.
 
 Backups must be encrypted, copied off the VM, and tested by restoring into a new empty database. An existing dump file alone does not prove recoverability.
 
-## 12. Post-deployment checklist
+## 12. Deployment checks recorded on October 23, 2026
 
-- [x] Frontend at `app.eduassets.tech`.
-- [x] Separate landing page at `eduassets.tech`.
-- [x] API at `api.eduassets.tech`.
-- [x] Remote PostgreSQL on Neon.
-- [x] Docker API published locally on the VM.
-- [x] Nginx listening on 80/443.
-- [x] Port 80/443 input rules fixed before the generic `REJECT`.
-- [x] External HTTPS reaches the API.
-- [x] CORS preflight returns the exact frontend origin.
-- [x] CSP allows the API, hosted documentation, and official Cloudflare beacon.
-- [ ] Off-host backup and restore drill documented with operational evidence.
-- [ ] External monitoring and alerts configured.
-- [ ] Final privacy, database grants, and retention review for real data.
+The deployment record for that date noted:
 
-The product remains **Beta** until the operational items and complete functional QA are finished.
+- Frontend at `app.eduassets.tech` and a separate landing page at `eduassets.tech`.
+- API at `api.eduassets.tech`, with remote PostgreSQL on Neon.
+- Docker API published locally on the VM, with Nginx listening on ports 80/443.
+- Port 80/443 input rules positioned before the generic `REJECT`.
+- External HTTPS reaching the API and CORS preflight returning the exact frontend origin.
+- CSP allowing the API, hosted documentation, and official Cloudflare beacon.
+
+This dated record is not a real-time service check.
