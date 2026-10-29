@@ -182,6 +182,25 @@
     font-size: 18px;
 }
 
+.terms-contact-link {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    text-underline-offset: 2px;
+}
+
+.terms-contact-link:hover {
+    color: var(--primary-color);
+    text-decoration-color: currentColor;
+}
+
+.terms-contact-link:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
 .terms-screen__back {
     flex: 0 0 auto;
     min-height: 36px;
