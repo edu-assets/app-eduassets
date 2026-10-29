@@ -95,16 +95,25 @@
 
 .terms-screen__sections {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px 28px;
+    grid-template-columns: 1fr;
+    gap: 0;
 }
 
 .terms-screen__section {
     min-width: 0;
+    padding: 0 0 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .terms-screen__section--wide {
-    grid-column: 1 / -1;
+    grid-column: auto;
+}
+
+.terms-screen__section:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: 0;
 }
 
 .terms-screen__section h2 {
@@ -128,8 +137,9 @@
 .terms-screen__section p {
     margin: 0;
     color: var(--text-secondary);
-    font-size: 0.84rem;
-    line-height: 1.65;
+    font-size: 0.92rem;
+    line-height: 1.75;
+    text-align: justify;
 }
 
 .terms-screen__list {
@@ -138,8 +148,9 @@
     margin: 10px 0 12px;
     padding-left: 18px;
     color: var(--text-secondary);
-    font-size: 0.82rem;
-    line-height: 1.55;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    text-align: justify;
 }
 
 .terms-screen__list li::marker {
@@ -212,11 +223,6 @@
 
     .terms-screen__body {
         padding: 20px;
-    }
-
-    .terms-screen__sections {
-        grid-template-columns: 1fr;
-        gap: 20px;
     }
 
     .terms-screen__section--wide {
