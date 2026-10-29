@@ -35,6 +35,12 @@ export async function initAuth(): Promise<void> {
         isAcessoConvidadoAutorizado()
     );
 
+    if (destino === 'terms') {
+        setEntryRoute('terms');
+        openModal('modal-terms');
+        return;
+    }
+
     if (destino === 'login') {
         setEntryRoute('login');
         openModal('modal-login');

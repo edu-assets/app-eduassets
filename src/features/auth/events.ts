@@ -1,6 +1,6 @@
 import { closeModal, openModal, showToast } from '../../core/ui/index.js';
 import { entrar, entrarComoConvidado, sair, isAutenticado, isAcessoConvidadoAutorizado, subscribe } from '../../core/state/authStore.js';
-import { isLoginRoute, resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
+import { isLoginRoute, resolveEntryDestination, setEntryRoute, TERMS_ROUTE_HASH } from '../../core/layout/entryRoute.js';
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
 import { traduzirErro, t, definirIdioma, getIdioma, subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
@@ -41,6 +41,12 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     document.addEventListener('click', (e) => {
         const target = e.target as Node;
         if (!els.sidebarFooter.contains(target)) fecharDropdown();
+
+        const termsTrigger = (e.target as HTMLElement).closest<HTMLElement>('[data-open-terms]');
+        if (termsTrigger) {
+            e.preventDefault();
+            mostrarTelaTermos();
+        }
     });
 
     document.addEventListener('keydown', (e) => {
@@ -68,6 +74,9 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     els.form.addEventListener('submit', (event) => {
         event.preventDefault();
         void fazerLogin(els, onInitialAccess);
+    });
+    document.querySelectorAll<HTMLElement>('[data-terms-close]').forEach((button) => {
+        button.addEventListener('click', () => fecharTelaTermos(els));
     });
     els.emailInput.addEventListener('input', () => mostrarErroLogin(els, ''));
     els.senhaInput.addEventListener('input', () => mostrarErroLogin(els, ''));
@@ -126,7 +135,28 @@ function mostrarTelaLogin(els: AuthEls): void {
     els.emailInput.focus();
 }
 
+function mostrarTelaTermos(): void {
+    closeModal('modal-login');
+    setEntryRoute('terms');
+    openModal('modal-terms');
+}
+
+function fecharTelaTermos(els: AuthEls): void {
+    closeModal('modal-terms');
+    const destino = isAutenticado() || isAcessoConvidadoAutorizado() ? 'app' : 'login';
+    setEntryRoute(destino);
+    if (destino === 'login') {
+        openModal('modal-login');
+        els.emailInput.focus();
+    }
+}
+
 function sincronizarRotaLogin(els: AuthEls): void {
+    if (window.location.hash === TERMS_ROUTE_HASH) {
+        mostrarTelaTermos();
+        return;
+    }
+
     const destino = resolveEntryDestination(
         window.location.hash,
         isAutenticado(),
@@ -138,6 +168,7 @@ function sincronizarRotaLogin(els: AuthEls): void {
         return;
     }
 
+    closeModal('modal-terms');
     if (isLoginRoute()) setEntryRoute('app');
     if (document.getElementById('modal-login')?.classList.contains('active')) {
         closeModal('modal-login');

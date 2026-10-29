@@ -2072,8 +2072,70 @@
                     <p class="login-gate-guest-note" id="login-guest-note" data-i18n-key="auth.convidado_somente_leitura">
                         O modo convidado permite consulta, sem operações de alteração.
                     </p>
+                    <p class="login-gate-footnote">
+                        <span class="material-symbols-outlined" aria-hidden="true">gavel</span>
+                        <span>
+                            <span data-i18n-key="auth.ao_continuar">Ao continuar, você concorda com os</span>
+                            <a href="#termos" data-open-terms data-i18n-key="auth.termos_de_uso">Termos de Uso</a>.
+                        </span>
+                    </p>
                 </form>
             </section>
+        </div>
+    </div>
+
+    <div class="modal-overlay terms-screen" id="modal-terms" data-close-on-overlay="false">
+        <div class="modal-box terms-screen__card" role="dialog" aria-modal="true" aria-labelledby="terms-title" tabindex="-1">
+            <header class="terms-screen__header">
+                <div>
+                    <p class="terms-screen__overline" data-i18n-key="terms.overline">INFORMAÇÕES LEGAIS</p>
+                    <h1 id="terms-title" data-i18n-key="terms.title">Termos de Uso</h1>
+                    <p class="terms-screen__intro" data-i18n-key="terms.intro">Leia as regras essenciais para utilizar o eduAssets com segurança e responsabilidade.</p>
+                </div>
+                <button class="terms-screen__close" type="button" data-terms-close aria-label="Fechar" data-i18n-aria-label="terms.close" title="Fechar" data-i18n-title="terms.close">
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+            </header>
+            <div class="terms-screen__body">
+                <p class="terms-screen__updated" data-i18n-key="terms.updated">Última atualização: 28 de outubro de 2026</p>
+                <div class="terms-screen__sections">
+                    <section class="terms-screen__section terms-screen__section--wide">
+                        <h2 data-i18n-key="terms.acceptance_title">1. Aceitação</h2>
+                        <p data-i18n-key="terms.acceptance_text">Ao acessar ou utilizar o eduAssets, você confirma que leu estes Termos de Uso e concorda com as regras aqui descritas. Se não concordar, não utilize as áreas protegidas do sistema.</p>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="terms.purpose_title">2. Finalidade do sistema</h2>
+                        <p data-i18n-key="terms.purpose_text">O eduAssets organiza inventário escolar, empréstimos, devoluções e ocorrências. O sistema deve ser usado apenas para finalidades institucionais e administrativas legítimas.</p>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="terms.access_title">3. Contas e acesso</h2>
+                        <p data-i18n-key="terms.access_text">Cada pessoa deve utilizar apenas suas próprias credenciais, manter a senha em sigilo e informar ao responsável pelo sistema qualquer suspeita de acesso indevido.</p>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="terms.guest_title">4. Modo convidado</h2>
+                        <p data-i18n-key="terms.guest_text">O modo convidado permite consulta somente leitura. Dados pessoais e ações de alteração podem ficar ocultos ou bloqueados até que uma sessão autorizada seja iniciada.</p>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="terms.use_title">5. Uso aceitável</h2>
+                        <p data-i18n-key="terms.use_text">Não é permitido tentar contornar permissões, inserir dados falsos de propósito, compartilhar credenciais, explorar falhas ou usar o sistema para finalidades ilícitas.</p>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="terms.availability_title">6. Disponibilidade</h2>
+                        <p data-i18n-key="terms.availability_text">Podem ocorrer interrupções para manutenção, segurança ou atualização. As informações exibidas dependem dos registros mantidos pela instituição e devem ser conferidas quando necessário.</p>
+                    </section>
+                    <section class="terms-screen__section terms-screen__section--wide">
+                        <h2 data-i18n-key="terms.changes_title">7. Atualizações dos termos</h2>
+                        <p data-i18n-key="terms.changes_text">Estes termos podem ser atualizados para refletir mudanças no sistema ou nas regras de operação. A versão vigente estará disponível nesta tela.</p>
+                    </section>
+                </div>
+            </div>
+            <footer class="terms-screen__footer">
+                <span class="terms-screen__footer-note">
+                    <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                    <span data-i18n-key="terms.footer_note">Em caso de dúvida, procure o responsável pelo sistema da sua instituição.</span>
+                </span>
+                <button class="terms-screen__back" type="button" data-terms-close data-i18n-key="terms.back_to_login">Voltar ao login</button>
+            </footer>
         </div>
     </div>
     <!-- Modal de confirmar exclusão -->
