@@ -2,11 +2,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     padding: 10px 20px;
     border: none;
     border-radius: 4px;
     font-size: 1rem;
     font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
     cursor: pointer;
     transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
 }
@@ -19,6 +22,21 @@
 
 .btn-block {
     width: 100%;
+}
+
+.btn .material-symbols-outlined,
+.btn-label {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Ações textuais customizadas: o rótulo é uma unidade de leitura. */
+.seguranca-toggle-btn,
+.config-system-toggle,
+.config-switch,
+.exportar-formato-btn,
+.controle-pagina-btn {
+    white-space: nowrap;
 }
 
 .btn-sm {
