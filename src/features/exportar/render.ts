@@ -54,7 +54,11 @@ export function popularChecklistEquipamentos(els: ExportarEls, equipamentos: Equ
 
 export function selecionarTipo(els: ExportarEls, tipo: string): void {
     els.tipoDadosInput.value = tipo;
-    els.tipoCards.forEach((card) => card.classList.toggle('active', card.dataset.tipo === tipo));
+    els.tipoCards.forEach((card) => {
+        const ativo = card.dataset.tipo === tipo;
+        card.classList.toggle('active', ativo);
+        card.setAttribute('aria-pressed', String(ativo));
+    });
 
     const ehEquipamentos = tipo === 'equipamentos';
 
@@ -72,7 +76,11 @@ export function selecionarTipo(els: ExportarEls, tipo: string): void {
 
 export function selecionarFormato(els: ExportarEls, formato: string): void {
     els.formatoInput.value = formato;
-    els.formatoBtns.forEach((btn) => btn.classList.toggle('active', btn.dataset.formato === formato));
+    els.formatoBtns.forEach((btn) => {
+        const ativo = btn.dataset.formato === formato;
+        btn.classList.toggle('active', ativo);
+        btn.setAttribute('aria-pressed', String(ativo));
+    });
     atualizarResumo(els);
 }
 

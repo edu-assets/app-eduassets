@@ -1204,33 +1204,31 @@
                         </span>
                         Exportar
                     </h2>
-                    <p class="panel-subtitle">Gere relatórios e exporte os dados do sistema conforme sua necessidade.
+                    <p class="panel-subtitle">Escolha os dados, ajuste os filtros e baixe o arquivo.
                     </p>
 
                     <div class="exportar-container">
                         <form id="form-exportar">
 
                             <div class="exportar-tipo-row">
-                                <button type="button" class="exportar-tipo-card active" data-tipo="devolucoes">
+                                <button type="button" class="exportar-tipo-card active" data-tipo="devolucoes" aria-pressed="true">
                                     <span class="exportar-tipo-icon exportar-tipo-icon-primary">
                                         <span class="material-symbols-outlined">swap_horiz</span>
                                     </span>
                                     <div class="exportar-tipo-texto">
                                         <span class="exportar-tipo-titulo">Empréstimos e devoluções</span>
-                                        <span class="exportar-tipo-desc">Relatório de empréstimos e devoluções
-                                            registrados.</span>
+                                        <span class="exportar-tipo-desc">Histórico de empréstimos e devoluções.</span>
                                     </div>
                                     <span class="material-symbols-outlined exportar-tipo-check">check_circle</span>
                                 </button>
 
-                                <button type="button" class="exportar-tipo-card" data-tipo="equipamentos">
+                                <button type="button" class="exportar-tipo-card" data-tipo="equipamentos" aria-pressed="false">
                                     <span class="exportar-tipo-icon exportar-tipo-icon-secondary">
                                         <span class="material-symbols-outlined">devices</span>
                                     </span>
                                     <div class="exportar-tipo-texto">
                                         <span class="exportar-tipo-titulo">Equipamentos</span>
-                                        <span class="exportar-tipo-desc">Estado atual do inventário de
-                                            equipamentos.</span>
+                                        <span class="exportar-tipo-desc">Inventário atual de equipamentos.</span>
                                     </div>
                                     <span class="material-symbols-outlined exportar-tipo-check">check_circle</span>
                                 </button>
@@ -1283,18 +1281,18 @@
                                         </span>
                                         <div>
                                             <h4 class="config-card-title">Formato de exportação</h4>
-                                            <p class="config-card-desc">Escolha o formato do arquivo.</p>
+                                            <p class="config-card-desc">Arquivo final</p>
                                         </div>
                                     </div>
 
                                     <div class="exportar-formato-opcoes">
-                                        <button type="button" class="exportar-formato-btn active" data-formato="csv">
+                                        <button type="button" class="exportar-formato-btn active" data-formato="csv" aria-pressed="true">
                                             <span class="material-symbols-outlined">csv</span> CSV
                                         </button>
-                                        <button type="button" class="exportar-formato-btn" data-formato="excel">
+                                        <button type="button" class="exportar-formato-btn" data-formato="excel" aria-pressed="false">
                                             <span class="material-symbols-outlined">table_chart</span> Excel
                                         </button>
-                                        <button type="button" class="exportar-formato-btn" data-formato="pdf">
+                                        <button type="button" class="exportar-formato-btn" data-formato="pdf" aria-pressed="false">
                                             <span class="material-symbols-outlined">picture_as_pdf</span> PDF
                                         </button>
                                     </div>
@@ -1309,7 +1307,7 @@
                                         <div>
                                             <h4 class="config-card-title">Observação <span
                                                     class="form-label-optional">(opcional)</span></h4>
-                                            <p class="config-card-desc">Nota incluída no relatório gerado.</p>
+                                            <p class="config-card-desc">Incluída no arquivo, se preenchida.</p>
                                         </div>
                                     </div>
                                     <div class="form-group">
@@ -1325,7 +1323,7 @@
                                         </span>
                                         <div>
                                             <h4 class="config-card-title">Resumo da exportação</h4>
-                                            <p class="config-card-desc">Confira os detalhes antes de exportar.</p>
+                                            <p class="config-card-desc">Confira antes de baixar.</p>
                                         </div>
                                     </div>
                                     <div class="exportar-resumo-lista">
@@ -1350,8 +1348,7 @@
                                             <span class="icon-badge icon-badge--sm icon-badge--info">
                                                 <span class="material-symbols-outlined">info</span>
                                             </span>
-                                            <span><strong>Importante</strong><br>Revise os filtros antes de exportar os
-                                                dados.</span>
+                                            <span><strong>Pronto para baixar?</strong><br>Revise os filtros uma última vez.</span>
                                         </div>
                                         <button class="btn btn-primary" type="submit">
                                             <span class="material-symbols-outlined">download</span> Exportar Dados

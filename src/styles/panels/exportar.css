@@ -1,7 +1,7 @@
 .exportar-container {
     width: 100%;
-    max-width: 1000px;
-    margin: 38px auto 0 auto;
+    max-width: 1120px;
+    margin: 28px auto 0;
     min-width: 0;
     box-sizing: border-box;
 }
@@ -18,8 +18,8 @@
 
 .exportar-tipo-row {
     display: flex;
-    gap: 14px;
-    margin-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .exportar-tipo-card {
@@ -27,7 +27,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px 16px;
+    padding: 16px 18px;
     border: 1.5px solid var(--border-color);
     border-radius: 8px;
     background-color: var(--surface-white);
@@ -88,7 +88,7 @@
 }
 
 .exportar-tipo-desc {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     line-height: 1.35;
 }
@@ -186,27 +186,27 @@
 
 .exportar-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 14px;
 }
 
 .exportar-card-periodo {
-    grid-column: 1;
+    grid-column: span 7;
     grid-row: 1;
 }
 
 .exportar-card-formato {
-    grid-column: 2;
+    grid-column: span 5;
     grid-row: 1;
 }
 
 .exportar-card-observacao {
-    grid-column: 1;
+    grid-column: span 7;
     grid-row: 2;
 }
 
 .exportar-card-resumo {
-    grid-column: 2;
+    grid-column: span 5;
     grid-row: 2;
 }
 
@@ -215,7 +215,7 @@
 }
 
 .exportar-grid .config-card {
-    padding: 18px 20px;
+    padding: 20px 22px;
 }
 
 .exportar-grid .config-card-header {
@@ -226,6 +226,14 @@
 .exportar-grid .config-card-header > div {
     min-width: 0;
     overflow-wrap: anywhere;
+}
+
+.exportar-grid .config-card-desc {
+    max-width: 42ch;
+}
+
+.exportar-grid .config-card-title {
+    letter-spacing: -0.01em;
 }
 
 .exportar-grid .form-row {
@@ -307,7 +315,7 @@
 .exportar-card-observacao textarea {
     resize: none;
     height: 100%;
-    min-height: 84px;
+    min-height: 96px;
 }
 
 .exportar-resumo-lista {
