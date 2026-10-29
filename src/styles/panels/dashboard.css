@@ -19,6 +19,7 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 20px;
+    min-width: 0;
 }
 
 .dashboard-resumo-card {
@@ -30,6 +31,9 @@
     border-radius: 8px;
     box-shadow: var(--shadow-sm);
     padding: 18px;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .dashboard-resumo-icon {
@@ -83,6 +87,7 @@
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--text-secondary);
+    overflow-wrap: anywhere;
 }
 
 .dashboard-resumo-numero {
@@ -96,6 +101,7 @@
 .dashboard-resumo-sub {
     font-size: 0.78rem;
     color: var(--text-muted);
+    overflow-wrap: anywhere;
 }
 
 /* ===== Tabela de estoque / histórico: ocupa 100% da largura ===== */
@@ -106,6 +112,9 @@
     border-radius: 8px;
     box-shadow: var(--shadow-sm);
     padding: 24px;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* Tabs internas: Estoque | Histórico */
@@ -175,9 +184,20 @@
     font-size: 0.92rem;
     color: var(--text-primary);
     cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .estoque-row:hover {
+    background-color: var(--hover-light);
+    border-bottom-color: color-mix(in srgb, var(--primary-color) 38%, var(--border-color));
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 10%, transparent);
+    transform: translateY(-1px);
+}
+
+.estoque-row:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
     background-color: var(--hover-light);
 }
 
@@ -890,6 +910,33 @@
     .category-field-input {
         padding: 8px 12px;
         font-size: 0.88rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-resumo-grid {
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        gap: 10px;
+    }
+
+    .dashboard-resumo-card:last-child {
+        grid-column: auto;
+    }
+
+    .dashboard-resumo-card {
+        width: 100%;
+        padding: 13px 14px;
+    }
+}
+
+@media (max-width: 360px) {
+    .dashboard-main {
+        padding: 12px 8px;
+    }
+
+    .dashboard-resumo-titulo {
+        font-size: 0.72rem;
     }
 }
 

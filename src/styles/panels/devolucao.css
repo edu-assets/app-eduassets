@@ -42,6 +42,8 @@
     border: 1px solid var(--primary-300);
     border-radius: 8px;
     background-color: color-mix(in srgb, var(--primary-color) 2%, var(--surface-white));
+    min-width: 0;
+    overflow: hidden;
 }
 
 .devolucao-item:hover {
@@ -272,6 +274,7 @@
 .devolucao-item-icon-pill {
     flex: 0 0 auto;
     width: fit-content;
+    max-width: 100%;
     min-width: 0;
     display: flex;
     align-items: center;
@@ -636,19 +639,9 @@
 
     .devolucao-tabela-header,
     .devolucao-item {
-        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.6fr) minmax(0, 1.5fr);
-        gap: 16px;
-        padding: 14px 24px;
-    }
-
-    .devolucao-tabela-header>*:nth-child(4),
-    .devolucao-tabela-header>*:nth-child(5) {
-        display: none !important;
-    }
-
-    .devolucao-item .devolucao-col-status,
-    .devolucao-item .devolucao-col-acao {
-        display: none !important;
+        grid-template-columns: minmax(0, 1.65fr) minmax(0, 1.35fr) minmax(0, 1.15fr) 96px;
+        gap: 14px;
+        padding: 14px 18px;
     }
 
     .info-resp-nome {
@@ -665,6 +658,44 @@
 }
 
 @media (max-width: 1024px) {
+    .devolucao-layout {
+        display: block;
+        margin-top: 20px;
+    }
+
+    .devolucao-tabela-header {
+        display: none;
+    }
+
+    .devolucao-item {
+        grid-template-columns: minmax(0, 1.35fr) minmax(150px, 0.9fr);
+        grid-template-areas:
+            "pessoa data"
+            "equip acao";
+        gap: 14px 18px;
+        padding: 16px;
+    }
+
+    .devolucao-col-resp {
+        grid-area: pessoa;
+    }
+
+    .devolucao-col-equip {
+        grid-area: equip;
+        min-width: 0;
+    }
+
+    .devolucao-col-data {
+        grid-area: data;
+        align-self: center;
+    }
+
+    .devolucao-col-acao {
+        grid-area: acao;
+        display: flex !important;
+        justify-content: flex-end;
+    }
+
     .devolucao-detalhe-painel {
         display: none;
     }
@@ -683,6 +714,7 @@
         width: calc(100% - 32px);
         max-width: 440px;
         max-height: 85vh;
+        max-height: calc(100dvh - 32px);
         overflow-y: auto;
         padding: 20px 18px 18px;
 
@@ -745,6 +777,21 @@
 
     .devolucao-col-acao {
         grid-area: acao;
+        display: flex !important;
+    }
+
+    .devolucao-col-equip,
+    .devolucao-itens-icons {
+        min-width: 0;
+    }
+
+    .devolucao-item-icon-pill {
+        max-width: 100%;
+    }
+
+    .info-data-completa,
+    .info-data-relativa {
+        white-space: normal;
     }
 
     .devolver-btn {

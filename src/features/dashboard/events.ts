@@ -15,15 +15,30 @@ import { exportarEstoqueCsv, filtrarEquipamentos, filtrarHistorico, buscarEquipa
 import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
 
 export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado): void {
+    const abrirDetalheEstoquePorLinha = (row: HTMLElement): void => {
+        const equipamento = buscarEquipamentoPorId(row.dataset.equipamentoId ?? '', getEquipamentos());
+        if (!equipamento) return;
+
+        exibirDetalheEstoque(els, equipamento);
+    };
+
     els.estoqueContainer.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
         const row = target.closest<HTMLElement>('.estoque-row');
         if (!row) return;
 
-        const equipamento = buscarEquipamentoPorId(row.dataset.equipamentoId ?? '', getEquipamentos());
-        if (!equipamento) return;
+        abrirDetalheEstoquePorLinha(row);
+    });
 
-        exibirDetalheEstoque(els, equipamento);
+    els.estoqueContainer.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+
+        const target = e.target as HTMLElement;
+        const row = target.closest<HTMLElement>('.estoque-row');
+        if (!row) return;
+
+        e.preventDefault();
+        abrirDetalheEstoquePorLinha(row);
     });
 
     if (els.btnDetalheFechar) els.btnDetalheFechar.addEventListener('click', () => fecharDetalhe(els));

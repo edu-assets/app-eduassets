@@ -57,7 +57,8 @@ export function renderDashboardCategoriaForm(dados: CategoriaResumoDados): strin
 
 function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
     return html`
-        <div class="estoque-row" data-id="${equipamento.id}" data-equipamento-id="${equipamento.id}">
+        <div class="estoque-row" data-id="${equipamento.id}" data-equipamento-id="${equipamento.id}"
+            role="button" tabindex="0">
             <span data-col="categoria">${equipamento.categoria?.nome ?? ''}</span>
             <span data-col="total" data-label="${t('dashboard.total')}">${equipamento.quantidadeTotal}</span>
             <span data-col="disponivel" data-label="${t('dashboard.disponivel')}">${equipamento.quantidadeDisponivel}</span>
