@@ -132,6 +132,20 @@
     line-height: 1.65;
 }
 
+.terms-screen__list {
+    display: grid;
+    gap: 7px;
+    margin: 10px 0 12px;
+    padding-left: 18px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.terms-screen__list li::marker {
+    color: var(--primary-color);
+}
+
 .terms-screen__footer {
     display: flex;
     align-items: center;
