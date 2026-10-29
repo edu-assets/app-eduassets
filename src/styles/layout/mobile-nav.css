@@ -63,6 +63,7 @@
 @media (max-width: 1024px) {
     .mobile-topbar {
         display: flex;
+        padding: 14px 24px;
     }
 
     .sidebar {
@@ -109,7 +110,7 @@
     }
 
     .main-content {
-        padding: 24px 20px;
+        padding: 28px 24px;
     }
 
     .sidebar-nav {

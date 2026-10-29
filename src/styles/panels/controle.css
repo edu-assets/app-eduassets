@@ -758,18 +758,6 @@
     .controle-resumo-chevron {
         display: none;
     }
-
-    .controle-registros-toolbar .btn {
-        font-size: 0;
-        padding: 8px;
-        min-width: 36px;
-        justify-content: center;
-    }
-
-    .controle-registros-toolbar .btn .material-symbols-outlined {
-        font-size: 18px;
-        margin: 0;
-    }
 }
 
 @media (max-width: 640px) {
@@ -789,6 +777,18 @@
 
     .controle-registros-toolbar {
         flex-wrap: wrap;
+    }
+
+    .controle-registros-toolbar .btn {
+        font-size: 0;
+        padding: 8px;
+        min-width: 36px;
+        justify-content: center;
+    }
+
+    .controle-registros-toolbar .btn .material-symbols-outlined {
+        font-size: 18px;
+        margin: 0;
     }
 
     .controle-tabs-row {

@@ -28,6 +28,18 @@ section h2 {
     gap: 10px;
 }
 
+@media (min-width: 641px) and (max-width: 1024px) {
+    .panel-title {
+        font-size: 1.45rem;
+        margin-bottom: 8px;
+    }
+
+    .panel-subtitle {
+        margin-left: 42px;
+        font-size: 0.95rem;
+        line-height: 1.45;
+    }
+}
 
 @media (max-width: 640px) {
     .panel-title {

@@ -282,7 +282,7 @@
   "shell.informacoes_da_sua_conta_de_administrado": "Information about your administrator account.",
   "shell.informacoes_do_sistema_tecnologias_utili": "System information, technologies used, and available documentation.",
   "shell.informe_as_medidas_tomadas_para_concluir": "Enter the measures taken to close out this record.",
-  "shell.informe_quem_esta_solicitando_e_os_detal": "Provide who is requesting and the general details of the loan.",
+  "shell.informe_quem_esta_solicitando_e_os_detal": "Choose the requester, responsible person and date.",
   "shell.inicio": "Home",
   "shell.entrar": "Sign in",
   "shell.ir_para_o_inicio": "Go to home",
