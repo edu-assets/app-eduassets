@@ -1,5 +1,7 @@
 {
-  "auth.modo_convidado": "Modo Convidado",
+  "auth.modo_convidado": "Convidado",
+  "auth.dado_restrito": "Não visível",
+  "auth.informacao_restrita": "Informação restrita no modo convidado",
   "cadastros.30_segundos": "30 segundos",
   "cadastros.administrador": "Administrador",
   "cadastros.aproxime_cartao_raspberry": "Aproxime o cartão do Raspberry Pi nos próximos 30 segundos.",
@@ -149,6 +151,8 @@
   "devolucao.remover": "Remover",
   "devolucao.retirado_em": "Retirado em {data}",
   "docs.atualizado_em": "Atualizado em:",
+  "docs.categoria_geral": "Visão geral",
+  "docs.categoria_tecnica": "Guias técnicos",
   "docs.codigo_copiado": "Código copiado",
   "docs.fonte": "Fonte:",
   "docs.nao_foi_possivel_carregar": "Não foi possível carregar este documento.",

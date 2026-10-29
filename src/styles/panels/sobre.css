@@ -123,9 +123,31 @@
 
 /* ===== Documentação: grid de tiles em destaque ===== */
 .sobre-doc-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.sobre-doc-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sobre-doc-grupo-titulo {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.73rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sobre-doc-grupo-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    justify-content: center;
 }
 
 .sobre-doc-tile {
@@ -198,26 +220,34 @@
 }
 
 .sobre-tech-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
+    gap: 10px;
     margin-top: 18px;
     padding-top: 18px;
     border-top: 1px solid var(--border-color);
 }
 
+.sobre-tech-item {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 9px;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    background: var(--surface-2);
+    color: var(--text-primary);
+}
+
 .sobre-tech-icon {
-    flex-shrink: 0;
-    width: 42px;
-    height: 42px;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.sobre-tech-icon:last-child {
-    border:1px solid var(--border-color);
 }
 
 .sobre-tech-icon svg {
@@ -226,12 +256,36 @@
     fill: currentColor;
 }
 
-.sobre-tech-icon[data-tech="html"] { background-color: #FDECE3; color: #E44D26; }
+.sobre-tech-icon {
+    fill: currentColor;
+}
+
 .sobre-tech-icon[data-tech="css"] { background-color: #E5F0FE; color: #264DE4; }
-.sobre-tech-icon[data-tech="js"] { background-color: #FFF9DB; color: #D6A700; }
-.sobre-tech-icon[data-tech="node"] { background-color: #E5F8EB; color: #3C873A; }
-.sobre-tech-icon[data-tech="postgres"] { background-color: #E5F0FE; color: #336791; }
+.sobre-tech-icon[data-tech="typescript"] { background-color: #E5F0FE; color: #3178C6; }
+.sobre-tech-icon[data-tech="vite"] { background-color: #F1ECFF; color: #646CFF; }
+.sobre-tech-icon[data-tech="nodedotjs"] { background-color: #E5F8EB; color: #3C873A; }
+.sobre-tech-icon[data-tech="express"] { background-color: var(--neutral-bg); color: var(--text-primary); }
 .sobre-tech-icon[data-tech="prisma"] { background-color: var(--neutral-bg); color: var(--text-primary); }
+.sobre-tech-icon[data-tech="zod"] { background-color: #FFF7D6; color: #3E67B1; }
+.sobre-tech-icon[data-tech="postgresql"] { background-color: #E5F0FE; color: #336791; }
+.sobre-tech-icon[data-tech="neon"] { background-color: #F4EAFE; color: #8A2BE2; }
+.sobre-tech-icon[data-tech="python"] { background-color: #FFF4D5; color: #3776AB; }
+.sobre-tech-icon[data-tech="raspberrypi"] { background-color: #FCE7EE; color: #C51A4A; }
+.sobre-tech-icon[data-tech="arduino"] { background-color: #E5F8F7; color: #00979D; }
+.sobre-tech-icon[data-tech="cloudflarepages"] { background-color: #FFF0E2; color: #F38020; }
+.sobre-tech-icon[data-tech="docker"] { background-color: #E5F0FE; color: #2496ED; }
+.sobre-tech-icon[data-tech="nginx"] { background-color: #E5F8EB; color: #009639; }
+
+.sobre-tech-label {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 /* ===== Informações do sistema / Sobre (reutilizado por Perfil e Segurança) ===== */
 .sobre-info-list {
@@ -383,9 +437,12 @@
         padding-top: 12px;
         gap: 8px;
     }
+    .sobre-tech-item {
+        padding: 6px;
+    }
     .sobre-tech-icon {
-        width: 32px;
-        height: 32px;
+        width: 26px;
+        height: 26px;
     }
     .sobre-tech-icon svg {
         width: 16px;
@@ -433,7 +490,7 @@
         max-width: 280px;
     }
 
-    .sobre-doc-grid {
+    .sobre-doc-grupo-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
@@ -490,7 +547,7 @@
         padding: 0 8px;
     }
 
-    .sobre-doc-grid {
+    .sobre-doc-grupo-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }

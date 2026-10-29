@@ -18,15 +18,32 @@ export function renderSidebar(docs: DocRegistryItem[], docAtivoId: string | null
 }
 
 export function renderAboutDocTiles(docs: DocRegistryItem[]): string {
-    return docs.map((doc) => {
-        const color = doc.category === 'geral' ? 'primary' : 'secondary';
+    const categorias: Array<{ id: DocRegistryItem['category']; titulo: string }> = [
+        { id: 'geral', titulo: t('docs.categoria_geral') },
+        { id: 'tecnico', titulo: t('docs.categoria_tecnica') }
+    ];
+
+    return categorias.map(({ id, titulo }) => {
+        const itens = docs.filter((doc) => doc.category === id);
+        if (!itens.length) return '';
+
         return `
-            <button type="button" class="sobre-doc-tile" data-abrir-doc="${escapeHtml(doc.id)}">
-                <span class="sobre-doc-tile-icon sobre-doc-tile-icon-${color}" aria-hidden="true">
-                    <span class="material-symbols-outlined">${escapeHtml(doc.icon)}</span>
-                </span>
-                <span class="sobre-doc-tile-nome">${escapeHtml(doc.title)}</span>
-            </button>
+            <section class="sobre-doc-grupo" aria-labelledby="sobre-doc-grupo-${id}">
+                <h5 id="sobre-doc-grupo-${id}" class="sobre-doc-grupo-titulo">${escapeHtml(titulo)}</h5>
+                <div class="sobre-doc-grupo-grid">
+                    ${itens.map((doc) => {
+                        const color = doc.category === 'geral' ? 'primary' : 'secondary';
+                        return `
+                            <button type="button" class="sobre-doc-tile" data-abrir-doc="${escapeHtml(doc.id)}">
+                                <span class="sobre-doc-tile-icon sobre-doc-tile-icon-${color}" aria-hidden="true">
+                                    <span class="material-symbols-outlined">${escapeHtml(doc.icon)}</span>
+                                </span>
+                                <span class="sobre-doc-tile-nome">${escapeHtml(doc.title)}</span>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+            </section>
         `;
     }).join('');
 }

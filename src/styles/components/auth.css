@@ -151,6 +151,36 @@
     border-color: rgba(255, 255, 255, 0.4);
 }
 
+.dado-restrito {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-secondary);
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.dado-restrito .material-symbols-outlined {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.sidebar-footer:not(.user-menu) {
+    gap: 8px;
+    padding-inline: 12px;
+}
+
+.sidebar-footer:not(.user-menu) .user-menu-info {
+    flex: 1 1 auto;
+}
+
+.sidebar-footer:not(.user-menu) .auth-status-action {
+    padding: 6px 8px;
+}
+
 .login-erro {
     color: var(--error-color);
     font-size: 0.82rem;

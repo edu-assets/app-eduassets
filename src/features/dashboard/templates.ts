@@ -2,6 +2,7 @@ import { html, raw } from '../../core/utils/html.js';
 import { escapeHtml } from '../../core/utils/sanitize.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { renderStatusBadge } from '../../shared/components/statusBadge.js';
+import { renderPessoaProtegida } from '../../shared/components/restrictedPerson.js';
 import { t } from '../../core/state/i18nStore.js';
 import type { Equipamento, LoanUI, LoanItemUI, CategoriaResumoDados } from '../../types/index.js';
 
@@ -89,7 +90,7 @@ export function renderDashboardAndamentoContent(loans: LoanUI[]): string {
         const itensTexto = loan.itens.map((item) => `${item.quantidade}x ${escapeHtml(item.nome)}`).join(', ');
         return html`
             <div class="dashboard-andamento-item">
-                <span class="dashboard-andamento-resp">${loan.responsavel}</span>
+                <span class="dashboard-andamento-resp">${raw(renderPessoaProtegida(loan.responsavel))}</span>
                 <span class="dashboard-andamento-itens">${raw(itensTexto)}</span>
             </div>
         `;
@@ -126,8 +127,8 @@ export function renderDashboardHistoricoContent(loans: LoanUI[], limiteChips: nu
     return loans.map((loan) => html`
         <div class="historico-row" data-id="${loan.id}">
             <span class="historico-numero" data-col="numero">#${loan.numero}</span>
-            <span data-col="solicitante" data-label="Solicitante">${loan.aluno}</span>
-            <span data-col="responsavel" data-label="Responsável">${loan.responsavel}</span>
+            <span data-col="solicitante" data-label="Solicitante">${raw(renderPessoaProtegida(loan.aluno))}</span>
+            <span data-col="responsavel" data-label="Responsável">${raw(renderPessoaProtegida(loan.responsavel))}</span>
             <span class="historico-data" data-col="retirada" data-label="Retirada">${loan.data}</span>
             <span class="historico-data" data-col="devolucao" data-label="Devolução">${loan.dataDevolucao || '—'}</span>
             <div class="historico-itens" data-col="itens" data-label="Itens">${raw(renderDashboardChipsItens(loan.itens, limiteChips))}</div>
@@ -161,12 +162,12 @@ export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
             </span>
             <div class="devolucao-detalhe-pessoa-info">
                 <div class="devolucao-detalhe-pessoa-linha">
-                    <span class="info-resp">${loan.responsavel}</span>
+                        <span class="info-resp">${raw(renderPessoaProtegida(loan.responsavel))}</span>
                     <svg class="seta-svg" viewBox="0 0 40 12" xmlns="http://www.w3.org/2000/svg">
                         <line x1="0" y1="6" x2="32" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         <polyline points="26,1 36,6 26,11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    <span class="info-value">${loan.aluno}</span>
+                    <span class="info-value">${raw(renderPessoaProtegida(loan.aluno))}</span>
                 </div>
                 <span class="devolucao-detalhe-pessoa-data">Retirada em ${loan.data}</span>
                 <span class="devolucao-detalhe-pessoa-data">Devolução: ${loan.dataDevolucao || '—'}</span>

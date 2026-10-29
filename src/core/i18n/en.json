@@ -1,5 +1,7 @@
 {
-  "auth.modo_convidado": "Guest Mode",
+  "auth.modo_convidado": "Guest",
+  "auth.dado_restrito": "Not visible",
+  "auth.informacao_restrita": "Information restricted in guest mode",
   "cadastros.30_segundos": "30 seconds",
   "cadastros.administrador": "Administrator",
   "cadastros.aproxime_cartao_raspberry": "Hold the card near the Raspberry Pi for the next 30 seconds.",
@@ -149,6 +151,8 @@
   "devolucao.remover": "Remove",
   "devolucao.retirado_em": "Checked out on {data}",
   "docs.atualizado_em": "Updated:",
+  "docs.categoria_geral": "Overview",
+  "docs.categoria_tecnica": "Technical guides",
   "docs.codigo_copiado": "Code copied",
   "docs.fonte": "Source:",
   "docs.nao_foi_possivel_carregar": "Could not load this document.",

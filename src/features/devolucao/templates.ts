@@ -2,6 +2,7 @@ import { html, raw } from '../../core/utils/html.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { gerarIniciais, formatarHora } from './utils.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
+import { renderPessoaProtegida, renderIniciaisProtegidas } from '../../shared/components/restrictedPerson.js';
 import { t } from '../../core/state/i18nStore.js';
 import type { LoanItemUI, LoanUI } from '../../types/index.js';
 
@@ -43,10 +44,10 @@ export function renderDevolucaoCard(loan: LoanUI): string {
     return html`
         <div class="devolucao-item" data-id="${loan.id}">
             <div class="devolucao-col-resp">
-                <div class="devolucao-avatar">${gerarIniciais(loan.responsavel)}</div>
+                <div class="devolucao-avatar">${raw(renderIniciaisProtegidas(gerarIniciais(loan.responsavel)))}</div>
                 <div class="devolucao-textos-resp">
-                    <span class="info-resp-nome">${loan.responsavel}</span>
-                    <span class="info-aluno-nome">${loan.aluno}</span>
+                    <span class="info-resp-nome">${raw(renderPessoaProtegida(loan.responsavel))}</span>
+                    <span class="info-aluno-nome">${raw(renderPessoaProtegida(loan.aluno))}</span>
                 </div>
             </div>
             <div class="devolucao-col-equip">
