@@ -172,7 +172,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -224,6 +224,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    min-height: 32px;
     padding: 5px 11px;
     border-radius: 999px;
     border: 1px solid var(--border-color);
@@ -231,6 +232,7 @@
     color: var(--text-secondary);
     font-size: 0.72rem;
     font-weight: 600;
+    white-space: nowrap;
     cursor: pointer;
     transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
@@ -440,11 +442,14 @@
     }
 
     .cadastro-usuario-row {
+        align-items: flex-start;
         flex-wrap: wrap;
+        gap: 10px 12px;
     }
 
     .cadastro-rfid-chip {
         margin-left: 46px;
+        min-height: 36px;
     }
 }
 
