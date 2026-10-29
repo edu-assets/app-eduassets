@@ -292,17 +292,31 @@
     font-size: 0.9rem;
     color: var(--text-primary);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    border-radius: 6px;
+    min-width: 0;
     position: relative;
+    z-index: 0;
+    transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .registros-row:hover {
+    background-color: var(--hover-light);
+    border-bottom-color: transparent;
+    z-index: 1;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 52%, var(--border-color));
+}
+
+.registros-row:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
     background-color: var(--hover-light);
 }
 
 .registros-row.selected {
     background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
-    border-left: 3px solid var(--primary-color);
+    border-left-color: transparent;
+    box-shadow: inset 3px 0 0 var(--primary-color), inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 34%, var(--border-color));
+    z-index: 1;
 }
 
 .registros-row-icon {
