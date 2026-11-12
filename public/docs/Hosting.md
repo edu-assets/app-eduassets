@@ -1,6 +1,6 @@
 # EduAssets hosting and operations
 
-> **Product version: official 1.0.0 (October 28, 2026).** The record below describes the topology observed on October 23, 2026; it is not a check of remote infrastructure at the time you read this guide.
+> **Product version: official 1.2.0 (November 12, 2026).** The record below describes the topology observed on October 23, 2026; it is not a check of remote infrastructure at the time you read this guide.
 
 ## 1. Deployed topology
 
@@ -75,14 +75,15 @@ VITE_RFID_BRIDGE_ENABLED=false
 
 7. Custom domain: `app.eduassets.tech`.
 
-The browser app fetches its Markdown from an immutable docs commit pinned in `src/core/docs/docsService.ts` via `raw.githubusercontent.com`. `docs.eduassets.tech` remains the public guide site; it is not the app's default fetch host. `public/_headers` is copied to `dist/_headers`. The production CSP must allow the API, the pinned docs origin, and the official Cloudflare Web Analytics beacon:
+The browser app fetches its Markdown from an immutable docs commit pinned in `src/core/docs/docsService.ts` via `raw.githubusercontent.com`. `docs.eduassets.tech` remains the public guide site; it is not the app's default fetch host. `public/_headers` is copied to `dist/_headers`. The production CSP must allow the API, the pinned docs origin, the official Cloudflare Web Analytics beacon and Google Analytics:
 
 ```text
-script-src 'self' https://static.cloudflareinsights.com
-connect-src 'self' https://api.eduassets.tech https://docs.eduassets.tech https://raw.githubusercontent.com https://cloudflareinsights.com
+script-src 'self' https://static.cloudflareinsights.com https://*.googletagmanager.com
+img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com
+connect-src 'self' https://api.eduassets.tech https://docs.eduassets.tech https://raw.githubusercontent.com https://cloudflareinsights.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com
 ```
 
-The Analytics beacon was blocked when the policy contained only `script-src 'self'`. After changing `_headers`, wait for a new Pages deployment and perform a hard refresh in the browser.
+The Analytics beacon was blocked when the policy contained only `script-src 'self'`. The policy allows no inline scripts: Google Analytics (`G-9LJ1MQRCEV`) is loaded by an app module (`src/core/analytics/analyticsConsent.ts`) **only after consent** in the cookie banner; without consent, no Google script is requested. The address sent to Google never includes fragments carrying values, such as the password recovery link. The `eduassets.tech` website uses the same mechanism (`src/scripts/analytics-consent.ts`) and an equivalent CSP. The app CI fails if the CSP stops allowing Google Analytics or starts accepting `'unsafe-inline'`. The privacy and cookie policies describe this processing (§16). After changing `_headers`, wait for a new Pages deployment and perform a hard refresh in the browser.
 
 ## 4. DNS and TLS
 
@@ -187,20 +188,44 @@ journalctl -u eduassets-deploy -n 30 --no-pager
 
 To pause automatic deployment: `systemctl disable --now eduassets-deploy.timer`. To retry a commit that failed: `rm /var/lib/eduassets-deploy/failed-sha`.
 
-### 5.2 Password recovery email (Zoho Mail)
+### 5.2 Password recovery email (Brevo)
 
-Self-service password recovery sends the link over SMTP. Without the variables below the feature is disabled (the **Forgot my password** link is hidden and the endpoint answers `503`); a partial configuration stops the API from starting. In `.env.production`:
+Self-service password recovery sends the link over SMTP. Without the four required variables below the feature is disabled (the **Forgot my password** link is hidden and the endpoint answers `503`); a partial configuration stops the API from starting. The API is not tied to a provider: any SMTP server with TLS works (port `465` uses implicit TLS; other ports use mandatory STARTTLS). In production mail is sent through **Brevo** (free plan), while the domain mailbox stays on **Zoho Mail**, used only for receiving. In `.env.production`:
 
 ```bash
 APP_PUBLIC_URL=https://app.eduassets.tech
-SMTP_HOST=smtppro.zoho.com        # Zoho domain accounts; personal accounts use smtp.zoho.com
-SMTP_PORT=465                     # implicit TLS; 587 uses STARTTLS
-SMTP_USER=nao-responda@eduassets.tech
-SMTP_PASS=<app-specific password generated in Zoho>
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587                                   # STARTTLS
+SMTP_USER=<SMTP login shown in Brevo → SMTP & API>
+SMTP_PASS=<SMTP key generated in Brevo>         # secret: never commit it or paste it into chats
 MAIL_FROM="eduAssets <nao-responda@eduassets.tech>"
+SUPPORT_EMAIL=dasilva-thiago@eduassets.tech     # optional: footer contact and Reply-To
+PUBLIC_SITE_URL=https://eduassets.tech          # optional: website link in the footer
 ```
 
-Create the `nao-responda@` mailbox (or alias) in Zoho Mail, generate an **app-specific password** (with MFA enabled, the account password does not work over SMTP) and recreate the `api` service after editing the file. The published SPF (`include:zohomail.com`) and DKIM (`zmail._domainkey`) records cover this sender; DMARC is covered in §15. Oracle Cloud blocks only outbound port 25; 465/587 work.
+**Brevo setup (once):**
+
+1. **Senders, domains & IPs → Domains:** authenticate `eduassets.tech` (`TXT` `brevo-code:…` at the apex, `CNAME` `brevo1._domainkey` and `brevo2._domainkey` for Brevo's DKIM, and the `_dmarc` record described in §15).
+2. **Branded subdomain `em`:** `CNAME` `em`, `r.em` (tracked-link redirects) and `img.em` (images), all **DNS only** in Cloudflare. Brevo issues the HTTPS certificate for `r.em.eduassets.tech` on its own; until it does, tracked links in the email open with a certificate error (see the record in §14).
+3. **Senders:** add `nao-responda@eduassets.tech`. The mailbox exists in Zoho Mail (free plan, no SMTP/IMAP) only to receive Brevo's verification and any replies.
+4. **Security → Authorized IPs:** with the IP allowlist on, add the VM's public IP; otherwise Brevo rejects the SMTP login.
+5. **SMTP & API:** generate the SMTP key and store it only in `.env.production` (mode `0600`).
+
+Brevo rewrites the links in the email to record clicks (`https://r.em.eduassets.tech/tr/cl/…`) and redirects to the original target, keeping the `#redefinir-senha=…` fragment; the dashboard offers no switch to turn this tracking off for transactional email. The free plan also adds the unsubscribe header that some mail clients show as **Unsubscribe**. The free plan has a daily sending limit; check the current value in the dashboard.
+
+**Email content:** responsive HTML in Portuguese or English (following the entry screen language) with a plain-text version, subject **Redefinição de senha do eduAssets** / **Reset your eduAssets password**, the brand banner embedded as an inline attachment (`cid`, no external images required), a **Set a new password** button with the full link spelled out, a box with the account, request date/time (Brasília time) and validity (30 minutes, single use), next steps, a security notice and a footer linking to the app, the website and support. With `SUPPORT_EMAIL`, replies go to support (Reply-To) instead of the `nao-responda@` sender. The banner lives in `backend/assets/email/header.jpg` in the API repository and is copied into the Docker image.
+
+After editing `.env.production`, recreate the `api` service **with the tag of the running image** — without `EDUASSETS_IMAGE_TAG`, Compose looks for `eduassets-backend:local`, which does not exist on the VM:
+
+```bash
+cd /opt/api-eduassets
+TAG=$(docker inspect eduassets-api-1 --format '{{.Config.Image}}' | cut -d: -f2)
+sudo EDUASSETS_IMAGE_TAG="$TAG" docker compose -p eduassets -f docker-compose.production.yml \
+  --env-file .env.production up -d --no-build --force-recreate api
+curl -s https://api.eduassets.tech/auth/session-capabilities   # "passwordRecovery": true
+```
+
+Oracle Cloud blocks only outbound port 25; 465/587 work.
 
 ## 6. Nginx
 
@@ -423,6 +448,14 @@ A read-only external check over the internet returned `{"status":"ok"}` from `/h
 - Security: the `ubuntu` user's shell history contained a database URL with the password in plain text (from an earlier backup attempt); those lines were removed. **The `neondb_owner` role password must be treated as exposed and rotated** in Neon, updating `pgpass` and `.env.production` and recreating the `api` service.
 - Still pending: database password rotation, the first restore drill on the operator machine (§11.2), optional dead-man-switch pings and the Cloudflare dashboard settings (§15).
 
+**Release 1.2.0 and email — November 12, 2026 (afternoon):**
+
+- `eduassets-deploy.timer` enabled. The automatic deployment shipped commit `6a3185d` (image `eduassets-backend:6a3185d563f2`): since the release included migration `20261112130000_password_reset_tokens`, it first took the encrypted backup (R2 upload completed after the HTTP 501 retry), applied the migration through the `migrate` service and only then recreated the API, which became `healthy`. All three timers (`eduassets-backup`, `eduassets-healthcheck`, `eduassets-deploy`) are active.
+- Email configured with Brevo (§5.2): domain authenticated, branded subdomain `em`, the VM IP on the authorized-IP list and sender `nao-responda@eduassets.tech`. `/auth/session-capabilities` started reporting `passwordRecovery: true` and the test email reached `teste@eduassets.tech` (a Zoho Mail alias).
+- Commit `5167d9f` (professional email template: banner, request details, security notice, footer and Reply-To) was deployed by the timer after CI; `SUPPORT_EMAIL` and `PUBLIC_SITE_URL` were added to `.env.production` and the `api` service was recreated on image `eduassets-backend:5167d9f60c84` (`healthy`). A first attempt to recreate it without `EDUASSETS_IMAGE_TAG` failed without affecting the running container; the correct command is in §5.2.
+- The email button opened a "Your connection is not private" page: the tracking host `r.em.eduassets.tech` served Brevo's default certificate (`r.mailin.fr`, expired in 2024) while the branded-subdomain certificate had not been issued. Brevo issued the Let's Encrypt certificate for `r.em.eduassets.tech` at 14:02 UTC and the full flow started working. If it happens again, the fallback is removing the branded subdomain in Brevo (links go back to Brevo's default domain).
+- Still pending: database password rotation, the first restore drill (§11.2), optional dead-man-switch pings, the remaining Cloudflare dashboard settings (§15) and the VM reboot requested by Ubuntu (*System restart required*).
+
 ## 15. Cloudflare zone security
 
 The Cloudflare Security Insights report of November 11, 2026 flagged the following for `eduassets.tech`:
@@ -430,10 +463,18 @@ The Cloudflare Security Insights report of November 11, 2026 flagged the followi
 | Item | Status | Action |
 |---|---|---|
 | `security.txt` | Published at `https://eduassets.tech/.well-known/security.txt` (RFC 9116, valid until 2027-11-11; monitoring alerts 30 days before). | Optionally also enable **Security → Settings → Security.txt** to clear the dashboard insight. |
-| DMARC | Missing. SPF (`include:zohomail.com`) and DKIM (`zmail._domainkey`) already exist. | Create the `TXT` record `_dmarc` with `v=DMARC1; p=none; rua=mailto:<report mailbox>`; after a few weeks without legitimate failures, tighten to `p=quarantine`. |
+| DMARC | Published on 2026-11-12 (Brevo's setup assistant consolidated two conflicting `_dmarc` records, `p=none` and `p=quarantine`, which made the policy invalid): `v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com,mailto:dasilva-thiago@eduassets.tech; adkim=r; aspf=r`. SPF (`include:zohomail.com`) covers Zoho; for Brevo sends, alignment comes from the `brevo1`/`brevo2._domainkey` DKIM with `d=eduassets.tech`. | Watch the aggregate reports for a few weeks; with no legitimate failures, tighten to `p=quarantine`. Keep a single `_dmarc` record. |
 | Bot Fight Mode | Off. | Enable under **Security → Bots**. Then run the `Uptime` workflow manually: if the challenge blocks GitHub Actions, keep the mode only if monitoring keeps passing. |
 | AI Labyrinth | Off. | Enable under **Security → Bots**. |
 | Cloudflare account MFA | Off. | Enable two-factor authentication under **My Profile → Authentication** (high priority). |
 | Turnstile | No widget. | Optional; only needed if a public form is added. |
 
 These changes are made in the Cloudflare dashboard by the account owner; record the date of each one in this section.
+
+## 16. Privacy, cookies and Google Analytics
+
+Since 2026-11-12 the app has its own **Privacy Policy**, at `https://app.eduassets.tech/#privacidade`, opened from the link on the entry screen and from the cookie banner; item 9 of the Terms of Use points to it. The content lives in `index.html` (modal `#modal-privacy`) and in the `privacy.*` keys of `src/core/i18n/pt.json`/`en.json`. It identifies the controller, the data processed (accounts, operational records, audit trail, password recovery and technical data), guest mode, the LGPD legal bases, the providers (Cloudflare, Oracle Cloud, Neon, Cloudflare R2, Brevo, Zoho Mail, GitHub and Google Analytics), retention, cookies and browser storage, security and data-subject rights. The `eduassets.tech` website keeps its own privacy and cookie policies, limited to the landing page.
+
+Google Analytics loads only after consent in the banner (app and website). The choice is kept in `eduassets_analytics_consent` in local storage, with a version (`CONSENT_VERSION`); refusing deletes the `_ga*` cookies. The **Cookie preferences** button (privacy policy footer in the app; footer and cookie policy on the website) reopens the banner.
+
+When the way data is handled changes, update the policy and its "Last updated" date in the app and on the website; if the purposes of the statistics change, increment `CONSENT_VERSION` in both modules so the banner asks again. When a provider changes (for example, the email provider), update section 5 of the app policy.

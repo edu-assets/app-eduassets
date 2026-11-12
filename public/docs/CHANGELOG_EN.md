@@ -2,14 +2,30 @@
 
 This changelog preserves dated development and deployment records. The current product version is **official 1.2.0**, released on November 12, 2026; earlier entries remain historical.
 
+## App privacy policy, cookie consent and Google Analytics — November 12, 2026
+
+- **App Privacy Policy** at `app.eduassets.tech/#privacidade` (PT/EN), based on the documented data and providers: controller, data processed, guest mode, LGPD legal bases, providers, retention, cookies and browser storage, security and data-subject rights. The entry screen now says "By continuing, you agree to the Terms of Use and acknowledge the Privacy Policy", and item 9 of the Terms of Use points to it.
+- **Google Analytics with consent:** the `G-9LJ1MQRCEV` tag was in the app and website HTML, but the CSP blocked the script in the app and the configuration on the website, so no visit was recorded — and the website policies said there was no analytics. The app and website now show a cookie banner and load Google Analytics only after **Accept**, through a bundled module (no inline script); **Decline** deletes the `_ga*` cookies, and the choice can be changed under **Cookie preferences**. Google signals and ad personalization are off; the address sent never includes the password recovery link. The CSPs allow the Google Analytics domains and the app CI checks it.
+- **Website:** privacy and cookie policies rewritten (PT/EN) to declare Google Analytics with consent, local storage and the link to the app policy; **Cookie preferences** button in the footer.
+- **Documentation:** Hosting §3 (CSP) and new §16 (privacy and cookies), User Manual.
+
+## Professional recovery email and Brevo delivery — November 12, 2026
+
+API update after the 1.2.0 release, with no version or database change.
+
+- **New recovery email template** (API commit `5167d9f`): responsive PT/EN HTML with the brand banner embedded (inline attachment, no external images), a **Set a new password** button with the full link spelled out, a box with the account, request date/time (Brasília time) and validity, next steps, a "Didn't request this?" notice and a footer linking to the app, the website and support. The plain-text version mirrors the HTML.
+- **New optional variables:** `SUPPORT_EMAIL` (footer contact and Reply-To, so replies do not land in `nao-responda@`) and `PUBLIC_SITE_URL` (website link). Both are validated at startup.
+- **Delivery through Brevo:** Zoho Mail's free plan has no SMTP, so production now sends through `smtp-relay.brevo.com:587` with the `eduassets.tech` domain authenticated (DKIM `brevo1`/`brevo2`), the branded subdomain `em` and the VM IP on the authorized-IP list. Zoho still receives the domain's mail. DMARC was consolidated into a single record.
+- **Documentation:** Hosting §5.2 rewritten for Brevo (including the correct command to recreate the API with the image tag), activation record in §14 and DMARC in §15; the User Manual describes the email received.
+
 ## v1.2.0 — Email password recovery, automatic deployment and alerts — November 12, 2026
 
-- **Self-service password recovery:** a **Forgot my password** link on the entry screen. The API (`POST /auth/senha/recuperar`) always answers the same way, never revealing whether the account exists, and emails (Zoho SMTP, sender `nao-responda@eduassets.tech`) a single-use link valid for 30 minutes; the token travels in the URL fragment, is removed from the address bar when the app opens, and only its SHA-256 hash is stored (new `PasswordResetToken` table, migration `20261112130000_password_reset_tokens`). `POST /auth/senha/redefinir` applies the strong password policy, ends every session and audits `PASSWORD_RESET_SELF`. Limits: 10 requests per IP every 15 minutes and 3 per email per hour. Without SMTP configured, the feature stays hidden.
+- **Self-service password recovery:** a **Forgot my password** link on the entry screen. The API (`POST /auth/senha/recuperar`) always answers the same way, never revealing whether the account exists, and emails (SMTP; in production, Brevo with sender `nao-responda@eduassets.tech`) a single-use link valid for 30 minutes; the token travels in the URL fragment, is removed from the address bar when the app opens, and only its SHA-256 hash is stored (new `PasswordResetToken` table, migration `20261112130000_password_reset_tokens`). `POST /auth/senha/redefinir` applies the strong password policy, ends every session and audits `PASSWORD_RESET_SELF`. Limits: 10 requests per IP every 15 minutes and 3 per email per hour. Without SMTP configured, the feature stays hidden.
 - **Automatic API deployment:** `eduassets-deploy.timer` on the VM deploys `main` once CI passes for the commit — with a backup before migrations, a health check and automatic code and image rollback. No ports are opened and no VM keys are stored in GitHub.
 - **HTTP 5xx alerting:** the VM health check now reads the API request log and alerts when at least 5 HTTP 5xx responses account for 5% or more of the requests since the previous check; it also alerts when the last automatic deployment failed.
 - **Automated documentation catalog:** `npm run docs:sync` in the app updates catalog dates and versions from the documentation repository's Git history, and the app CI fails when the catalog or the local document copy diverges from the pinned commit.
 - **Dependencies:** fixed every vulnerability reported by `npm audit`. API: `body-parser` 2.4.0 (DoS through trailing bytes after a compressed body) and `deepmerge-ts` 8.0.2 in the Prisma CLI via `overrides`, without moving to Prisma 7. Site: `undici`, `zod`, `fast-xml-parser` and `fast-uri`. All four repositories now report 0 known vulnerabilities.
-- **Documentation:** Hosting (§5.1 automatic deployment, §5.2 Zoho email, §10 5xx alerting), Deployment Guide, API Reference, User Manual and Operations and Recovery updated.
+- **Documentation:** Hosting (§5.1 automatic deployment, §5.2 SMTP email, §10 5xx alerting), Deployment Guide, API Reference, User Manual and Operations and Recovery updated.
 
 ## v1.1.0 — Password reset, sessions and continuous operation — November 12, 2026
 

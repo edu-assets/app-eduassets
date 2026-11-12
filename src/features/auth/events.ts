@@ -1,6 +1,6 @@
 import { closeModal, openModal, showToast } from '../../core/ui/index.js';
 import { entrar, entrarComoConvidado, sair, isAutenticado, isAcessoConvidadoAutorizado, subscribe } from '../../core/state/authStore.js';
-import { isLoginRoute, resolveEntryDestination, setEntryRoute, TERMS_ROUTE_HASH } from '../../core/layout/entryRoute.js';
+import { isLoginRoute, resolveEntryDestination, setEntryRoute, TERMS_ROUTE_HASH, PRIVACY_ROUTE_HASH } from '../../core/layout/entryRoute.js';
 import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
 import { traduzirErro, t, definirIdioma, getIdioma, subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
@@ -43,10 +43,10 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
         const target = e.target as Node;
         if (!els.sidebarFooter.contains(target)) fecharDropdown();
 
-        const termsTrigger = (e.target as HTMLElement).closest<HTMLElement>('[data-open-terms]');
-        if (termsTrigger) {
+        const legalTrigger = (e.target as HTMLElement).closest<HTMLElement>('[data-open-terms], [data-open-privacy]');
+        if (legalTrigger) {
             e.preventDefault();
-            mostrarTelaTermos();
+            mostrarTelaLegal(legalTrigger.hasAttribute('data-open-privacy') ? 'privacy' : 'terms');
         }
     });
 
@@ -76,8 +76,8 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
         event.preventDefault();
         void fazerLogin(els, onInitialAccess);
     });
-    document.querySelectorAll<HTMLElement>('[data-terms-close]').forEach((button) => {
-        button.addEventListener('click', () => fecharTelaTermos(els));
+    document.querySelectorAll<HTMLElement>('[data-terms-close], [data-privacy-close]').forEach((button) => {
+        button.addEventListener('click', () => fecharTelaLegal(els));
     });
     els.emailInput.addEventListener('input', () => mostrarErroLogin(els, ''));
     els.senhaInput.addEventListener('input', () => mostrarErroLogin(els, ''));
@@ -137,14 +137,19 @@ function mostrarTelaLogin(els: AuthEls): void {
     els.emailInput.focus();
 }
 
-function mostrarTelaTermos(): void {
+type TelaLegal = 'terms' | 'privacy';
+const MODAL_LEGAL: Record<TelaLegal, string> = { terms: 'modal-terms', privacy: 'modal-privacy' };
+
+function mostrarTelaLegal(tela: TelaLegal): void {
     closeModal('modal-login');
-    setEntryRoute('terms');
-    openModal('modal-terms');
+    closeModal(MODAL_LEGAL[tela === 'terms' ? 'privacy' : 'terms']);
+    setEntryRoute(tela);
+    openModal(MODAL_LEGAL[tela]);
 }
 
-function fecharTelaTermos(els: AuthEls): void {
+function fecharTelaLegal(els: AuthEls): void {
     closeModal('modal-terms');
+    closeModal('modal-privacy');
     const destino = isAutenticado() || isAcessoConvidadoAutorizado() ? 'app' : 'login';
     setEntryRoute(destino);
     if (destino === 'login') {
@@ -154,8 +159,8 @@ function fecharTelaTermos(els: AuthEls): void {
 }
 
 function sincronizarRotaLogin(els: AuthEls): void {
-    if (window.location.hash === TERMS_ROUTE_HASH) {
-        mostrarTelaTermos();
+    if (window.location.hash === TERMS_ROUTE_HASH || window.location.hash === PRIVACY_ROUTE_HASH) {
+        mostrarTelaLegal(window.location.hash === TERMS_ROUTE_HASH ? 'terms' : 'privacy');
         return;
     }
 
@@ -171,6 +176,7 @@ function sincronizarRotaLogin(els: AuthEls): void {
     }
 
     closeModal('modal-terms');
+    closeModal('modal-privacy');
     if (isLoginRoute()) setEntryRoute('app');
     if (document.getElementById('modal-login')?.classList.contains('active')) {
         closeModal('modal-login');

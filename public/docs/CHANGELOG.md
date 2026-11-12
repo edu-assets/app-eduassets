@@ -2,14 +2,30 @@
 
 Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.2.0 oficial**, publicada em 12/11/2026; entradas anteriores permanecem como histórico.
 
+## Política de privacidade do app, consentimento de cookies e Google Analytics — 12 de novembro de 2026
+
+- **Política de Privacidade do app** em `app.eduassets.tech/#privacidade` (PT/EN), baseada nos dados e fornecedores documentados: responsável, dados tratados, modo convidado, bases legais da LGPD, fornecedores, retenção, cookies e armazenamento do navegador, segurança e direitos do titular. A tela de entrada passou a dizer "Ao continuar, você concorda com os Termos de Uso e declara ciência da Política de Privacidade", e o item 9 dos Termos de Uso aponta para ela.
+- **Google Analytics com consentimento:** a tag `G-9LJ1MQRCEV` estava no HTML do app e do site, mas a CSP bloqueava o script no app e a configuração no site, então nenhuma visita era registrada — e as políticas do site diziam não haver analytics. Agora o app e o site mostram um banner de cookies e só carregam o Google Analytics após **Aceitar**, por um módulo próprio (sem script inline); **Recusar** apaga os cookies `_ga*`, e a escolha pode ser mudada em **Preferências de cookies**. Sinais do Google e personalização de anúncios desativados; o endereço enviado nunca inclui o link de recuperação de senha. As CSPs liberam os domínios do Google Analytics e a CI do app verifica isso.
+- **Site:** políticas de privacidade e de cookies reescritas (PT/EN) para declarar o Google Analytics com consentimento, o armazenamento local e o link para a política do app; botão **Preferências de cookies** no rodapé.
+- **Documentação:** Hospedagem §3 (CSP) e novo §16 (privacidade e cookies), Manual do Usuário.
+
+## E-mail de recuperação profissional e envio pelo Brevo — 12 de novembro de 2026
+
+Atualização da API após a publicação da 1.2.0, sem mudança de versão nem de banco.
+
+- **Novo modelo do e-mail de recuperação** (commit `5167d9f` da API): HTML responsivo em PT/EN com banner da marca embutido (anexo inline, sem imagens externas), botão **Definir nova senha** com o link por extenso, quadro com conta, data/hora do pedido (horário de Brasília) e validade, próximos passos, aviso "Não foi você?" e rodapé com links do app, do site e do suporte. A versão em texto puro acompanha o HTML.
+- **Novas variáveis opcionais:** `SUPPORT_EMAIL` (contato no rodapé e Reply-To, para que respostas não caiam no `nao-responda@`) e `PUBLIC_SITE_URL` (link do site). Ambas são validadas no startup.
+- **Envio pelo Brevo:** o plano gratuito do Zoho Mail não oferece SMTP, então a produção passou a enviar por `smtp-relay.brevo.com:587` com o domínio `eduassets.tech` autenticado (DKIM `brevo1`/`brevo2`), subdomínio de marca `em` e IP da VM na lista de IPs autorizados. O Zoho continua recebendo os e-mails do domínio. O DMARC foi consolidado em um único registro.
+- **Documentação:** Hospedagem §5.2 reescrita para o Brevo (incluindo o comando correto para recriar a API com a tag da imagem), registro da ativação em §14 e DMARC em §15; Manual do Usuário descreve o e-mail recebido.
+
 ## v1.2.0 — Recuperação de senha por e-mail, deploy automático e alertas — 12 de novembro de 2026
 
-- **Recuperação de senha self-service:** link **Esqueci minha senha** na tela de entrada. A API (`POST /auth/senha/recuperar`) responde sempre da mesma forma, sem revelar se a conta existe, e envia por e-mail (Zoho SMTP, remetente `nao-responda@eduassets.tech`) um link de uso único válido por 30 minutos; o token viaja no fragmento da URL, é removido da barra de endereço ao abrir o app e só o seu hash SHA-256 é armazenado (nova tabela `PasswordResetToken`, migration `20261112130000_password_reset_tokens`). `POST /auth/senha/redefinir` aplica a política forte de senha, encerra todas as sessões e audita `PASSWORD_RESET_SELF`. Limites: 10 pedidos por IP a cada 15 minutos e 3 por e-mail por hora. Sem SMTP configurado, a funcionalidade fica oculta.
+- **Recuperação de senha self-service:** link **Esqueci minha senha** na tela de entrada. A API (`POST /auth/senha/recuperar`) responde sempre da mesma forma, sem revelar se a conta existe, e envia por e-mail (SMTP; em produção, Brevo com o remetente `nao-responda@eduassets.tech`) um link de uso único válido por 30 minutos; o token viaja no fragmento da URL, é removido da barra de endereço ao abrir o app e só o seu hash SHA-256 é armazenado (nova tabela `PasswordResetToken`, migration `20261112130000_password_reset_tokens`). `POST /auth/senha/redefinir` aplica a política forte de senha, encerra todas as sessões e audita `PASSWORD_RESET_SELF`. Limites: 10 pedidos por IP a cada 15 minutos e 3 por e-mail por hora. Sem SMTP configurado, a funcionalidade fica oculta.
 - **Deploy automático da API:** `eduassets-deploy.timer` na VM implanta o `main` quando a CI passa para o commit — com backup antes de migrations, verificação de saúde e rollback automático de código e imagem. Não abre portas nem guarda chaves da VM no GitHub.
 - **Alerta de erros 5xx:** o health check da VM passou a ler o log de requisições da API e alerta quando há pelo menos 5 respostas 5xx que representem 5% ou mais das requisições desde a verificação anterior; também alerta quando o último deploy automático falhou.
 - **Catálogo de documentação automatizado:** `npm run docs:sync` no app atualiza datas e versões do catálogo a partir do histórico Git do repositório de documentação, e a CI do app falha se o catálogo ou a cópia local dos documentos divergirem do commit fixado.
 - **Dependências:** corrigidas todas as vulnerabilidades apontadas pelo `npm audit`. API: `body-parser` 2.4.0 (DoS com bytes extras após corpo comprimido) e `deepmerge-ts` 8.0.2 no CLI do Prisma via `overrides`, sem migrar para o Prisma 7. Site: `undici`, `zod`, `fast-xml-parser` e `fast-uri`. Os quatro repositórios ficaram com 0 vulnerabilidades conhecidas.
-- **Documentação:** Hospedagem (§5.1 deploy automático, §5.2 e-mail via Zoho, §10 alerta de 5xx), Guia de Implantação, Referência da API, Manual do Usuário e Operação e Recuperação atualizados.
+- **Documentação:** Hospedagem (§5.1 deploy automático, §5.2 e-mail via SMTP, §10 alerta de 5xx), Guia de Implantação, Referência da API, Manual do Usuário e Operação e Recuperação atualizados.
 
 ## v1.1.0 — Redefinição de senha, sessões e operação contínua — 12 de novembro de 2026
 

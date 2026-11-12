@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
     APP_ROUTE_HASH,
     LOGIN_ROUTE_HASH,
+    PRIVACY_ROUTE_HASH,
     TERMS_ROUTE_HASH,
     resolveEntryDestination,
 } from '../core/layout/entryRoute.js';
@@ -27,5 +28,10 @@ describe('entry route', () => {
     it('opens the terms route without requiring an authenticated session', () => {
         expect(resolveEntryDestination(TERMS_ROUTE_HASH, false, false)).toBe('terms');
         expect(resolveEntryDestination(TERMS_ROUTE_HASH, true, false)).toBe('terms');
+    });
+
+    it('opens the privacy policy route without requiring an authenticated session', () => {
+        expect(resolveEntryDestination(PRIVACY_ROUTE_HASH, false, false)).toBe('privacy');
+        expect(resolveEntryDestination(PRIVACY_ROUTE_HASH, true, true)).toBe('privacy');
     });
 });

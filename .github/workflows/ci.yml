@@ -55,6 +55,19 @@ jobs:
               throw new Error(`CSP connect-src does not allow the documentation origin: ${origin}`);
             }
           }
+          // Google Analytics loads only after consent, from a bundled module (no inline scripts).
+          const scriptSrc = csp.match(/(?:^|;)\s*script-src\s+([^;]+)/)?.[1] ?? '';
+          if (!scriptSrc.split(/\s+/).includes('https://*.googletagmanager.com')) {
+            throw new Error('CSP script-src does not allow the Google Analytics loader');
+          }
+          for (const origin of ['https://*.google-analytics.com', 'https://*.analytics.google.com']) {
+            if (!connectSrc.split(/\s+/).includes(origin)) {
+              throw new Error(`CSP connect-src does not allow Google Analytics: ${origin}`);
+            }
+          }
+          if (/'unsafe-inline'/.test(scriptSrc)) {
+            throw new Error("CSP script-src must not allow 'unsafe-inline'");
+          }
           const docsSource = fs.readFileSync('src/core/docs/docsService.ts', 'utf8');
           if (!/https:\/\/raw\.githubusercontent\.com\/edu-assets\/docs-eduassets\/[0-9a-f]{40}\/public/.test(docsSource)) {
             throw new Error('The central Markdown source must be pinned to an immutable docs commit SHA');

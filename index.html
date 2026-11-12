@@ -18,14 +18,6 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/assets/icons/eduAssets_icon-stroked48x.ico">
 
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9LJ1MQRCEV"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-9LJ1MQRCEV');
-    </script>
 
     <!-- CSS -->
     <link rel="stylesheet" href="src/styles/styles.css">
@@ -2140,7 +2132,9 @@
                         <span class="material-symbols-outlined" aria-hidden="true">gavel</span>
                         <span>
                             <span data-i18n-key="auth.ao_continuar">Ao continuar, você concorda com os</span>
-                            <a href="#termos" data-open-terms data-i18n-key="auth.termos_de_uso">Termos de Uso</a>.
+                            <a href="#termos" data-open-terms data-i18n-key="auth.termos_de_uso">Termos de Uso</a>
+                            <span data-i18n-key="auth.e_ciencia_da">e declara ciência da</span>
+                            <a href="#privacidade" data-open-privacy data-i18n-key="auth.politica_de_privacidade">Política de Privacidade</a>.
                         </span>
                     </p>
                     <p class="login-gate-footnote login-gate-contact">
@@ -2206,7 +2200,7 @@
                 </button>
             </header>
             <div class="terms-screen__body">
-                <p class="terms-screen__updated" data-i18n-key="terms.updated">Última atualização: 28 de outubro de 2026</p>
+                <p class="terms-screen__updated" data-i18n-key="terms.updated">Última atualização: 12 de novembro de 2026</p>
                 <div class="terms-screen__sections">
                     <section class="terms-screen__section terms-screen__section--wide">
                         <h2 data-i18n-key="terms.acceptance_title">1. Aceitação</h2>
@@ -2250,7 +2244,7 @@
                     </section>
                     <section class="terms-screen__section">
                         <h2 data-i18n-key="terms.privacy_title">9. Privacidade e proteção de dados</h2>
-                        <p data-i18n-key="terms.privacy_text">As informações acessadas devem ser utilizadas apenas para finalidades autorizadas, respeitando a confidencialidade dos dados e as regras aplicáveis. O tratamento de dados pessoais, quando existente, deve observar a legislação e a política de privacidade correspondente. Estes Termos de Uso não substituem uma política de privacidade específica.</p>
+                        <p data-i18n-key="terms.privacy_text">As informações acessadas devem ser utilizadas apenas para finalidades autorizadas, respeitando a confidencialidade dos dados e as regras aplicáveis. O tratamento de dados pessoais pelo eduAssets está descrito na Política de Privacidade, disponível na tela de entrada.</p>
                     </section>
                     <section class="terms-screen__section terms-screen__section--wide">
                         <h2 data-i18n-key="terms.changes_title">10. Atualizações dos termos</h2>
@@ -2268,6 +2262,124 @@
                 </span>
                 <button class="terms-screen__back" type="button" data-terms-close data-i18n-key="terms.back_to_login">Voltar ao login</button>
             </footer>
+        </div>
+    </div>
+    <div class="modal-overlay terms-screen" id="modal-privacy" data-close-on-overlay="false">
+        <div class="modal-box terms-screen__card" role="dialog" aria-modal="true" aria-labelledby="privacy-title" tabindex="-1">
+            <header class="terms-screen__header">
+                <div>
+                    <p class="terms-screen__overline" data-i18n-key="privacy.overline">INFORMAÇÕES LEGAIS</p>
+                    <h1 id="privacy-title" data-i18n-key="privacy.title">Política de Privacidade</h1>
+                    <p class="terms-screen__intro" data-i18n-key="privacy.intro">Como o eduAssets trata dados pessoais em app.eduassets.tech, com base na Lei Geral de Proteção de Dados (LGPD, Lei nº 13.709/2018).</p>
+                </div>
+                <button class="terms-screen__close" type="button" data-privacy-close aria-label="Fechar política de privacidade" data-i18n-aria-label="privacy.close" title="Fechar política de privacidade" data-i18n-title="privacy.close">
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+            </header>
+            <div class="terms-screen__body">
+                <p class="terms-screen__updated" data-i18n-key="privacy.updated">Última atualização: 12 de novembro de 2026</p>
+                <div class="terms-screen__sections">
+                    <section class="terms-screen__section terms-screen__section--wide">
+                        <h2 data-i18n-key="privacy.controller_title">1. Quem é o responsável</h2>
+                        <p data-i18n-key="privacy.controller_text">O eduAssets é um projeto de portfólio mantido por Thiago da Silva, responsável (controlador) pelos dados pessoais tratados nesta instalação: o app em app.eduassets.tech e a API em api.eduassets.tech. O contato para assuntos de privacidade é o e-mail indicado no rodapé desta tela. Uma instituição que adote o eduAssets em instalação própria passa a ser a responsável pelos dados dessa instalação.</p>
+                    </section>
+                    <section class="terms-screen__section terms-screen__section--wide">
+                        <h2 data-i18n-key="privacy.data_title">2. Dados tratados</h2>
+                        <p data-i18n-key="privacy.data_text">O sistema trata somente os dados necessários ao controle de empréstimos, estoque e ocorrências:</p>
+                        <ul class="terms-screen__list">
+                            <li data-i18n-key="privacy.accounts">Contas de usuário: nome, e-mail usado como login, nível de acesso, situação (ativa ou inativa), datas de criação e alteração e quem as fez. A senha é guardada apenas como hash bcrypt; um cartão RFID, quando cadastrado, é guardado apenas como hash.</li>
+                            <li data-i18n-key="privacy.records">Registros de operação: nome de quem retirou cada empréstimo, responsável (nome e cargo), datas, itens e observações; ocorrências de equipamentos com descrição, problema e medidas tomadas. Esses campos são preenchidos pelos usuários: registre apenas o necessário e evite dados pessoais nos textos livres.</li>
+                            <li data-i18n-key="privacy.audit">Auditoria: qual conta fez qual alteração, em qual registro, quais campos mudaram e quando — sem copiar os valores.</li>
+                            <li data-i18n-key="privacy.recovery">Recuperação de senha: um código de uso único, guardado apenas como hash, com validade de 30 minutos.</li>
+                            <li data-i18n-key="privacy.technical">Dados técnicos: endereço IP, método, caminho (sem parâmetros sensíveis), código de resposta e tempo de cada requisição à API, em logs nos quais e-mails e tokens são mascarados; contadores temporários de tentativas, mantidos em memória, para limitar abusos.</li>
+                        </ul>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="privacy.guest_title">3. Modo convidado</h2>
+                        <p data-i18n-key="privacy.guest_text">Sem login, o modo convidado mostra apenas informações sem dados pessoais: empréstimos aparecem sem solicitante, responsável e observação, e ocorrências sem número de patrimônio, problema, descrição e medidas. Responsáveis e usuários só são visíveis com sessão autorizada.</p>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="privacy.purposes_title">4. Finalidades e bases legais</h2>
+                        <ul class="terms-screen__list">
+                            <li data-i18n-key="privacy.purpose_service">Operar contas, autenticar e registrar empréstimos, devoluções e ocorrências: execução das funcionalidades solicitadas (art. 7º, V, da LGPD).</li>
+                            <li data-i18n-key="privacy.purpose_security">Segurança, auditoria, logs, limites de tentativas e backups: legítimo interesse em proteger o sistema e seus usuários (art. 7º, IX).</li>
+                            <li data-i18n-key="privacy.purpose_analytics">Estatísticas de uso com Google Analytics: consentimento, que pode ser recusado ou revogado a qualquer momento (art. 7º, I).</li>
+                        </ul>
+                    </section>
+                    <section class="terms-screen__section terms-screen__section--wide">
+                        <h2 data-i18n-key="privacy.providers_title">5. Com quem os dados são compartilhados</h2>
+                        <p data-i18n-key="privacy.providers_text">O eduAssets não vende dados pessoais. Para funcionar, usa os fornecedores abaixo, que tratam dados em nome do projeto; alguns deles podem processá-los fora do Brasil:</p>
+                        <ul class="terms-screen__list">
+                            <li data-i18n-key="privacy.cloudflare">Cloudflare: DNS, proteção e criptografia do tráfego, hospedagem do app e métricas agregadas de acesso e desempenho (Cloudflare Web Analytics, sem cookies).</li>
+                            <li data-i18n-key="privacy.oracle">Oracle Cloud: servidor que executa a API.</li>
+                            <li data-i18n-key="privacy.neon">Neon: banco de dados PostgreSQL.</li>
+                            <li data-i18n-key="privacy.r2">Cloudflare R2: cópias de segurança do banco, criptografadas antes do envio.</li>
+                            <li data-i18n-key="privacy.brevo">Brevo: envio do e-mail de recuperação de senha (nome, e-mail e link). O Brevo registra a entrega, a abertura e os cliques nesse e-mail.</li>
+                            <li data-i18n-key="privacy.zoho">Zoho Mail: recebimento de mensagens enviadas aos endereços @eduassets.tech, como o suporte.</li>
+                            <li data-i18n-key="privacy.github">GitHub: hospeda o código e os guias; a central de documentação do app baixa os guias de raw.githubusercontent.com.</li>
+                            <li data-i18n-key="privacy.google">Google Analytics: somente se você aceitar os cookies de estatísticas (seção 7).</li>
+                        </ul>
+                    </section>
+                    <section class="terms-screen__section terms-screen__section--wide">
+                        <h2 data-i18n-key="privacy.retention_title">6. Por quanto tempo os dados são mantidos</h2>
+                        <ul class="terms-screen__list">
+                            <li data-i18n-key="privacy.ret_records">Contas, registros de operação e auditoria: enquanto esta instalação estiver em operação. Contas não são apagadas pela interface; um administrador pode desativá-las, o que impede o acesso.</li>
+                            <li data-i18n-key="privacy.ret_session">Sessão: até 8 horas após o login, ou até sair da conta.</li>
+                            <li data-i18n-key="privacy.ret_recovery">Códigos de recuperação: valem 30 minutos e uma única vez. Um novo pedido apaga os códigos anteriores da conta, a redefinição apaga os demais códigos e marca o usado como utilizado, e códigos vencidos há mais de 24 horas são apagados no pedido seguinte.</li>
+                            <li data-i18n-key="privacy.ret_logs">Logs da API: rotação por tamanho, com no máximo 5 arquivos de 10 MB.</li>
+                            <li data-i18n-key="privacy.ret_backups">Backups criptografados: 7 dias no servidor e 30 dias no Cloudflare R2.</li>
+                            <li data-i18n-key="privacy.ret_analytics">Google Analytics: cookies por até 2 anos no seu navegador; os eventos ficam pelo prazo de retenção configurado na propriedade do Google Analytics.</li>
+                        </ul>
+                    </section>
+                    <section class="terms-screen__section terms-screen__section--wide">
+                        <h2 data-i18n-key="privacy.cookies_title">7. Cookies e armazenamento no navegador</h2>
+                        <ul class="terms-screen__list">
+                            <li data-i18n-key="privacy.ck_session">Essencial — __Host-eduassets_session: cookie de sessão protegido (HttpOnly, Secure, SameSite=Lax), válido por até 8 horas.</li>
+                            <li data-i18n-key="privacy.ck_local">Essencial — armazenamento do navegador: eduassets_theme e eduassets_lang (tema e idioma), eduassets_logout_pendente (conclui uma saída feita sem conexão), eduassets_guest_entry_authorized (modo convidado na aba atual) e eduassets_analytics_consent (sua escolha sobre estatísticas).</li>
+                            <li data-i18n-key="privacy.ck_ga">Estatísticas, somente com consentimento — _ga e _ga_9LJ1MQRCEV: cookies do Google Analytics que contam visitas e páginas de forma agregada. Os Sinais do Google e a personalização de anúncios ficam desativados, e o link de recuperação de senha nunca é enviado.</li>
+                        </ul>
+                        <p data-i18n-key="privacy.cookies_text">Sem o seu aceite, nenhum script do Google é carregado. Você pode mudar a escolha a qualquer momento no botão Preferências de cookies, abaixo; ao recusar, os cookies do Google Analytics são apagados.</p>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="privacy.security_title">8. Segurança</h2>
+                        <p data-i18n-key="privacy.security_text">O tráfego usa HTTPS; senhas, cartões RFID e códigos de recuperação são guardados apenas como hash; a sessão usa cookie protegido; o acesso é controlado por nível (administrador ou editor) e as alterações são auditadas; os logs mascaram e-mails e tokens; os backups são criptografados antes de sair do servidor.</p>
+                    </section>
+                    <section class="terms-screen__section">
+                        <h2 data-i18n-key="privacy.rights_title">9. Seus direitos</h2>
+                        <p data-i18n-key="privacy.rights_text">Você pode pedir confirmação de tratamento, acesso, correção, anonimização, bloqueio ou eliminação de dados desnecessários, portabilidade, informações sobre compartilhamento e revogação do consentimento (art. 18 da LGPD), pelo e-mail abaixo. Também é possível reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p>
+                    </section>
+                    <section class="terms-screen__section terms-screen__section--wide">
+                        <h2 data-i18n-key="privacy.changes_title">10. Atualizações desta política</h2>
+                        <p data-i18n-key="privacy.changes_text">Esta política pode ser revisada quando o eduAssets mudar a forma de tratar dados. A versão vigente fica disponível nesta tela, com a data da última atualização. Se as finalidades das estatísticas mudarem, sua escolha sobre cookies será pedida novamente.</p>
+                    </section>
+                </div>
+            </div>
+            <footer class="terms-screen__footer">
+                <span class="terms-screen__footer-note">
+                    <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                    <span>
+                        <span data-i18n-key="privacy.footer_note">Dúvidas ou pedidos sobre seus dados:</span>
+                        <a class="terms-contact-link" href="mailto:dasilva-thiago@eduassets.tech">dasilva-thiago@eduassets.tech</a>
+                    </span>
+                </span>
+                <span class="terms-screen__footer-actions">
+                    <button class="terms-screen__back terms-screen__back--secondary" type="button" data-open-cookie-preferences data-i18n-key="privacy.cookie_preferences">Preferências de cookies</button>
+                    <button class="terms-screen__back" type="button" data-privacy-close data-i18n-key="privacy.back_to_login">Voltar</button>
+                </span>
+            </footer>
+        </div>
+    </div>
+    <div class="cookie-consent" id="cookie-consent" role="region" aria-labelledby="cookie-consent-title" hidden>
+        <div class="cookie-consent__text">
+            <p class="cookie-consent__title" id="cookie-consent-title" data-i18n-key="consent.title">Cookies de estatísticas</p>
+            <p>
+                <span data-i18n-key="consent.text">Usamos cookies essenciais para a sessão e as preferências. Com o seu aceite, também usamos o Google Analytics para entender o uso do eduAssets de forma agregada.</span>
+                <a href="#privacidade" data-open-privacy data-i18n-key="consent.policy_link">Política de Privacidade</a>
+            </p>
+        </div>
+        <div class="cookie-consent__actions">
+            <button type="button" class="cookie-consent__btn" data-consent-choice="denied" data-i18n-key="consent.reject">Recusar</button>
+            <button type="button" class="cookie-consent__btn cookie-consent__btn--primary" data-consent-choice="granted" data-i18n-key="consent.accept">Aceitar</button>
         </div>
     </div>
     <!-- Modal de confirmar exclusão -->

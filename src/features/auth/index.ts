@@ -39,9 +39,9 @@ export async function initAuth(): Promise<void> {
         isAcessoConvidadoAutorizado()
     );
 
-    if (destino === 'terms') {
-        setEntryRoute('terms');
-        openModal('modal-terms');
+    if (destino === 'terms' || destino === 'privacy') {
+        setEntryRoute(destino);
+        openModal(destino === 'terms' ? 'modal-terms' : 'modal-privacy');
         return;
     }
 

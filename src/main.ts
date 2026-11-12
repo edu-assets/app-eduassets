@@ -16,12 +16,17 @@ import { initSeguranca } from './features/seguranca/index.js';
 import { initPerfil } from './features/perfil/index.js';
 import { initRfidListener } from './core/rfid/rfidListener.js';
 import { initDocumentation } from './features/sobre/index.js';
+import { initAnalyticsConsent } from './core/analytics/analyticsConsent.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initI18n();
     initModals();
-    await initAuth();
+    // initAuth removes an emailed recovery token from the URL synchronously, before its first await,
+    // so Analytics (only after consent) never sees it.
+    const auth = initAuth();
+    initAnalyticsConsent();
+    await auth;
     await initAuthDataSync();
 
     const inits: Array<() => void | Promise<void>> = [
