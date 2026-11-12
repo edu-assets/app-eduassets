@@ -2,6 +2,7 @@ import { iniciarSessao, isAutenticado, getUsuario, isAcessoConvidadoAutorizado }
 import { resolveEntryDestination, setEntryRoute } from '../../core/layout/entryRoute.js';
 import { openModal } from '../../core/ui/index.js';
 import { attachAuthEvents } from './events.js';
+import { consumirTokenRecuperacaoDaUrl, initPasswordRecovery } from './passwordRecovery.js';
 import { renderAuthStatus } from './render.js';
 import type { AuthEls } from './render.js';
 
@@ -24,12 +25,15 @@ export async function initAuth(): Promise<void> {
         btnContinuarConvidado: document.getElementById('login-continuar-convidado') as HTMLButtonElement
     };
 
+    const tokenRecuperacao = consumirTokenRecuperacaoDaUrl();
     attachAuthEvents(els, liberarEntrada);
+    const recuperacao = initPasswordRecovery(tokenRecuperacao);
     await iniciarSessao();
     const autenticado = isAutenticado();
     renderAuthStatus(els, autenticado, getUsuario());
 
-    const destino = resolveEntryDestination(
+    // An emailed recovery link always opens the login card on the new-password form.
+    const destino = recuperacao.temToken ? 'login' : resolveEntryDestination(
         window.location.hash,
         autenticado,
         isAcessoConvidadoAutorizado()
@@ -44,7 +48,7 @@ export async function initAuth(): Promise<void> {
     if (destino === 'login') {
         setEntryRoute('login');
         openModal('modal-login');
-        els.emailInput.focus();
+        recuperacao.focar();
         await escolhaInicial;
     } else {
         setEntryRoute('app');

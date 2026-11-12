@@ -19,6 +19,24 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - name: Resolve pinned docs commit
+        id: docs-pin
+        run: |
+          sha="$(grep -oE 'docs-eduassets/[0-9a-f]{40}/public' src/core/docs/docsService.ts | head -n1 | cut -d/ -f2)"
+          test -n "$sha"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - name: Checkout pinned docs
+        uses: actions/checkout@v4
+        with:
+          repository: edu-assets/docs-eduassets
+          ref: ${{ steps.docs-pin.outputs.sha }}
+          fetch-depth: 0
+          path: .docs-eduassets
+          persist-credentials: false
+      - name: Check docs registry dates against the pinned docs
+        run: node scripts/sync-docs-registry.mjs --check --docs .docs-eduassets
+      - name: Check local docs fallback matches the pinned docs
+        run: diff -r --strip-trailing-cr public/docs .docs-eduassets/public/docs
       - name: Validate Cloudflare Pages security headers
         run: |
           node <<'NODE'

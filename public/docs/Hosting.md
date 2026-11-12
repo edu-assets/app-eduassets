@@ -162,6 +162,46 @@ https://app.eduassets.tech
 
 Migrations and seeding are explicit operations. Never seed an unknown or production database without a backup and review. The API must not run migrations automatically at startup.
 
+### 5.1 Automatic API deployment (pull on the VM)
+
+Since v1.2.0 the VM can deploy the API by itself: [`auto-deploy.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/auto-deploy.sh), triggered every 5 minutes by `eduassets-deploy.timer`, fetches `main` and acts only when `origin/main` moved forward **and** the CI jobs `verify` and `production-smoke` passed for that exact commit (a public GitHub API query; no inbound port is opened and no VM key is stored in GitHub). The sequence is:
+
+1. fast-forward the checkout (diverged history or local changes are refused);
+2. build the image tagged with the commit's `git rev-parse --short=12`;
+3. only when the release adds migrations: an encrypted backup (`run-scheduled-backup.sh`) and an explicit run of the `migrate` service — if either fails, the API is not touched;
+4. `up -d --no-build --force-recreate api` and a wait of up to 180 s for `healthy` + `/ready`;
+5. success: the commit is appended to `/var/lib/eduassets-deploy/history` and old images are removed, keeping the current and previous ones;
+6. failure: the checkout and container return to the previous commit/image and the commit is written to `/var/lib/eduassets-deploy/failed-sha`, which is not retried (`vm-health-check.sh` reports the failure until a new push or until that file is removed).
+
+Rolling back code/images **does not revert migrations**: keep migrations compatible with the previous version (expand/migrate/contract), as in the Deployment Guide. Activation (once, as root):
+
+```bash
+cd /opt/api-eduassets
+git pull --ff-only origin main
+install -m 600 deploy/systemd/deploy.env.example /etc/eduassets/deploy.env   # optional; review the values
+install -m 644 deploy/systemd/eduassets-deploy.service deploy/systemd/eduassets-deploy.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now eduassets-deploy.timer
+journalctl -u eduassets-deploy -n 30 --no-pager
+```
+
+To pause automatic deployment: `systemctl disable --now eduassets-deploy.timer`. To retry a commit that failed: `rm /var/lib/eduassets-deploy/failed-sha`.
+
+### 5.2 Password recovery email (Zoho Mail)
+
+Self-service password recovery sends the link over SMTP. Without the variables below the feature is disabled (the **Forgot my password** link is hidden and the endpoint answers `503`); a partial configuration stops the API from starting. In `.env.production`:
+
+```bash
+APP_PUBLIC_URL=https://app.eduassets.tech
+SMTP_HOST=smtppro.zoho.com        # Zoho domain accounts; personal accounts use smtp.zoho.com
+SMTP_PORT=465                     # implicit TLS; 587 uses STARTTLS
+SMTP_USER=nao-responda@eduassets.tech
+SMTP_PASS=<app-specific password generated in Zoho>
+MAIL_FROM="eduAssets <nao-responda@eduassets.tech>"
+```
+
+Create the `nao-responda@` mailbox (or alias) in Zoho Mail, generate an **app-specific password** (with MFA enabled, the account password does not work over SMTP) and recreate the `api` service after editing the file. The published SPF (`include:zohomail.com`) and DKIM (`zmail._domainkey`) records cover this sender; DMARC is covered in §15. Oracle Cloud blocks only outbound port 25; 465/587 work.
+
 ## 6. Nginx
 
 Nginx accepts HTTPS connections on TCP port 443, according to the reviewed configuration bind, and forwards to the local API. Validate before reloading:
@@ -312,7 +352,7 @@ systemctl enable --now eduassets-healthcheck.timer
 systemctl start eduassets-healthcheck.service && journalctl -u eduassets-healthcheck -n 20 --no-pager
 ```
 
-Isolated 5xx responses do not raise a dedicated alert yet: they surface as `/ready` failures when they affect the API and can be followed in **Cloudflare → Analytics**.
+On every run, `vm-health-check.sh` also reads the API request log (`docker logs` since the previous run, ignoring `/health` and `/ready` health-check traffic) and reports a problem when there were **at least 5 HTTP 5xx responses and they were at least 5%** of the requests in that interval (`ERROR_5XX_MIN_COUNT` and `ERROR_5XX_MAX_PERCENT` in `/etc/eduassets/healthcheck.env`). Requiring both avoids alerts for a single error during quiet periods. With `HEALTH_PING_URL`, the problem reaches the dead-man switch as `/fail`. The script also reports when the last automatic deployment (§5.1) failed.
 
 ## 11. Backup and recovery
 
@@ -344,7 +384,7 @@ Adjust `User=` in `eduassets-backup.service` if the account that owns `/etc/edua
 
 ```bash
 export AGE_IDENTITY="$HOME/.config/eduassets/age-identity.txt"   # mode 0600
-export RCLONE_SOURCE='r2:eduassets-postgres-backups'
+export RCLONE_SOURCE='r2:eduassets-postgres-backups/postgres'
 export EXPECTED_MIGRATION='20261028173000_user_management_audit'  # optional
 bash deploy/scripts/verify-backup-restore.sh
 ```

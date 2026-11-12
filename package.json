@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "docs:sync": "node scripts/sync-docs-registry.mjs",
+    "docs:check": "node scripts/sync-docs-registry.mjs --check"
   },
   "keywords": [],
   "author": "",

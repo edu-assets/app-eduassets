@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.1.0 oficial**, publicada em 12/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.2.0 oficial**, publicada em 12/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.2.0 — Recuperação de senha por e-mail, deploy automático e alertas — 12 de novembro de 2026
+
+- **Recuperação de senha self-service:** link **Esqueci minha senha** na tela de entrada. A API (`POST /auth/senha/recuperar`) responde sempre da mesma forma, sem revelar se a conta existe, e envia por e-mail (Zoho SMTP, remetente `nao-responda@eduassets.tech`) um link de uso único válido por 30 minutos; o token viaja no fragmento da URL, é removido da barra de endereço ao abrir o app e só o seu hash SHA-256 é armazenado (nova tabela `PasswordResetToken`, migration `20261112130000_password_reset_tokens`). `POST /auth/senha/redefinir` aplica a política forte de senha, encerra todas as sessões e audita `PASSWORD_RESET_SELF`. Limites: 10 pedidos por IP a cada 15 minutos e 3 por e-mail por hora. Sem SMTP configurado, a funcionalidade fica oculta.
+- **Deploy automático da API:** `eduassets-deploy.timer` na VM implanta o `main` quando a CI passa para o commit — com backup antes de migrations, verificação de saúde e rollback automático de código e imagem. Não abre portas nem guarda chaves da VM no GitHub.
+- **Alerta de erros 5xx:** o health check da VM passou a ler o log de requisições da API e alerta quando há pelo menos 5 respostas 5xx que representem 5% ou mais das requisições desde a verificação anterior; também alerta quando o último deploy automático falhou.
+- **Catálogo de documentação automatizado:** `npm run docs:sync` no app atualiza datas e versões do catálogo a partir do histórico Git do repositório de documentação, e a CI do app falha se o catálogo ou a cópia local dos documentos divergirem do commit fixado.
+- **Dependências:** corrigidas todas as vulnerabilidades apontadas pelo `npm audit`. API: `body-parser` 2.4.0 (DoS com bytes extras após corpo comprimido) e `deepmerge-ts` 8.0.2 no CLI do Prisma via `overrides`, sem migrar para o Prisma 7. Site: `undici`, `zod`, `fast-xml-parser` e `fast-uri`. Os quatro repositórios ficaram com 0 vulnerabilidades conhecidas.
+- **Documentação:** Hospedagem (§5.1 deploy automático, §5.2 e-mail via Zoho, §10 alerta de 5xx), Guia de Implantação, Referência da API, Manual do Usuário e Operação e Recuperação atualizados.
 
 ## v1.1.0 — Redefinição de senha, sessões e operação contínua — 12 de novembro de 2026
 

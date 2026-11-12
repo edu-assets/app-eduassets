@@ -23,11 +23,13 @@ O middleware da API ainda aceita `Authorization: Bearer <JWT>` para integraçõe
 | `GET` | `/` | Público | Resposta básica de status. |
 | `GET` | `/health` | Público | Liveness do processo. |
 | `GET` | `/ready` | Público | Readiness com verificação limitada do PostgreSQL. |
-| `GET` | `/auth/session-capabilities` | Público | Informa se o servidor suporta sessão de navegador via cookie. |
+| `GET` | `/auth/session-capabilities` | Público | Informa se o servidor suporta sessão de navegador via cookie (`cookieSession`) e se a recuperação de senha por e-mail está configurada (`passwordRecovery`). |
 | `POST` | `/auth/login` | Público; rate limited e Origin validado ao solicitar modo cookie | Autentica com `login` e `password`; grava cookie e retorna o perfil no modo cookie. |
 | `GET` | `/auth/me` | Sessão autenticada | Retorna o perfil da sessão atual. |
 | `POST` | `/auth/logout` | Sessão autenticada | Revoga a versão de sessão do usuário e remove o cookie. Retorna `204`. |
 | `PATCH` | `/auth/senha` | Sessão autenticada | Altera a senha usando `senhaAtual` e `novaSenha`; reemite a sessão atual quando a alteração tem sucesso. |
+| `POST` | `/auth/senha/recuperar` | Público; 10 pedidos por IP a cada 15 min e 3 por e-mail por hora; Origin validado no modo cookie | Corpo `{ "login": "...", "idioma": "pt" \| "en" }`. Responde sempre `202` com o mesmo corpo, antes de qualquer consulta, para não revelar se a conta existe. Se o login for um e-mail de conta ativa, invalida links anteriores, grava apenas o hash SHA-256 de um token aleatório de 256 bits válido por 30 minutos, registra `PASSWORD_RESET_REQUEST` e envia o link `APP_PUBLIC_URL/#redefinir-senha=<token>`. Retorna `503` quando o SMTP não está configurado. |
+| `POST` | `/auth/senha/redefinir` | Público; 10 tentativas por IP a cada 15 min; Origin validado no modo cookie | Corpo `{ "token": "...", "senha": "..." }` com a política forte. Consome o token (uso único), grava o novo hash, incrementa `sessionVersion` (encerra todas as sessões), apaga outros tokens da conta e registra `PASSWORD_RESET_SELF`. Token inválido, expirado ou usado retorna `400` `backend.auth.link_recuperacao_invalido`. Retorna `204`. |
 | `POST` | `/auth/rfid` | Somente quando `RFID_BRIDGE_ENABLED=true`; bridge autorizada | Recebe leitura RFID do processo bridge e não é um endpoint de login de navegador. |
 | `POST` | `/auth/rfid/session` | Somente com bridge RFID habilitada; código curto de uso único | Troca o código de login RFID pelo cookie de sessão do navegador. |
 

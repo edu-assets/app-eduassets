@@ -109,7 +109,7 @@ O script recusa objetos preexistentes em qualquer schema não sistêmico e não 
 
 ## Release e rollback
 
-Antes de release: verificar backup e evidência de restauração; buildar/taguear imagens imutáveis e definir `EDUASSETS_IMAGE_TAG` explicitamente, mantendo registrada a tag anterior; executar CI; revisar SQL da migration; aplicá-la como etapa explícita; subir uma instância da API; testar `/health`, `/ready`, CORS, login, allowlists do Guest e fluxos principais; então publicar manualmente o build do Cloudflare Pages. Os workflows atuais de CI validam código e smoke tests, mas não publicam/deployam automaticamente.
+Antes de release: verificar backup e evidência de restauração; buildar/taguear imagens imutáveis e definir `EDUASSETS_IMAGE_TAG` explicitamente, mantendo registrada a tag anterior; executar CI; revisar SQL da migration; aplicá-la como etapa explícita; subir uma instância da API; testar `/health`, `/ready`, CORS, login, allowlists do Guest e fluxos principais; então publicar manualmente o build do Cloudflare Pages. Os workflows de CI validam código e smoke tests; o deploy da API na VM pode ser feito automaticamente pelo `eduassets-deploy.timer` (Hospedagem §5.1), que só implanta commits do `main` com a CI aprovada, faz backup antes de migrations e reverte código/imagem se a API não ficar saudável.
 
 Rollback Git/imagem **não reverte migração**. Usar migrações compatíveis para frente/trás (expand/migrate/contract). Se uma migração não for compatível, restaurar somente por plano aprovado de incidente, avaliando perda de dados; não executar SQL de rollback às cegas. Primeira migração de produção, backups, TLS, firewall, Cloudflare Pages e monitoramento continuam tarefas externas não verificadas.
 

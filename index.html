@@ -1680,7 +1680,7 @@
                                 </div>
 
                                 <div class="sobre-sistema-topo">
-                                    <span class="sobre-status-badge" data-i18n="shell.versao_produto">v1.1.0</span>
+                                    <span class="sobre-status-badge" data-i18n="shell.versao_produto">v1.2.0</span>
                                     <span class="sobre-sistema-status" data-i18n="shell.release_oficial">Versão oficial</span>
                                 </div>
 
@@ -2122,6 +2122,7 @@
                         <label for="login-senha" data-i18n-key="cadastros.campo_senha">Senha</label>
                         <input type="password" id="login-senha" name="password" autocomplete="current-password" required>
                     </div>
+                    <button type="button" class="login-gate-link login-gate-forgot" id="login-esqueci-senha" data-i18n-key="auth.esqueci_senha" hidden>Esqueci minha senha</button>
                     <p class="login-erro" id="login-erro" role="alert" aria-live="polite"></p>
                     <button class="btn btn-primary btn-block login-gate-submit" id="login-btn-entrar" type="submit">
                         <span data-i18n-key="shell.entrar">Entrar</span>
@@ -2149,6 +2150,44 @@
                             <a href="mailto:dasilva-thiago@eduassets.tech">dasilva-thiago@eduassets.tech</a>
                         </span>
                     </p>
+                </form>
+                <form id="recuperar-senha-form" class="login-gate-form login-gate-recovery" novalidate hidden>
+                    <div class="login-gate-recovery-heading">
+                        <h2 data-i18n-key="auth.recuperar_titulo">Recuperar senha</h2>
+                        <p data-i18n-key="auth.recuperar_instrucao">Informe o e-mail da sua conta. Se ele estiver cadastrado, enviaremos um link para definir uma nova senha.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="recuperar-email" data-i18n-key="auth.campo_email">E-mail</label>
+                        <input type="email" id="recuperar-email" name="email" autocomplete="email" maxlength="200" required>
+                    </div>
+                    <p class="login-erro" id="recuperar-erro" role="alert" aria-live="polite"></p>
+                    <p class="login-gate-notice" id="recuperar-enviado" role="status" data-i18n-key="auth.recuperar_enviado" hidden>Se o e-mail estiver cadastrado, você receberá um link em instantes. Ele expira em 30 minutos; verifique também a caixa de spam.</p>
+                    <button class="btn btn-primary btn-block login-gate-submit" id="recuperar-enviar" type="submit">
+                        <span data-i18n-key="auth.enviar_link">Enviar link</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                    </button>
+                    <button type="button" class="login-gate-link" data-voltar-login data-i18n-key="auth.voltar_login">Voltar para o login</button>
+                </form>
+                <form id="redefinir-senha-form" class="login-gate-form login-gate-recovery" novalidate hidden>
+                    <div class="login-gate-recovery-heading">
+                        <h2 data-i18n-key="auth.redefinir_titulo">Definir nova senha</h2>
+                        <p data-i18n-key="auth.redefinir_instrucao">Escolha uma nova senha. Ao salvar, todas as sessões abertas da conta serão encerradas.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="redefinir-nova" data-i18n-key="auth.campo_nova_senha">Nova senha</label>
+                        <input type="password" id="redefinir-nova" name="new-password" autocomplete="new-password" maxlength="200" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="redefinir-confirmar" data-i18n-key="auth.campo_confirmar_senha">Confirmar nova senha</label>
+                        <input type="password" id="redefinir-confirmar" name="confirm-password" autocomplete="new-password" maxlength="200" required>
+                    </div>
+                    <p class="login-gate-hint" data-i18n-key="cadastros.reset_senha_regras">Mínimo de 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo.</p>
+                    <p class="login-erro" id="redefinir-erro" role="alert" aria-live="polite"></p>
+                    <button class="btn btn-primary btn-block login-gate-submit" id="redefinir-salvar" type="submit">
+                        <span data-i18n-key="auth.salvar_nova_senha">Salvar nova senha</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">lock_reset</span>
+                    </button>
+                    <button type="button" class="login-gate-link" data-voltar-login data-i18n-key="auth.voltar_login">Voltar para o login</button>
                 </form>
             </section>
         </div>

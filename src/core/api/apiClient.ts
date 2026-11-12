@@ -29,6 +29,7 @@ export class ApiError extends Error {
 }
 
 let cookieSessionSupport: boolean | null = null;
+let passwordRecoverySupport = false;
 let cookieSessionSupportCheck: Promise<boolean> | null = null;
 
 export function supportsHttpOnlySession(): Promise<boolean> {
@@ -47,8 +48,9 @@ export function supportsHttpOnlySession(): Promise<boolean> {
                     return false;
                 }
                 if (!response.ok) return false;
-                const result = await response.json() as { cookieSession?: unknown };
+                const result = await response.json() as { cookieSession?: unknown; passwordRecovery?: unknown };
                 cookieSessionSupport = result.cookieSession === true;
+                passwordRecoverySupport = result.passwordRecovery === true;
                 return cookieSessionSupport;
             } catch {
                 return false;
@@ -58,6 +60,12 @@ export function supportsHttpOnlySession(): Promise<boolean> {
         })();
     }
     return cookieSessionSupportCheck;
+}
+
+/** True when the API can send password recovery emails (SMTP configured). */
+export async function supportsPasswordRecovery(): Promise<boolean> {
+    const cookieSession = await supportsHttpOnlySession();
+    return cookieSession && passwordRecoverySupport;
 }
 
 function formatarDetalhesValidacao(detalhes: ValidationErrorDetail[] | null | undefined): string | null {

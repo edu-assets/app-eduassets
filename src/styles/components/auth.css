@@ -585,3 +585,62 @@ body.editor-mode [data-requires-admin] {
     cursor: not-allowed;
     pointer-events: none;
 }
+
+/* Self-service password recovery (forgot password / new password views inside the login card) */
+.login-gate-form[hidden],
+.login-gate-link[hidden],
+.login-gate-notice[hidden] {
+    display: none;
+}
+
+.login-gate-link {
+    align-self: center;
+    padding: 2px 4px;
+    border: 0;
+    background: none;
+    color: var(--primary-color);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-gate-link:hover {
+    text-decoration: underline;
+}
+
+.login-gate-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.login-gate-forgot {
+    align-self: flex-end;
+    margin-top: -6px;
+}
+
+.login-gate-recovery-heading h2 {
+    margin: 0 0 4px;
+    color: var(--text-primary);
+    font-size: 1.05rem;
+}
+
+.login-gate-recovery-heading p,
+.login-gate-hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.login-gate-notice {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--primary-color) 35%, var(--border-color));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--primary-color) 8%, transparent);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}

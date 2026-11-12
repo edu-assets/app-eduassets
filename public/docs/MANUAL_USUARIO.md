@@ -24,7 +24,7 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 2. Clique em **Entrar**. Após o login, o menu mostra o nome e o papel da conta.
 3. Para encerrar a sessão, abra o menu do usuário e clique em **Sair**. O sistema solicita a revogação ao backend e retorna à tela de login.
 
-**Recuperação de senha:** não há recuperação automática por e-mail. Se você esqueceu a senha, peça a um **Administrador** que a redefina em **Cadastros → Usuários** (seção 8); ele definirá uma senha temporária, que você deve trocar em **Segurança** assim que entrar.
+**Recuperação de senha:** se você esqueceu a senha e seu login é um e-mail, clique em **Esqueci minha senha** na tela de entrada, informe o e-mail e selecione **Enviar link**. Por segurança, a mensagem exibida é a mesma exista ou não a conta. O e-mail traz o botão **Definir nova senha**; o link vale por 30 minutos e uma única vez, e só o pedido mais recente é válido. Na tela aberta pelo link, preencha **Nova senha** e **Confirmar nova senha** (12+ caracteres, com maiúscula, minúscula, número e símbolo) e clique em **Salvar nova senha**: todas as sessões abertas da conta são encerradas e você entra com a nova senha. Se o link não aparecer na tela de entrada (instalação sem e-mail configurado) ou se o seu login não for um e-mail, peça a um **Administrador** que redefina a senha em **Cadastros → Usuários** (seção 8).
 
 O navegador usa exclusivamente sessão por cookie `HttpOnly`, com validade do JWT de até 8 horas; JavaScript da página não pode ler o cookie. Em produção HTTPS, ele também usa `Secure`. Se a API não confirmar suporte a cookie, o login falha fechado, sem token Bearer de fallback e sem gravar JWT em `localStorage`. Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam à tela de login. O código atual não aplica esse limite às sessões de **Editor**. O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
 
@@ -146,7 +146,7 @@ O tema e o idioma são preferências do navegador. A interface de notificações
 
 Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preencha **Senha atual**, **Nova senha** e **Confirmar nova senha**; a nova senha precisa ter pelo menos 12 caracteres e a confirmação deve coincidir. Clique em **Atualizar senha** ou **Cancelar**.
 
-A troca é permitida somente para a conta autenticada e exige a senha atual. Não há recuperação automática por e-mail: se a senha for perdida, **Contate o administrador**, que pode redefini-la em **Cadastros → Usuários** (seção 8).
+A troca é permitida somente para a conta autenticada e exige a senha atual. Se a senha for perdida, use **Esqueci minha senha** na tela de entrada (seção 2) ou **Contate o administrador**, que pode redefini-la em **Cadastros → Usuários** (seção 8).
 
 ## 12. Meu Perfil
 
@@ -169,7 +169,7 @@ Quem prepara uma instância deve seguir o README e preencher valores próprios n
 - **Data de devolução:** timestamp offset-aware selecionado é persistido; clientes antigos podem omitir o campo e usar o horário do servidor. Alteração da data não reescreve o histórico dos registros já existentes.
 - **RFID:** é opcional e depende de configuração (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), rede/loopback, ponte, dependências e hardware compatível. A mesma LAN, sozinha, não garante funcionamento.
 - **Implantação:** a instância oficial roda em `app.eduassets.tech` com a API em `api.eduassets.tech` (registros datados no [Guia de Hospedagem](Hospedagem.md)). Backup criptografado diário com retenção, monitoramento externo e ensaio de restauração estão descritos no mesmo guia; a ativação de cada item na VM é registrada pelo operador.
-- **Senha:** não há recuperação automática por e-mail; o administrador redefine senhas em **Cadastros → Usuários** e cada usuário altera a própria em **Segurança**.
+- **Senha:** cada usuário altera a própria em **Segurança** e pode recuperá-la por e-mail em **Esqueci minha senha** (quando a instalação tem e-mail configurado); o administrador também redefine senhas em **Cadastros → Usuários**.
 - **Segurança da UI:** guestGate, permissions e os atributos `data-requires-*` orientam a interface. As permissões efetivas são as das rotas/controllers do backend.
 - **Granularidade do inventário:** o sistema controla quantidades por modelo/categoria, não números de série individuais.
 - **Dados:** este manual não contém dados reais; use somente contas, pessoas, equipamentos e tokens autorizados pela sua instalação.

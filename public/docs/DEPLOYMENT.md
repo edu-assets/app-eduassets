@@ -109,7 +109,7 @@ The script refuses pre-existing objects in any non-system schema and never uses 
 
 ## Release and rollback
 
-Before release: verify backups and restore evidence; build/tag immutable images and set `EDUASSETS_IMAGE_TAG` explicitly, recording the previous tag; run CI; inspect migration SQL; apply it as an explicit release step; deploy one API instance; check `/health`, `/ready`, CORS, login, Guest response allowlists, and core workflows; then publish the Cloudflare Pages build manually. Current CI workflows validate code and smoke tests but do not publish/deploy automatically.
+Before release: verify backups and restore evidence; build/tag immutable images and set `EDUASSETS_IMAGE_TAG` explicitly, recording the previous tag; run CI; inspect migration SQL; apply it as an explicit release step; deploy one API instance; check `/health`, `/ready`, CORS, login, Guest response allowlists, and core workflows; then publish the Cloudflare Pages build manually. CI workflows validate code and smoke tests; the API deployment on the VM can be done automatically by `eduassets-deploy.timer` (Hosting §5.1), which deploys only `main` commits whose CI passed, takes a backup before migrations and rolls code/image back if the API does not become healthy.
 
 A Git/image rollback does **not** reverse a database migration. Use backward-compatible expand/migrate/contract changes. If a migration is not backward-compatible, restore only under an approved incident plan after evaluating data loss; do not run rollback SQL blindly. The first production migration, database backup policy, TLS, origin firewall, Cloudflare Pages settings and monitoring all remain unverified external tasks.
 

@@ -23,11 +23,13 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `GET` | `/` | Public | Basic status response. |
 | `GET` | `/health` | Public | Process liveness. |
 | `GET` | `/ready` | Public | Readiness with a bounded PostgreSQL check. |
-| `GET` | `/auth/session-capabilities` | Public | Reports whether the server supports browser cookie sessions. |
+| `GET` | `/auth/session-capabilities` | Public | Reports whether the server supports browser cookie sessions (`cookieSession`) and whether email password recovery is configured (`passwordRecovery`). |
 | `POST` | `/auth/login` | Public; rate limited, with Origin validation when cookie mode is requested | Authenticates `login` and `password`; sets the cookie and returns the profile in cookie mode. |
 | `GET` | `/auth/me` | Authenticated session | Returns the current session profile. |
 | `POST` | `/auth/logout` | Authenticated session | Revokes the user's session version and clears the cookie. Returns `204`. |
 | `PATCH` | `/auth/senha` | Authenticated session | Changes the password using `senhaAtual` and `novaSenha`; successful changes reissue the current session. |
+| `POST` | `/auth/senha/recuperar` | Public; 10 requests per IP every 15 min and 3 per email per hour; Origin validated in cookie mode | Body `{ "login": "...", "idioma": "pt" \| "en" }`. Always answers `202` with the same body, before any lookup, so it never reveals whether the account exists. When the login is the email of an active account, it invalidates earlier links, stores only the SHA-256 hash of a random 256-bit token valid for 30 minutes, records `PASSWORD_RESET_REQUEST` and emails the link `APP_PUBLIC_URL/#redefinir-senha=<token>`. Returns `503` when SMTP is not configured. |
+| `POST` | `/auth/senha/redefinir` | Public; 10 attempts per IP every 15 min; Origin validated in cookie mode | Body `{ "token": "...", "senha": "..." }` following the strong policy. Consumes the token (single use), stores the new hash, increments `sessionVersion` (ending every session), deletes the account's other tokens and records `PASSWORD_RESET_SELF`. An invalid, expired or used token returns `400` `backend.auth.link_recuperacao_invalido`. Returns `204`. |
 | `POST` | `/auth/rfid` | Only when `RFID_BRIDGE_ENABLED=true`; authorized bridge | Receives an RFID scan from the bridge process; it is not a browser login endpoint. |
 | `POST` | `/auth/rfid/session` | Only when RFID bridge is enabled; short-lived one-time code | Exchanges an RFID login code for the browser session cookie. |
 

@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.1.0**, released on November 12, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.2.0**, released on November 12, 2026; earlier entries remain historical.
+
+## v1.2.0 — Email password recovery, automatic deployment and alerts — November 12, 2026
+
+- **Self-service password recovery:** a **Forgot my password** link on the entry screen. The API (`POST /auth/senha/recuperar`) always answers the same way, never revealing whether the account exists, and emails (Zoho SMTP, sender `nao-responda@eduassets.tech`) a single-use link valid for 30 minutes; the token travels in the URL fragment, is removed from the address bar when the app opens, and only its SHA-256 hash is stored (new `PasswordResetToken` table, migration `20261112130000_password_reset_tokens`). `POST /auth/senha/redefinir` applies the strong password policy, ends every session and audits `PASSWORD_RESET_SELF`. Limits: 10 requests per IP every 15 minutes and 3 per email per hour. Without SMTP configured, the feature stays hidden.
+- **Automatic API deployment:** `eduassets-deploy.timer` on the VM deploys `main` once CI passes for the commit — with a backup before migrations, a health check and automatic code and image rollback. No ports are opened and no VM keys are stored in GitHub.
+- **HTTP 5xx alerting:** the VM health check now reads the API request log and alerts when at least 5 HTTP 5xx responses account for 5% or more of the requests since the previous check; it also alerts when the last automatic deployment failed.
+- **Automated documentation catalog:** `npm run docs:sync` in the app updates catalog dates and versions from the documentation repository's Git history, and the app CI fails when the catalog or the local document copy diverges from the pinned commit.
+- **Dependencies:** fixed every vulnerability reported by `npm audit`. API: `body-parser` 2.4.0 (DoS through trailing bytes after a compressed body) and `deepmerge-ts` 8.0.2 in the Prisma CLI via `overrides`, without moving to Prisma 7. Site: `undici`, `zod`, `fast-xml-parser` and `fast-uri`. All four repositories now report 0 known vulnerabilities.
+- **Documentation:** Hosting (§5.1 automatic deployment, §5.2 Zoho email, §10 5xx alerting), Deployment Guide, API Reference, User Manual and Operations and Recovery updated.
 
 ## v1.1.0 — Password reset, sessions and continuous operation — November 12, 2026
 

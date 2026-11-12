@@ -21,6 +21,14 @@ export function logoutSession(): Promise<void> {
     return http.post<void>('/auth/logout');
 }
 
+export function solicitarRecuperacaoSenha(login: string, idioma: 'pt' | 'en'): Promise<unknown> {
+    return http.post<unknown>('/auth/senha/recuperar', { login, idioma }, { authMode: 'cookie' });
+}
+
+export function redefinirSenhaComToken(token: string, senha: string): Promise<void> {
+    return http.post<void>('/auth/senha/redefinir', { token, senha }, { authMode: 'cookie' });
+}
+
 export function alterarSenha(senhaAtual: string, novaSenha: string): Promise<void> {
     return http.patch<void>('/auth/senha', { senhaAtual, novaSenha }, { authMode: 'cookie' });
 }

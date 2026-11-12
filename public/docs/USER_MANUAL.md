@@ -24,7 +24,7 @@ The current data model tracks quantities by **category/model**. It does not prov
 2. Click **Sign in**. After sign-in, the user menu shows the account name and role.
 3. To end the session, open the user menu and click **Log out**. The system requests revocation from the backend and returns to the login screen.
 
-**Password recovery:** there is no automatic email recovery. If you forgot your password, ask an **Administrator** to reset it in **Records → System Users** (section 8); they will set a temporary password that you should change in **Security** as soon as you sign in.
+**Password recovery:** if you forgot your password and your login is an email address, click **Forgot my password** on the entry screen, enter the email and select **Send link**. For security, the same message is shown whether or not the account exists. The email contains a **Set a new password** button; the link is valid for 30 minutes and a single use, and only the most recent request is valid. On the screen opened by the link, fill in **New password** and **Confirm new password** (12+ characters with uppercase, lowercase, number and symbol) and click **Save new password**: every open session of the account is ended and you sign in with the new password. If the link is not shown on the entry screen (installation without email configured) or your login is not an email address, ask an **Administrator** to reset it in **Records → System Users** (section 8).
 
 The browser uses cookie-only sessions with an `HttpOnly` cookie and a JWT lifetime of up to 8 hours; page JavaScript cannot read that cookie. On production HTTPS, the cookie is also `Secure`. If the API cannot confirm cookie support, login fails closed without a Bearer fallback or a JWT written to `localStorage`. **Administrator** sessions expire after 30 minutes of inactivity and return to the login screen. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
 
@@ -146,7 +146,7 @@ Theme and language are browser preferences. The notification interface is presen
 
 Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 12 characters and the confirmation must match. Click **Update password** or **Cancel**.
 
-Changing a password is available only to the authenticated account and requires the current password. There is no automatic email recovery; if the password is lost, use **Contact the administrator**: an administrator can reset it in **Records → System Users** (section 8).
+Changing a password is available only to the authenticated account and requires the current password. If the password is lost, use **Forgot my password** on the entry screen (section 2) or **Contact the administrator**: an administrator can reset it in **Records → System Users** (section 8).
 
 ## 12. My Profile
 
@@ -169,7 +169,7 @@ Anyone preparing an installation should follow the README and provide local valu
 - **Return date:** the selected offset-aware timestamp is persisted; older clients may omit it and use server time. Changing the field does not rewrite existing historical records.
 - **RFID:** optional and dependent on configuration (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), network/loopback reachability, bridge, dependencies, and compatible hardware. The same LAN alone does not guarantee operation.
 - **Deployment:** the official instance runs at `app.eduassets.tech` with the API at `api.eduassets.tech` (dated records in the [Hosting Guide](Hosting.md)). Daily encrypted backups with retention, external monitoring and a restore drill are described in the same guide; the operator records when each item is enabled on the VM.
-- **Password:** there is no automatic email recovery; administrators reset passwords in **Records → System Users** and each user changes their own in **Security**.
+- **Password:** each user changes their own in **Security** and can recover it by email through **Forgot my password** (when the installation has email configured); administrators can also reset passwords in **Records → System Users**.
 - **UI security:** guestGate, permissions, and `data-requires-*` attributes guide the interface. Effective authorization is enforced by backend routes/controllers.
 - **Inventory granularity:** the system tracks quantities by model/category, not individual serial numbers.
 - **Data:** this manual contains no real data; use only accounts, people, equipment, and tokens authorized by your installation.

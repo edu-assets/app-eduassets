@@ -5,6 +5,7 @@ import { renderAuthStatus, mostrarErroLogin } from './render.js';
 import type { AuthEls } from './render.js';
 import { traduzirErro, t, definirIdioma, getIdioma, subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
+import { mostrarFormularioLogin } from './passwordRecovery.js';
 import { definirTema, getTemaResolvido, subscribe as subscribeTheme } from '../../core/state/themeStore.js';
 
 export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () => undefined): void {
@@ -129,6 +130,7 @@ function updateEntryThemeSelection(): void {
 
 function mostrarTelaLogin(els: AuthEls): void {
     mostrarErroLogin(els, '');
+    mostrarFormularioLogin();
     setEntryRoute('login');
     const modal = document.getElementById('modal-login');
     if (!modal?.classList.contains('active')) openModal('modal-login');
