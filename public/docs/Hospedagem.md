@@ -374,6 +374,15 @@ Os comandos do operador retornaram sucesso em `/health` e `/ready` por loopback 
 
 Uma checagem externa somente leitura, feita pela internet, obteve `{"status":"ok"}` em `/health` e `{"status":"ready"}` em `/ready` (HTTP 200), HTTP 200 no app, na landing page e no host de documentação, certificados TLS válidos por 67 a 73 dias e `security.txt` publicado. Isso confirma que a API v1.0.1 implantada em 28/10 estava saudável e conectada ao banco; não é uma leitura em tempo real. A partir desta data, o monitoramento do §10 passa a fazer essas verificações continuamente. Os itens operacionais que dependem de ação na VM ou na máquina do operador — ativar os timers de backup e de health check, executar o primeiro ensaio de restauração e cadastrar os pings opcionais — devem ser registrados aqui quando concluídos.
 
+**Ativação na VM — 12/11/2026 (12:24–12:30 UTC):**
+
+- Checkout `/opt/api-eduassets` alinhado ao `origin/main` (`a82715d`) após a reescrita do histórico no GitHub: a árvore do commit implantado (`14b0716`) é idêntica à do `cd1b460` da nova história (`49a0870…`), sem alterações locais; o commit antigo foi preservado no branch local `backup/pre-rewrite-14b0716`. A API não foi reconstruída nem reiniciada e segue na imagem `eduassets-backend:14b071611075` (`healthy`).
+- `/etc/eduassets/backup.env` criado (modo `0600`, dono `ubuntu`) com a URL *direct* do Neon sem senha e o destino `offsite:eduassets-postgres-backups/postgres`.
+- Backup manual e backup pelo systemd concluídos com sucesso (`eduassets-20261112T122849Z.dump.age` e `eduassets-20261112T122938Z.dump.age`, 334393 bytes cada); o R2 passou a ter 3 objetos. A primeira tentativa de envio ao R2 retorna HTTP 501 e a repetição automática do `rclone` conclui o envio, como em 28/10.
+- `eduassets-backup.timer` (diário, 06:30 UTC) e `eduassets-healthcheck.timer` (a cada 5 minutos) habilitados. Primeira verificação da VM: disco 24%, 473 MB de memória disponível, API `healthy`, backup com 0 h — `VM health OK`.
+- Segurança: o histórico de shell do usuário `ubuntu` continha uma URL do banco com a senha em texto puro (de uma tentativa de backup anterior); as linhas foram removidas. **A senha do papel `neondb_owner` deve ser considerada exposta e precisa ser trocada** no Neon, com atualização do `pgpass` e do `.env.production` e recriação do serviço `api`.
+- Ainda pendentes: troca da senha do banco, primeiro ensaio de restauração na máquina do operador (§11.2), pings opcionais de dead-man switch e ajustes do painel Cloudflare (§15).
+
 ## 15. Segurança da zona Cloudflare
 
 O relatório Security Insights do Cloudflare de 11/11/2026 apontou, para `eduassets.tech`:

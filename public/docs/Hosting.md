@@ -374,6 +374,15 @@ The operator's commands returned success from `/health` and `/ready` through VM 
 
 A read-only external check over the internet returned `{"status":"ok"}` from `/health` and `{"status":"ready"}` from `/ready` (HTTP 200), HTTP 200 from the app, landing page and documentation host, TLS certificates valid for 67 to 73 days and a published `security.txt`. This confirms the API v1.0.1 deployed on October 28 was healthy and connected to the database; it is not a real-time reading. From this date on, the §10 monitoring performs these checks continuously. Operational items that require action on the VM or the operator machine — enabling the backup and health-check timers, running the first restore drill and registering the optional pings — should be recorded here once done.
 
+**VM activation — November 12, 2026 (12:24–12:30 UTC):**
+
+- Checkout `/opt/api-eduassets` aligned with `origin/main` (`a82715d`) after the GitHub history rewrite: the tree of the deployed commit (`14b0716`) is identical to `cd1b460` in the new history (`49a0870…`), with no local changes; the old commit was kept in the local branch `backup/pre-rewrite-14b0716`. The API was neither rebuilt nor restarted and keeps running image `eduassets-backend:14b071611075` (`healthy`).
+- `/etc/eduassets/backup.env` created (mode `0600`, owner `ubuntu`) with the password-free Neon *direct* URL and the destination `offsite:eduassets-postgres-backups/postgres`.
+- Manual and systemd-triggered backups completed successfully (`eduassets-20261112T122849Z.dump.age` and `eduassets-20261112T122938Z.dump.age`, 334393 bytes each); R2 now holds 3 objects. The first upload attempt to R2 returns HTTP 501 and `rclone`'s automatic retry completes the transfer, as on October 28.
+- `eduassets-backup.timer` (daily, 06:30 UTC) and `eduassets-healthcheck.timer` (every 5 minutes) enabled. First VM check: disk 24%, 473 MB memory available, API `healthy`, backup 0 h old — `VM health OK`.
+- Security: the `ubuntu` user's shell history contained a database URL with the password in plain text (from an earlier backup attempt); those lines were removed. **The `neondb_owner` role password must be treated as exposed and rotated** in Neon, updating `pgpass` and `.env.production` and recreating the `api` service.
+- Still pending: database password rotation, the first restore drill on the operator machine (§11.2), optional dead-man-switch pings and the Cloudflare dashboard settings (§15).
+
 ## 15. Cloudflare zone security
 
 The Cloudflare Security Insights report of November 11, 2026 flagged the following for `eduassets.tech`:
