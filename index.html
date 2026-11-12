@@ -17,6 +17,13 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/assets/icons/eduAssets_icon-stroked48x.ico">
+    <link rel="apple-touch-icon" href="/assets/icons/eduAssets_icon-apple-touch-180.png">
+
+    <!-- PWA (installable app; required for Web Push on iPhone/iPad) -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#2563EB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="eduAssets">
 
 
     <!-- CSS -->
@@ -1540,7 +1547,7 @@
                             </div>
                         </div>
 
-                        <div class="config-card">
+                        <div class="config-card" id="config-notif-card" data-requires-admin hidden>
                             <div class="config-card-header">
                                 <span class="config-icon config-icon-info">
                                     <span class="material-symbols-outlined">notifications</span>
@@ -1552,41 +1559,108 @@
                                 </div>
                             </div>
 
+                            <div class="config-item config-item--control">
+                                <div class="config-item-info">
+                                    <span class="config-item-icon config-item-icon-neutral">
+                                        <span class="material-symbols-outlined" aria-hidden="true">devices</span>
+                                    </span>
+                                    <div class="config-item-text">
+                                        <span class="config-item-title" data-i18n-key="notif.status_titulo">Neste dispositivo</span>
+                                        <span class="config-item-desc" id="config-notif-status" role="status" aria-live="polite" data-i18n-exclude>Verificando...</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" id="config-notif-ativar" hidden>
+                                    <span class="material-symbols-outlined" aria-hidden="true">notifications_active</span>
+                                    <span class="btn-label" data-i18n-exclude>Ativar notificações neste dispositivo</span>
+                                </button>
+                            </div>
+                            <p class="config-notif-help" id="config-notif-ajuda" hidden data-i18n-exclude></p>
+
                             <div class="config-item">
                                 <div class="config-item-info">
                                     <span class="config-item-icon config-item-icon-success">
-                                        <span class="material-symbols-outlined">open_in_new</span>
+                                        <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
                                     </span>
                                     <div class="config-item-text">
-                                        <span class="config-item-title">Alertas de empréstimo</span>
-                                        <span class="config-item-desc">Receba notificações sobre novos empréstimos
-                                            registrados.</span>
+                                        <span class="config-item-title" data-i18n-key="notif.emprestimo_titulo">Alertas de empréstimo</span>
+                                        <span class="config-item-desc" data-i18n-key="notif.emprestimo_desc">Avise quando outro usuário registrar um novo empréstimo.</span>
                                     </div>
                                 </div>
-                                <button type="button" class="config-switch active" id="config-notif-emprestimo"
-                                    role="switch" aria-checked="true" aria-label="Alertas de empréstimo">
+                                <button type="button" class="config-switch active" id="config-notif-emprestimo" data-notif-switch="emprestimo"
+                                    role="switch" aria-checked="true" aria-label="Alertas de empréstimo" data-i18n-aria-label="notif.emprestimo_titulo" disabled>
                                     <span class="config-switch-thumb"></span>
-                                    <span class="config-switch-label">Ativado</span>
+                                    <span class="config-switch-label" data-i18n-exclude>Ativado</span>
                                 </button>
                             </div>
 
                             <div class="config-item">
                                 <div class="config-item-info">
                                     <span class="config-item-icon config-item-icon-warning">
-                                        <span class="material-symbols-outlined">assignment_return</span>
+                                        <span class="material-symbols-outlined" aria-hidden="true">assignment_return</span>
                                     </span>
                                     <div class="config-item-text">
-                                        <span class="config-item-title">Alertas de devolução</span>
-                                        <span class="config-item-desc">Receba notificações sobre devoluções pendentes e
-                                            realizadas.</span>
+                                        <span class="config-item-title" data-i18n-key="notif.devolucao_titulo">Alertas de devolução</span>
+                                        <span class="config-item-desc" data-i18n-key="notif.devolucao_desc">Avise quando outro usuário registrar uma devolução.</span>
                                     </div>
                                 </div>
-                                <button type="button" class="config-switch active" id="config-notif-devolucao"
-                                    role="switch" aria-checked="true" aria-label="Alertas de devolução">
+                                <button type="button" class="config-switch active" id="config-notif-devolucao" data-notif-switch="devolucao"
+                                    role="switch" aria-checked="true" aria-label="Alertas de devolução" data-i18n-aria-label="notif.devolucao_titulo" disabled>
                                     <span class="config-switch-thumb"></span>
-                                    <span class="config-switch-label">Ativado</span>
+                                    <span class="config-switch-label" data-i18n-exclude>Ativado</span>
                                 </button>
                             </div>
+
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <span class="config-item-icon config-item-icon-warning">
+                                        <span class="material-symbols-outlined" aria-hidden="true">report_problem</span>
+                                    </span>
+                                    <div class="config-item-text">
+                                        <span class="config-item-title" data-i18n-key="notif.ocorrencia_titulo">Alertas de ocorrência</span>
+                                        <span class="config-item-desc" data-i18n-key="notif.ocorrencia_desc">Avise quando outro usuário registrar uma nova ocorrência.</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="config-switch active" id="config-notif-ocorrencia" data-notif-switch="ocorrencia"
+                                    role="switch" aria-checked="true" aria-label="Alertas de ocorrência" data-i18n-aria-label="notif.ocorrencia_titulo" disabled>
+                                    <span class="config-switch-thumb"></span>
+                                    <span class="config-switch-label" data-i18n-exclude>Ativado</span>
+                                </button>
+                            </div>
+
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <span class="config-item-icon config-item-icon-neutral">
+                                        <span class="material-symbols-outlined" aria-hidden="true">volume_up</span>
+                                    </span>
+                                    <div class="config-item-text">
+                                        <span class="config-item-title" data-i18n-key="notif.som_titulo">Som dentro do app</span>
+                                        <span class="config-item-desc" data-i18n-key="notif.som_desc">Toca um aviso sonoro quando uma notificação chega com o eduAssets aberto. O som da notificação do sistema é o padrão do aparelho.</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="config-switch active" id="config-notif-som" data-notif-switch="som"
+                                    role="switch" aria-checked="true" aria-label="Som dentro do app" data-i18n-aria-label="notif.som_titulo">
+                                    <span class="config-switch-thumb"></span>
+                                    <span class="config-switch-label" data-i18n-exclude>Ativado</span>
+                                </button>
+                            </div>
+
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <span class="config-item-icon config-item-icon-neutral">
+                                        <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                                    </span>
+                                    <div class="config-item-text">
+                                        <span class="config-item-title" data-i18n-key="notif.teste_titulo">Notificação de teste</span>
+                                        <span class="config-item-desc" data-i18n-key="notif.teste_desc">Envia uma notificação aos seus dispositivos com as notificações ativas.</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-neutral btn-sm" id="config-notif-teste" disabled>
+                                    <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                                    <span class="btn-label" data-i18n-key="notif.btn_teste">Enviar notificação de teste</span>
+                                </button>
+                            </div>
+
+                            <p class="config-notif-note" data-i18n-key="notif.aplicacao_imediata">As opções desta seção são aplicadas na hora, sem precisar clicar em Salvar Configurações.</p>
                         </div>
 
                         <div class="config-footer-bar">
@@ -2291,6 +2365,7 @@
                             <li data-i18n-key="privacy.records">Registros de operação: nome de quem retirou cada empréstimo, responsável (nome e cargo), datas, itens e observações; ocorrências de equipamentos com descrição, problema e medidas tomadas. Esses campos são preenchidos pelos usuários: registre apenas o necessário e evite dados pessoais nos textos livres.</li>
                             <li data-i18n-key="privacy.audit">Auditoria: qual conta fez qual alteração, em qual registro, quais campos mudaram e quando — sem copiar os valores.</li>
                             <li data-i18n-key="privacy.recovery">Recuperação de senha: um código de uso único, guardado apenas como hash, com validade de 30 minutos.</li>
+                            <li data-i18n-key="privacy.push_data">Notificações push (opcionais, somente para administradores): o endereço técnico e as chaves de criptografia da inscrição feita no navegador, a conta vinculada e as opções escolhidas. A notificação mostra o nome do solicitante (em empréstimos e devoluções), um resumo dos equipamentos, o tipo de ocorrência e o nome de quem registrou, sem observações, descrições nem números de patrimônio. Ela pode aparecer na tela bloqueada do aparelho.</li>
                             <li data-i18n-key="privacy.technical">Dados técnicos: endereço IP, método, caminho (sem parâmetros sensíveis), código de resposta e tempo de cada requisição à API, em logs nos quais e-mails e tokens são mascarados; contadores temporários de tentativas, mantidos em memória, para limitar abusos.</li>
                         </ul>
                     </section>
@@ -2304,6 +2379,7 @@
                             <li data-i18n-key="privacy.purpose_service">Operar contas, autenticar e registrar empréstimos, devoluções e ocorrências: execução das funcionalidades solicitadas (art. 7º, V, da LGPD).</li>
                             <li data-i18n-key="privacy.purpose_security">Segurança, auditoria, logs, limites de tentativas e backups: legítimo interesse em proteger o sistema e seus usuários (art. 7º, IX).</li>
                             <li data-i18n-key="privacy.purpose_analytics">Estatísticas de uso com Google Analytics: consentimento, que pode ser recusado ou revogado a qualquer momento (art. 7º, I).</li>
+                            <li data-i18n-key="privacy.purpose_push">Notificações push opcionais para administradores: consentimento, dado ao ativar o recurso no navegador e revogável a qualquer momento (art. 7º, I).</li>
                         </ul>
                     </section>
                     <section class="terms-screen__section terms-screen__section--wide">
@@ -2317,6 +2393,7 @@
                             <li data-i18n-key="privacy.brevo">Brevo: envio do e-mail de recuperação de senha (nome, e-mail e link). O Brevo registra a entrega, a abertura e os cliques nesse e-mail.</li>
                             <li data-i18n-key="privacy.zoho">Zoho Mail: recebimento de mensagens enviadas aos endereços @eduassets.tech, como o suporte.</li>
                             <li data-i18n-key="privacy.github">GitHub: hospeda o código e os guias; a central de documentação do app baixa os guias de raw.githubusercontent.com.</li>
+                            <li data-i18n-key="privacy.push">Serviços de push do navegador (Google, Apple, Mozilla e Microsoft, conforme o navegador usado): entregam ao aparelho as notificações opcionais de administradores. Recebem o endereço técnico da inscrição e uma mensagem criptografada que não conseguem ler.</li>
                             <li data-i18n-key="privacy.google">Google Analytics: somente se você aceitar os cookies de estatísticas (seção 7).</li>
                         </ul>
                     </section>
@@ -2328,6 +2405,7 @@
                             <li data-i18n-key="privacy.ret_recovery">Códigos de recuperação: valem 30 minutos e uma única vez. Um novo pedido apaga os códigos anteriores da conta, a redefinição apaga os demais códigos e marca o usado como utilizado, e códigos vencidos há mais de 24 horas são apagados no pedido seguinte.</li>
                             <li data-i18n-key="privacy.ret_logs">Logs da API: rotação por tamanho, com no máximo 5 arquivos de 10 MB.</li>
                             <li data-i18n-key="privacy.ret_backups">Backups criptografados: 7 dias no servidor e 30 dias no Cloudflare R2.</li>
+                            <li data-i18n-key="privacy.ret_push">Inscrições de notificações: até o administrador desativar o recurso, sair da conta no aparelho ou trocar a senha. Inscrições recusadas pelo serviço de push também são apagadas, e contas desativadas ou rebaixadas deixam de receber na hora.</li>
                             <li data-i18n-key="privacy.ret_analytics">Google Analytics: cookies por até 2 anos no seu navegador; os eventos ficam pelo prazo de retenção configurado na propriedade do Google Analytics.</li>
                         </ul>
                     </section>
@@ -2335,7 +2413,8 @@
                         <h2 data-i18n-key="privacy.cookies_title">7. Cookies e armazenamento no navegador</h2>
                         <ul class="terms-screen__list">
                             <li data-i18n-key="privacy.ck_session">Essencial — __Host-eduassets_session: cookie de sessão protegido (HttpOnly, Secure, SameSite=Lax), válido por até 8 horas.</li>
-                            <li data-i18n-key="privacy.ck_local">Essencial — armazenamento do navegador: eduassets_theme e eduassets_lang (tema e idioma), eduassets_logout_pendente (conclui uma saída feita sem conexão), eduassets_guest_entry_authorized (modo convidado na aba atual) e eduassets_analytics_consent (sua escolha sobre estatísticas).</li>
+                            <li data-i18n-key="privacy.ck_local">Essencial — armazenamento do navegador: eduassets_theme e eduassets_lang (tema e idioma), eduassets_logout_pendente (conclui uma saída feita sem conexão), eduassets_guest_entry_authorized (modo convidado na aba atual), eduassets_analytics_consent (sua escolha sobre estatísticas), eduassets_alert_sound (som dos alertas) e eduassets_push_prefs (opções de notificação deste aparelho).</li>
+                            <li data-i18n-key="privacy.ck_push">Essencial ao recurso, somente se ativado — service worker e inscrição de notificações: o navegador guarda a inscrição deste aparelho até você desativá-la; o service worker não guarda dados nem cópias do app.</li>
                             <li data-i18n-key="privacy.ck_ga">Estatísticas, somente com consentimento — _ga e _ga_9LJ1MQRCEV: cookies do Google Analytics que contam visitas e páginas de forma agregada. Os Sinais do Google e a personalização de anúncios ficam desativados, e o link de recuperação de senha nunca é enviado.</li>
                         </ul>
                         <p data-i18n-key="privacy.cookies_text">Sem o seu aceite, nenhum script do Google é carregado. Você pode mudar a escolha a qualquer momento no botão Preferências de cookies, abaixo; ao recusar, os cookies do Google Analytics são apagados.</p>

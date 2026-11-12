@@ -7,9 +7,11 @@ import { traduzirErro, t, definirIdioma, getIdioma, subscribe as subscribeI18n }
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 import { mostrarFormularioLogin } from './passwordRecovery.js';
 import { definirTema, getTemaResolvido, subscribe as subscribeTheme } from '../../core/state/themeStore.js';
+import { isAdmin } from '../../core/auth/permissions.js';
+import { desativarDispositivoSilenciosamente } from '../../core/notifications/pushNotifications.js';
 
 export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () => undefined): void {
-    els.sidebarFooter.addEventListener('click', (e) => {
+    els.sidebarFooter.addEventListener('click', async (e) => {
         const target = e.target as HTMLElement;
 
         const trigger = target.closest<HTMLElement>('#user-menu-trigger');
@@ -23,6 +25,7 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
 
         if (target.closest('#btn-user-menu-sair')) {
             fecharDropdown();
+            await removerNotificacoesDoDispositivo();
             sair();
             setEntryRoute('login');
             showToast(t('feedback.sessao_encerrada'), 'success');
@@ -54,8 +57,9 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
         if (e.key === 'Escape') fecharDropdown();
     });
 
-    els.btnHeroLogin?.addEventListener('click', () => {
+    els.btnHeroLogin?.addEventListener('click', async () => {
         if (isAutenticado()) {
+            await removerNotificacoesDoDispositivo();
             void sair().then(() => {
                 setEntryRoute('login');
                 showToast(t('feedback.sessao_encerrada'), 'success');
@@ -85,6 +89,15 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     attachEntryPreferences();
 
     subscribe(({ autenticado, usuario }) => renderAuthStatus(els, autenticado, usuario));
+}
+
+/**
+ * Explicit sign-out only: stop pushes to this device (a shared school computer must not keep receiving them).
+ * Runs before sair() because the request needs the session. Idle expiry deliberately does not call this.
+ */
+async function removerNotificacoesDoDispositivo(): Promise<void> {
+    if (!isAdmin()) return;
+    await desativarDispositivoSilenciosamente();
 }
 
 function attachEntryPreferences(): void {

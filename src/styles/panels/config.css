@@ -343,6 +343,41 @@ html[data-theme="dark"] .config-system-toggle.active {
     color: var(--primary-color);
 }
 
+.config-switch:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 3px;
+    border-radius: 999px;
+}
+
+.config-switch:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Notificações push: estado do dispositivo e instruções */
+.config-card[hidden],
+#config-notif-card .btn[hidden],
+.config-notif-help[hidden] {
+    display: none;
+}
+
+.config-notif-help {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    background-color: var(--info-bg);
+    border: 1px solid color-mix(in srgb, var(--info-color) 25%, transparent);
+    border-radius: 8px;
+    color: var(--info-color);
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.config-notif-note {
+    margin: 16px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
 /* barra de rodapé */
 .config-footer-bar {
     display: flex;

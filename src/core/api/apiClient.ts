@@ -30,6 +30,7 @@ export class ApiError extends Error {
 
 let cookieSessionSupport: boolean | null = null;
 let passwordRecoverySupport = false;
+let pushNotificationsSupport = false;
 let cookieSessionSupportCheck: Promise<boolean> | null = null;
 
 export function supportsHttpOnlySession(): Promise<boolean> {
@@ -48,9 +49,10 @@ export function supportsHttpOnlySession(): Promise<boolean> {
                     return false;
                 }
                 if (!response.ok) return false;
-                const result = await response.json() as { cookieSession?: unknown; passwordRecovery?: unknown };
+                const result = await response.json() as { cookieSession?: unknown; passwordRecovery?: unknown; pushNotifications?: unknown };
                 cookieSessionSupport = result.cookieSession === true;
                 passwordRecoverySupport = result.passwordRecovery === true;
+                pushNotificationsSupport = result.pushNotifications === true;
                 return cookieSessionSupport;
             } catch {
                 return false;
@@ -66,6 +68,12 @@ export function supportsHttpOnlySession(): Promise<boolean> {
 export async function supportsPasswordRecovery(): Promise<boolean> {
     const cookieSession = await supportsHttpOnlySession();
     return cookieSession && passwordRecoverySupport;
+}
+
+/** True when the API has Web Push (VAPID keys) configured. */
+export async function supportsPushNotifications(): Promise<boolean> {
+    const cookieSession = await supportsHttpOnlySession();
+    return cookieSession && pushNotificationsSupport;
 }
 
 function formatarDetalhesValidacao(detalhes: ValidationErrorDetail[] | null | undefined): string | null {
@@ -96,7 +104,7 @@ function formatarMensagemErro(payload: ApiErrorPayload | null, status: number): 
 }
 
 interface RequestOptions {
-    method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+    method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     body?: unknown;
     authMode?: 'cookie';
 }
@@ -124,6 +132,8 @@ async function request<T>(path: string, { method = 'GET', body, authMode }: Requ
     }
 
     const temConteudo = response.status !== 204;
+    // 202 Accepted (e.g. the push test) may legitimately carry no body.
+    const corpoOpcional = response.status === 202;
     let payload: ApiErrorPayload | null = null;
     let respostaInvalida = false;
 
@@ -131,7 +141,7 @@ async function request<T>(path: string, { method = 'GET', body, authMode }: Requ
         try {
             payload = await response.json();
         } catch {
-            respostaInvalida = true;
+            respostaInvalida = !corpoOpcional;
         }
     }
 
@@ -157,6 +167,7 @@ async function request<T>(path: string, { method = 'GET', body, authMode }: Requ
 export const http = {
     get: <T>(path: string): Promise<T> => request<T>(path),
     post: <T>(path: string, body?: unknown, options: Pick<RequestOptions, 'authMode'> = {}): Promise<T> => request<T>(path, { ...options, method: 'POST', body }),
+    put: <T>(path: string, body?: unknown, options: Pick<RequestOptions, 'authMode'> = {}): Promise<T> => request<T>(path, { ...options, method: 'PUT', body }),
     patch: <T>(path: string, body?: unknown, options: Pick<RequestOptions, 'authMode'> = {}): Promise<T> => request<T>(path, { ...options, method: 'PATCH', body }),
-    delete: <T>(path: string): Promise<T> => request<T>(path, { method: 'DELETE' })
+    delete: <T>(path: string, body?: unknown): Promise<T> => request<T>(path, { method: 'DELETE', body })
 };

@@ -27,6 +27,7 @@
 .toast-success { border-left-color: var(--success-color); }
 .toast-error { border-left-color: var(--error-color); }
 .toast-warning { border-left-color: var(--warning-color); }
+.toast-info { border-left-color: var(--info-color); }
 
 .toast .material-symbols-outlined {
     font-size: 20px;
@@ -42,6 +43,23 @@
 .toast-success .material-symbols-outlined { color: var(--success-color); }
 .toast-error .material-symbols-outlined { color: var(--error-color); }
 .toast-warning .material-symbols-outlined { color: var(--warning-color); }
+.toast-info .material-symbols-outlined { color: var(--info-color); }
+
+/* Notification alerts: larger and with a short attention pulse. */
+.toast-info {
+    max-width: 420px;
+    box-shadow: var(--shadow-lg), 0 0 0 2px color-mix(in srgb, var(--info-color) 35%, transparent);
+    animation: toast-in 0.25s ease, toast-attention 0.9s ease 0.25s 2;
+}
+
+@keyframes toast-attention {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-info { animation: toast-in 0.25s ease; }
+}
 
 .toast-leaving {
     animation: toast-out 0.2s ease forwards;

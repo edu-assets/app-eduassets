@@ -1,11 +1,16 @@
 import { traduzirTexto } from '../state/i18nStore.js';
 
-type ToastType = 'success' | 'error' | 'warning';
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+const DEFAULT_DURATION = 3500;
+// "info" carries notifications the user should actually read (e.g. a new loan), so it stays longer.
+const DURATIONS: Partial<Record<ToastType, number>> = { info: 9000 };
 
 const ICONS: Record<ToastType, string> = {
     success: 'check_circle',
     error: 'error',
-    warning: 'warning'
+    warning: 'warning',
+    info: 'notifications_active'
 };
 
 let container: HTMLDivElement | null = null;
@@ -19,7 +24,7 @@ function getContainer(): HTMLDivElement {
     return container;
 }
 
-export function showToast(message: string, type: ToastType = 'success', duration: number = 3500): void {
+export function showToast(message: string, type: ToastType = 'success', duration: number = DURATIONS[type] ?? DEFAULT_DURATION): void {
     message = traduzirTexto(message);
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;

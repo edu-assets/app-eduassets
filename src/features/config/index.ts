@@ -1,4 +1,5 @@
 import { attachConfigEvents, attachTemaToggle, attachIdiomaToggle } from './events.js';
+import { initNotificacoesConfig } from './notificacoes.js';
 
 export function initConfig(): void {
     const btnSalvar = document.getElementById('config-salvar');
@@ -11,4 +12,6 @@ export function initConfig(): void {
 
     const grupoIdioma = document.getElementById('config-idioma-group');
     if (grupoIdioma) attachIdiomaToggle(grupoIdioma);
+
+    initNotificacoesConfig();
 }
