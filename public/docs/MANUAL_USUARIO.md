@@ -24,11 +24,11 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 2. Clique em **Entrar**. Após o login, o menu mostra o nome e o papel da conta.
 3. Para encerrar a sessão, abra o menu do usuário e clique em **Sair**. O sistema solicita a revogação ao backend e retorna à tela de login.
 
-**Recuperação de senha:** o sistema não oferece recuperação automática. Contate o administrador da instalação se não houver uma senha disponível.
+**Recuperação de senha:** não há recuperação automática por e-mail. Se você esqueceu a senha, peça a um **Administrador** que a redefina em **Cadastros → Usuários** (seção 8); ele definirá uma senha temporária, que você deve trocar em **Segurança** assim que entrar.
 
 O navegador usa exclusivamente sessão por cookie `HttpOnly`, com validade do JWT de até 8 horas; JavaScript da página não pode ler o cookie. Em produção HTTPS, ele também usa `Secure`. Se a API não confirmar suporte a cookie, o login falha fechado, sem token Bearer de fallback e sem gravar JWT em `localStorage`. Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam à tela de login. O código atual não aplica esse limite às sessões de **Editor**. O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
 
-**Nota de segurança:** **Sair** solicita ao servidor a revogação da versão de sessão da conta e a remoção do cookie. A troca de senha também revoga sessões anteriores e mantém este navegador conectado com uma sessão renovada. Se a API estiver indisponível durante o logout, a revogação do lado do servidor não pode ser confirmada; tente novamente quando a conexão voltar. Use dispositivos confiáveis e informe o administrador da instalação se suspeitar que sua conta foi exposta. O app atual não oferece fallback Bearer no navegador.
+**Nota de segurança:** **Sair** solicita ao servidor a revogação da versão de sessão da conta e a remoção do cookie. A troca de senha também revoga sessões anteriores e mantém este navegador conectado com uma sessão renovada. Se a API estiver indisponível durante o logout, o navegador registra a saída como pendente: a sessão não é restaurada ao reabrir o app, e a revogação no servidor é repetida automaticamente quando a conexão volta ou na próxima abertura do app. Use dispositivos confiáveis e informe o administrador da instalação se suspeitar que sua conta foi exposta. O app atual não oferece fallback Bearer no navegador.
 
 ### RFID (opcional)
 
@@ -110,6 +110,8 @@ Criar, editar e resolver exigem autenticação (**Editor** ou **Administrador**)
 
 No cartão de um usuário, **Vincular cartão** abre **Cartão RFID**. Depois do vínculo, use **Gerar novo token** (substitui o atual), **Copiar token** quando disponível ou **Revogar cartão**. O token é sensível: não o publique nem o inclua em relatórios.
 
+O botão **Redefinir senha** (ícone de cadeado) ao lado de cada usuário abre um modal para definir uma senha temporária. Preencha **Nova senha** e **Confirmar nova senha**: são exigidos pelo menos 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo (máximo de 72 bytes). Ao confirmar, todas as sessões abertas do usuário são encerradas e a ação é registrada na auditoria como `PASSWORD_RESET`. Entregue a senha temporária por um canal seguro e oriente o usuário a trocá-la em **Segurança**. Para a sua própria conta, use **Segurança** (o botão avisa e não abre o modal).
+
 A interface atual de **Cadastros** é voltada a consultar/listar e criar os registros mostrados. Não presuma que uma ação de edição ou exclusão exibida em outro painel exista para cada cadastro.
 
 ## 9. Exportar
@@ -144,7 +146,7 @@ O tema e o idioma são preferências do navegador. A interface de notificações
 
 Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preencha **Senha atual**, **Nova senha** e **Confirmar nova senha**; a nova senha precisa ter pelo menos 12 caracteres e a confirmação deve coincidir. Clique em **Atualizar senha** ou **Cancelar**.
 
-A troca é permitida somente para a conta autenticada e exige a senha atual. **Não há recuperação de senha implementada**: se a senha for perdida, **Contate o administrador**.
+A troca é permitida somente para a conta autenticada e exige a senha atual. Não há recuperação automática por e-mail: se a senha for perdida, **Contate o administrador**, que pode redefini-la em **Cadastros → Usuários** (seção 8).
 
 ## 12. Meu Perfil
 
@@ -166,8 +168,8 @@ Quem prepara uma instância deve seguir o README e preencher valores próprios n
 
 - **Data de devolução:** timestamp offset-aware selecionado é persistido; clientes antigos podem omitir o campo e usar o horário do servidor. Alteração da data não reescreve o histórico dos registros já existentes.
 - **RFID:** é opcional e depende de configuração (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), rede/loopback, ponte, dependências e hardware compatível. A mesma LAN, sozinha, não garante funcionamento.
-- **Deployment:** um deployment real, domínio público, proxy, banco hospedado ou política de backup não foi validado por este trabalho. O README descreve desenvolvimento local e preparação técnica.
-- **Senha:** não há recuperação de senha; somente a troca autenticada em **Segurança**.
+- **Implantação:** a instância oficial roda em `app.eduassets.tech` com a API em `api.eduassets.tech` (registros datados no [Guia de Hospedagem](Hospedagem.md)). Backup criptografado diário com retenção, monitoramento externo e ensaio de restauração estão descritos no mesmo guia; a ativação de cada item na VM é registrada pelo operador.
+- **Senha:** não há recuperação automática por e-mail; o administrador redefine senhas em **Cadastros → Usuários** e cada usuário altera a própria em **Segurança**.
 - **Segurança da UI:** guestGate, permissions e os atributos `data-requires-*` orientam a interface. As permissões efetivas são as das rotas/controllers do backend.
 - **Granularidade do inventário:** o sistema controla quantidades por modelo/categoria, não números de série individuais.
 - **Dados:** este manual não contém dados reais; use somente contas, pessoas, equipamentos e tokens autorizados pela sua instalação.

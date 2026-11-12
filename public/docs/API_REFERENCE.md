@@ -52,6 +52,8 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `GET` | `/responsaveis` | Authenticated session. |
 | `POST` | `/responsaveis` | Administrator. |
 | `GET`, `POST` | `/usuarios` | Administrator. |
+| `PATCH` | `/usuarios/:id` | Administrator; updates name, login, access level or the `ativo` status. |
+| `POST` | `/usuarios/:id/password-reset` | Administrator; body `{ "senha": "..." }` following the strong policy (12+ characters, uppercase, lowercase, digit, symbol, max. 72 bytes). Stores the new hash, increments `sessionVersion` (ending the user's sessions) and records `PASSWORD_RESET` in the audit log in the same transaction. Returns `204`. Used by the **Reset password** action in **Records → System Users**. |
 | `POST`, `DELETE` | `/usuarios/:id/rfid-token` | Administrator; provisions or revokes an RFID token. |
 
 ## Validation and rules

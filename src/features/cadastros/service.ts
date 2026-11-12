@@ -177,3 +177,25 @@ export async function revogarCartaoRfid(usuarioId: number): Promise<void> {
         throw new Error(erro instanceof ApiError ? erro.message : 'Erro ao revogar cartão.');
     }
 }
+/* ===== Redefinição administrativa de senha ===== */
+
+/** Mirrors the API password policy (usuario.schema.ts `senhaForte`). Returns an i18n key or null. */
+export function validarNovaSenha(senha: string, confirmacao: string): string | null {
+    if (!senha || !confirmacao) return 'validation.seguranca.preencha_campos';
+    if (senha !== confirmacao) return 'validation.seguranca.confirmacao_incorreta';
+    const forte = new TextEncoder().encode(senha).length <= 72
+        && senha.length >= 12
+        && /[a-z]/.test(senha)
+        && /[A-Z]/.test(senha)
+        && /\d/.test(senha)
+        && /[^A-Za-z0-9]/.test(senha);
+    return forte ? null : 'validation.cadastros.senha_fraca';
+}
+
+export async function redefinirSenhaUsuario(usuarioId: number, senha: string): Promise<void> {
+    try {
+        await usuariosApi.redefinirSenhaUsuario(usuarioId, senha);
+    } catch (erro) {
+        throw new Error(erro instanceof ApiError ? erro.message : 'feedback.erro_redefinir_senha');
+    }
+}

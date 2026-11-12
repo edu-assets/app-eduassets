@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.0.2 oficial**, publicada em 12/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.1.0 oficial**, publicada em 12/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.1.0 — Redefinição de senha, sessões e operação contínua — 12 de novembro de 2026
+
+- **Redefinição de senha pelo administrador:** em **Cadastros → Usuários**, o botão **Redefinir senha** define uma senha temporária para outra conta usando o endpoint já existente `POST /usuarios/:id/password-reset` — mesma política forte da API, encerramento de todas as sessões da conta (`sessionVersion`) e auditoria `PASSWORD_RESET`. Para a própria conta, o app orienta o uso de **Segurança**. O runbook de reset manual no banco ficou restrito ao caso em que nenhum administrador consegue entrar.
+- **Logout sem conexão:** quando a API não confirma o logout, o navegador marca a saída como pendente, não restaura a sessão ao reabrir o app e repete a revogação ao voltar a conexão ou na próxima abertura. Antes, o cookie `HttpOnly` remanescente podia restaurar a sessão no recarregamento.
+- **Monitoramento:** workflow `Uptime` no GitHub Actions (a cada 15 minutos) para `/health`, `/ready`, app, landing page, documentação, validade TLS e `security.txt`; health check na VM via systemd (disco, memória, saúde do container com reinício automático após 3 falhas seguidas e idade do backup), com pings opcionais de dead-man switch.
+- **Backup:** execução diária agendada por systemd, retenção de 7 dias locais e 30 dias no R2 com trava de segurança (nunca apaga com menos de 3 cópias recentes) e ensaio automatizado de restauração em PostgreSQL descartável na máquina do operador (`verify-backup-restore.sh`).
+- **Documentação:** Manual, Referência da API (inclui `PATCH /usuarios/:id` e `POST /usuarios/:id/password-reset`), Hospedagem (novos §11.1, §11.2, §14 e §15 com a checklist de segurança da zona Cloudflare) e Operação e Recuperação atualizados; caminho do checkout de produção unificado em `/opt/api-eduassets`. Verificação externa de 12/11/2026 registrou a API saudável e conectada ao banco.
+- **Pendências que dependem do operador:** ativar os timers de backup e health check na VM, rodar o primeiro ensaio de restauração e aplicar os ajustes do painel Cloudflare (DMARC, Bot Fight Mode, AI Labyrinth, MFA). O passo a passo está no Guia de Hospedagem.
 
 ## v1.0.2 — Correções de interface — 12 de novembro de 2026
 

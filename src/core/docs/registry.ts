@@ -29,8 +29,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'auto_stories',
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
-        version: '1.0.1',
-        updatedAt: '2026-10-28'
+        version: '1.1.0',
+        updatedAt: '2026-11-12'
     },
     {
         id: 'readme',
@@ -56,8 +56,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'cloud',
         file: { pt: '/docs/Hospedagem.md', en: '/docs/Hosting.md' },
         category: 'tecnico',
-        version: '1.0.1',
-        updatedAt: '2026-10-28'
+        version: '1.1.0',
+        updatedAt: '2026-11-12'
     },
     {
         id: 'database-model',
@@ -74,7 +74,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'route',
         file: { pt: '/docs/ROADMAP.md', en: '/docs/ROADMAP_EN.md' },
         category: 'geral',
-        version: '1.0.2',
+        version: '1.1.0',
         updatedAt: '2026-11-12'
     },
     {
@@ -83,7 +83,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: '1.0.2',
+        version: '1.1.0',
         updatedAt: '2026-11-12'
     },
     {
@@ -92,8 +92,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'api',
         file: { pt: '/docs/REFERENCIA_API.md', en: '/docs/API_REFERENCE.md' },
         category: 'tecnico',
-        version: '1.0.1',
-        updatedAt: '2026-10-28'
+        version: '1.1.0',
+        updatedAt: '2026-11-12'
     },
     {
         id: 'development',
@@ -119,8 +119,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'health_and_safety',
         file: { pt: '/docs/OPERACAO_E_RECUPERACAO.md', en: '/docs/OPERATIONS_AND_RECOVERY.md' },
         category: 'tecnico',
-        version: '1.0.1',
-        updatedAt: '2026-10-28'
+        version: '1.1.0',
+        updatedAt: '2026-11-12'
     }
 ];
 

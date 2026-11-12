@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.0.2**, released on November 12, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.1.0**, released on November 12, 2026; earlier entries remain historical.
+
+## v1.1.0 — Password reset, sessions and continuous operation — November 12, 2026
+
+- **Administrator password reset:** in **Records → System Users**, the **Reset password** button sets a temporary password for another account through the existing `POST /usuarios/:id/password-reset` endpoint — same strong API policy, all of the account's sessions ended (`sessionVersion`) and a `PASSWORD_RESET` audit entry. For their own account, administrators are pointed to **Security**. The manual database reset runbook is now limited to the case where no administrator can sign in.
+- **Offline logout:** when the API cannot confirm a logout, the browser marks it as pending, does not restore the session when the app is reopened and retries revocation once connectivity returns or on the next start. Previously the remaining `HttpOnly` cookie could restore the session on reload.
+- **Monitoring:** `Uptime` GitHub Actions workflow (every 15 minutes) for `/health`, `/ready`, app, landing page, documentation, TLS validity and `security.txt`; systemd VM health check (disk, memory, container health with automatic restart after 3 consecutive failures, backup age), with optional dead-man-switch pings.
+- **Backup:** daily systemd-scheduled run, retention of 7 days locally and 30 days in R2 with a safety lock (never deletes with fewer than 3 recent copies) and an automated restore drill into a disposable PostgreSQL on the operator machine (`verify-backup-restore.sh`).
+- **Documentation:** User Manual, API Reference (adds `PATCH /usuarios/:id` and `POST /usuarios/:id/password-reset`), Hosting (new §11.1, §11.2, §14 and §15 with the Cloudflare zone security checklist) and Operations and Recovery updated; the production checkout path is unified as `/opt/api-eduassets`. An external check on November 12, 2026 recorded the API as healthy and connected to the database.
+- **Items that depend on the operator:** enable the backup and health-check timers on the VM, run the first restore drill and apply the Cloudflare dashboard settings (DMARC, Bot Fight Mode, AI Labyrinth, MFA). Step-by-step instructions are in the Hosting Guide.
 
 ## v1.0.2 — Interface fixes — November 12, 2026
 

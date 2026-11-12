@@ -423,7 +423,7 @@
   "shell.usuario_escola_com": "usuario@escola.com",
   "shell.usuarios": "Usuários",
   "shell.utilize_o_menu_lateral_para_registrar_em": "Utilize o menu lateral para registrar empréstimos, realizar devoluções ou consultar equipamentos.",
-  "shell.versao_produto": "v1.0.2",
+  "shell.versao_produto": "v1.1.0",
   "shell.veja_um_resumo_geral_do_sistema": "Veja um resumo geral do sistema.",
   "shell.ver_dashboard": "Ver dashboard",
   "shell.ver_documentacao": "Ver documentação",
@@ -519,5 +519,13 @@
   "backend.seguranca.muitas_tentativas_senha": "Muitas tentativas de alteração de senha. Tente novamente em alguns minutos.",
   "backend.usuarios.nao_encontrado": "Usuário não encontrado.",
   "backend.seguranca.muitas_provisionamentos_rfid": "Muitas tentativas de provisionamento de cartão RFID. Tente novamente em alguns minutos.",
-  "validation.emprestimo.sem_itens": "O empréstimo precisa ter ao menos um item."
+  "validation.emprestimo.sem_itens": "O empréstimo precisa ter ao menos um item.",
+  "cadastros.redefinir_senha": "Redefinir senha",
+  "cadastros.reset_senha_subtitulo": "Defina uma senha temporária para o usuário.",
+  "cadastros.reset_senha_aviso": "Todas as sessões abertas deste usuário serão encerradas. Informe a senha temporária por um canal seguro e peça que ele a altere em Segurança.",
+  "cadastros.reset_senha_regras": "Mínimo de 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo.",
+  "validation.cadastros.senha_fraca": "A senha deve ter no mínimo 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo (máximo de 72 bytes).",
+  "feedback.senha_redefinida": "Senha de {nome} redefinida. As sessões abertas foram encerradas.",
+  "feedback.erro_redefinir_senha": "Erro ao redefinir senha.",
+  "feedback.redefinir_propria_senha": "Para alterar a sua própria senha, use o painel Segurança."
 }

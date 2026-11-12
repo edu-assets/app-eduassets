@@ -4,10 +4,11 @@ This guide supports incident triage; it does not replace the [Deployment Guide](
 
 ## Known limitations
 
-- The GitHub Actions workflow runs checks and smoke tests against disposable infrastructure; it does **not** publish the frontend or deploy/restart the Oracle VM.
+- The GitHub Actions CI workflow runs checks and smoke tests against disposable infrastructure; it does **not** publish the frontend or deploy/restart the Oracle VM. API deployment remains manual and reviewed (see the [Deployment Guide](DEPLOYMENT.md)).
+- The `Uptime` workflow checks the public endpoints, TLS and `security.txt` every 15 minutes; on the VM, `eduassets-healthcheck.timer` checks disk, memory, container health (restarting after 3 consecutive failures) and backup age. Details in the [Hosting Guide §10](Hosting.md).
 - Run `39875293195` is historical evidence recorded for `verify` and `production-smoke` on commit `a8cd39b`, not proof of the current checkout or remote service state.
 - Releases that change the schema require a confirmed backup, an explicit migration, and health/readiness validation; do not seed or migrate an operational database without review and an approved maintenance window.
-- Session revocation requires an API request. If the network is unavailable when a user logs out, the UI clears local state but cannot confirm server-side revocation.
+- Session revocation requires an API request. If the network is unavailable when a user logs out, the UI clears local state and marks the logout as pending: the app does not restore that session when reopened and retries revocation when connectivity returns or the next time it opens. Until the retry succeeds, the JWT remains valid on the server for the rest of its 8-hour lifetime.
 - Administrator inactivity timeout is 30 minutes; activity is process-local and assumes a single instance. After restart, administrative tokens without recoverable activity state fail closed; JWTs expire within 8 hours.
 - RFID is optional, depends on hardware and configuration, and is disabled/blocked at the public edge in the reference deployment templates.
 
@@ -21,7 +22,7 @@ This guide supports incident triage; it does not replace the [Deployment Guide](
 
 ## Suspected account compromise
 
-The user should end the session and notify the installation administrator through an institutional channel. The administrator should review the account and available events, revoke/rebind credentials using approved access procedures, review subsequent sessions, and assess possible data exposure. Password changes require an authenticated session; self-service recovery is not implemented. An emergency manual reset must follow the reviewed administrative runbook and be performed by an authorized operator—not improvised with SQL.
+The user should end the session and notify the installation administrator through an institutional channel. The administrator should review the account and available events, revoke/rebind credentials using approved access procedures, review subsequent sessions, and assess possible data exposure. A user changing their own password needs an authenticated session; there is no self-service email recovery. An administrator resets another account's password in **Records → System Users → Reset password**: the action ends all of that account's sessions (`sessionVersion`) and is audited as `PASSWORD_RESET`. The administrative runbook for a manual database reset is reserved for the case where no administrator can sign in, must be performed by an authorized operator and never improvised with SQL.
 
 Never ask users to send passwords, cookies, JWTs, RFID one-time codes, or database dumps. If an infrastructure secret may have leaked, follow the organization's rotation process and record the change without copying the new value into tickets or Git.
 
@@ -39,3 +40,4 @@ After an authorized intervention, record the version, applied migrations, `/heal
 - [API Reference](API_REFERENCE.md) / [Referência da API](REFERENCIA_API.md)
 - [Data Model](DATA_MODEL.md) / [Modelo de Dados](MODELO_DE_DADOS.md)
 - Administrative runbook for authorized operators: `operations/backend/ADMIN_PASSWORD_RESET_RUNBOOK.md` (not served under `public/docs/`; GitHub visibility depends on this repository's access settings).
+- Restore drill: [`verify-backup-restore.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/verify-backup-restore.sh), described in the [Hosting Guide §11.2](Hosting.md); it restores the newest backup into a disposable PostgreSQL on the operator machine and checks migrations and row counts without touching production.

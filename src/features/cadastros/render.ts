@@ -133,3 +133,31 @@ export function exibirCartaoRevogado(els: RfidModalEls): void {
 export function fecharModalRfid(): void {
     closeModal('modal-cadastro-rfid');
 }
+/* ===== Modal Redefinir senha ===== */
+
+export interface ResetSenhaModalEls {
+    form: HTMLFormElement;
+    avatar: HTMLElement;
+    nome: HTMLElement;
+    login: HTMLElement;
+    novaSenha: HTMLInputElement;
+    confirmarSenha: HTMLInputElement;
+    btnSalvar: HTMLButtonElement;
+    btnCancelar: HTMLElement;
+}
+
+export function abrirModalResetSenha(els: ResetSenhaModalEls, usuario: Usuario): void {
+    els.avatar.textContent = gerarIniciais(usuario.nome);
+    els.nome.textContent = usuario.nome;
+    els.login.textContent = usuario.login;
+    els.novaSenha.value = '';
+    els.confirmarSenha.value = '';
+    openModal('modal-cadastro-senha');
+    els.novaSenha.focus();
+}
+
+export function fecharModalResetSenha(els: ResetSenhaModalEls): void {
+    els.novaSenha.value = '';
+    els.confirmarSenha.value = '';
+    closeModal('modal-cadastro-senha');
+}

@@ -24,11 +24,11 @@ The current data model tracks quantities by **category/model**. It does not prov
 2. Click **Sign in**. After sign-in, the user menu shows the account name and role.
 3. To end the session, open the user menu and click **Log out**. The system requests revocation from the backend and returns to the login screen.
 
-**Password recovery:** the system does not provide automatic recovery. Contact the installation administrator if no password is available.
+**Password recovery:** there is no automatic email recovery. If you forgot your password, ask an **Administrator** to reset it in **Records → System Users** (section 8); they will set a temporary password that you should change in **Security** as soon as you sign in.
 
 The browser uses cookie-only sessions with an `HttpOnly` cookie and a JWT lifetime of up to 8 hours; page JavaScript cannot read that cookie. On production HTTPS, the cookie is also `Secure`. If the API cannot confirm cookie support, login fails closed without a Bearer fallback or a JWT written to `localStorage`. **Administrator** sessions expire after 30 minutes of inactivity and return to the login screen. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
 
-**Security note:** **Log out** asks the server to revoke the account's session version and remove the cookie. A successful password change also revokes earlier sessions while keeping this browser signed in with a renewed session. If the API is unavailable during logout, server-side revocation cannot be confirmed; retry when connectivity returns. Use trusted devices and contact the installation administrator if you suspect the account was exposed. The current browser app has no Bearer fallback.
+**Security note:** **Log out** asks the server to revoke the account's session version and remove the cookie. A successful password change also revokes earlier sessions while keeping this browser signed in with a renewed session. If the API is unavailable during logout, the browser records the logout as pending: the session is not restored when the app is reopened, and server-side revocation is retried automatically when connectivity returns or the next time the app opens. Use trusted devices and contact the installation administrator if you suspect the account was exposed. The current browser app has no Bearer fallback.
 
 ### RFID (optional)
 
@@ -110,6 +110,8 @@ Creating, editing, and resolving require authentication (**Editor** or **Adminis
 
 On a user row, **Link card** opens **RFID Card**. After linking, use **Generate new token** (replaces the current one), **Copy token** when available, or **Revoke card**. Treat the token as sensitive; do not publish it or include it in reports.
 
+The **Reset password** button (padlock icon) next to each user opens a dialog to set a temporary password. Fill in **New password** and **Confirm new password**: at least 12 characters with an uppercase letter, a lowercase letter, a number and a symbol are required (72 bytes maximum). On confirmation, all of the user's open sessions are ended and the action is recorded in the audit log as `PASSWORD_RESET`. Hand over the temporary password through a secure channel and ask the user to change it in **Security**. For your own account, use **Security** (the button shows a notice instead of opening the dialog).
+
 The current **Records** UI is designed to list/view and create the records shown. Do not assume that an edit or delete action available in another panel exists for every record type.
 
 ## 9. Export
@@ -144,7 +146,7 @@ Theme and language are browser preferences. The notification interface is presen
 
 Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 12 characters and the confirmation must match. Click **Update password** or **Cancel**.
 
-Changing a password is available only to the authenticated account and requires the current password. **Password recovery is not implemented**; if the password is lost, use **Contact the administrator**.
+Changing a password is available only to the authenticated account and requires the current password. There is no automatic email recovery; if the password is lost, use **Contact the administrator**: an administrator can reset it in **Records → System Users** (section 8).
 
 ## 12. My Profile
 
@@ -166,8 +168,8 @@ Anyone preparing an installation should follow the README and provide local valu
 
 - **Return date:** the selected offset-aware timestamp is persisted; older clients may omit it and use server time. Changing the field does not rewrite existing historical records.
 - **RFID:** optional and dependent on configuration (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), network/loopback reachability, bridge, dependencies, and compatible hardware. The same LAN alone does not guarantee operation.
-- **Deployment:** a real deployment, public domain, proxy, hosted database, or backup policy was not validated by this work. The README describes local development and technical preparation.
-- **Password:** there is no password recovery; only the authenticated change in **Security** is available.
+- **Deployment:** the official instance runs at `app.eduassets.tech` with the API at `api.eduassets.tech` (dated records in the [Hosting Guide](Hosting.md)). Daily encrypted backups with retention, external monitoring and a restore drill are described in the same guide; the operator records when each item is enabled on the VM.
+- **Password:** there is no automatic email recovery; administrators reset passwords in **Records → System Users** and each user changes their own in **Security**.
 - **UI security:** guestGate, permissions, and `data-requires-*` attributes guide the interface. Effective authorization is enforced by backend routes/controllers.
 - **Inventory granularity:** the system tracks quantities by model/category, not individual serial numbers.
 - **Data:** this manual contains no real data; use only accounts, people, equipment, and tokens authorized by your installation.

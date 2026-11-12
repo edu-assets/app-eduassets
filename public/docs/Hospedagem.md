@@ -40,7 +40,7 @@ Na VM são necessários Ubuntu, Docker Engine com Docker Compose, Nginx, UFW e a
 Use um arquivo protegido na VM:
 
 ```bash
-cd /opt/eduassets
+cd /opt/api-eduassets
 chmod 600 .env.production
 ```
 
@@ -106,7 +106,7 @@ No Cloudflare, use **Full (strict)** quando o certificado de origem corresponden
 A API de produção é gerenciada pelo Compose, e não por `npm run dev`:
 
 ```bash
-cd /opt/eduassets
+cd /opt/api-eduassets
 
 docker compose \
   --env-file .env.production \
@@ -295,7 +295,24 @@ docker compose \
 
 `/health` verifica liveness e não depende do PostgreSQL. `/ready` verifica a conexão com o Neon e pode retornar `503` quando o banco estiver indisponível. O healthcheck do Compose pode marcar o container como `unhealthy`; `restart: unless-stopped` não reinicia o processo só por esse estado, então configure monitoramento/alerta separado. A política mantém o serviço após reinício do daemon Docker, desde que o Compose tenha sido iniciado e a política de restart preservada.
 
-Configure separadamente monitoramento externo para `/health`, `/ready`, respostas 5xx, expiração TLS, espaço em disco, memória, disponibilidade do Neon e falha de backup. Essa configuração não é criada automaticamente pelo repositório.
+O monitoramento é feito em duas camadas, ambas versionadas no repositório da API:
+
+- **Externo (GitHub Actions):** o workflow [`uptime.yml`](https://github.com/edu-assets/api-eduassets/blob/main/.github/workflows/uptime.yml) roda a cada 15 minutos e executa [`public-uptime-check.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/public-uptime-check.sh). Ele verifica `/health` e `/ready` da API (o `/ready` cobre a disponibilidade do Neon), o app, a landing page, o host de documentação, a validade TLS dos quatro hosts (alerta com menos de 14 dias) e o campo `Expires` do `security.txt` (alerta com menos de 30 dias). Uma execução com falha fica vermelha e o GitHub notifica por e-mail a conta que alterou o agendamento por último. O GitHub pausa agendamentos após 60 dias sem atividade no repositório; reative em **Actions** se isso ocorrer. O script também pode ser rodado manualmente: `bash deploy/scripts/public-uptime-check.sh`.
+- **Na VM (systemd):** [`vm-health-check.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/vm-health-check.sh), acionado a cada 5 minutos por `eduassets-healthcheck.timer`, verifica uso de disco (`/` e `/var/lib/docker`, limite de 85%), memória disponível, o estado de saúde do container da API e a idade do backup local mais recente (limite de 26 h). Se o container permanecer `unhealthy` por 3 verificações seguidas, ele é reiniciado — o que o `restart: unless-stopped` não faz sozinho. Os resultados vão para o journal (`journalctl -u eduassets-healthcheck`); com `HEALTH_PING_URL` configurado, um serviço do tipo dead-man switch (por exemplo, healthchecks.io) alerta quando há falha ou quando a VM para de reportar.
+
+Instalação na VM (uma vez, como root, a partir do checkout revisado):
+
+```bash
+cd /opt/api-eduassets
+install -d -m 700 /etc/eduassets /var/lib/eduassets-health
+install -m 600 deploy/systemd/healthcheck.env.example /etc/eduassets/healthcheck.env   # revise os valores
+install -m 644 deploy/systemd/eduassets-healthcheck.service deploy/systemd/eduassets-healthcheck.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now eduassets-healthcheck.timer
+systemctl start eduassets-healthcheck.service && journalctl -u eduassets-healthcheck -n 20 --no-pager
+```
+
+Respostas 5xx isoladas ainda não geram alerta próprio: elas aparecem como falha do `/ready` quando afetam a API e podem ser acompanhadas em **Cloudflare → Analytics**.
 
 ## 11. Backup e recuperação
 
@@ -304,6 +321,35 @@ Antes de migrations em banco operacional, execute [backup-postgres.sh](https://g
 Quando o `.env` for carregado com `source`, prefira valores sem aspas externas duplicadas. Para operações com `pg_dump`, mantenha uma URL libpq própria se os parâmetros do Prisma forem diferentes. Nunca coloque URLs reais neste documento.
 
 O backup deve ser criptografado, enviado para fora da VM e testado com restauração em um banco novo e vazio. Um arquivo de dump existente, sozinho, não prova que a recuperação funciona.
+
+### 11.1 Backup diário agendado e retenção
+
+[`run-scheduled-backup.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/run-scheduled-backup.sh) executa o `backup-postgres.sh` e, em seguida, [`prune-backups.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/prune-backups.sh). A configuração fica em `/etc/eduassets/backup.env` (modo `0600`; modelo em [`deploy/systemd/backup.env.example`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/systemd/backup.env.example)). A retenção padrão mantém 7 dias de cópias locais e 30 dias no R2 e **nunca apaga nada** se houver menos de 3 backups dentro da janela — assim, um job quebrado não elimina as últimas cópias boas. Opcionalmente, configure no R2 uma regra de ciclo de vida (lifecycle) equivalente como segunda barreira. Com `BACKUP_PING_URL`, um dead-man switch alerta se o backup diário falhar ou não acontecer.
+
+```bash
+cd /opt/api-eduassets
+sudo install -m 600 -o ubuntu deploy/systemd/backup.env.example /etc/eduassets/backup.env   # preencha com os valores reais
+sudo install -m 644 deploy/systemd/eduassets-backup.service deploy/systemd/eduassets-backup.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now eduassets-backup.timer      # todo dia às 03:30 de Brasília (06:30 UTC)
+sudo systemctl start eduassets-backup.service && journalctl -u eduassets-backup -n 30 --no-pager
+systemctl list-timers 'eduassets-*'
+```
+
+Ajuste `User=` em `eduassets-backup.service` se a conta dona de `/etc/eduassets/pgpass` e da configuração do `rclone` não for `ubuntu`.
+
+### 11.2 Ensaio de restauração
+
+[`verify-backup-restore.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/verify-backup-restore.sh) prova que um backup pode ser recuperado. Ele roda **na máquina do operador que guarda a identidade privada `age`** (nunca na VM): baixa o backup mais recente do R2 (ou usa `BACKUP_FILE`), descriptografa localmente, restaura em um PostgreSQL 18 descartável em Docker ligado só a `127.0.0.1`, confere a tabela `_prisma_migrations` (sem migrations inacabadas) e as contagens de linhas e, ao terminar, destrói o container e o dump em texto puro. Ele não se conecta ao banco de produção.
+
+```bash
+export AGE_IDENTITY="$HOME/.config/eduassets/age-identity.txt"   # modo 0600
+export RCLONE_SOURCE='r2:eduassets-postgres-backups'
+export EXPECTED_MIGRATION='20261028173000_user_management_audit'  # opcional
+bash deploy/scripts/verify-backup-restore.sh
+```
+
+Requisitos: Docker, `age` e `rclone` configurado com acesso de leitura ao bucket. Rode o ensaio depois de ativar o backup agendado e, a partir daí, mensalmente, registrando data, nome do backup, migration mais recente e contagens (sem valores de dados) no registro de operação.
 
 ## 12. Verificações de implantação registradas em 23/10/2026
 
@@ -323,3 +369,22 @@ Este registro é datado e não representa uma checagem em tempo real dos serviç
 O operador relatou a implantação da API v1.0.1 no commit `14b0716110750857daa27d0e979e3bec574e39e0`, com a migration `20261028173000_user_management_audit`. O backup de 328366 bytes foi criado antes da migration, criptografado com `age` e listado no bucket R2 `eduassets-postgres-backups`; a transferência passou após uma repetição automática de HTTP 501. `pg_dump` 18.6 foi usado contra Neon 18.6, com senha via `PGPASSFILE` modo `0600`.
 
 Os comandos do operador retornaram sucesso em `/health` e `/ready` por loopback e por `https://api.eduassets.tech`. O primeiro snapshot do Compose ainda mostrava `health: starting`; não houve registro posterior de estado `healthy`. Não foi realizado restore do objeto de produção, não foi configurado agendamento/retention e não houve alteração de Nginx, firewall ou Cloudflare nessa atualização. Este histórico não substitui monitoramento contínuo nem política de recuperação.
+
+## 14. Verificação externa registrada em 12/11/2026
+
+Uma checagem externa somente leitura, feita pela internet, obteve `{"status":"ok"}` em `/health` e `{"status":"ready"}` em `/ready` (HTTP 200), HTTP 200 no app, na landing page e no host de documentação, certificados TLS válidos por 67 a 73 dias e `security.txt` publicado. Isso confirma que a API v1.0.1 implantada em 28/10 estava saudável e conectada ao banco; não é uma leitura em tempo real. A partir desta data, o monitoramento do §10 passa a fazer essas verificações continuamente. Os itens operacionais que dependem de ação na VM ou na máquina do operador — ativar os timers de backup e de health check, executar o primeiro ensaio de restauração e cadastrar os pings opcionais — devem ser registrados aqui quando concluídos.
+
+## 15. Segurança da zona Cloudflare
+
+O relatório Security Insights do Cloudflare de 11/11/2026 apontou, para `eduassets.tech`:
+
+| Item | Situação | Ação |
+|---|---|---|
+| `security.txt` | Publicado em `https://eduassets.tech/.well-known/security.txt` (RFC 9116, válido até 11/11/2027; o monitoramento alerta 30 dias antes). | Opcionalmente, ative também **Security → Settings → Security.txt** para encerrar o alerta no painel. |
+| DMARC | Ausente. SPF (`include:zohomail.com`) e DKIM (`zmail._domainkey`) já existem. | Criar o registro `TXT` `_dmarc` com `v=DMARC1; p=none; rua=mailto:<caixa de relatórios>`; após algumas semanas sem falhas legítimas, endurecer para `p=quarantine`. |
+| Bot Fight Mode | Desligado. | Ativar em **Security → Bots**. Em seguida, rodar o workflow `Uptime` manualmente: se o desafio bloquear o GitHub Actions, mantenha o modo apenas se o monitoramento continuar passando. |
+| AI Labyrinth | Desligado. | Ativar em **Security → Bots**. |
+| MFA da conta Cloudflare | Desligado. | Ativar a verificação em duas etapas em **My Profile → Authentication** (prioridade alta). |
+| Turnstile | Sem widget. | Opcional; só é necessário se surgir formulário público. |
+
+Essas alterações são feitas no painel do Cloudflare pelo dono da conta; registre a data de cada uma nesta seção.

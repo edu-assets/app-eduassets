@@ -16,3 +16,7 @@ export function gerarTokenRfid(id: number): Promise<{ usuario: { id: number; nom
 export function revogarTokenRfid(id: number): Promise<void> {
     return http.delete(`/usuarios/${id}/rfid-token`);
 }
+
+export function redefinirSenhaUsuario(id: number, senha: string): Promise<void> {
+    return http.post<void>(`/usuarios/${id}/password-reset`, { senha });
+}

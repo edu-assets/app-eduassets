@@ -31,6 +31,16 @@ export function initCadastros(): void {
             btnRevogar: document.getElementById('btn-rfid-revogar') as HTMLButtonElement,
             btnCopiar: document.getElementById('btn-rfid-copiar') as HTMLButtonElement,
             btnFechar: document.getElementById('rfid-modal-fechar') as HTMLElement
+        },
+        resetSenhaModal: {
+            form: document.getElementById('reset-senha-form') as HTMLFormElement,
+            avatar: document.getElementById('reset-senha-avatar') as HTMLElement,
+            nome: document.getElementById('reset-senha-nome') as HTMLElement,
+            login: document.getElementById('reset-senha-login') as HTMLElement,
+            novaSenha: document.getElementById('reset-senha-nova') as HTMLInputElement,
+            confirmarSenha: document.getElementById('reset-senha-confirmar') as HTMLInputElement,
+            btnSalvar: document.getElementById('reset-senha-salvar') as HTMLButtonElement,
+            btnCancelar: document.getElementById('reset-senha-cancelar') as HTMLElement
         }
     };
 

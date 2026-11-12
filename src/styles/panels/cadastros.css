@@ -259,6 +259,50 @@
     color: var(--success-color);
 }
 
+/* ===== Ação: redefinir senha ===== */
+.cadastro-usuario-acao {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.cadastro-usuario-acao .material-symbols-outlined {
+    font-size: 17px;
+}
+
+.cadastro-usuario-acao:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
+    color: var(--primary-color);
+}
+
+.cadastro-usuario-acao:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.cadastro-senha-regras {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.45;
+}
+
+#reset-senha-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
 /* ===== Modal Cartão RFID ===== */
 .cadastro-rfid-estado {
     display: flex;

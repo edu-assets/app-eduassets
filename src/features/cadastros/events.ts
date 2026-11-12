@@ -1,5 +1,15 @@
 import { closeModal, showToast, confirmarExclusao } from '../../core/ui/index.js';
-import { getConfig, listarRegistros, criarRegistro, carregarOpcoesCampo, formatarItem, gerarCartaoRfid, revogarCartaoRfid } from './service.js';
+import {
+    getConfig,
+    listarRegistros,
+    criarRegistro,
+    carregarOpcoesCampo,
+    formatarItem,
+    gerarCartaoRfid,
+    revogarCartaoRfid,
+    validarNovaSenha,
+    redefinirSenhaUsuario
+} from './service.js';
 import {
     abrirModalCadastro,
     exibirListaCarregando,
@@ -10,10 +20,13 @@ import {
     abrirModalRfid,
     exibirModoGravacao,
     exibirCartaoRevogado,
-    fecharModalRfid
+    fecharModalRfid,
+    abrirModalResetSenha,
+    fecharModalResetSenha
 } from './render.js';
 import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
-import type { CampoComOpcoes, RfidModalEls } from './render.js';
+import { getUsuario } from '../../core/state/authStore.js';
+import type { CampoComOpcoes, RfidModalEls, ResetSenhaModalEls } from './render.js';
 import type { Usuario } from '../../types/index.js';
 import { traduzirErro, t } from '../../core/state/i18nStore.js';
 import { carregarEquipamentos } from '../../core/state/equipamentoStore.js';
@@ -31,6 +44,7 @@ export interface CadastrosEls {
     btnCancelar: HTMLElement | null;
     btnSalvar: HTMLButtonElement | null;
     rfidModal: RfidModalEls;
+    resetSenhaModal: ResetSenhaModalEls;
 }
 
 export interface CadastrosEstado {
@@ -39,6 +53,7 @@ export interface CadastrosEstado {
 
 let usuariosCache: Usuario[] = [];
 let usuarioRfidAtual: Usuario | null = null;
+let usuarioResetSenhaAtual: Usuario | null = null;
 
 export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado): void {
     els.cards.forEach((card) => {
@@ -59,6 +74,22 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
 
     els.listaWrap.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
+
+        const botaoReset = target.closest<HTMLElement>('[data-reset-senha-usuario-id]');
+        if (botaoReset) {
+            if (bloquearSeNaoAdmin()) return;
+            const usuario = usuariosCache.find((u) => String(u.id) === botaoReset.dataset.resetSenhaUsuarioId);
+            if (!usuario) return;
+            if (usuario.id === getUsuario()?.id) {
+                // Resetting your own password would revoke your current session; use the authenticated flow.
+                showToast(t('feedback.redefinir_propria_senha'), 'warning');
+                return;
+            }
+            usuarioResetSenhaAtual = usuario;
+            abrirModalResetSenha(els.resetSenhaModal, usuario);
+            return;
+        }
+
         const chip = target.closest<HTMLElement>('[data-rfid-usuario-id]');
         if (!chip) return;
         if (bloquearSeNaoAdmin()) return;
@@ -71,6 +102,41 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
     });
 
     attachRfidModalEvents(els);
+    attachResetSenhaModalEvents(els);
+}
+
+function attachResetSenhaModalEvents(els: CadastrosEls): void {
+    const modal = els.resetSenhaModal;
+    if (!modal.form) return;
+
+    modal.btnCancelar.addEventListener('click', () => {
+        usuarioResetSenhaAtual = null;
+        fecharModalResetSenha(modal);
+    });
+
+    modal.form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (bloquearSeNaoAdmin() || !usuarioResetSenhaAtual) return;
+
+        const erroValidacao = validarNovaSenha(modal.novaSenha.value, modal.confirmarSenha.value);
+        if (erroValidacao) {
+            showToast(t(erroValidacao), 'warning');
+            return;
+        }
+
+        const usuario = usuarioResetSenhaAtual;
+        setButtonLoading(modal.btnSalvar, true);
+        try {
+            await redefinirSenhaUsuario(usuario.id, modal.novaSenha.value);
+            usuarioResetSenhaAtual = null;
+            fecharModalResetSenha(modal);
+            showToast(t('feedback.senha_redefinida').replace('{nome}', usuario.nome), 'success');
+        } catch (erro) {
+            showToast(traduzirErro(erro, 'feedback.erro_redefinir_senha'), 'error');
+        } finally {
+            setButtonLoading(modal.btnSalvar, false);
+        }
+    });
 }
 
 function attachRfidModalEvents(els: CadastrosEls): void {

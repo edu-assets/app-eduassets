@@ -40,7 +40,7 @@ The VM requires Ubuntu, Docker Engine with Docker Compose, Nginx, UFW, and admin
 Use a protected environment file on the VM:
 
 ```bash
-cd /opt/eduassets
+cd /opt/api-eduassets
 chmod 600 .env.production
 ```
 
@@ -106,7 +106,7 @@ Use **Full (strict)** in Cloudflare when the matching origin certificate for `ap
 The production API is managed by Compose, not by `npm run dev`:
 
 ```bash
-cd /opt/eduassets
+cd /opt/api-eduassets
 
 docker compose \
   --env-file .env.production \
@@ -295,7 +295,24 @@ docker compose \
 
 `/health` checks process liveness and does not depend on PostgreSQL. `/ready` checks the Neon connection and may return `503` when the database is unavailable. The Compose health check may mark the container `unhealthy`; `restart: unless-stopped` does not restart a process solely for that state, so configure separate monitoring/alerts. The policy keeps the service running after a Docker daemon restart, provided Compose was started and the restart policy remains in place.
 
-Configure external monitoring separately for `/health`, `/ready`, 5xx responses, TLS expiry, disk space, memory, Neon availability, and backup failures. The repository does not create this monitoring automatically.
+Monitoring has two layers, both versioned in the API repository:
+
+- **External (GitHub Actions):** the [`uptime.yml`](https://github.com/edu-assets/api-eduassets/blob/main/.github/workflows/uptime.yml) workflow runs every 15 minutes and executes [`public-uptime-check.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/public-uptime-check.sh). It checks the API `/health` and `/ready` (`/ready` covers Neon availability), the app, the landing page, the documentation host, TLS validity for the four hosts (alert below 14 days) and the `security.txt` `Expires` field (alert below 30 days). A failed run turns red and GitHub emails the account that last changed the schedule. GitHub pauses schedules after 60 days without repository activity; re-enable it under **Actions** if that happens. The script can also be run by hand: `bash deploy/scripts/public-uptime-check.sh`.
+- **On the VM (systemd):** [`vm-health-check.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/vm-health-check.sh), triggered every 5 minutes by `eduassets-healthcheck.timer`, checks disk usage (`/` and `/var/lib/docker`, 85% limit), available memory, the API container health state and the age of the newest local backup (26 h limit). If the container stays `unhealthy` for 3 consecutive checks it is restarted — something `restart: unless-stopped` does not do on its own. Results go to the journal (`journalctl -u eduassets-healthcheck`); with `HEALTH_PING_URL` set, a dead-man-switch service (for example healthchecks.io) alerts on failures or when the VM stops reporting.
+
+Installation on the VM (once, as root, from the reviewed checkout):
+
+```bash
+cd /opt/api-eduassets
+install -d -m 700 /etc/eduassets /var/lib/eduassets-health
+install -m 600 deploy/systemd/healthcheck.env.example /etc/eduassets/healthcheck.env   # review the values
+install -m 644 deploy/systemd/eduassets-healthcheck.service deploy/systemd/eduassets-healthcheck.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now eduassets-healthcheck.timer
+systemctl start eduassets-healthcheck.service && journalctl -u eduassets-healthcheck -n 20 --no-pager
+```
+
+Isolated 5xx responses do not raise a dedicated alert yet: they surface as `/ready` failures when they affect the API and can be followed in **Cloudflare → Analytics**.
 
 ## 11. Backup and recovery
 
@@ -304,6 +321,35 @@ Before migrations on an operational database, run [backup-postgres.sh](https://g
 When sourcing an environment file, avoid externally duplicated quote characters. For `pg_dump`, keep a dedicated libpq URL if Prisma parameters differ. Never place real URLs in this document.
 
 Backups must be encrypted, copied off the VM, and tested by restoring into a new empty database. An existing dump file alone does not prove recoverability.
+
+### 11.1 Scheduled daily backup and retention
+
+[`run-scheduled-backup.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/run-scheduled-backup.sh) runs `backup-postgres.sh` followed by [`prune-backups.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/prune-backups.sh). Configuration lives in `/etc/eduassets/backup.env` (mode `0600`; template in [`deploy/systemd/backup.env.example`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/systemd/backup.env.example)). Default retention keeps 7 days of local copies and 30 days in R2, and **never deletes anything** when fewer than 3 backups exist inside the window — so a broken job cannot wipe the last good copies. Optionally configure an equivalent R2 lifecycle rule as a second safeguard. With `BACKUP_PING_URL`, a dead-man switch alerts if the daily backup fails or does not happen.
+
+```bash
+cd /opt/api-eduassets
+sudo install -m 600 -o ubuntu deploy/systemd/backup.env.example /etc/eduassets/backup.env   # fill in the real values
+sudo install -m 644 deploy/systemd/eduassets-backup.service deploy/systemd/eduassets-backup.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now eduassets-backup.timer      # daily at 03:30 Brasília time (06:30 UTC)
+sudo systemctl start eduassets-backup.service && journalctl -u eduassets-backup -n 30 --no-pager
+systemctl list-timers 'eduassets-*'
+```
+
+Adjust `User=` in `eduassets-backup.service` if the account that owns `/etc/eduassets/pgpass` and the `rclone` configuration is not `ubuntu`.
+
+### 11.2 Restore drill
+
+[`verify-backup-restore.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/verify-backup-restore.sh) proves that a backup can be recovered. It runs **on the operator machine that holds the `age` private identity** (never on the VM): it downloads the newest backup from R2 (or uses `BACKUP_FILE`), decrypts it locally, restores it into a disposable PostgreSQL 18 Docker container bound to `127.0.0.1` only, checks `_prisma_migrations` (no unfinished migrations) and row counts, then destroys the container and the plaintext dump. It never connects to the production database.
+
+```bash
+export AGE_IDENTITY="$HOME/.config/eduassets/age-identity.txt"   # mode 0600
+export RCLONE_SOURCE='r2:eduassets-postgres-backups'
+export EXPECTED_MIGRATION='20261028173000_user_management_audit'  # optional
+bash deploy/scripts/verify-backup-restore.sh
+```
+
+Requirements: Docker, `age`, and `rclone` configured with read access to the bucket. Run the drill once the scheduled backup is enabled and monthly afterwards, recording the date, backup name, newest migration and row counts (no data values) in the operations log.
 
 ## 12. Deployment checks recorded on October 23, 2026
 
@@ -323,3 +369,22 @@ This dated record is not a real-time service check.
 The operator reported deploying API v1.0.1 at commit `14b0716110750857daa27d0e979e3bec574e39e0`, with migration `20261028173000_user_management_audit`. A 328366-byte backup was created before migration, encrypted with `age`, and listed in Cloudflare R2 bucket `eduassets-postgres-backups`; transfer completed after an automatic retry of HTTP 501. `pg_dump` 18.6 was used against Neon 18.6, with the password supplied through mode-0600 `PGPASSFILE`.
 
 The operator's commands returned success from `/health` and `/ready` through VM loopback and `https://api.eduassets.tech`. The first Compose snapshot still showed `health: starting`; no later `healthy` state was recorded. The production object was not restored, backup scheduling/retention was not configured, and this API update did not change Nginx, firewall, or Cloudflare settings. This record is not a substitute for continuous monitoring or a recovery policy.
+
+## 14. External check recorded on November 12, 2026
+
+A read-only external check over the internet returned `{"status":"ok"}` from `/health` and `{"status":"ready"}` from `/ready` (HTTP 200), HTTP 200 from the app, landing page and documentation host, TLS certificates valid for 67 to 73 days and a published `security.txt`. This confirms the API v1.0.1 deployed on October 28 was healthy and connected to the database; it is not a real-time reading. From this date on, the §10 monitoring performs these checks continuously. Operational items that require action on the VM or the operator machine — enabling the backup and health-check timers, running the first restore drill and registering the optional pings — should be recorded here once done.
+
+## 15. Cloudflare zone security
+
+The Cloudflare Security Insights report of November 11, 2026 flagged the following for `eduassets.tech`:
+
+| Item | Status | Action |
+|---|---|---|
+| `security.txt` | Published at `https://eduassets.tech/.well-known/security.txt` (RFC 9116, valid until 2027-11-11; monitoring alerts 30 days before). | Optionally also enable **Security → Settings → Security.txt** to clear the dashboard insight. |
+| DMARC | Missing. SPF (`include:zohomail.com`) and DKIM (`zmail._domainkey`) already exist. | Create the `TXT` record `_dmarc` with `v=DMARC1; p=none; rua=mailto:<report mailbox>`; after a few weeks without legitimate failures, tighten to `p=quarantine`. |
+| Bot Fight Mode | Off. | Enable under **Security → Bots**. Then run the `Uptime` workflow manually: if the challenge blocks GitHub Actions, keep the mode only if monitoring keeps passing. |
+| AI Labyrinth | Off. | Enable under **Security → Bots**. |
+| Cloudflare account MFA | Off. | Enable two-factor authentication under **My Profile → Authentication** (high priority). |
+| Turnstile | No widget. | Optional; only needed if a public form is added. |
+
+These changes are made in the Cloudflare dashboard by the account owner; record the date of each one in this section.

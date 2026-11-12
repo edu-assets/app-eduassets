@@ -52,6 +52,8 @@ O middleware da API ainda aceita `Authorization: Bearer <JWT>` para integraçõe
 | `GET` | `/responsaveis` | Sessão autenticada. |
 | `POST` | `/responsaveis` | Administrador. |
 | `GET`, `POST` | `/usuarios` | Administrador. |
+| `PATCH` | `/usuarios/:id` | Administrador; altera nome, login, nível de acesso ou status `ativo`. |
+| `POST` | `/usuarios/:id/password-reset` | Administrador; corpo `{ "senha": "..." }` com a política forte (12+ caracteres, maiúscula, minúscula, número, símbolo, máx. 72 bytes). Grava o novo hash, incrementa `sessionVersion` (encerra as sessões do usuário) e registra `PASSWORD_RESET` na auditoria na mesma transação. Retorna `204`. Usado pela ação **Redefinir senha** em **Cadastros → Usuários**. |
 | `POST`, `DELETE` | `/usuarios/:id/rfid-token` | Administrador; provisiona ou revoga token RFID. |
 
 ## Validação e regras

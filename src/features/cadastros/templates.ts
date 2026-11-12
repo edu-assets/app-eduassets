@@ -57,6 +57,10 @@ export function renderItemRegistroUsuario(usuario: Usuario): string {
                 <span class="cadastro-usuario-nome">${usuario.nome}</span>
                 <span class="cadastro-usuario-meta">${usuario.login} · ${t(NIVEL_LABEL[usuario.nivelAcesso] ?? usuario.nivelAcesso)}</span>
             </div>
+            <button type="button" class="cadastro-usuario-acao" data-reset-senha-usuario-id="${usuario.id}"
+                title="${t('cadastros.redefinir_senha')}" aria-label="${t('cadastros.redefinir_senha')}">
+                <span class="material-symbols-outlined" aria-hidden="true">lock_reset</span>
+            </button>
             ${raw(chip)}
         </div>
     `;

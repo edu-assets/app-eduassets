@@ -23,15 +23,18 @@ describe('authStore cookie sessions', () => {
   let storedToken: string | null;
   let storedGuestMode: string | null;
   let storedGuestEntry: string | null;
+  const otherKeys = new Map<string, string>();
   const storage = {
-    getItem: vi.fn((key: string) => key === 'eduassets_token' ? storedToken : key === 'eduassets_guest_mode' ? storedGuestMode : null),
+    getItem: vi.fn((key: string) => key === 'eduassets_token' ? storedToken : key === 'eduassets_guest_mode' ? storedGuestMode : otherKeys.get(key) ?? null),
     setItem: vi.fn((key: string, value: string) => {
       if (key === 'eduassets_token') storedToken = value;
-      if (key === 'eduassets_guest_mode') storedGuestMode = value;
+      else if (key === 'eduassets_guest_mode') storedGuestMode = value;
+      else otherKeys.set(key, value);
     }),
     removeItem: vi.fn((key: string) => {
       if (key === 'eduassets_token') storedToken = null;
-      if (key === 'eduassets_guest_mode') storedGuestMode = null;
+      else if (key === 'eduassets_guest_mode') storedGuestMode = null;
+      else otherKeys.delete(key);
     }),
   };
   const sessionStorageMock = {
@@ -50,6 +53,7 @@ describe('authStore cookie sessions', () => {
     storedToken = null;
     storedGuestMode = null;
     storedGuestEntry = null;
+    otherKeys.clear();
     vi.stubGlobal('localStorage', storage);
     vi.stubGlobal('sessionStorage', sessionStorageMock);
     apiMocks.login.mockResolvedValue({ user });
@@ -134,5 +138,62 @@ describe('authStore cookie sessions', () => {
 
     expect(isAcessoConvidadoAutorizado()).toBe(false);
     expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('eduassets_guest_entry_authorized');
+  });
+
+  it('keeps a pending logout when the API cannot confirm revocation and never restores that session', async () => {
+    const first = await import('../core/state/authStore.js');
+    await first.entrar('user@example.invalid', 'Synthetic-Password-01');
+    await first.sair();
+    expect(otherKeys.get('eduassets_logout_pendente')).toBe('true');
+
+    vi.resetModules();
+    apiMocks.fetchMe.mockResolvedValue(user);
+    const reloaded = await import('../core/state/authStore.js');
+    await reloaded.iniciarSessao();
+
+    expect(apiMocks.logoutSession).toHaveBeenCalledTimes(2);
+    expect(apiMocks.fetchMe).not.toHaveBeenCalled();
+    expect(reloaded.isAutenticado()).toBe(false);
+    expect(otherKeys.get('eduassets_logout_pendente')).toBe('true');
+  });
+
+  it('settles a pending logout on the next start and only then allows session restore again', async () => {
+    otherKeys.set('eduassets_logout_pendente', 'true');
+    apiMocks.logoutSession.mockResolvedValueOnce(undefined);
+    apiMocks.fetchMe.mockResolvedValue(user);
+    const { iniciarSessao, isAutenticado } = await import('../core/state/authStore.js');
+
+    await iniciarSessao();
+    expect(apiMocks.logoutSession).toHaveBeenCalledTimes(1);
+    expect(apiMocks.fetchMe).not.toHaveBeenCalled();
+    expect(isAutenticado()).toBe(false);
+    expect(otherKeys.has('eduassets_logout_pendente')).toBe(false);
+
+    await iniciarSessao();
+    expect(apiMocks.fetchMe).toHaveBeenCalledTimes(1);
+    expect(isAutenticado()).toBe(true);
+  });
+
+  it('treats 401 on a pending logout as an already-ended session', async () => {
+    otherKeys.set('eduassets_logout_pendente', 'true');
+    apiMocks.logoutSession.mockRejectedValueOnce(Object.assign(new Error('expired'), { status: 401 }));
+    const { iniciarSessao } = await import('../core/state/authStore.js');
+
+    await iniciarSessao();
+
+    expect(otherKeys.has('eduassets_logout_pendente')).toBe(false);
+    expect(apiMocks.fetchMe).not.toHaveBeenCalled();
+  });
+
+  it('clears the pending flag after a confirmed logout or a fresh login', async () => {
+    apiMocks.logoutSession.mockResolvedValueOnce(undefined);
+    const { entrar, sair } = await import('../core/state/authStore.js');
+    await entrar('user@example.invalid', 'Synthetic-Password-01');
+    await sair();
+    expect(otherKeys.has('eduassets_logout_pendente')).toBe(false);
+
+    otherKeys.set('eduassets_logout_pendente', 'true');
+    await entrar('user@example.invalid', 'Synthetic-Password-01');
+    expect(otherKeys.has('eduassets_logout_pendente')).toBe(false);
   });
 });

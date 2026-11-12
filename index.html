@@ -1133,6 +1133,60 @@
                         </div>
                     </div>
 
+                    <div class="modal-overlay" id="modal-cadastro-senha">
+                        <div class="modal-box modal-box--md">
+                            <div class="modal-header">
+                                <span class="modal-header-icon modal-header-icon-secondary">
+                                    <span class="material-symbols-outlined">lock_reset</span>
+                                </span>
+                                <div class="modal-header-titles">
+                                    <h3>Redefinir senha</h3>
+                                    <p class="modal-subtitle">Defina uma senha temporária para o usuário.</p>
+                                </div>
+                            </div>
+                            <form class="modal-body" id="reset-senha-form" autocomplete="off" novalidate>
+                                <div class="modal-summary-panel">
+                                    <div class="modal-summary-person">
+                                        <span class="modal-summary-avatar" id="reset-senha-avatar"></span>
+                                        <div>
+                                            <div class="modal-summary-title" id="reset-senha-nome"></div>
+                                            <div class="modal-summary-sub" id="reset-senha-login"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-callout modal-callout-warning">
+                                    <span class="material-symbols-outlined">warning</span>
+                                    <span>Todas as sessões abertas deste usuário serão encerradas. Informe a senha temporária por um canal seguro e peça que ele a altere em Segurança.</span>
+                                </div>
+
+                                <!-- Hidden decoy fields absorb browser autofill before the real fields -->
+                                <input type="text" name="fake-username" autocomplete="username" style="display:none"
+                                    tabindex="-1" aria-hidden="true">
+                                <input type="password" name="fake-password" autocomplete="new-password"
+                                    style="display:none" tabindex="-1" aria-hidden="true">
+
+                                <div class="form-group">
+                                    <label for="reset-senha-nova">Nova senha</label>
+                                    <input type="password" id="reset-senha-nova" autocomplete="new-password"
+                                        data-lpignore="true" data-1p-ignore aria-describedby="reset-senha-regras">
+                                </div>
+                                <div class="form-group">
+                                    <label for="reset-senha-confirmar">Confirmar nova senha</label>
+                                    <input type="password" id="reset-senha-confirmar" autocomplete="new-password"
+                                        data-lpignore="true" data-1p-ignore>
+                                </div>
+                                <p class="cadastro-senha-regras" id="reset-senha-regras">Mínimo de 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo.</p>
+                            </form>
+                            <div class="modal-footer">
+                                <button class="btn btn-neutral" id="reset-senha-cancelar" type="button">Cancelar</button>
+                                <button class="btn btn-primary" id="reset-senha-salvar" type="submit" form="reset-senha-form"
+                                    data-requires-admin>
+                                    <span class="material-symbols-outlined">lock_reset</span> Redefinir senha</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="cadastros-container">
 
                         <div class="cadastros-grid">
@@ -1626,7 +1680,7 @@
                                 </div>
 
                                 <div class="sobre-sistema-topo">
-                                    <span class="sobre-status-badge" data-i18n="shell.versao_produto">v1.0.2</span>
+                                    <span class="sobre-status-badge" data-i18n="shell.versao_produto">v1.1.0</span>
                                     <span class="sobre-sistema-status" data-i18n="shell.release_oficial">Versão oficial</span>
                                 </div>
 

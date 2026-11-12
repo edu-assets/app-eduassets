@@ -3,6 +3,9 @@ import { setToken } from './tokenStore.js';
 import type { AuthUser, AuthState } from '../../types/index.js';
 
 const GUEST_ENTRY_SESSION_KEY = 'eduassets_guest_entry_authorized';
+// Set when a logout could not be confirmed by the API (e.g. offline). The HttpOnly session cookie may still
+// be valid, so the session must be revoked before any session restore is attempted.
+const LOGOUT_PENDENTE_KEY = 'eduassets_logout_pendente';
 localStorage.removeItem('eduassets_guest_mode');
 
 type AuthListener = (state: AuthState) => void;
@@ -29,7 +32,60 @@ function definirAcessoConvidadoAutorizado(ativo: boolean): void {
     else sessionStorage.removeItem(GUEST_ENTRY_SESSION_KEY);
 }
 
+function isLogoutPendente(): boolean {
+    try {
+        return localStorage.getItem(LOGOUT_PENDENTE_KEY) === 'true';
+    } catch {
+        return false;
+    }
+}
+
+function definirLogoutPendente(ativo: boolean): void {
+    try {
+        if (ativo) localStorage.setItem(LOGOUT_PENDENTE_KEY, 'true');
+        else localStorage.removeItem(LOGOUT_PENDENTE_KEY);
+    } catch {
+        /* storage unavailable: the in-memory state is already cleared */
+    }
+}
+
+function statusDoErro(erro: unknown): number | undefined {
+    return typeof erro === 'object' && erro !== null && 'status' in erro
+        ? Number((erro as { status: unknown }).status)
+        : undefined;
+}
+
+/**
+ * Retries a pending server-side logout. 401/403 mean the cookie session is already gone, which also
+ * settles the pending state. Returns true when no revocation is pending anymore.
+ */
+export async function concluirLogoutPendente(): Promise<boolean> {
+    if (!isLogoutPendente()) return true;
+    try {
+        await logoutSession();
+    } catch (erro) {
+        const status = statusDoErro(erro);
+        if (status !== 401 && status !== 403) return false;
+    }
+    definirLogoutPendente(false);
+    return true;
+}
+
+function agendarRepeticaoLogout(): void {
+    if (typeof window === 'undefined') return;
+    window.addEventListener('online', () => { void concluirLogoutPendente(); }, { once: true });
+}
+
 export async function iniciarSessao(): Promise<void> {
+    if (isLogoutPendente()) {
+        // Fail closed: never restore a session the user asked to end, even while revocation is still pending.
+        const concluido = await concluirLogoutPendente();
+        if (!concluido) agendarRepeticaoLogout();
+        setToken(null);
+        user = null;
+        notify();
+        return;
+    }
     try {
         user = await fetchMe();
         definirAcessoConvidadoAutorizado(false);
@@ -43,6 +99,8 @@ export async function iniciarSessao(): Promise<void> {
 
 export async function entrar(login: string, senha: string): Promise<void> {
     const resposta = await loginRequest(login, senha);
+    // A fresh login replaces the session cookie, so the abandoned session can no longer be restored here.
+    definirLogoutPendente(false);
     setToken(null);
     user = resposta.user;
     definirAcessoConvidadoAutorizado(false);
@@ -57,9 +115,13 @@ export function entrarComoConvidado(): void {
 }
 
 export function sair(revogarNoServidor = true): Promise<void> {
-    const revogacao = revogarNoServidor && user
-        ? logoutSession().catch(() => undefined)
-        : Promise.resolve();
+    let revogacao: Promise<void> = Promise.resolve();
+    if (revogarNoServidor && user) {
+        definirLogoutPendente(true);
+        revogacao = concluirLogoutPendente().then((concluido) => {
+            if (!concluido) agendarRepeticaoLogout();
+        });
+    }
     setToken(null);
     user = null;
     definirAcessoConvidadoAutorizado(false);
