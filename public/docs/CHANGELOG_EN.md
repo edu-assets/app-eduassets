@@ -1,6 +1,13 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.0.1**, released on October 28, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.0.2**, released on November 12, 2026; earlier entries remain historical.
+
+## v1.0.2 — Interface fixes — November 12, 2026
+
+- Dashboard → Stock: each row now shows the equipment name (model) with its category below, removing seemingly duplicated rows when a category has more than one equipment item (for example, two tablet models). The column header is now "Equipment".
+- Stock search also matches the equipment model; the detail panel shows the equipment alongside its category; the stock CSV export gained a `Modelo` column.
+- Login: the entry card no longer has a fixed maximum height that hid content. On short viewports (laptops, 125–150% scaling) spacing is tightened so the whole form, including the support contact, stays visible; if height is still insufficient, the screen scrolls instead of clipping.
+- The version badge in the About panel now shows the current version.
 
 ## v1.0.1 — Security and operations patch — October 28, 2026
 

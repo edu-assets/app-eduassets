@@ -200,6 +200,7 @@ export interface AuthState {
 
 export interface CategoriaResumoDados {
     id: number;
+    modelo: string;
     categoria: string;
     total: number;
     disponivel: number;

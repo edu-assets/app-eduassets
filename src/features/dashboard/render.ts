@@ -81,6 +81,7 @@ export function ativarAbaDashboard(els: DashboardEls, tab: string): void {
 function montarDadosFormularioCategoria(equipamento: Equipamento): CategoriaResumoDados {
     return {
         id: equipamento.id,
+        modelo: equipamento.modelo,
         categoria: equipamento.categoria?.nome ?? '',
         total: equipamento.quantidadeTotal,
         disponivel: equipamento.quantidadeDisponivel,
@@ -93,7 +94,7 @@ function montarDadosFormularioCategoria(equipamento: Equipamento): CategoriaResu
 export function exibirDetalheEstoque(els: DashboardEls, equipamento: Equipamento): void {
     const dadosFormulario = montarDadosFormularioCategoria(equipamento);
 
-    els.detalheTitulo.textContent = t('shell.detalhes_da_categoria');
+    els.detalheTitulo.textContent = t('dashboard.detalhes_do_equipamento');
     els.detalheBody.innerHTML = renderDashboardCategoriaForm(dadosFormulario);
 
     abrirDetalhe(els);

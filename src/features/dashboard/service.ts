@@ -61,6 +61,7 @@ export function gerarCsvEstoque(equipamentos: Equipamento[]): string {
     const manutencaoPorEquipamento = contarManutencaoPorEquipamento(getOcorrenciasPorTipo('manutencao'));
 
     const linhas = equipamentos.map((equipamento) => [
+        equipamento.modelo,
         equipamento.categoria?.nome ?? '',
         equipamento.quantidadeTotal,
         equipamento.quantidadeDisponivel,
@@ -68,7 +69,7 @@ export function gerarCsvEstoque(equipamentos: Equipamento[]): string {
         equipamento.quantidadeQuebrada
     ]);
 
-    return gerarLinhasCsv([['Categoria', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'], ...linhas]);
+    return gerarLinhasCsv([['Modelo', 'Categoria', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'], ...linhas]);
 }
 
 function formatarPct(valor: number, total: number): string {
@@ -90,7 +91,8 @@ export function filtrarEquipamentos(equipamentos: Equipamento[], termo: string):
     if (!termo.trim()) return equipamentos;
     const termoMin = termo.toLowerCase();
     
-    return equipamentos.filter((eq) => 
+    return equipamentos.filter((eq) =>
+        (eq.modelo || '').toLowerCase().includes(termoMin) ||
         (eq.categoria?.nome || '').toLowerCase().includes(termoMin)
     );
 }

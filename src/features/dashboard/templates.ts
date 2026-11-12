@@ -13,6 +13,11 @@ export function renderDashboardCategoriaForm(dados: CategoriaResumoDados): strin
         <p class="category-edit-subtitle">${t('dashboard.resumo_somente_leitura_da_categoria')}</p>
 
         <div class="form-group margin-bottom-lg">
+            <label class="category-field-label">${t('dashboard.equipamento')}</label>
+            <div class="category-field-input">${dados.modelo}</div>
+        </div>
+
+        <div class="form-group margin-bottom-lg">
             <label class="category-field-label">${t('dashboard.nome_da_categoria')}</label>
             <div class="category-field-input">${dados.categoria}</div>
         </div>
@@ -59,7 +64,10 @@ function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
     return html`
         <div class="estoque-row" data-id="${equipamento.id}" data-equipamento-id="${equipamento.id}"
             role="button" tabindex="0">
-            <span data-col="categoria">${equipamento.categoria?.nome ?? ''}</span>
+            <span data-col="categoria">
+                <span class="estoque-modelo">${equipamento.modelo}</span>
+                <span class="estoque-categoria">${equipamento.categoria?.nome ?? ''}</span>
+            </span>
             <span data-col="total" data-label="${t('dashboard.total')}">${equipamento.quantidadeTotal}</span>
             <span data-col="disponivel" data-label="${t('dashboard.disponivel')}">${equipamento.quantidadeDisponivel}</span>
             <span data-col="quebrado" data-label="${t('dashboard.quebrado')}">${equipamento.quantidadeQuebrada}</span>
@@ -70,7 +78,7 @@ function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
 export function renderDashboardEstoqueContent(equipamentos: Equipamento[]): string {
     const header = html`
         <div class="estoque-header">
-            <span>${t('dashboard.categoria')}</span>
+            <span>${t('dashboard.equipamento')}</span>
             <span>${t('dashboard.total')}</span>
             <span>${t('dashboard.disponivel')}</span>
             <span>${t('dashboard.quebrado')}</span>

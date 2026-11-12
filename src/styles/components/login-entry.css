@@ -13,7 +13,9 @@
     width: min(980px, 100%);
     max-width: 980px;
     min-height: min(600px, calc(100dvh - 48px));
-    max-height: calc(100dvh - 48px);
+    /* No max-height (overrides auth.css): on short viewports the overlay scrolls instead of clipping the form. */
+    max-height: none;
+    margin: auto;
     padding: 0;
     overflow: hidden;
     border: 1px solid var(--border-color);
@@ -436,6 +438,94 @@ html[data-theme="dark"] .login-gate-submit:hover:not(:disabled) {
 
 .login-gate .modal-close-btn {
     display: none;
+}
+
+/* Short desktop/laptop viewports: tighten vertical rhythm so the whole form, including the support contact, fits. */
+@media (min-width: 721px) and (max-height: 780px) {
+    .login-gate.modal-overlay {
+        padding: 16px 24px;
+    }
+
+    .login-gate .login-gate-card {
+        min-height: 0;
+    }
+
+    .login-gate-aside {
+        padding: 28px 30px 22px;
+    }
+
+    .login-gate-intro {
+        margin: 32px 0 24px;
+    }
+
+    .login-gate-main {
+        padding-top: 24px;
+        padding-bottom: 22px;
+    }
+
+    .login-gate-preferences {
+        margin-bottom: 18px;
+    }
+
+    .login-gate-heading {
+        margin-bottom: 16px;
+    }
+
+    .login-gate-form {
+        gap: 11px;
+    }
+
+    .login-gate-guest-note {
+        margin-top: -5px;
+    }
+
+    .login-gate-footnote {
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+}
+
+/* Very short viewports (e.g. 1080p laptops at 150% scaling): float the preferences beside the heading. */
+@media (min-width: 721px) and (max-height: 700px) {
+    .login-gate.modal-overlay {
+        padding-block: 10px;
+    }
+
+    .login-gate-main {
+        position: relative;
+        padding-top: 20px;
+        padding-bottom: 16px;
+    }
+
+    .login-gate-preferences {
+        position: absolute;
+        top: 14px;
+        right: clamp(30px, 5vw, 58px);
+        margin: 0;
+    }
+
+    .login-gate-intro {
+        margin: 24px 0 18px;
+    }
+
+    .login-gate-heading h1 {
+        font-size: 1.6rem;
+    }
+
+    .login-gate-form {
+        gap: 9px;
+    }
+
+    .login-gate-form .form-group input,
+    .login-gate-submit,
+    .login-gate-guest {
+        min-height: 40px;
+    }
+
+    .login-gate-footnote {
+        margin-top: 6px;
+        padding-top: 8px;
+    }
 }
 
 @media (max-width: 720px) {

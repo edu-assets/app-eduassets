@@ -1,6 +1,13 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.0.1 oficial**, publicada em 28/10/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.0.2 oficial**, publicada em 12/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.0.2 — Correções de interface — 12 de novembro de 2026
+
+- Dashboard → Estoque: cada linha passou a exibir o nome do equipamento (modelo) com a categoria abaixo, eliminando linhas aparentemente duplicadas quando há mais de um equipamento na mesma categoria (por exemplo, dois modelos de tablet). O cabeçalho da coluna passou a ser "Equipamento".
+- A busca do estoque também encontra equipamentos pelo modelo; o painel de detalhe mostra o equipamento junto da categoria; a exportação CSV do estoque ganhou a coluna `Modelo`.
+- Login: o cartão de entrada não tem mais altura máxima fixa com conteúdo oculto. Em telas baixas (notebooks, escalas de 125–150%) o espaçamento é compactado para que todo o formulário, incluindo o contato de suporte, fique visível; se ainda faltar altura, a tela rola em vez de cortar o conteúdo.
+- O selo de versão do painel Sobre foi atualizado para a versão atual.
 
 ## v1.0.1 — Correções de segurança e operação — 28 de outubro de 2026
 

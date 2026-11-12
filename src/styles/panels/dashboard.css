@@ -190,6 +190,25 @@
     transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
+.estoque-row [data-col="categoria"] {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.estoque-modelo {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.estoque-categoria {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
 .estoque-row:hover {
     background-color: var(--hover-light);
     border-bottom-color: transparent;
@@ -756,7 +775,7 @@
     }
 
     .estoque-row [data-col="categoria"] {
-        display: block;
+        display: flex;
         width: 100%;
         padding: 9px 10px;
         margin-bottom: 4px;
