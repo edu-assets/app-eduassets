@@ -15,6 +15,8 @@ const PREFS_PADRAO: PushPreferencias = { emprestimo: true, devolucao: true, ocor
 /** Errors carry i18n keys as message (no spaces), resolved by traduzirErro(). */
 export const ERRO_PUSH_INDISPONIVEL = 'notif.erro_indisponivel';
 export const ERRO_PERMISSAO_NEGADA = 'notif.erro_permissao';
+/** The browser resolved the permission request as 'default': no popup was shown (quiet UI) or it was dismissed. */
+export const ERRO_PERMISSAO_SEM_RESPOSTA = 'notif.erro_permissao_sem_resposta';
 export const ERRO_NAO_SUPORTADO = 'notif.erro_nao_suportado';
 
 /** Converts a base64url VAPID public key into the bytes expected by PushManager.subscribe(). */
@@ -132,16 +134,13 @@ function mesmaChave(inscricao: PushSubscription, chave: Uint8Array): boolean {
 }
 
 /**
- * Enables notifications on this device. Must be called from a user click: the permission prompt is shown
- * before any await so browsers (Safari in particular) still see the user gesture.
+ * Subscribes this browser to push and registers the subscription on the server. Requires the notification
+ * permission to be granted already (no prompt is shown here), so it also serves the automatic activation
+ * that runs after the user allows notifications manually in the browser UI.
  */
-export async function ativar(): Promise<PushPreferencias> {
-    const suporte = suportePush();
-    if (suporte === 'bloqueado') throw new Error(ERRO_PERMISSAO_NEGADA);
-    if (suporte !== 'suportado') throw new Error(ERRO_NAO_SUPORTADO);
-
-    const permissao = await Notification.requestPermission();
-    if (permissao !== 'granted') throw new Error(ERRO_PERMISSAO_NEGADA);
+export async function concluirAtivacao(): Promise<PushPreferencias> {
+    if (suportePush() !== 'suportado') throw new Error(ERRO_NAO_SUPORTADO);
+    if (Notification.permission !== 'granted') throw new Error(ERRO_PERMISSAO_NEGADA);
 
     const config = await obterConfigPush();
     if (!config.habilitado || !config.chavePublica) throw new Error(ERRO_PUSH_INDISPONIVEL);
@@ -179,6 +178,25 @@ export async function ativar(): Promise<PushPreferencias> {
         if (criadaAgora) await inscricao.unsubscribe().catch(() => false);
         throw erro;
     }
+}
+
+/**
+ * Enables notifications on this device. Must be called from a user click: the permission prompt is shown
+ * before any await so browsers (Safari in particular) still see the user gesture.
+ *
+ * 'denied' maps to ERRO_PERMISSAO_NEGADA; 'default' (no decision: the browser showed no prompt, e.g. Chrome's
+ * quieter permission UI, or it was dismissed) maps to ERRO_PERMISSAO_SEM_RESPOSTA so the UI can guide the user.
+ */
+export async function ativar(): Promise<PushPreferencias> {
+    const suporte = suportePush();
+    if (suporte === 'bloqueado') throw new Error(ERRO_PERMISSAO_NEGADA);
+    if (suporte !== 'suportado') throw new Error(ERRO_NAO_SUPORTADO);
+
+    const permissao = await Notification.requestPermission();
+    if (permissao === 'denied') throw new Error(ERRO_PERMISSAO_NEGADA);
+    if (permissao !== 'granted') throw new Error(ERRO_PERMISSAO_SEM_RESPOSTA);
+
+    return concluirAtivacao();
 }
 
 /**

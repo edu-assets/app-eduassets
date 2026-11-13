@@ -18,11 +18,16 @@ import { initRfidListener } from './core/rfid/rfidListener.js';
 import { initDocumentation } from './features/sobre/index.js';
 import { initAnalyticsConsent } from './core/analytics/analyticsConsent.js';
 import { initNotificacoes } from './core/notifications/index.js';
+import { APP_VERSION } from './core/version.js';
+import { initBannerNotificacoes } from './features/notificacoes/banner.js';
 import { capturarPainelDaUrlInicial } from './core/notifications/notificationRouting.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initI18n();
+    // The static HTML already carries the version (Vite plugin); this keeps the badge right if it was cached or edited.
+    const badgeVersao = document.getElementById('sobre-versao');
+    if (badgeVersao) badgeVersao.textContent = `v${APP_VERSION}`;
     initModals();
     // A notification click can open the app at "/#panel-...": remember the panel before the entry route rewrites the hash.
     capturarPainelDaUrlInicial();
@@ -49,7 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         initRfidListener,
         initPerfil,
         initDocumentation,
-        initNotificacoes
+        initNotificacoes,
+        initBannerNotificacoes
     ];
 
     inits.forEach((fn) => {

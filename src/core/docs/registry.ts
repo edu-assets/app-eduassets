@@ -29,7 +29,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'auto_stories',
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
-        version: '1.2.0',
+        version: '1.3.0',
         updatedAt: '2026-11-13'
     },
     {
@@ -83,7 +83,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: '1.2.0',
+        version: '1.3.0',
         updatedAt: '2026-11-13'
     },
     {
@@ -101,8 +101,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'code',
         file: { pt: '/docs/DESENVOLVIMENTO.md', en: '/docs/DEVELOPMENT.md' },
         category: 'tecnico',
-        version: '1.0.1',
-        updatedAt: '2026-10-28'
+        version: '1.3.0',
+        updatedAt: '2026-11-13'
     },
     {
         id: 'deployment',

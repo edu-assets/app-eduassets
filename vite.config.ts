@@ -1,7 +1,26 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'vitest/config';
+import type { Plugin } from 'vite';
+
+// package.json is the single source of truth for the product version (see scripts/set-version.mjs).
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
+
+/** Replaces %APP_VERSION% in index.html at build/serve time so the static HTML is right before any JS runs. */
+function appVersionHtml(): Plugin {
+    return {
+        name: 'eduassets-app-version-html',
+        transformIndexHtml: {
+            order: 'pre',
+            handler: (html) => html.replaceAll('%APP_VERSION%', pkg.version)
+        }
+    };
+}
 
 export default defineConfig({
-  plugins: [],
+  plugins: [appVersionHtml()],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   publicDir: 'public',
   server: {
     host: '0.0.0.0',

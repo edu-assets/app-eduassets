@@ -1,6 +1,21 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.2.0**, released on November 12, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.3.0**, released on November 13, 2026; earlier entries remain historical.
+
+## v1.3.0 — Notification banner, guided activation and single version source — November 13, 2026
+
+Consolidates everything released since 1.2.0; details are in the dated entries below.
+
+- **Push notifications for administrators:** system alerts for loans, returns and occurrences, enabled per device (see *Push notifications for administrators*).
+- **Activation banner:** administrators who have not yet enabled notifications on the current device see a banner at the top of the app, with **Enable notifications** and **Not now** (hides the banner for 7 days on that device). On iPhone and iPad outside the installed app it explains how to install to the Home Screen; when notifications are blocked it shows how to unblock them.
+- **Permission prompt not shown:** when the browser does not show the permission prompt (for example Chrome's quieter notification UI, which shows only a crossed-out bell in the address bar, or prompts dismissed several times), the app explains how to allow notifications through the icon next to the address (Notifications › Allow); the blocked message was improved the same way.
+- **Automatic completion:** after the administrator allows notifications in the browser's site settings, the app finishes enabling them by itself, with no second click — only if they asked for them in that session or the banner was showing; a device is never subscribed silently.
+- **Automatic refresh and date and time:** periodic data refresh, mobile form fixes, server clock and date validation.
+- **Privacy and cookies:** app Privacy Policy, cookie consent and Google Analytics only after acceptance.
+- **Recovery email:** new professional template and delivery through Brevo.
+- **Operations:** active monitoring, dead-man-switch alerts, MFA and protections on the Cloudflare account, and the official `rclone` in backups.
+- **Single version source:** the version shown in the app (About badge) comes from the app's `package.json` at build time. `npm run version:set -- <x.y.z> [--date YYYY-MM-DD]` updates the version in every repository (app, API, site, documentation READMEs and package files) and `npm run version:set -- --check` verifies they agree. The portfolio site also reads its version from its `package.json`.
+- **Documentation:** User Manual §10 (banner, permission prompt and system notifications) and Development (new *Versioning*).
 
 ## Automatic refresh and date and time adjustments — November 12, 2026
 

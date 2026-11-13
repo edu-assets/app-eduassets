@@ -2,11 +2,17 @@ import { isAdmin } from '../../core/auth/permissions.js';
 import { subscribe as subscribeAuth } from '../../core/state/authStore.js';
 import { subscribe as subscribeI18n, t, traduzirErro } from '../../core/state/i18nStore.js';
 import { showToast } from '../../core/ui/index.js';
+import {
+    EVENTO_ESTADO_PUSH,
+    orientacaoDePermissao,
+    registrarDesativacao,
+    solicitarAtivacao
+} from '../../core/notifications/pushActivation.js';
 import { pushDisponivelNoServidor } from '../../core/api/notificacoes.js';
 import type { PushPreferencias } from '../../core/api/notificacoes.js';
 import { definirSomAtivo, desbloquearAudio, isSomAtivo, tocarAlerta } from '../../core/notifications/alertSound.js';
 import {
-    ativar,
+    ERRO_PERMISSAO_SEM_RESPOSTA,
     atualizarPreferencias,
     desativar,
     enviarTeste,
@@ -84,7 +90,11 @@ export function initNotificacoesConfig(): void {
                 mostrarStatus('notif.status_servidor', null);
                 break;
             default:
-                mostrarStatus('notif.status_inativo', null);
+                // After an Activate click the browser showed no prompt: keep the guidance visible next to the status.
+                mostrarStatus(
+                    'notif.status_inativo',
+                    orientacaoDePermissao() === ERRO_PERMISSAO_SEM_RESPOSTA ? ERRO_PERMISSAO_SEM_RESPOSTA : null
+                );
         }
 
         // The button is only offered when it can do something: enable on supported devices, disable when active.
@@ -129,14 +139,15 @@ export function initNotificacoesConfig(): void {
     btnAtivar.addEventListener('click', () => {
         if (!isAdmin()) return;
         const desativando = estadoAtual?.inscrito === true;
-        // ativar() asks for the permission synchronously inside this click handler (user gesture).
+        // solicitarAtivacao() asks for the permission synchronously inside this click handler (user gesture)
+        // and shows its own feedback (a long guidance toast when the browser shows no prompt).
         void executar(btnAtivar, async () => {
             if (desativando) {
                 const servidorAtualizado = await desativar();
+                registrarDesativacao();
                 showToast(t(servidorAtualizado ? 'notif.desativadas_ok' : 'notif.desativadas_parcial'), servidorAtualizado ? 'success' : 'warning');
             } else {
-                await ativar();
-                showToast(t('notif.ativadas_ok'), 'success');
+                await solicitarAtivacao();
             }
         });
     });
@@ -177,6 +188,8 @@ export function initNotificacoesConfig(): void {
     document.addEventListener('click', (evento) => {
         if ((evento.target as HTMLElement).closest('.nav-link[data-panel="panel-config"]')) void renderizar();
     });
+    // Activation, deactivation or automatic activation (also triggered from the banner) changes this card.
+    window.addEventListener(EVENTO_ESTADO_PUSH, () => { void renderizar(); });
     window.addEventListener('focus', () => { void renderizar(); });
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') void renderizar();

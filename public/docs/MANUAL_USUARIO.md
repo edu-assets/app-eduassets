@@ -156,8 +156,8 @@ Administradores recebem uma notificação do sistema, no computador ou no celula
 
 Para ativar:
 
-1. Em **Configurações**, localize o cartão **Notificações** e clique em **Ativar notificações neste dispositivo**.
-2. Permita as notificações no aviso do navegador.
+1. Clique em **Ativar notificações** no banner no topo do app ou, em **Configurações**, no cartão **Notificações**, em **Ativar notificações neste dispositivo**. O banner aparece para administradores sem notificações neste dispositivo; **Agora não** o oculta por 7 dias naquele dispositivo.
+2. Quando o navegador pedir, clique em **Permitir**.
 3. Clique em **Enviar notificação de teste** para confirmar o recebimento.
 4. Use os interruptores de **empréstimos**, **devoluções** e **ocorrências** para escolher o que chega neste dispositivo. Eles são aplicados imediatamente; não é preciso clicar em **Salvar Configurações**.
 
@@ -165,7 +165,10 @@ Para desativar neste dispositivo, clique em **Desativar neste dispositivo**.
 
 - **Android:** o Chrome funciona diretamente.
 - **iPhone e iPad:** exigem iOS 16.4 ou superior e o app instalado na tela de início. No Safari, toque em **Compartilhar → Adicionar à Tela de Início**, abra o app pelo ícone, entre como administrador e então ative as notificações.
-- **Bloqueio do navegador:** se as notificações foram bloqueadas, libere-as nas configurações do site (ícone ao lado do endereço) e recarregue a página.
+- **Aviso de permissão não aparece:** clique no ícone ao lado do endereço do site (sino riscado, cadeado ou configurações do site) › **Notificações** › **Permitir**. O app conclui a ativação sozinho, desde que você a tenha pedido nesta sessão ou o banner esteja visível.
+- **Bloqueio do navegador:** no mesmo lugar, altere para **Permitir** e recarregue a página.
+- **Brave:** ative **Usar serviços do Google para mensagens push** em `brave://settings/privacy`.
+- **Só aparece dentro do app:** a notificação é do sistema e aparece mesmo com a aba do eduAssets em segundo plano, com outro programa à frente ou com a aba fechada (navegador aberto). Se ela só aparece dentro do app, confira o sistema operacional: no Windows, **Configurações › Sistema › Notificações** (notificações ativadas, navegador permitido e **Não incomodar** desligado); no macOS, **Ajustes do Sistema › Notificações › o navegador**.
 
 **Conteúdo:** o título é **Novo empréstimo**, **Devolução registrada** ou **Nova ocorrência**. Empréstimos e devoluções mostram o solicitante, os equipamentos e quem registrou, por exemplo: *João Silva · Notebook Dell ×2, Projetor Epson ×1 · por Ana Souza*. Ocorrências mostram os equipamentos, o tipo (**Observação**, **Manutenção** ou **Quebrado**) e quem registrou. Os equipamentos aparecem como "Categoria Modelo", até três itens e depois "e mais N". A notificação nunca mostra observações, descrições, problemas, medidas tomadas nem números de patrimônio, e um pedido de ocorrência gera uma única notificação, mesmo com vários números de patrimônio. O texto está em português nesta versão e pode aparecer na tela de bloqueio. Ao tocar em uma notificação de empréstimo ou devolução, o app abre o **Dashboard** na aba **Histórico**; uma notificação de ocorrência abre o painel **Controle**.
 

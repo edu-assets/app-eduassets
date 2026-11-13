@@ -34,6 +34,17 @@ npm run preview
 
 The Vite development server listens on port **5173** and proxies the configured API routes, `/ready`, and the supported WebSocket path to the local API on port 3000. A production Cloudflare Pages build uses repository root `/`, build command `npm run build`, and output directory `dist`. `public/_headers` is copied to the output. These commands do not deploy or connect to production services.
 
+## Versioning
+
+The canonical version is the `version` field in the app's `package.json`. To release a version, run in `app/`:
+
+```bash
+npm run version:set -- X.Y.Z --date YYYY-MM-DD
+npm run version:set -- --check
+```
+
+The first command updates the app, API and site package files, the README status lines and the docs README release date; the second verifies that they all agree. The About version badge uses `__APP_VERSION__` (a Vite `define`) through `src/core/version.ts`. Then update the changelog and, after pinning the docs commit, run `npm run docs:sync -- --docs <path to the docs clone>`.
+
 ## Structure and conventions
 
 `src/core/` contains application-wide services, API client, authentication, routing, state, localization, and theme. `src/features/` owns screen workflows; `src/shared/` contains reusable UI; `src/types/` centralizes TypeScript contracts. `src/core/docs/registry.ts` is the single source of truth for documents shown in About; the canonical Markdown and PDF assets are in the docs repository under `public/docs/`. The copy in the frontend repository is a transition fallback and should not become a second editing source.

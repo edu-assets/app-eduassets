@@ -1,6 +1,21 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.2.0 oficial**, publicada em 12/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.3.0 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.3.0 — Banner de notificações, ativação guiada e versão única — 13 de novembro de 2026
+
+Consolida tudo o que foi publicado desde a 1.2.0; os detalhes estão nas entradas datadas abaixo.
+
+- **Notificações push para administradores:** alertas do sistema para empréstimos, devoluções e ocorrências, ativados por dispositivo (veja *Notificações push para administradores*).
+- **Banner de ativação:** administradores que ainda não ativaram as notificações no dispositivo atual veem um banner no topo do app, com **Ativar notificações** e **Agora não** (oculta o banner por 7 dias naquele dispositivo). No iPhone e no iPad, fora do app instalado, ele explica como instalar na Tela de Início; com as notificações bloqueadas, mostra como desbloqueá-las.
+- **Permissão não exibida:** quando o navegador não mostra o pedido de permissão (por exemplo, a interface discreta do Chrome, que mostra apenas um sino riscado na barra de endereço, ou pedidos dispensados várias vezes), o app explica como permitir pelo ícone ao lado do endereço (Notificações › Permitir); a mensagem de bloqueio foi melhorada da mesma forma.
+- **Conclusão automática:** depois que o administrador permite as notificações nas configurações do site, o app conclui a ativação sozinho, sem segundo clique — apenas se ele a pediu naquela sessão ou se o banner estava visível; um dispositivo nunca é inscrito silenciosamente.
+- **Atualização automática e data e hora:** atualização periódica dos dados, correções de formulários no celular, relógio do servidor e validação de datas.
+- **Privacidade e cookies:** Política de Privacidade do app, consentimento de cookies e Google Analytics somente após aceite.
+- **E-mail de recuperação:** novo modelo profissional e envio pelo Brevo.
+- **Operação:** monitoramento ativo, alertas por dead-man switch, MFA e proteções na conta Cloudflare e `rclone` oficial nos backups.
+- **Versão única:** a versão exibida no app (selo em Sobre) vem do `package.json` do app em tempo de build. `npm run version:set -- <x.y.z> [--date AAAA-MM-DD]` atualiza a versão em todos os repositórios (app, API, site, READMEs da documentação e arquivos de pacote) e `npm run version:set -- --check` verifica se estão de acordo. O site do portfólio também lê a versão do seu `package.json`.
+- **Documentação:** Manual do Usuário §10 (banner, permissão e notificações do sistema) e Desenvolvimento (novo *Versionamento*).
 
 ## Atualização automática e ajustes de data e hora — 12 de novembro de 2026
 

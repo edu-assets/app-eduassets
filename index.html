@@ -139,6 +139,19 @@
 
             <main class="main-content">
 
+                <!-- Aviso para administradores: notificações push ainda não ativadas neste dispositivo -->
+                <div class="push-banner" id="push-banner" role="region" aria-label="Aviso sobre notificações" hidden data-i18n-exclude>
+                    <span class="material-symbols-outlined push-banner__icon" aria-hidden="true">notifications_active</span>
+                    <p class="push-banner__text" id="push-banner-texto"></p>
+                    <div class="push-banner__actions">
+                        <button type="button" class="btn btn-primary btn-sm" id="push-banner-ativar" hidden>
+                            <span class="material-symbols-outlined" aria-hidden="true">notifications_active</span>
+                            <span class="btn-label">Ativar notificações</span>
+                        </button>
+                        <button type="button" class="btn btn-neutral btn-sm" id="push-banner-dispensar">Agora não</button>
+                    </div>
+                </div>
+
                 <!-- PAINEL 0: Início -->
                 <section class="panel active" id="panel-inicio">
 
@@ -1574,7 +1587,7 @@
                                     <span class="btn-label" data-i18n-exclude>Ativar notificações neste dispositivo</span>
                                 </button>
                             </div>
-                            <p class="config-notif-help" id="config-notif-ajuda" hidden data-i18n-exclude></p>
+                            <p class="config-notif-help" id="config-notif-ajuda" role="status" aria-live="polite" hidden data-i18n-exclude></p>
 
                             <div class="config-item">
                                 <div class="config-item-info">
@@ -1746,7 +1759,7 @@
                                 </div>
 
                                 <div class="sobre-sistema-topo">
-                                    <span class="sobre-status-badge" data-i18n="shell.versao_produto">v1.2.0</span>
+                                    <span class="sobre-status-badge" id="sobre-versao">v%APP_VERSION%</span>
                                     <span class="sobre-sistema-status" data-i18n="shell.release_oficial">Versão oficial</span>
                                 </div>
 

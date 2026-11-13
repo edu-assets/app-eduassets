@@ -156,8 +156,8 @@ Administrators receive a system notification, on the computer or the phone, when
 
 To enable it:
 
-1. In **Settings**, find the **Notifications** card and click **Turn on notifications on this device**.
-2. Allow notifications in the browser prompt.
+1. Click **Enable notifications** in the banner at the top of the app or, in **Settings**, on the **Notifications** card, **Turn on notifications on this device**. The banner appears for administrators without notifications on this device; **Not now** hides it for 7 days on that device.
+2. When the browser asks, click **Allow**.
 3. Click **Send test notification** to confirm that it arrives.
 4. Use the switches for **loans**, **returns** and **issues** to choose what reaches this device. They apply immediately; you do not need to click **Save Settings**.
 
@@ -165,7 +165,10 @@ To turn it off on this device, click **Turn off on this device**.
 
 - **Android:** Chrome works directly.
 - **iPhone and iPad:** require iOS 16.4 or later and the app installed on the home screen. In Safari, tap **Share → Add to Home Screen**, open the app from its icon, sign in as an administrator and then enable notifications.
-- **Blocked by the browser:** if notifications were blocked, allow them in the site settings (icon next to the address) and reload the page.
+- **Permission prompt does not appear:** click the icon next to the site address (crossed-out bell, padlock or site settings) › **Notifications** › **Allow**. The app finishes the activation by itself, provided you asked for it in this session or the banner is showing.
+- **Blocked by the browser:** in the same place, change it to **Allow** and reload the page.
+- **Brave:** turn on **Use Google services for push messaging** in `brave://settings/privacy`.
+- **Only appears inside the app:** the notification is a system notification and appears even with the eduAssets tab in the background, another program in front, or the tab closed (browser open). If it only appears inside the app, check the operating system: on Windows, **Settings › System › Notifications** (notifications on, the browser allowed and **Do not disturb** off); on macOS, **System Settings › Notifications › the browser**.
 
 **Content:** the title is **Novo empréstimo**, **Devolução registrada** or **Nova ocorrência** (Portuguese in this version). Loan and return notifications show the requester, the equipment and who registered the operation, for example: *João Silva · Notebook Dell ×2, Projetor Epson ×1 · por Ana Souza*. Issue notifications show the equipment, the type (**Observação**, **Manutenção** or **Quebrado**) and who registered it. Equipment appears as "Category Model", up to three items and then "e mais N" ("and N more"). A notification never shows notes, descriptions, problem text, measures taken or patrimony numbers, and one issue request produces a single notification even when it has several patrimony numbers. The notification can appear on the lock screen. Tapping a loan or return notification opens the **Dashboard** on the **History** tab; tapping an issue notification opens the **Control** panel.
 

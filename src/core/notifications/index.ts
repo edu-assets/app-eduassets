@@ -4,6 +4,7 @@ import { pushDisponivelNoServidor } from '../api/notificacoes.js';
 import { registrarDesbloqueioDeAudio } from './alertSound.js';
 import { ouvirMensagensDoServiceWorker } from './inAppAlerts.js';
 import { aplicarPainelPendente, descartarPainelPendente } from './notificationRouting.js';
+import { initAtivacaoPush } from './pushActivation.js';
 import { registrarServiceWorker, sincronizar } from './pushNotifications.js';
 
 let adminPreparado = false;
@@ -29,6 +30,7 @@ async function prepararAdministrador(): Promise<void> {
  */
 export function initNotificacoes(): void {
     registrarDesbloqueioDeAudio();
+    initAtivacaoPush();
     ouvirMensagensDoServiceWorker();
 
     const aoMudarSessao = (autenticado: boolean): void => {

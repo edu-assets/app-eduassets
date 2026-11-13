@@ -34,6 +34,17 @@ npm run preview
 
 O servidor Vite escuta na porta **5173** e encaminha as rotas de API configuradas, `/ready` e o caminho WebSocket suportado para a API local na porta 3000. O build Cloudflare Pages de produção usa a raiz `/`, comando `npm run build` e diretório de saída `dist`. `public/_headers` é copiado para a saída. Esses comandos não fazem deploy nem se conectam a serviços de produção.
 
+## Versionamento
+
+A versão canônica é o campo `version` do `package.json` do app. Para publicar uma versão, execute em `app/`:
+
+```bash
+npm run version:set -- X.Y.Z --date AAAA-MM-DD
+npm run version:set -- --check
+```
+
+O primeiro comando atualiza os arquivos de pacote do app, da API e do site, as linhas de status dos READMEs e a data de release do README da documentação; o segundo verifica se todos concordam. O selo da versão em Sobre usa `__APP_VERSION__` (`define` do Vite) por meio de `src/core/version.ts`. Em seguida, atualize o changelog e, depois de fixar o commit da documentação, execute `npm run docs:sync -- --docs <caminho do clone da documentação>`.
+
 ## Estrutura e convenções
 
 `src/core/` contém serviços globais, cliente de API, autenticação, rotas, estado, localização e tema. `src/features/` é responsável pelos fluxos das telas; `src/shared/` contém UI reutilizável; `src/types/` centraliza contratos TypeScript. `src/core/docs/registry.ts` é a fonte única dos documentos exibidos em Sobre; o Markdown e os PDFs canônicos estão em `public/docs/` no repositório de documentação. A cópia no frontend é fallback temporário e não deve virar uma segunda fonte de edição.
