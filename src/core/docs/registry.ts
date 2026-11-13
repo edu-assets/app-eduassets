@@ -29,7 +29,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'auto_stories',
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
-        version: '1.4.0',
+        version: '1.5.0',
         updatedAt: '2026-11-13'
     },
     {
@@ -47,8 +47,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'account_tree',
         file: { pt: '/docs/ARQUITETURA.md', en: '/docs/ARCHITECTURE.md' },
         category: 'tecnico',
-        version: '1.0.1',
-        updatedAt: '2026-10-28'
+        version: '1.5.0',
+        updatedAt: '2026-11-13'
     },
     {
         id: 'hosting',
@@ -65,7 +65,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'schema',
         file: { pt: '/docs/MODELO_DE_DADOS.md', en: '/docs/DATA_MODEL.md' },
         category: 'tecnico',
-        version: '1.4.0',
+        version: '1.5.0',
         updatedAt: '2026-11-13'
     },
     {
@@ -83,7 +83,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: '1.4.0',
+        version: '1.5.0',
         updatedAt: '2026-11-13'
     },
     {
@@ -92,7 +92,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'api',
         file: { pt: '/docs/REFERENCIA_API.md', en: '/docs/API_REFERENCE.md' },
         category: 'tecnico',
-        version: '1.4.0',
+        version: '1.5.0',
         updatedAt: '2026-11-13'
     },
     {

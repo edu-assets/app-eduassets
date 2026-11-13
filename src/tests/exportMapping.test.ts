@@ -8,8 +8,12 @@ const mocks = vi.hoisted(() => ({
   gerarLinhasCsv: vi.fn((_matriz: Array<Array<string | number>>) => '')
 }));
 
+vi.mock('../core/ui/index.js', () => ({ showToast: vi.fn() }));
+vi.mock('../core/state/i18nStore.js', () => ({ t: (k: string) => k }));
 vi.mock('../core/state/equipamentoStore.js', () => ({ getEquipamentos: () => mocks.equipamentos }));
-vi.mock('../core/state/loanStore.js', () => ({ getLoans: () => mocks.loans }));
+vi.mock('../core/api/emprestimos.js', () => ({
+  listarTodasPaginasEmprestimos: async () => ({ items: mocks.loans, completo: true })
+}));
 vi.mock('../core/state/ocorrenciasStore.js', () => ({
   getOcorrenciasPorTipo: (tipo: string) => mocks.ocorrencias.filter((o: any) => o.tipo === tipo)
 }));

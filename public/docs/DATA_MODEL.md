@@ -43,11 +43,12 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `id` | `Int` | No | Primary key; `autoincrement()` |
 | `nome` | `String` | No | — |
 | `cargo` | `String` | No | — |
+| `ativo` | `Boolean` | No | `@default(true)`; inactive responsible parties are left out of `GET /responsaveis` (except for an admin with `incluirInativos=true`) and cannot receive new loans |
 | `emprestimos` | `Emprestimo[]` | No | Prisma relation, 1:N |
 | `criadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
 | `criadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
 
-`Responsavel` is a domain entity referenced by loans. The schema does not give it a system access level; access is represented separately by `Usuario`.
+`Responsavel` is a domain entity referenced by loans. The schema does not give it a system access level; access is represented separately by `Usuario`. The additive migration `20261114100000_loan_history_filters_responsavel_active` adds `Responsavel.ativo` (default `true`, so existing records stay active) and the `Emprestimo(dataRetirada, id)` index.
 
 ### Usuario (User)
 
@@ -171,7 +172,7 @@ The foreign-key relations are `Equipamento.categoriaId → Categoria.id`, `Empre
 - `createdAt` on `Equipamento`, `Usuario`, `Emprestimo`, and `Ocorrencia` uses `@default(now())`.
 - `Equipamento.updatedAt` uses Prisma's `@updatedAt`; it is not declared as a user-supplied nullable field.
 - Unique declarations are `Categoria.nome`, `Usuario.login`, nullable `Usuario.rfidTokenHash`, and `PushSubscription.endpoint`. These produce uniqueness enforcement/indexes for those fields.
-- Explicit secondary indexes cover `Emprestimo.status`, `Ocorrencia.status`, equipment availability/broken counts, `ItemEmprestimo.emprestimoId`, the composite `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)`, and `PushSubscription.usuarioId`.
+- Explicit secondary indexes cover `Emprestimo.status`, `Ocorrencia.status`, equipment availability/broken counts, `ItemEmprestimo.emprestimoId`, the composite `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)`, and `PushSubscription.usuarioId`. `Emprestimo(dataRetirada, id)` supports history pagination (`dataRetirada` and `id` descending).
 - `ItemEmprestimo.emprestimoId` and `Ocorrencia.equipamentoId` therefore have explicit query-supporting indexes; the former also has a composite index for equipment-to-open-loan lookup.
 
 ## Business rules verified in backend services

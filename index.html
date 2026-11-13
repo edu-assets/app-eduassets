@@ -681,6 +681,10 @@
                                     <span></span>
                                 </div>
                                 <div class="historico-lista" id="historico-lista"></div>
+                                <div class="historico-paginacao" id="historico-paginacao" hidden>
+                                    <span class="historico-paginacao-texto" id="historico-contagem" aria-live="polite"></span>
+                                    <button type="button" class="btn btn-neutral btn-sm" id="btn-historico-carregar-mais" hidden>Carregar mais</button>
+                                </div>
                                 <div class="historico-vazio devolucao-detalhe-empty" id="historico-vazio"
                                     style="display:none;">
                                     <span class="material-symbols-outlined">history</span>
@@ -1684,6 +1688,53 @@
                             <p class="config-notif-note" data-i18n-key="notif.aplicacao_imediata">As opções desta seção são aplicadas na hora.</p>
                         </div>
 
+                        <div class="config-card" id="config-sessao-card" hidden>
+                            <div class="config-card-header">
+                                <span class="config-icon config-icon-secondary">
+                                    <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+                                </span>
+                                <div>
+                                    <h4 class="config-card-title" data-i18n-key="sessao.config_titulo">Sessão</h4>
+                                    <p class="config-card-desc" data-i18n-key="sessao.config_desc">Encerre a sessão automaticamente quando este navegador ficar sem uso.</p>
+                                </div>
+                            </div>
+
+                            <div class="config-item">
+                                <div class="config-item-info">
+                                    <span class="config-item-icon config-item-icon-neutral">
+                                        <span class="material-symbols-outlined" aria-hidden="true">lock_clock</span>
+                                    </span>
+                                    <div class="config-item-text">
+                                        <span class="config-item-title" data-i18n-key="sessao.config_switch_titulo">Encerrar sessão por inatividade</span>
+                                        <span class="config-item-desc" id="config-sessao-switch-desc" data-i18n-key="sessao.config_switch_desc">Vale somente para este navegador. Em outros navegadores e dispositivos a sessão continua como antes.</span>
+                                    </div>
+                                </div>
+                                <button type="button" class="config-switch" id="config-sessao-switch" data-sessao-switch
+                                    role="switch" aria-checked="false" aria-label="Encerrar sessão por inatividade" data-i18n-aria-label="sessao.config_switch_titulo"
+                                    aria-describedby="config-sessao-switch-desc">
+                                    <span class="config-switch-thumb"></span>
+                                    <span class="config-switch-label" data-i18n-exclude>Desativado</span>
+                                </button>
+                            </div>
+
+                            <div class="config-item config-item--control">
+                                <div class="config-item-info">
+                                    <span class="config-item-icon config-item-icon-neutral">
+                                        <span class="material-symbols-outlined" aria-hidden="true">hourglass_empty</span>
+                                    </span>
+                                    <div class="config-item-text">
+                                        <label class="config-item-title" for="config-sessao-duracao" data-i18n-key="sessao.config_duracao_titulo">Tempo sem uso</label>
+                                        <span class="config-item-desc" data-i18n-key="sessao.config_duracao_desc">Antes de encerrar, um aviso permite continuar conectado.</span>
+                                    </div>
+                                </div>
+                                <select class="config-select" id="config-sessao-duracao" disabled>
+                                    <option value="15" data-i18n-key="sessao.minutos_15">15 minutos</option>
+                                    <option value="30" data-i18n-key="sessao.minutos_30">30 minutos</option>
+                                    <option value="60" data-i18n-key="sessao.minutos_60">60 minutos</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="config-footer-bar">
                             <div class="config-footer-info">
                                 <span class="icon-badge icon-badge--sm icon-badge--info">
@@ -1959,45 +2010,40 @@
                                 <span class="material-symbols-outlined seguranca-toggle-chevron">expand_more</span>
                             </button>
 
-                            <div class="seguranca-form-senha" id="seguranca-form-senha" style="display:none;">
-                                <!-- Campos-isca ocultos: absorvem o autofill do Chrome antes dos campos reais -->
-                                <input type="text" name="fake-username" autocomplete="username" style="display:none"
-                                    tabindex="-1" aria-hidden="true">
-                                <input type="password" name="fake-password" autocomplete="new-password"
-                                    style="display:none" tabindex="-1" aria-hidden="true">
-
+                            <form class="seguranca-form-senha" id="seguranca-form-senha" style="display:none;" novalidate>
+                                <input type="text" id="seguranca-username-oculto" name="username" autocomplete="username" hidden readonly tabindex="-1" aria-hidden="true">
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="seguranca-senha-atual">Senha atual</label>
                                         <input type="password" id="seguranca-senha-atual" name="senha-atual-eduassets"
-                                            autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore>
+                                            autocomplete="current-password" aria-describedby="seguranca-senha-erro">
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="seguranca-senha-nova">Nova senha</label>
                                         <input type="password" id="seguranca-senha-nova" name="senha-nova-eduassets"
-                                            autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore
+                                            autocomplete="new-password" aria-describedby="seguranca-senha-erro"
                                             placeholder="Mínimo de 12 caracteres">
                                     </div>
                                     <div class="form-group">
                                         <label for="seguranca-senha-confirmar">Confirmar nova senha</label>
                                         <input type="password" id="seguranca-senha-confirmar"
-                                            name="senha-confirmar-eduassets" autocomplete="new-password" readonly
-                                            data-lpignore="true" data-1p-ignore
+                                            name="senha-confirmar-eduassets" autocomplete="new-password"
+                                            aria-describedby="seguranca-senha-erro"
                                             placeholder="Digite novamente a nova senha">
                                     </div>
                                 </div>
-                                <p class="login-erro" id="seguranca-senha-erro"></p>
+                                <p class="login-erro" id="seguranca-senha-erro" role="alert" aria-live="polite"></p>
 
                                 <div class="category-edit-actions">
                                     <button type="button" class="btn btn-neutral"
                                         id="seguranca-senha-cancelar">Cancelar</button>
-                                    <button type="button" class="btn btn-primary" id="seguranca-senha-salvar">
+                                    <button type="submit" class="btn btn-primary" id="seguranca-senha-salvar">
                                         <span class="material-symbols-outlined">save</span> Atualizar senha
                                     </button>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </section>
@@ -2508,6 +2554,39 @@
                 <button class="btn btn-neutral" id="confirmar-exclusao-cancelar" type="button">Cancelar</button>
                 <button class="btn btn-danger" id="confirmar-exclusao-btn" type="button" data-requires-admin>
                     <span class="material-symbols-outlined">delete</span> Excluir registro
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session expiry warning (core/auth/sessionTimeout.ts): must be answered explicitly. -->
+    <div class="modal-overlay" id="modal-sessao-expirando" data-close-on-overlay="false">
+        <div class="modal-box modal-box--md modal-box--sessao" role="alertdialog" aria-modal="true" aria-labelledby="sessao-aviso-titulo"
+            aria-describedby="sessao-aviso-descricao" tabindex="-1">
+            <div class="modal-header">
+                <span class="modal-header-icon modal-header-icon-warning">
+                    <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+                </span>
+                <div class="modal-header-titles">
+                    <h3 id="sessao-aviso-titulo" data-i18n-key="sessao.aviso_titulo">Sua sessão está prestes a expirar</h3>
+                    <p class="modal-subtitle" id="sessao-aviso-descricao" data-i18n-key="sessao.aviso_descricao">Sem atividade recente, a sessão será encerrada quando a contagem chegar a zero. Deseja continuar conectado?</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p class="sessao-aviso-contagem">
+                    <span class="sessao-aviso-rotulo" data-i18n-key="sessao.aviso_tempo_restante">Tempo restante</span>
+                    <span class="sessao-aviso-tempo" id="sessao-aviso-contagem" role="timer" aria-atomic="true" data-i18n-exclude>02:00</span>
+                </p>
+                <p class="modal-callout modal-callout-error sessao-aviso-erro" id="sessao-aviso-erro" role="alert" hidden data-i18n-exclude></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-neutral" id="sessao-aviso-sair" type="button">
+                    <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                    <span data-i18n-key="sessao.sair_agora">Sair agora</span>
+                </button>
+                <button class="btn btn-primary" id="sessao-aviso-continuar" type="button">
+                    <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+                    <span data-i18n-key="sessao.continuar_conectado">Continuar conectado</span>
                 </button>
             </div>
         </div>

@@ -5,9 +5,10 @@ import {
     usuariosApi,
     ApiError
 } from '../../core/api/index.js';
-import type { Categoria, Equipamento, Responsavel, Usuario, UsuarioUpdatePayload } from '../../types/index.js';
+import type { Categoria, Equipamento, Responsavel, ResponsavelUpdatePayload, Usuario, UsuarioUpdatePayload } from '../../types/index.js';
 import { atualizarEquipamentoPorId } from '../../core/state/equipamentoStore.js';
 import { t } from '../../core/state/i18nStore.js';
+import { senhaAtendeRegras } from '../../shared/components/passwordField.js';
 
 export interface CampoOpcao {
     value: string | number;
@@ -68,12 +69,13 @@ const CADASTRO_CONFIG: Record<TipoCadastro, CadastroConfig<any>> = {
         descricao: 'cadastros.desc_responsaveis',
         icone: 'badge',
         iconeClasse: 'success',
-        listar: () => responsaveisApi.listarResponsaveis(),
+        // Admin-only screen: includes deactivated people so they stay manageable (can be reactivated).
+        listar: () => responsaveisApi.listarResponsaveis({ incluirInativos: true }),
         criar: (valores) => responsaveisApi.criarResponsavel({
             nome: valores['cad-nome'],
             cargo: valores['cad-cargo']
         }),
-        formatarItem: (item: Responsavel) => `${item.nome} — ${item.cargo}`,
+        formatarItem: (item: Responsavel) => `${item.nome} — ${item.cargo}${item.ativo === false ? ` — ${t('cadastros.inativo')}` : ''}`,
         campos: [
             { id: 'cad-nome', label: 'cadastros.campo_nome', type: 'text', placeholder: 'cadastros.placeholder_nome_completo' },
             { id: 'cad-cargo', label: 'cadastros.campo_cargo', type: 'text', placeholder: 'cadastros.placeholder_cargo' }
@@ -186,13 +188,7 @@ export async function revogarCartaoRfid(usuarioId: number): Promise<void> {
 export function validarNovaSenha(senha: string, confirmacao: string): string | null {
     if (!senha || !confirmacao) return 'validation.seguranca.preencha_campos';
     if (senha !== confirmacao) return 'validation.seguranca.confirmacao_incorreta';
-    const forte = new TextEncoder().encode(senha).length <= 72
-        && senha.length >= 12
-        && /[a-z]/.test(senha)
-        && /[A-Z]/.test(senha)
-        && /\d/.test(senha)
-        && /[^A-Za-z0-9]/.test(senha);
-    return forte ? null : 'validation.cadastros.senha_fraca';
+    return senhaAtendeRegras(senha) ? null : 'validation.cadastros.senha_fraca';
 }
 
 export async function redefinirSenhaUsuario(usuarioId: number, senha: string): Promise<void> {
@@ -226,5 +222,24 @@ export async function ajustarTotalEquipamento(
 }
 
 export function textoBuscaUsuario(usuario: Usuario): string {
-    return `${usuario.nome} ${usuario.login} ${usuario.nivelAcesso === 'ADMINISTRADOR' ? 'Administrador' : 'Editor'}${usuario.ativo === false ? ' Inativo' : ''}`;
+    return `${usuario.nome} ${usuario.login} ${usuario.nivelAcesso === 'ADMINISTRADOR' ? t('cadastros.administrador') : t('cadastros.editor')}${usuario.ativo === false ? ` ${t('cadastros.inativo')}` : ''}`;
+}
+
+
+/* ===== Categorias e responsáveis: edição ===== */
+
+export async function renomearCategoria(categoriaId: number, nome: string): Promise<Categoria> {
+    try {
+        return await categoriasApi.atualizarCategoria(categoriaId, nome);
+    } catch (erro) {
+        throw new Error(erro instanceof ApiError ? erro.message : 'feedback.erro_renomear_categoria');
+    }
+}
+
+export async function atualizarResponsavel(responsavelId: number, dados: ResponsavelUpdatePayload): Promise<Responsavel> {
+    try {
+        return await responsaveisApi.atualizarResponsavel(responsavelId, dados);
+    } catch (erro) {
+        throw new Error(erro instanceof ApiError ? erro.message : 'feedback.erro_atualizar_responsavel');
+    }
 }

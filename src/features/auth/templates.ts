@@ -17,13 +17,13 @@ export function renderUserMenuAutenticado(usuario: AuthUser): string {
             <span class="material-symbols-outlined user-menu-chevron">expand_more</span>
         </button>
         <div class="user-menu-dropdown" id="user-menu-dropdown">
-            <a href="#" class="user-menu-item nav-link" data-panel="panel-perfil">
+            <a href="#app/perfil" class="user-menu-item nav-link" data-panel="panel-perfil">
                 <span class="icon-badge icon-badge--sm icon-badge--neutral">
                     <span class="material-symbols-outlined">person</span>
                 </span>
                 ${t('auth.meu_perfil')}
             </a>
-            <a href="#" class="user-menu-item nav-link" data-panel="panel-seguranca">
+            <a href="#app/seguranca" class="user-menu-item nav-link" data-panel="panel-seguranca">
                 <span class="icon-badge icon-badge--sm icon-badge--neutral">
                     <span class="material-symbols-outlined">lock</span>
                 </span>

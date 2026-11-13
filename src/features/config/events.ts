@@ -33,8 +33,9 @@ function animarTrocaIdioma(grupoIdioma: HTMLElement, idioma: IdiomaPreferencia):
 }
 
 export function attachConfigEvents(): void {
-    // Push notification switches (data-notif-switch) are wired in notificacoes.ts and apply immediately.
-    document.querySelectorAll<HTMLElement>('.config-switch:not([data-notif-switch])').forEach((switchEl) => {
+    // Push notification switches (data-notif-switch) are wired in notificacoes.ts and the session switch
+    // (data-sessao-switch) in sessao.ts; both apply immediately.
+    document.querySelectorAll<HTMLElement>('.config-switch:not([data-notif-switch]):not([data-sessao-switch])').forEach((switchEl) => {
         switchEl.addEventListener('click', () => {
             const ativo = switchEl.classList.toggle('active');
             switchEl.setAttribute('aria-checked', String(ativo));

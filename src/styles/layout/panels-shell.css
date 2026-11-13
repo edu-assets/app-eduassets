@@ -7,6 +7,13 @@
     display: block;
 }
 
+/* The router moves focus to the panel heading (tabindex="-1"); it is not an interactive control. */
+.panel[tabindex="-1"]:focus,
+.panel h1[tabindex="-1"]:focus,
+.panel h2[tabindex="-1"]:focus {
+    outline: none;
+}
+
 .panel-title {
     font-size: 1.6rem;
     font-weight: 500;

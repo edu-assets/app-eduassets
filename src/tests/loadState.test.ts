@@ -1,14 +1,21 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// Carga de empréstimos = abertos (completo) + primeira página do histórico; `listarEmprestimos` simula os abertos.
 const listarEmprestimos = vi.fn();
 vi.mock('../core/api/emprestimos.js', () => ({
-    listarEmprestimos: (...args: unknown[]) => listarEmprestimos(...args),
+    listarEmprestimosAbertos: (...args: unknown[]) => listarEmprestimos(...args),
+    listarPaginaEmprestimos: vi.fn(async () => ({ items: [], nextCursor: null, limit: 50 })),
+    normalizarFiltros: (f: object) => f,
+    LIMITE_PAGINA_PADRAO: 50,
+    LIMITE_PAGINA_MAXIMO: 100,
+    MAX_PAGINAS: 200,
     criarEmprestimo: vi.fn(),
     atualizarItensEmprestimo: vi.fn(),
     devolverEmprestimo: vi.fn()
 }));
 vi.mock('../core/api/equipamentos.js', () => ({ listarEquipamentos: vi.fn(async () => []), atualizarEquipamento: vi.fn() }));
+vi.mock('../core/state/authStore.js', () => ({ isAutenticado: () => true }));
 vi.mock('../core/state/i18nStore.js', () => ({ t: (key: string) => key, subscribe: vi.fn() }));
 
 import { carregarEmprestimos, limparEmprestimos } from '../core/state/loanStore.js';

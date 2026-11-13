@@ -937,3 +937,22 @@
 .devolucao-col-acao .detalhes-btn {
     width: 100%;
 }
+
+/* ===== Devoluções: busca e ordenação ===== */
+.devolucao-ferramentas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    padding-bottom: 10px;
+}
+
+.devolucao-busca-wrap {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.devolucao-ordem {
+    flex: 0 1 auto;
+    max-width: 100%;
+}

@@ -28,7 +28,9 @@ The current data model tracks quantities by **category/model**. It does not prov
 
 **Password recovery:** if you forgot your password and your login is an email address, click **Forgot my password** on the entry screen, enter the email and select **Send link**. For security, the same message is shown whether or not the account exists. The email comes from `nao-responda@eduassets.tech` with the subject **Reset your eduAssets password** (check the spam folder if it does not arrive within a few minutes) and contains a **Set a new password** button, the full link and the request details; the link is valid for 30 minutes and a single use, and only the most recent request is valid. On the screen opened by the link, fill in **New password** and **Confirm new password** (12+ characters with uppercase, lowercase, number and symbol) and click **Save new password**: every open session of the account is ended and you sign in with the new password. If you did not request the reset, ignore the email: your current password keeps working. If the link is not shown on the entry screen (installation without email configured) or your login is not an email address, ask an **Administrator** to reset it in **Records → System Users** (section 8).
 
-The browser uses cookie-only sessions with an `HttpOnly` cookie and a JWT lifetime of up to 8 hours; page JavaScript cannot read that cookie. On production HTTPS, the cookie is also `Secure`. If the API cannot confirm cookie support, login fails closed without a Bearer fallback or a JWT written to `localStorage`. **Administrator** sessions expire after 30 minutes of inactivity and return to the login screen. The current code does not apply that limit to **Editor** sessions. Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
+The browser uses cookie-only sessions with an `HttpOnly` cookie and a JWT lifetime of up to 8 hours; page JavaScript cannot read that cookie. On production HTTPS, the cookie is also `Secure`. If the API cannot confirm cookie support, login fails closed without a Bearer fallback or a JWT written to `localStorage`. **Administrator** sessions expire after 30 minutes of inactivity; 2 minutes before, a warning with a countdown offers **Stay signed in** or **Sign out now**. Activity in one tab counts for all open tabs. After expiry you return to the login screen and, after signing in again, to the panel you were on. **Editor** sessions do not expire by default; Editors can turn on an optional limit in **Settings → Session** (section 10). Backend activity state is process-local and assumes a single instance; horizontal scaling requires shared state.
+
+**Panel addresses:** each panel has its own address (for example, `#app/devolucoes` or `#app/dashboard/historico`). Reloading keeps the panel open, the browser back and forward buttons work and the tab title shows the current panel. Administrator-only panels (such as **Records**) redirect users without access. After an explicit **Sign out**, the next user starts at **Home** and other tabs are signed out too.
 
 **Security note:** **Log out** asks the server to revoke the account's session version and remove the cookie. A successful password change also revokes earlier sessions while keeping this browser signed in with a renewed session. If the API is unavailable during logout, the browser records the logout as pending: the session is not restored when the app is reopened, and server-side revocation is retried automatically when connectivity returns or the next time the app opens. Use trusted devices and contact the installation administrator if you suspect the account was exposed. The current browser app has no Bearer fallback.
 
@@ -74,7 +76,7 @@ While **Date and Time** is untouched, the field follows the server clock and the
 4. Click **Return** in the list or **Confirm Return** in the detail panel.
 5. Review the **Confirm Return** modal and click **Confirm Return**; **Cancel** closes it without completing the return.
 
-Each loan card has a **Details** button (also keyboard accessible). Signed-in users see in **Details** who registered and who returned the loan.
+Each loan card has a **Details** button (also keyboard accessible). Signed-in users see in **Details** who registered and who returned the loan. Use the search box (requester, responsible, equipment and who registered it) and the sort option **Oldest first** / **Newest first** to find a loan. With no results the screen says "No results for x" and offers **Clear search** or **Clear filters**.
 
 Items become available again after confirmation. **Return Date and Time** is filled automatically and can be edited; on confirmation the UI sends the selected offset-aware ISO timestamp, which the backend validates and persists. Older clients that omit the field continue to use server-current time.
 
@@ -87,6 +89,7 @@ The **Dashboard** shows **Total equipment**, **Available**, **On Loan**, **Maint
 - In **Stock**, review totals by category. Click a row for the category's read-only details.
 - In **History**, review loan dates, items, and status. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Signed-in users also see authorship (who registered and who returned); Guests never receive this data. Stock details show who created and changed the equipment. On first load the Dashboard shows loading skeletons and "—" counters; if loading fails, an in-panel error with **Try again** appears. Click **Details** when available.
 - Use **Search by information...**. In **Stock**, it searches the category; in **History**, it searches number, requester, and responsible party.
+- **History filters:** History loads 50 loans at a time; use **Load more** and follow **Showing N loans** (guests too). The status chips (**All**, **Open**, **Returned**) and period chips (**Today**, **7 days**, **This month**, **All time**) combine with search, which for signed-in users runs on the server over the whole history. **Clear filters** returns to the full view.
 - In **Stock**, **Export** immediately downloads a CSV of the current stock. In **History**, **Export** takes you to the **Export** panel for more options.
 
 Displayed stock is derived from open loans and maintenance/broken issues. Check **Control** before interpreting a count affected by an issue.
@@ -118,9 +121,9 @@ Creating, editing, and resolving require authentication (**Editor** or **Adminis
 **Records** is administrative. Open a card, fill in the fields, and click **Save**; **Cancel** closes the modal. **Registered** lists the data loaded from the API.
 
 - **Equipment:** **Category**, **Model**, and **Quantity**. **Adjust total** changes a model's total quantity and cannot go below the items in use.
-- **Responsible Parties:** **Name** and **Role**.
+- **Responsible Parties:** **Name** and **Role**. They can be edited, deactivated and reactivated; inactive responsible parties do not appear in the **Register Loan** form, but older loans stay in the history.
 - **System Users:** **Name**, **Email / Login** (must be an email), **Password**, and **Access level** (**Administrator** or **Editor**). Name, access level and login can be edited, and the user can be deactivated or reactivated (with confirmation); deactivated users show an **Inactive** badge, and logins that are not valid emails show a warning. You cannot deactivate or demote your own account, nor remove the last active administrator. Password recovery only works if the login's mailbox really exists.
-- **Equipment Categories:** **Category Name**.
+- **Equipment Categories:** **Category Name**; an existing category can be renamed (the name cannot duplicate another).
 
 On a user row, **Link card** opens **RFID Card**. After linking, use **Generate new token** (replaces the current one), **Copy token** when available, or **Revoke card**. Treat the token as sensitive; do not publish it or include it in reports.
 
@@ -134,7 +137,7 @@ Open **Export** and choose one of the cards:
 
 | UI data type | Confirmed workflow |
 | --- | --- |
-| **Loans and returns** | Set **Start date** and **End date**; the current month is selected by default. The period filters records by the loan creation date. |
+| **Loans and returns** | Set **Start date** and **End date**; the current month is selected by default. The period filters records by the loan checkout date, and the export includes every loan in the period, even if there are more than 50. |
 | **Equipment** | The report reflects the current inventory. Use **Select all** or choose equipment individually; at least one must be selected. |
 
 Then:
@@ -156,6 +159,10 @@ In **Settings**:
 - **Notifications:** per-device activation, with switches for loans, returns and issues (see the subsection below).
 
 Theme and language apply immediately and are saved as preferences in this browser; there is no save button.
+
+### Session (Editors)
+
+In **Settings → Session**, an Editor can turn on **Sign out after inactivity** and choose the idle time (15, 30 or 60 minutes). It is off by default, applies to this browser only and, before signing out, a warning lets you **Stay signed in**. For Administrators the 30-minute limit always applies.
 
 ### Push notifications for administrators
 
@@ -185,9 +192,11 @@ To turn it off on this device, click **Turn off on this device**.
 
 ## 11. Account Security
 
-Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 12 characters and the confirmation must match. Click **Update password** or **Cancel**. **Last change** shows the date of the last password change (**No record** if none).
+Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 12 characters with an uppercase letter, a lowercase letter, a number and a symbol (maximum 72 bytes), must differ from the current password, and the confirmation must match. Password fields have a button to show or hide the text and a checklist that ticks off the requirements as you type (the same applies when resetting a password, recovering access and creating users); the form also submits with Enter. Click **Update password** or **Cancel**. **Last change** shows the date of the last password change (**No record** if none).
 
 Changing a password is available only to the authenticated account and requires the current password. If the password is lost, use **Forgot my password** on the entry screen (section 2) or **Contact the administrator**: an administrator can reset it in **Records → System Users** (section 8).
+
+**On-screen notifications:** app notifications are announced to screen readers, have a close button, pause on hover and sit at the bottom center on mobile; error notifications stay until closed.
 
 ## 12. My Profile
 

@@ -6,6 +6,7 @@ import {
     carregarOcorrencias, limparOcorrencias,
     carregarResponsaveis, limparResponsaveis,
 } from './index.js';
+import { limparFiltrosHistorico } from './loanStore.js';
 import { advanceSessionDataVersion, getSessionDataVersion } from './sessionDataVersion.js';
 import { createSessionDataCoordinator } from './sessionDataCoordinator.js';
 import { iniciarLiveSync } from './liveSync.js';
@@ -42,6 +43,8 @@ export async function initAuthDataSync(): Promise<void> {
             const chave = chaveDaSessao(autenticado, usuario?.id);
             if (chave === ultimaChave) return;
             ultimaChave = chave;
+            // Busca/filtros do histórico não podem sobreviver ao usuário que os digitou (PC compartilhado).
+            void limparFiltrosHistorico({ recarregar: false });
             void synchronize(autenticado);
         });
     }

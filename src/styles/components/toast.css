@@ -74,3 +74,46 @@
     from { opacity: 1; transform: translateX(0); }
     to { opacity: 0; transform: translateX(20px); }
 }
+.toast-region {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast-close {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.toast-close:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+}
+
+.toast-close .material-symbols-outlined { color: inherit; font-size: 18px; width: 18px; height: 18px; }
+
+@media (max-width: 600px) {
+    .toast-container {
+        top: auto;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        width: calc(100% - 32px);
+        align-items: center;
+    }
+    .toast-region { width: 100%; align-items: center; }
+    .toast, .toast-info { min-width: 0; width: 100%; max-width: 420px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast, .toast-info, .toast-leaving { animation: none; }
+}

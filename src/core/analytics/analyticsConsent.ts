@@ -1,3 +1,5 @@
+import { HASHES_APP_CONHECIDOS } from '../layout/appRoutes.js';
+
 /**
  * Google Analytics 4 loaded only after explicit consent (LGPD). Without a "granted" choice no Google
  * script is requested and no analytics cookie is written. The choice is stored per browser in
@@ -40,12 +42,13 @@ export function writeConsent(choice: ConsentChoice, storage: Pick<Storage, 'setI
 }
 
 /**
- * Page location sent to Analytics: origin + path + a plain route hash (#app, #login…). Fragments
- * carrying values, such as the emailed password-reset token, are never sent.
+ * Page location sent to Analytics: origin + path + a plain route hash (#app, #login…) or one of the fixed
+ * panel routes (#app/devolucoes, #app/dashboard/historico…). Fragments carrying values, such as the
+ * emailed password-reset token, are never sent.
  */
 export function sanitizePageLocation(href: string): string {
     const url = new URL(href);
-    const route = /^#[a-z][a-z-]*$/i.test(url.hash) ? url.hash : '';
+    const route = /^#[a-z][a-z-]*$/i.test(url.hash) || HASHES_APP_CONHECIDOS.has(url.hash) ? url.hash : '';
     return `${url.origin}${url.pathname}${route}`;
 }
 

@@ -9,6 +9,8 @@ import { mostrarFormularioLogin } from './passwordRecovery.js';
 import { definirTema, getTemaResolvido, subscribe as subscribeTheme } from '../../core/state/themeStore.js';
 import { isAdmin } from '../../core/auth/permissions.js';
 import { desativarDispositivoSilenciosamente } from '../../core/notifications/pushNotifications.js';
+import { EVENTO_SAIR_SOLICITADO, registrarLogoutExplicito } from '../../core/auth/sessionTimeout.js';
+import { restaurarRotaPosLogin } from '../../core/auth/rotaPosLogin.js';
 
 export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () => undefined): void {
     els.sidebarFooter.addEventListener('click', async (e) => {
@@ -25,10 +27,7 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
 
         if (target.closest('#btn-user-menu-sair')) {
             fecharDropdown();
-            await removerNotificacoesDoDispositivo();
-            sair();
-            setEntryRoute('login');
-            showToast(t('feedback.sessao_encerrada'), 'success');
+            await sairExplicitamente();
             return;
         }
 
@@ -60,6 +59,7 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     els.btnHeroLogin?.addEventListener('click', async () => {
         if (isAutenticado()) {
             await removerNotificacoesDoDispositivo();
+            registrarLogoutExplicito();
             void sair().then(() => {
                 setEntryRoute('login');
                 showToast(t('feedback.sessao_encerrada'), 'success');
@@ -86,9 +86,24 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
     els.emailInput.addEventListener('input', () => mostrarErroLogin(els, ''));
     els.senhaInput.addEventListener('input', () => mostrarErroLogin(els, ''));
     window.addEventListener('hashchange', () => sincronizarRotaLogin(els));
+    // "Sair agora" in the session-expiry warning: same explicit sign-out as the user menu.
+    window.addEventListener(EVENTO_SAIR_SOLICITADO, (evento) => {
+        evento.preventDefault();
+        void sairExplicitamente();
+    });
     attachEntryPreferences();
 
     subscribe(({ autenticado, usuario }) => renderAuthStatus(els, autenticado, usuario));
+}
+
+/** Explicit sign-out (user menu, "Sair agora"): the next person on this tab starts at Início. */
+async function sairExplicitamente(): Promise<void> {
+    if (!isAutenticado()) return;
+    await removerNotificacoesDoDispositivo();
+    registrarLogoutExplicito();
+    void sair();
+    setEntryRoute('login');
+    showToast(t('feedback.sessao_encerrada'), 'success');
 }
 
 /**
@@ -215,6 +230,8 @@ async function fazerLogin(els: AuthEls, onInitialAccess: () => void): Promise<vo
     els.btnContinuarConvidado.disabled = true;
     try {
         await entrar(login, senha);
+        // After an expiry, reopen the panel the user was on (the router still applies permissions).
+        restaurarRotaPosLogin();
         setEntryRoute('app');
         closeModal('modal-login');
         els.emailInput.value = '';

@@ -6,6 +6,7 @@ export interface SegurancaEls {
     senhaAlteradaEm: HTMLElement | null;
     btnToggleSenha: HTMLElement;
     formSenha: HTMLElement;
+    usernameOculto?: HTMLInputElement | null;
     inputAtual: HTMLInputElement;
     inputNova: HTMLInputElement;
     inputConfirmar: HTMLInputElement;
@@ -20,6 +21,8 @@ export interface SegurancaEstado {
 
 export function renderInfoConta(els: SegurancaEls, usuario: AuthUser | null): void {
     if (els.email) els.email.textContent = usuario?.login ?? '—';
+    // Campo oculto só para gerenciadores de senha atualizarem a conta certa.
+    if (els.usernameOculto) els.usernameOculto.value = usuario?.login ?? '';
     if (els.senhaAlteradaEm) {
         const valor = usuario?.senhaAlteradaEm;
         els.senhaAlteradaEm.textContent = valor
@@ -35,21 +38,6 @@ function formatarDataHora(iso: string): string {
     return data.toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' });
 }
 
-function liberarReadonlyNoFoco(input: HTMLInputElement): void {
-    const remover = () => {
-        input.removeAttribute('readonly');
-        input.removeEventListener('focus', remover);
-    };
-    input.addEventListener('focus', remover);
-}
-
-export function habilitarProtecaoAutofill(els: SegurancaEls): void {
-    [els.inputAtual, els.inputNova, els.inputConfirmar].forEach((input) => {
-        input.setAttribute('readonly', 'true');
-        liberarReadonlyNoFoco(input);
-    });
-}
-
 export function alternarFormSenha(els: SegurancaEls, estado: SegurancaEstado, abrir: boolean): void {
     estado.formAberto = abrir;
     els.formSenha.style.display = abrir ? 'flex' : 'none';
@@ -58,9 +46,12 @@ export function alternarFormSenha(els: SegurancaEls, estado: SegurancaEstado, ab
     els.inputAtual.value = '';
     els.inputNova.value = '';
     els.inputConfirmar.value = '';
+    [els.inputAtual, els.inputNova, els.inputConfirmar].forEach((input) => {
+        input.type = 'password';
+        input.dispatchEvent(new Event('input'));
+    });
     mostrarErro(els, '');
 
-    if (abrir) habilitarProtecaoAutofill(els);
 }
 
 export function mostrarErro(els: SegurancaEls, mensagem: string): void {

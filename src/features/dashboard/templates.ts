@@ -5,6 +5,7 @@ import { renderStatusBadge } from '../../shared/components/statusBadge.js';
 import { renderPessoaProtegida } from '../../shared/components/restrictedPerson.js';
 import { t } from '../../core/state/i18nStore.js';
 import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
+import { renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
 import type { Equipamento, LoanUI, LoanItemUI, CategoriaResumoDados } from '../../types/index.js';
 
 const LIMITE_CHIPS_HISTORICO_PADRAO = 2;
@@ -76,7 +77,8 @@ function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
     `;
 }
 
-export function renderDashboardEstoqueContent(equipamentos: Equipamento[]): string {
+/** `termoBusca`: busca ativa que zerou a lista (distingue "sem resultados" de "nada cadastrado"). */
+export function renderDashboardEstoqueContent(equipamentos: Equipamento[], termoBusca = ''): string {
     const header = html`
         <div class="estoque-header">
             <span>${t('dashboard.equipamento')}</span>
@@ -88,7 +90,9 @@ export function renderDashboardEstoqueContent(equipamentos: Equipamento[]): stri
 
     const linhas = equipamentos.length
         ? equipamentos.map(renderDashboardEstoqueLinha).join('')
-        : html`<div class="dashboard-andamento-vazio" style="display:flex;"><p>${t('dashboard.nenhum_equipamento_cadastrado')}</p></div>`;
+        : termoBusca.trim()
+            ? renderEmptyStateSemResultados({ consulta: termoBusca, containerClass: 'estado-vazio-resultados', limpar: 'busca' })
+            : html`<div class="dashboard-andamento-vazio" style="display:flex;"><p>${t('dashboard.nenhum_equipamento_cadastrado')}</p></div>`;
 
     return header + linhas;
 }

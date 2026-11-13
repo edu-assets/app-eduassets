@@ -1,7 +1,7 @@
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
-import { getLoans } from '../../core/state/loanStore.js';
-import { attachDashboardEvents } from './events.js';
-import { renderEstoque, renderResumo, renderHistorico } from './render.js';
+import { attachDashboardEvents, renderHistoricoAtual } from './events.js';
+import { garantirBarraFiltros } from './filtros.js';
+import { renderEstoque, renderResumo } from './render.js';
 import type { DashboardEls, DashboardEstado } from './render.js';
 
 export function initDashboard(): void {
@@ -18,6 +18,10 @@ export function initDashboard(): void {
         btnDetalheFechar: document.getElementById('btn-dashboard-detalhe-fechar'),
         historicoLista: document.getElementById('historico-lista') as HTMLElement,
         historicoVazio: document.getElementById('historico-vazio') as HTMLElement,
+        historicoFiltros: garantirBarraFiltros(),
+        historicoPaginacao: document.getElementById('historico-paginacao'),
+        historicoContagem: document.getElementById('historico-contagem'),
+        btnCarregarMais: document.getElementById('btn-historico-carregar-mais') as HTMLButtonElement | null,
         resumoTotal: document.getElementById('resumo-total') as HTMLElement,
         resumoDisponivel: document.getElementById('resumo-disponivel') as HTMLElement,
         resumoEmprestado: document.getElementById('resumo-emprestado') as HTMLElement,
@@ -38,6 +42,6 @@ export function initDashboard(): void {
 
     renderEstoque(els, getEquipamentos());
     renderResumo(els, getEquipamentos());
-    renderHistorico(els, [...getLoans()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
+    renderHistoricoAtual(els, estado);
     // As atualizações dos stores são assinadas em attachDashboardEvents, já respeitando o termo de busca.
 }

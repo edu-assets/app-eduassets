@@ -40,6 +40,16 @@ describe('analytics consent', () => {
         expect(sanitizePageLocation('https://app.eduassets.tech/#privacidade')).toBe('https://app.eduassets.tech/#privacidade');
     });
 
+    it('reports only the fixed list of panel routes', () => {
+        expect(sanitizePageLocation('https://app.eduassets.tech/#app/devolucoes')).toBe('https://app.eduassets.tech/#app/devolucoes');
+        expect(sanitizePageLocation('https://app.eduassets.tech/#app/dashboard/historico'))
+            .toBe('https://app.eduassets.tech/#app/dashboard/historico');
+        expect(sanitizePageLocation('https://app.eduassets.tech/#app/nao-existe')).toBe('https://app.eduassets.tech/');
+        expect(sanitizePageLocation('https://app.eduassets.tech/#app/devolucoes?id=42')).toBe('https://app.eduassets.tech/');
+        expect(sanitizePageLocation('https://app.eduassets.tech/#app/redefinir-senha=AbCdEfGhIjKlMnOpQrStUvWxYz0123456789-_AbCd'))
+            .toBe('https://app.eduassets.tech/');
+    });
+
     it('finds Google Analytics cookies on every domain level to delete them on refusal', () => {
         expect(analyticsCookieNames('_ga=GA1.1.1; eduassets=1; _ga_9LJ1MQRCEV=GS1; _gid=x; other_ga=1'))
             .toEqual(['_ga', '_ga_9LJ1MQRCEV', '_gid']);

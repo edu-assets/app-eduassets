@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await auth;
     await initAuthDataSync();
 
+    // initNavigation runs last: every feature listens before the route in the URL (reload) opens its panel.
     const inits: Array<() => void | Promise<void>> = [
-        initNavigation,
         initMobileNavigation,
         initConfirm,
         initSessionTimeout,
@@ -55,7 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         initPerfil,
         initDocumentation,
         initNotificacoes,
-        initBannerNotificacoes
+        initBannerNotificacoes,
+        initNavigation
     ];
 
     inits.forEach((fn) => {

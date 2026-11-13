@@ -1,3 +1,4 @@
+import { aoTrocarSessao } from '../../core/state/sessionChange.js';
 import { closeModal, showToast, confirmarExclusao } from '../../core/ui/index.js';
 import {
     getConfig,
@@ -11,7 +12,9 @@ import {
     redefinirSenhaUsuario,
     atualizarUsuario,
     ajustarTotalEquipamento,
-    textoBuscaUsuario
+    textoBuscaUsuario,
+    renomearCategoria,
+    atualizarResponsavel
 } from './service.js';
 import {
     abrirModalCadastro,
@@ -20,6 +23,8 @@ import {
     renderListaRegistros,
     renderListaUsuarios,
     renderListaEquipamentos,
+    renderListaCategorias,
+    renderListaResponsaveis,
     aplicarErrosCampos,
     mostrarErroCampo,
     limparCamposFormulario,
@@ -34,16 +39,21 @@ import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { getUsuario } from '../../core/state/authStore.js';
 import type { CampoCadastro } from './service.js';
 import type { CampoComOpcoes, RfidModalEls, ResetSenhaModalEls } from './render.js';
-import type { Equipamento, Usuario } from '../../types/index.js';
+import type { Categoria, Equipamento, Responsavel, Usuario } from '../../types/index.js';
 import {
     filtrarPorBusca,
     validarCamposCadastro,
     validarEdicaoUsuario,
     montarPayloadAtualizacaoUsuario,
-    montarPayloadAjusteTotal
+    montarPayloadAjusteTotal,
+    validarSenhaNovoUsuario,
+    validarRenomearCategoria,
+    nomeCategoriaAlterado,
+    validarEdicaoResponsavel,
+    montarPayloadAtualizacaoResponsavel
 } from './logic.js';
 import type { ItemComAutoria } from './logic.js';
-import { textoEquipamento } from './templates.js';
+import { textoEquipamento, textoCategoria, textoResponsavel } from './templates.js';
 import { traduzirErro, t } from '../../core/state/i18nStore.js';
 import { getEquipamentos, carregarEquipamentos } from '../../core/state/equipamentoStore.js';
 import { carregarResponsaveis } from '../../core/state/responsavelStore.js';
@@ -73,6 +83,8 @@ let itensCache: unknown[] = [];
 let estadoAtual: CadastrosEstado | null = null;
 let editandoUsuarioId: number | null = null;
 let ajustandoEquipamentoId: number | null = null;
+let editandoCategoriaId: number | null = null;
+let editandoResponsavelId: number | null = null;
 /** Double-submit guard: keys of operations currently running. */
 const emAndamento = new Set<string>();
 
@@ -94,6 +106,11 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
     estadoAtual = estado;
 
     els.busca?.addEventListener('input', () => renderizarLista(els));
+    aoTrocarSessao(() => {
+        if (!els.busca?.value) return;
+        els.busca.value = '';
+        if (estadoAtual?.tipoAtual) renderizarLista(els);
+    });
 
     // Clears a field's inline error as soon as the user edits it.
     const limparErroAoDigitar = (e: Event) => {
@@ -121,6 +138,12 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
 
     els.listaWrap.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
+
+        if (target.closest('[data-limpar-busca]')) {
+            if (els.busca) { els.busca.value = ''; els.busca.focus(); }
+            renderizarLista(els);
+            return;
+        }
 
         if (tratarCliqueAcaoLista(els, estado, target)) return;
 
@@ -158,6 +181,12 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
         } else if (form.matches('[data-ajustar-total-form]')) {
             e.preventDefault();
             void salvarAjusteTotal(els, estado, form);
+        } else if (form.matches('[data-renomear-categoria-form]')) {
+            e.preventDefault();
+            void salvarRenomearCategoria(els, estado, form);
+        } else if (form.matches('[data-editar-responsavel-form]')) {
+            e.preventDefault();
+            void salvarEdicaoResponsavel(els, estado, form);
         }
     });
 
@@ -280,6 +309,8 @@ async function abrirCadastro(els: CadastrosEls, estado: CadastrosEstado, tipo: s
     usuariosCache = [];
     editandoUsuarioId = null;
     ajustandoEquipamentoId = null;
+    editandoCategoriaId = null;
+    editandoResponsavelId = null;
     if (els.busca) els.busca.value = '';
 
     let camposComOpcoes: CampoComOpcoes[];
@@ -327,6 +358,10 @@ async function salvarRegistro(els: CadastrosEls, estado: CadastrosEstado): Promi
     });
 
     const erros = validarCamposCadastro(config.campos, valores);
+    if (!erros['cad-senha-usuario'] && estado.tipoAtual === 'usuarios') {
+        const erroSenha = validarSenhaNovoUsuario(valores['cad-senha-usuario'] ?? '');
+        if (erroSenha) erros['cad-senha-usuario'] = erroSenha;
+    }
     aplicarErrosCampos(config.campos.map((campo) => campo.id), erros);
     if (Object.keys(erros).length) return;
 
@@ -365,15 +400,19 @@ function renderizarLista(els: CadastrosEls): void {
         renderListaUsuarios(els, filtrarPorBusca(usuariosCache, termo, textoBuscaUsuario), {
             usuarioAtualId: getUsuario()?.id ?? null,
             editandoId: editandoUsuarioId
-        });
+        }, termo);
     } else if (tipo === 'equipamentos') {
         renderListaEquipamentos(els, filtrarPorBusca(itensCache as Equipamento[], termo, textoEquipamento), {
             ajustandoId: ajustandoEquipamentoId
-        });
+        }, termo);
+    } else if (tipo === 'categorias') {
+        renderListaCategorias(els, filtrarPorBusca(itensCache as Categoria[], termo, textoCategoria), editandoCategoriaId, termo);
+    } else if (tipo === 'responsaveis') {
+        renderListaResponsaveis(els, filtrarPorBusca(itensCache as Responsavel[], termo, textoResponsavel), editandoResponsavelId, termo);
     } else {
         const pares = itensCache.map((item) => ({ texto: formatarItem(tipo, item), item: item as ItemComAutoria }));
         const filtrados = filtrarPorBusca(pares, termo, (par) => par.texto);
-        renderListaRegistros(els, filtrados.map((par) => par.texto), filtrados.map((par) => par.item));
+        renderListaRegistros(els, filtrados.map((par) => par.texto), filtrados.map((par) => par.item), termo);
     }
 }
 
@@ -401,6 +440,44 @@ function tratarCliqueAcaoLista(els: CadastrosEls, estado: CadastrosEstado, targe
         const id = Number(desativar ? desativar.dataset.desativarUsuarioId : reativar?.dataset.reativarUsuarioId);
         const usuario = usuariosCache.find((u) => u.id === id);
         if (usuario) void alternarAtivoUsuario(els, estado, usuario, botao, !desativar);
+        return true;
+    }
+
+    const renomear = target.closest<HTMLElement>('[data-renomear-categoria-id]');
+    if (renomear) {
+        if (bloquearSeNaoAdmin()) return true;
+        editandoCategoriaId = Number(renomear.dataset.renomearCategoriaId);
+        renderizarLista(els);
+        els.listaWrap.querySelector<HTMLInputElement>('#edit-categoria-nome')?.focus();
+        return true;
+    }
+    if (target.closest('[data-renomear-categoria-cancelar]')) {
+        editandoCategoriaId = null;
+        renderizarLista(els);
+        return true;
+    }
+
+    const editarResp = target.closest<HTMLElement>('[data-editar-responsavel-id]');
+    if (editarResp) {
+        if (bloquearSeNaoAdmin()) return true;
+        editandoResponsavelId = Number(editarResp.dataset.editarResponsavelId);
+        renderizarLista(els);
+        els.listaWrap.querySelector<HTMLInputElement>('#edit-responsavel-nome')?.focus();
+        return true;
+    }
+    if (target.closest('[data-editar-responsavel-cancelar]')) {
+        editandoResponsavelId = null;
+        renderizarLista(els);
+        return true;
+    }
+    const desativarResp = target.closest<HTMLButtonElement>('[data-desativar-responsavel-id]');
+    const reativarResp = target.closest<HTMLButtonElement>('[data-reativar-responsavel-id]');
+    if (desativarResp || reativarResp) {
+        if (bloquearSeNaoAdmin()) return true;
+        const botao = (desativarResp ?? reativarResp) as HTMLButtonElement;
+        const id = Number(desativarResp ? desativarResp.dataset.desativarResponsavelId : reativarResp?.dataset.reativarResponsavelId);
+        const responsavel = (itensCache as Responsavel[]).find((r) => r.id === id);
+        if (responsavel) void alternarAtivoResponsavel(els, estado, responsavel, botao, !desativarResp);
         return true;
     }
 
@@ -520,6 +597,123 @@ async function salvarAjusteTotal(els: CadastrosEls, estado: CadastrosEstado, for
             await recarregarLista(els, estado);
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_ajustar_total'), 'error');
+        } finally {
+            setButtonLoading(botao, false);
+        }
+    });
+}
+
+
+async function salvarRenomearCategoria(els: CadastrosEls, estado: CadastrosEstado, form: HTMLFormElement): Promise<void> {
+    if (bloquearSeNaoAdmin()) return;
+    const id = Number(form.dataset.renomearCategoriaForm);
+    const categoria = (itensCache as Categoria[]).find((c) => c.id === id);
+    if (!categoria) return;
+
+    const campo = 'edit-categoria-nome';
+    const entrada = (document.getElementById(campo) as HTMLInputElement | null)?.value ?? '';
+    const erro = validarRenomearCategoria(categoria.nome, entrada);
+    mostrarErroCampo(campo, erro);
+    if (erro) {
+        document.getElementById(campo)?.focus();
+        return;
+    }
+    const novoNome = nomeCategoriaAlterado(categoria.nome, entrada);
+    if (!novoNome) {
+        editandoCategoriaId = null;
+        renderizarLista(els);
+        return;
+    }
+
+    await executarUnico(`renomear-categoria-${id}`, async () => {
+        const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        setButtonLoading(botao, true);
+        try {
+            await renomearCategoria(id, novoNome);
+            editandoCategoriaId = null;
+            await carregarEquipamentos().catch(() => undefined);
+            showToast(t('feedback.categoria_renomeada'), 'success');
+            await recarregarLista(els, estado);
+        } catch (erroApi) {
+            // Inline: duplicate name / not found appear under the field so the admin can fix it in place.
+            mostrarErroCampoTexto(campo, traduzirErro(erroApi, 'feedback.erro_renomear_categoria'));
+        } finally {
+            setButtonLoading(botao, false);
+        }
+    });
+}
+
+function mostrarErroCampoTexto(id: string, mensagem: string): void {
+    document.getElementById(id)?.setAttribute('aria-invalid', 'true');
+    const erroEl = document.getElementById(`${id}-erro`);
+    if (erroEl) {
+        erroEl.textContent = mensagem;
+        erroEl.hidden = false;
+    }
+}
+
+async function salvarEdicaoResponsavel(els: CadastrosEls, estado: CadastrosEstado, form: HTMLFormElement): Promise<void> {
+    if (bloquearSeNaoAdmin()) return;
+    const id = Number(form.dataset.editarResponsavelForm);
+    const responsavel = (itensCache as Responsavel[]).find((r) => r.id === id);
+    if (!responsavel) return;
+
+    const valor = (campo: string) => (document.getElementById(campo) as HTMLInputElement | null)?.value ?? '';
+    const valores = { nome: valor('edit-responsavel-nome'), cargo: valor('edit-responsavel-cargo') };
+    const erros = validarEdicaoResponsavel(valores);
+    aplicarErrosCampos(['edit-responsavel-nome', 'edit-responsavel-cargo'], erros);
+    if (Object.keys(erros).length) return;
+
+    const payload = montarPayloadAtualizacaoResponsavel(responsavel, valores);
+    if (!Object.keys(payload).length) {
+        editandoResponsavelId = null;
+        renderizarLista(els);
+        return;
+    }
+
+    await executarUnico(`editar-responsavel-${id}`, async () => {
+        const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        setButtonLoading(botao, true);
+        try {
+            await atualizarResponsavel(id, payload);
+            editandoResponsavelId = null;
+            await carregarResponsaveis().catch(() => undefined);
+            showToast(t('feedback.responsavel_atualizado'), 'success');
+            await recarregarLista(els, estado);
+        } catch (erro) {
+            mostrarErroCampoTexto('edit-responsavel-nome', traduzirErro(erro, 'feedback.erro_atualizar_responsavel'));
+        } finally {
+            setButtonLoading(botao, false);
+        }
+    });
+}
+
+async function alternarAtivoResponsavel(
+    els: CadastrosEls,
+    estado: CadastrosEstado,
+    responsavel: Responsavel,
+    botao: HTMLButtonElement,
+    ativar: boolean
+): Promise<void> {
+    await executarUnico(`ativo-responsavel-${responsavel.id}`, async () => {
+        const confirmado = await confirmarExclusao({
+            titulo: t(ativar ? 'cadastros.reativar_responsavel_titulo' : 'cadastros.desativar_responsavel_titulo'),
+            mensagem: t(ativar ? 'cadastros.reativar_responsavel_mensagem' : 'cadastros.desativar_responsavel_mensagem').replace('{nome}', responsavel.nome),
+            textoAtencao: ativar ? undefined : t('cadastros.desativar_responsavel_aviso'),
+            chaveConfirmar: ativar ? 'cadastros.reativar' : 'cadastros.desativar',
+            iconeConfirmar: ativar ? 'person_check' : 'person_off'
+        });
+        if (!confirmado) return;
+
+        setButtonLoading(botao, true);
+        try {
+            await atualizarResponsavel(responsavel.id, { ativo: ativar });
+            // Shared store (loan form select) uses the default active-only list, so the person appears/disappears there.
+            await carregarResponsaveis().catch(() => undefined);
+            showToast(t(ativar ? 'feedback.responsavel_reativado' : 'feedback.responsavel_desativado').replace('{nome}', responsavel.nome), 'success');
+            await recarregarLista(els, estado);
+        } catch (erro) {
+            showToast(traduzirErro(erro, 'feedback.erro_atualizar_responsavel'), 'error');
         } finally {
             setButtonLoading(botao, false);
         }

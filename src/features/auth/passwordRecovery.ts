@@ -5,6 +5,7 @@ import { t, traduzirErro, getIdioma } from '../../core/state/i18nStore.js';
 import { showToast } from '../../core/ui/index.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 import { validarNovaSenha } from '../cadastros/service.js';
+import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
 
 const TOKEN_HASH_PATTERN = /^#redefinir-senha=([A-Za-z0-9_-]{43})$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,6 +75,8 @@ export function initPasswordRecovery(tokenInicial: string | null): PasswordRecov
     }
 
     let token = tokenInicial;
+    const checklistNova = aprimorarCampoSenha(nova, { checklist: true });
+    aprimorarCampoSenha(confirmar);
 
     void supportsPasswordRecovery().then((disponivel) => { link.hidden = !disponivel; });
 
@@ -128,6 +131,7 @@ export function initPasswordRecovery(tokenInicial: string | null): PasswordRecov
                 token = null;
                 nova.value = '';
                 confirmar.value = '';
+                checklistNova.atualizar();
                 if (isAutenticado()) {
                     // The reset revoked every session, including this browser's; start clean.
                     window.location.reload();

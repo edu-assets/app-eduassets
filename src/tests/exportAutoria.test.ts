@@ -7,11 +7,15 @@ const mocks = vi.hoisted(() => ({
   gerarLinhasCsv: vi.fn((_m: Array<Array<string | number>>) => '')
 }));
 
+vi.mock('../core/ui/index.js', () => ({ showToast: vi.fn() }));
+vi.mock('../core/state/i18nStore.js', () => ({ t: (k: string) => k }));
 vi.mock('../core/state/authStore.js', () => ({ isAutenticado: () => mocks.autenticado }));
 vi.mock('../core/state/equipamentoStore.js', () => ({
   getEquipamentos: () => [{ id: 1, modelo: 'M', categoria: { nome: 'A' }, quantidadeTotal: 1, quantidadeDisponivel: 1, quantidadeQuebrada: 0 }]
 }));
-vi.mock('../core/state/loanStore.js', () => ({ getLoans: () => mocks.loans }));
+vi.mock('../core/api/emprestimos.js', () => ({
+  listarTodasPaginasEmprestimos: async () => ({ items: mocks.loans, completo: true })
+}));
 vi.mock('../core/state/ocorrenciasStore.js', () => ({
   getOcorrenciasPorTipo: (tipo: string) => mocks.ocorrencias.filter((o: any) => o.tipo === tipo)
 }));
@@ -26,9 +30,11 @@ const base = { dataInicial: '', dataFinal: '', formato: 'csv', equipamentoIds: [
 describe('exportacao com autoria', () => {
   beforeEach(() => {
     mocks.gerarLinhasCsv.mockClear();
+    // Formato da API (paginado=1): o serviço mapeia para LoanUI.
     mocks.loans = [{
-      numero: 1, aluno: 'Beto', responsavel: 'Ana', data: '01/01/2026', dataDevolucao: '02/01/2026', status: 'devolvido',
-      createdAt: new Date(), criadoPor: { id: 1, nome: 'Zé' }, devolvidoPor: null
+      id: 1, solicitanteNome: 'Beto', responsavelId: 3, responsavel: { id: 3, nome: 'Ana' }, status: 'DEVOLVIDO',
+      dataRetirada: '2026-01-01T12:00:00.000Z', dataDevolucao: '2026-01-02T12:00:00.000Z', observacao: null,
+      createdAt: '2026-01-01T12:00:00.000Z', itens: [], criadoPor: { id: 1, nome: 'Zé' }, devolvidoPor: null
     }];
     mocks.ocorrencias = [{
       tipo: 'quebrado', status: 'aberto', equipamentoId: 1, categoria: 'A', modelo: 'M', numero: '1', problema: 'tela',

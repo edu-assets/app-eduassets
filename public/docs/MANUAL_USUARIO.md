@@ -28,7 +28,9 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 
 **Recuperação de senha:** se você esqueceu a senha e seu login é um e-mail, clique em **Esqueci minha senha** na tela de entrada, informe o e-mail e selecione **Enviar link**. Por segurança, a mensagem exibida é a mesma exista ou não a conta. O e-mail chega do remetente `nao-responda@eduassets.tech` com o assunto **Redefinição de senha do eduAssets** (confira a caixa de spam se não aparecer em alguns minutos) e traz o botão **Definir nova senha**, o link por extenso e os detalhes do pedido; o link vale por 30 minutos e uma única vez, e só o pedido mais recente é válido. Na tela aberta pelo link, preencha **Nova senha** e **Confirmar nova senha** (12+ caracteres, com maiúscula, minúscula, número e símbolo) e clique em **Salvar nova senha**: todas as sessões abertas da conta são encerradas e você entra com a nova senha. Se você não pediu a redefinição, ignore o e-mail: a senha atual continua valendo. Se o link não aparecer na tela de entrada (instalação sem e-mail configurado) ou se o seu login não for um e-mail, peça a um **Administrador** que redefina a senha em **Cadastros → Usuários** (seção 8).
 
-O navegador usa exclusivamente sessão por cookie `HttpOnly`, com validade do JWT de até 8 horas; JavaScript da página não pode ler o cookie. Em produção HTTPS, ele também usa `Secure`. Se a API não confirmar suporte a cookie, o login falha fechado, sem token Bearer de fallback e sem gravar JWT em `localStorage`. Sessões de **Administrador** expiram após 30 minutos de inatividade e retornam à tela de login. O código atual não aplica esse limite às sessões de **Editor**. O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
+O navegador usa exclusivamente sessão por cookie `HttpOnly`, com validade do JWT de até 8 horas; JavaScript da página não pode ler o cookie. Em produção HTTPS, ele também usa `Secure`. Se a API não confirmar suporte a cookie, o login falha fechado, sem token Bearer de fallback e sem gravar JWT em `localStorage`. Sessões de **Administrador** expiram após 30 minutos de inatividade; 2 minutos antes, um aviso com contagem regressiva oferece **Continuar conectado** ou **Sair agora**. A atividade em uma aba vale para todas as abas abertas. Ao expirar, você volta à tela de login e, depois de entrar de novo, retorna ao painel em que estava. Sessões de **Editor** não expiram por padrão; o Editor pode ativar um limite opcional em **Configurações → Sessão** (seção 10). O controle de atividade do backend está em memória e pressupõe uma única instância; escala horizontal exige estado compartilhado.
+
+**Endereços dos painéis:** cada painel tem seu próprio endereço (por exemplo, `#app/devolucoes` ou `#app/dashboard/historico`). Recarregar a página mantém o painel aberto, os botões voltar e avançar do navegador funcionam e o título da aba mostra o painel atual. Painéis exclusivos de administrador (como **Cadastros**) redirecionam quem não tem acesso. Ao sair com **Sair**, o próximo usuário começa no **Início** e as outras abas também são desconectadas.
 
 **Nota de segurança:** **Sair** solicita ao servidor a revogação da versão de sessão da conta e a remoção do cookie. A troca de senha também revoga sessões anteriores e mantém este navegador conectado com uma sessão renovada. Se a API estiver indisponível durante o logout, o navegador registra a saída como pendente: a sessão não é restaurada ao reabrir o app, e a revogação no servidor é repetida automaticamente quando a conexão volta ou na próxima abertura do app. Use dispositivos confiáveis e informe o administrador da instalação se suspeitar que sua conta foi exposta. O app atual não oferece fallback Bearer no navegador.
 
@@ -74,7 +76,7 @@ Enquanto **Data e Hora** não for alterada, o campo acompanha o relógio do serv
 4. Clique em **Devolver** na lista ou em **Confirmar Devolução** no painel.
 5. Revise o modal **Confirmar Devolução** e clique em **Confirmar Devolução**; **Cancelar** fecha sem concluir.
 
-O cartão de cada empréstimo tem o botão **Detalhes** (também acessível pelo teclado). Usuários autenticados veem em **Detalhes** quem registrou e quem devolveu o empréstimo.
+O cartão de cada empréstimo tem o botão **Detalhes** (também acessível pelo teclado). Usuários autenticados veem em **Detalhes** quem registrou e quem devolveu o empréstimo. Use o campo de busca (solicitante, responsável, equipamento e quem registrou) e a ordenação **Mais antigos primeiro** / **Mais recentes primeiro** para localizar um empréstimo. Sem resultados, a tela diz "Nenhum resultado para x" e oferece **Limpar busca** ou **Limpar filtros**.
 
 Os itens retornam à quantidade disponível depois da confirmação. **Data e Hora da Devolução** é preenchido automaticamente e pode ser editado; ao confirmar, a UI envia o timestamp ISO com offset selecionado, que o backend valida e persiste. Clientes antigos que não enviem esse campo continuam usando o horário atual do servidor.
 
@@ -87,6 +89,7 @@ O **Dashboard** apresenta os cartões **Total de equipamentos**, **Disponíveis*
 - Na aba **Estoque**, consulte os totais por categoria. Clique em uma linha para abrir os detalhes somente leitura da categoria.
 - Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível. Usuários autenticados também veem a autoria (quem registrou e quem devolveu); Convidados nunca recebem esses dados. Os detalhes do estoque mostram quem cadastrou e alterou o equipamento. Na primeira carga, o Dashboard exibe esqueletos de carregamento e contadores "—"; se a carga falhar, aparece um erro no painel com **Tentar novamente**.
 - Use o campo **Buscar por informações...**. Em **Estoque**, a busca considera a categoria; em **Histórico**, considera número, solicitante e responsável.
+- **Filtros do Histórico:** o Histórico carrega 50 empréstimos por vez; use **Carregar mais** e acompanhe **Mostrando N empréstimos** (vale também para Convidados). Os chips de status (**Todos**, **Abertos**, **Devolvidos**) e de período (**Hoje**, **7 dias**, **Este mês**, **Tudo**) combinam com a busca, que para usuários logados é feita no servidor sobre todo o histórico. **Limpar filtros** volta à visão completa.
 - Na aba **Estoque**, o botão **Exportar** baixa imediatamente um CSV do estoque atual. Na aba **Histórico**, **Exportar** leva ao painel **Exportar**, onde há mais opções.
 
 O estoque exibido é derivado de empréstimos abertos e ocorrências de manutenção/quebra. Consulte **Controle** para registrar ou resolver uma ocorrência antes de interpretar os números.
@@ -118,15 +121,15 @@ Criar, editar e resolver exigem autenticação (**Editor** ou **Administrador**)
 **Cadastros** é administrativo. Abra um cartão, preencha os campos e clique em **Salvar**; **Cancelar** fecha o modal. A lista **Cadastrados** mostra os registros carregados pela API.
 
 - **Equipamentos:** **Categoria**, **Modelo** e **Quantidade**. **Ajustar total** altera a quantidade total de um modelo, sem poder ficar abaixo dos itens em uso.
-- **Responsáveis:** **Nome** e **Cargo**.
+- **Responsáveis:** **Nome** e **Cargo**. Podem ser editados, desativados e reativados; responsáveis inativos não aparecem no formulário de **Registrar Empréstimo**, mas os empréstimos antigos continuam no histórico.
 - **Usuários:** **Nome**, **E-mail / Login** (deve ser um e-mail), **Senha** e **Nível de acesso** (**Administrador** ou **Editor**). Nome, nível de acesso e login podem ser editados, e o usuário pode ser desativado ou reativado (com confirmação); usuários desativados mostram o selo **Inativo**, e logins que não são e-mails válidos mostram um aviso. Você não pode desativar nem rebaixar a própria conta, nem remover o último administrador ativo. A recuperação de senha só funciona se a caixa de e-mail do login realmente existir.
-- **Categorias:** **Nome da categoria**.
+- **Categorias:** **Nome da categoria**; é possível renomear uma categoria existente (o nome não pode repetir o de outra).
 
 No cartão de um usuário, **Vincular cartão** abre **Cartão RFID**. Depois do vínculo, use **Gerar novo token** (substitui o atual), **Copiar token** quando disponível ou **Revogar cartão**. O token é sensível: não o publique nem o inclua em relatórios.
 
 O botão **Redefinir senha** (ícone de cadeado) ao lado de cada usuário abre um modal para definir uma senha temporária. Preencha **Nova senha** e **Confirmar nova senha**: são exigidos pelo menos 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo (máximo de 72 bytes). Ao confirmar, todas as sessões abertas do usuário são encerradas e a ação é registrada na auditoria como `PASSWORD_RESET`. Entregue a senha temporária por um canal seguro e oriente o usuário a trocá-la em **Segurança**. Para a sua própria conta, use **Segurança** (o botão avisa e não abre o modal).
 
-As listas de **Cadastros** têm busca e, para quem está autenticado, mostram quem criou cada registro. A interface atual é voltada a consultar/listar, criar e, para usuários e totais de equipamento, ajustar os registros mostrados. Não presuma que uma ação de edição ou exclusão exibida em outro painel exista para cada cadastro.
+As listas de **Cadastros** têm busca e, para quem está autenticado, mostram quem criou cada registro. A interface atual é voltada a consultar/listar, criar e, para usuários, responsáveis, categorias e totais de equipamento, ajustar os registros mostrados. Não presuma que uma ação de edição ou exclusão exibida em outro painel exista para cada cadastro.
 
 ## 9. Exportar
 
@@ -134,7 +137,7 @@ Abra **Exportar** e escolha um dos cartões:
 
 | Tipo de dados na UI | Workflow confirmado |
 | --- | --- |
-| **Empréstimos e devoluções** | Informe **Data inicial** e **Data final**; o mês atual vem selecionado por padrão. O período filtra os registros pela data de criação do empréstimo. |
+| **Empréstimos e devoluções** | Informe **Data inicial** e **Data final**; o mês atual vem selecionado por padrão. O período filtra os registros pela data de retirada do empréstimo e a exportação inclui todos os empréstimos do período, mesmo que sejam mais de 50. |
 | **Equipamentos** | O relatório representa o estado atual do inventário. Use **Selecionar todos** ou marque equipamentos individualmente; selecione pelo menos um. |
 
 Depois:
@@ -156,6 +159,10 @@ Em **Configurações**:
 - **Notificações:** ativação por dispositivo, com interruptores para empréstimos, devoluções e ocorrências (veja a subseção abaixo).
 
 Tema e idioma são aplicados imediatamente e salvos como preferências deste navegador; não há botão de salvar.
+
+### Sessão (Editores)
+
+Em **Configurações → Sessão**, o Editor pode ativar **Encerrar sessão por inatividade** e escolher o tempo (15, 30 ou 60 minutos). Vem desligado por padrão, vale só neste navegador e, antes de sair, um aviso permite **Continuar conectado**. Para Administradores, o limite de 30 minutos é sempre aplicado.
 
 ### Notificações push para administradores
 
@@ -185,9 +192,11 @@ Para desativar neste dispositivo, clique em **Desativar neste dispositivo**.
 
 ## 11. Segurança da conta
 
-Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preencha **Senha atual**, **Nova senha** e **Confirmar nova senha**; a nova senha precisa ter pelo menos 12 caracteres e a confirmação deve coincidir. Clique em **Atualizar senha** ou **Cancelar**. **Última alteração** mostra a data da última troca de senha (**Sem registro** se não houver).
+Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preencha **Senha atual**, **Nova senha** e **Confirmar nova senha**; a nova senha precisa ter pelo menos 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo (máximo de 72 bytes), ser diferente da senha atual, e a confirmação deve coincidir. Os campos de senha têm um botão para mostrar ou ocultar o texto e uma lista que marca os requisitos atendidos enquanto você digita (o mesmo vale ao redefinir senha, recuperar o acesso e criar usuários); o formulário também é enviado com Enter. Clique em **Atualizar senha** ou **Cancelar**. **Última alteração** mostra a data da última troca de senha (**Sem registro** se não houver).
 
 A troca é permitida somente para a conta autenticada e exige a senha atual. Se a senha for perdida, use **Esqueci minha senha** na tela de entrada (seção 2) ou **Contate o administrador**, que pode redefini-la em **Cadastros → Usuários** (seção 8).
+
+**Avisos na tela:** as notificações do app são lidas por leitores de tela, têm botão de fechar, pausam ao passar o mouse e ficam na parte inferior central no celular; as de erro permanecem até serem fechadas.
 
 ## 12. Meu Perfil
 

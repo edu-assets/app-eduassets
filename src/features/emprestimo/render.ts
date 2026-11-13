@@ -51,6 +51,6 @@ export function popularSelectEquipamentos(
 }
 
 export function popularSelectResponsaveis(select: HTMLSelectElement, responsaveis: Responsavel[]): void {
-    const opcoes = responsaveis.map((r) => ({ id: r.id, label: r.nome }));
+    const opcoes = responsaveis.filter((r) => r.ativo !== false).map((r) => ({ id: r.id, label: r.nome }));
     fillSelect(select, renderPlaceholderOption(t('emprestimo.responsavel_pelo_emprestimo')), renderOpcoesSelect(opcoes));
 }

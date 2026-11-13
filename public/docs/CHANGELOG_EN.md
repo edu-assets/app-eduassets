@@ -1,6 +1,19 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.4.0**, released on November 13, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.5.0**, released on November 13, 2026; earlier entries remain historical.
+
+## v1.5.0 — Filtered history, per-panel routes and a safer session — November 13, 2026
+
+- **Navigation:** each panel has its own address (`#app/<panel>`, for example `#app/devolucoes` and `#app/dashboard/historico`). Reloading keeps the panel, the browser back and forward buttons work and the tab title shows the panel. Administrator-only panels redirect users without access.
+- **Session:** a warning appears 2 minutes before an administrator session expires from inactivity (30 min), with a countdown and the **Stay signed in** and **Sign out now** buttons. Activity in one tab counts for all tabs, and while an administrator is active the app confirms activity with the server at most once per minute. After expiry and a new login the user returns to the previous panel; an explicit logout takes the next user to **Home** and signs out other tabs. Editors can turn on an optional inactivity timeout in **Settings → Session** (off by default; 15, 30 or 60 min; this browser only).
+- **Dashboard → History:** loads 50 loans at a time, with **Load more** and **Showing N loans** (guests too; the silent 50-item limit is gone). Status chips (**All**, **Open**, **Returned**), period chips (**Today**, **7 days**, **This month**, **All time**), server-side search for signed-in users and **Clear filters**.
+- **Export:** fetches every page of the period and filters by checkout date (`dataRetirada`); it used to filter locally by creation date.
+- **Returns:** search (requester, responsible, equipment and registered by) and sorting (oldest or newest first). Empty states distinguish "no results for x" and offer **Clear search** and **Clear filters**.
+- **Records:** rename categories; edit, deactivate and reactivate responsible parties (inactive ones disappear from the loan form); the new-user form blocks weak passwords.
+- **Passwords:** fields have a show/hide button and a live requirement checklist (Security, administrator reset, recovery and new user); the Security form submits with Enter. When changing a password, the new one must meet the strong rule and differ from the current one.
+- **Notifications (toasts):** announced to screen readers, errors stay until closed, close button, pause on hover and bottom-center position on mobile.
+- **API:** `GET /emprestimos` gains `status`, `de`/`ate`, `q` and `paginado=1`; new `PATCH /categorias/:id` and `PATCH /responsaveis/:id`; `GET /responsaveis` returns only active ones by default; `POST /emprestimos` with an inactive responsible party returns `409`. Migration `20261114100000_loan_history_filters_responsavel_active` (`Responsavel.ativo` and index `Emprestimo(dataRetirada, id)`).
+- **Documentation:** User Manual §2, §5, §6, §8, §9, §10 and §11; API Reference (loans, categories, responsible parties, password, notification target); Data Model (`Responsavel.ativo`, index, migration); Architecture (routes and session).
 
 ## v1.4.0 — Record authorship, user management and interface refinements — November 13, 2026
 

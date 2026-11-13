@@ -1,6 +1,7 @@
 import { getUsuario, subscribe } from '../../core/state/authStore.js';
 import { attachSegurancaEvents } from './events.js';
-import { renderInfoConta, habilitarProtecaoAutofill } from './render.js';
+import { renderInfoConta } from './render.js';
+import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
 import type { SegurancaEls, SegurancaEstado } from './render.js';
 
 export function initSeguranca(): void {
@@ -12,6 +13,7 @@ export function initSeguranca(): void {
         senhaAlteradaEm: document.getElementById('seguranca-senha-alterada-em'),
         btnToggleSenha: document.getElementById('seguranca-toggle-senha') as HTMLElement,
         formSenha: document.getElementById('seguranca-form-senha') as HTMLElement,
+        usernameOculto: document.getElementById('seguranca-username-oculto') as HTMLInputElement | null,
         inputAtual: document.getElementById('seguranca-senha-atual') as HTMLInputElement,
         inputNova: document.getElementById('seguranca-senha-nova') as HTMLInputElement,
         inputConfirmar: document.getElementById('seguranca-senha-confirmar') as HTMLInputElement,
@@ -26,7 +28,8 @@ export function initSeguranca(): void {
     subscribe(({ usuario }) => renderInfoConta(els, usuario));
     attachSegurancaEvents(els, estado);
 
-    habilitarProtecaoAutofill(els);
+    [els.inputAtual, els.inputConfirmar].forEach((input) => aprimorarCampoSenha(input));
+    aprimorarCampoSenha(els.inputNova, { checklist: true });
 
     requestAnimationFrame(() => {
         els.inputAtual.value = '';

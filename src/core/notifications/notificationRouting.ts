@@ -1,8 +1,10 @@
 import { isAdmin } from '../auth/permissions.js';
+import { parseRota, getDefinicaoRota, rotaDoPainel } from '../layout/appRoutes.js';
+import { navegarPara } from '../layout/navigation.js';
 
 /**
- * Maps notification target URLs (e.g. "/#panel-controle") to an app panel and opens it through the
- * existing sidebar navigation (.nav-link[data-panel]); the app has no hash router of its own.
+ * Maps notification target URLs (e.g. "/#app/controle", legacy "/#panel-controle") to an app panel and
+ * opens it through the hash router ("#app/<slug>").
  */
 const PAINEIS_PERMITIDOS = new Set([
     'panel-inicio',
@@ -40,7 +42,11 @@ export function painelDaUrlNotificacao(url: unknown): string | null {
         .trim()
         .toLowerCase();
     if (!candidato) return null;
-    const painel = ALIAS[candidato] ?? candidato;
+    const rotaApp = parseRota(`#${candidato}`);
+    const painelDaRota = rotaApp && !rotaApp.desconhecida && candidato !== 'app'
+        ? getDefinicaoRota(rotaApp.slug).painelId
+        : null;
+    const painel = painelDaRota ?? ALIAS[candidato] ?? candidato;
     return PAINEIS_PERMITIDOS.has(painel) ? painel : null;
 }
 
@@ -53,11 +59,11 @@ export function capturarPainelDaUrlInicial(): void {
 export function aplicarPainelPendente(): void {
     if (!painelPendente || !isAdmin()) return;
     const painel = painelPendente;
-    const link = document.querySelector<HTMLElement>(`.nav-link[data-panel="${painel}"]`);
     painelPendente = null;
-    link?.click();
+    const rota = rotaDoPainel(painel);
+    if (!rota) return;
     const aba = ABA_POR_PAINEL[painel];
-    if (link && aba) document.querySelector<HTMLElement>(`.dashboard-tab-link[data-tab="${aba}"]`)?.click();
+    navegarPara(rota.slug, aba ? { aba } : {});
 }
 
 export function abrirPainelDaNotificacao(url: unknown): void {

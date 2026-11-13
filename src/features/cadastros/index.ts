@@ -1,4 +1,5 @@
 import { attachCadastrosEvents } from './events.js';
+import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
 import type { CadastrosEls, CadastrosEstado } from './events.js';
 
 export function initCadastros(): void {
@@ -44,6 +45,9 @@ export function initCadastros(): void {
             btnCancelar: document.getElementById('reset-senha-cancelar') as HTMLElement
         }
     };
+
+    aprimorarCampoSenha(els.resetSenhaModal.novaSenha, { checklist: true });
+    aprimorarCampoSenha(els.resetSenhaModal.confirmarSenha);
 
     const estado: CadastrosEstado = { tipoAtual: null };
 

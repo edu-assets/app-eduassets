@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
     listarEquipamentos: vi.fn(async () => []),
     listarEmprestimos: vi.fn(async () => []),
+    listarPaginaEmprestimos: vi.fn(async () => ({ items: [], nextCursor: null, limit: 50 })),
     criarEmprestimo: vi.fn(async () => ({})),
     atualizarItensEmprestimo: vi.fn(async () => ({})),
     devolverEmprestimo: vi.fn(async () => ({})),
@@ -17,8 +18,15 @@ vi.mock('../core/api/equipamentos.js', () => ({
     listarEquipamentos: mocks.listarEquipamentos,
     atualizarEquipamento: vi.fn()
 }));
+vi.mock('../core/state/authStore.js', () => ({ isAutenticado: () => true }));
+// `listarEmprestimos` = leitura dos empréstimos abertos (uma por recarga).
 vi.mock('../core/api/emprestimos.js', () => ({
-    listarEmprestimos: mocks.listarEmprestimos,
+    listarEmprestimosAbertos: mocks.listarEmprestimos,
+    listarPaginaEmprestimos: mocks.listarPaginaEmprestimos,
+    normalizarFiltros: (f: object) => f,
+    LIMITE_PAGINA_PADRAO: 50,
+    LIMITE_PAGINA_MAXIMO: 100,
+    MAX_PAGINAS: 200,
     criarEmprestimo: mocks.criarEmprestimo,
     atualizarItensEmprestimo: mocks.atualizarItensEmprestimo,
     devolverEmprestimo: mocks.devolverEmprestimo

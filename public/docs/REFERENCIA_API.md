@@ -27,7 +27,7 @@ O middleware da API ainda aceita `Authorization: Bearer <JWT>` para integraçõe
 | `POST` | `/auth/login` | Público; rate limited e Origin validado ao solicitar modo cookie | Autentica com `login` e `password`; grava cookie e retorna o perfil no modo cookie, incluindo `senhaAlteradaEm` (ISO 8601 ou `null`) como em `GET /auth/me`. |
 | `GET` | `/auth/me` | Sessão autenticada | Retorna o perfil da sessão atual, incluindo `senhaAlteradaEm` (ISO 8601 ou `null`), derivado da auditoria (`PASSWORD_CHANGE`, `PASSWORD_RESET`, `PASSWORD_RESET_SELF`). |
 | `POST` | `/auth/logout` | Sessão autenticada | Revoga a versão de sessão do usuário e remove o cookie. Retorna `204`. |
-| `PATCH` | `/auth/senha` | Sessão autenticada | Altera a senha usando `senhaAtual` e `novaSenha`; reemite a sessão atual quando a alteração tem sucesso. |
+| `PATCH` | `/auth/senha` | Sessão autenticada | Altera a senha usando `senhaAtual` e `novaSenha`; reemite a sessão atual quando a alteração tem sucesso. | A nova senha deve atender à regra forte (12+ caracteres, máx. 72 bytes UTF-8, minúscula, maiúscula, número e símbolo) e ser diferente da atual.
 | `POST` | `/auth/senha/recuperar` | Público; 10 pedidos por IP a cada 15 min e 3 por e-mail por hora; Origin validado no modo cookie | Corpo `{ "login": "...", "idioma": "pt" \| "en" }`. Responde sempre `202` com o mesmo corpo, antes de qualquer consulta, para não revelar se a conta existe. Se o login for um e-mail de conta ativa, invalida links anteriores, grava apenas o hash SHA-256 de um token aleatório de 256 bits válido por 30 minutos, registra `PASSWORD_RESET_REQUEST` e envia o link `APP_PUBLIC_URL/#redefinir-senha=<token>` no idioma pedido (HTML com banner inline e texto puro; Reply-To em `SUPPORT_EMAIL`, quando configurado). Retorna `503` quando o SMTP não está configurado. |
 | `POST` | `/auth/senha/redefinir` | Público; 10 tentativas por IP a cada 15 min; Origin validado no modo cookie | Corpo `{ "token": "...", "senha": "..." }` com a política forte. Consome o token (uso único), grava o novo hash, incrementa `sessionVersion` (encerra todas as sessões), apaga outros tokens da conta e registra `PASSWORD_RESET_SELF`. Token inválido, expirado ou usado retorna `400` `backend.auth.link_recuperacao_invalido`. Retorna `204`. |
 | `POST` | `/auth/rfid` | Somente quando `RFID_BRIDGE_ENABLED=true`; bridge autorizada | Recebe leitura RFID do processo bridge e não é um endpoint de login de navegador. |
@@ -41,18 +41,20 @@ O middleware da API ainda aceita `Authorization: Bearer <JWT>` para integraçõe
 |---|---|---|
 | `GET` | `/categorias` | Público/convidado ou autenticado. |
 | `POST` | `/categorias` | Administrador. |
+| `PATCH` | `/categorias/:id` | Administrador; corpo `{ "nome" }`. Erros: `404` `backend.categorias.nao_encontrada` e `409` `backend.categorias.nome_duplicado`. |
 | `GET` | `/equipamentos` | Público/convidado ou autenticado. |
 | `POST`, `PATCH` | `/equipamentos`, `/equipamentos/:id` | Administrador. Quando o `PATCH` envia `quantidadeTotal` sem `quantidadeDisponivel`, o servidor aplica a diferença em `quantidadeDisponivel` de forma atômica sob bloqueio de linha e responde `409` `backend.equipamentos.quantidade_em_uso` se o novo total ficar abaixo das unidades em uso; enviando os dois campos, os valores explícitos são mantidos. |
-| `GET` | `/emprestimos` | Público/convidado ou autenticado. Sem sessão, aceita `limit` (padrão 50, máximo 100) e `cursor` positivo; retorna `{ items, nextCursor, limit }` em ordem de ID decrescente, com projeção pública reduzida. |
-| `POST` | `/emprestimos` | Usuário autenticado (editor ou administrador). `dataRetirada` com mais de 5 minutos no futuro retorna `400` `backend.emprestimos.data_retirada_futura`. |
+| `GET` | `/emprestimos` | Público/convidado ou autenticado. Filtros opcionais: `status` (`ABERTO` ou `DEVOLVIDO`); `de` e `ate` sobre `dataRetirada`, inclusivos, aceitando `AAAA-MM-DD` (dia UTC inteiro) ou ISO com offset; `q` (somente autenticados; sem distinção de maiúsculas em solicitante, responsável e modelo do equipamento; Convidados recebem `400`). Com `paginado=1`, retorna `{ items, nextCursor, limit }` ordenado por `dataRetirada` decrescente e `id` decrescente, com `limit` de 1 a 100 (padrão 50) e `cursor` = id do último empréstimo recebido. Sem `paginado`, usuários autenticados continuam recebendo o array completo (legado, mantido por compatibilidade; o filtro `status` vale). Convidados sempre recebem a resposta paginada, com DTO mascarado (`limit` padrão 50, máximo 100, e `cursor` positivo). |
+| `POST` | `/emprestimos` | Usuário autenticado (editor ou administrador). `dataRetirada` com mais de 5 minutos no futuro retorna `400` `backend.emprestimos.data_retirada_futura`. | Responsável inativo retorna `409` `backend.emprestimos.responsavel_inativo`.
 | `PATCH` | `/emprestimos/:id` | Usuário autenticado; atualização dos itens de empréstimo. |
 | `PATCH` | `/emprestimos/:id/devolver` | Usuário autenticado; registro de devolução. `dataDevolucao` é opcional (omitida = horário do servidor). Mais de 5 minutos no futuro retorna `400` `backend.emprestimos.data_devolucao_futura`; anterior à retirada, comparada por minuto, retorna `400` `backend.emprestimos.data_devolucao_anterior`. |
 | `GET` | `/ocorrencias` | Público/convidado ou autenticado; projeção pública reduzida. |
 | `POST`, `PATCH` | `/ocorrencias`, `/ocorrencias/:id` | Usuário autenticado. |
 | `PATCH` | `/ocorrencias/:id/resolver` | Usuário autenticado. |
 | `DELETE` | `/ocorrencias/:id` | Administrador. |
-| `GET` | `/responsaveis` | Sessão autenticada. |
+| `GET` | `/responsaveis` | Sessão autenticada. Retorna apenas responsáveis ativos; o Administrador pode passar `?incluirInativos=true`. |
 | `POST` | `/responsaveis` | Administrador. |
+| `PATCH` | `/responsaveis/:id` | Administrador; corpo `{ nome?, cargo?, ativo? }`. Erro: `404` `backend.responsaveis.nao_encontrado`. |
 | `GET`, `POST` | `/usuarios` | Administrador. `POST` e `PATCH /usuarios/:id` exigem `login` em formato de e-mail (o login por senha não mudou e contas existentes continuam funcionando). A recuperação de senha só funciona se a caixa de e-mail existir. `GET` inclui `criadoPor` e `atualizadoPor`. |
 | `PATCH` | `/usuarios/:id` | Administrador; altera nome, login, nível de acesso ou status `ativo`. Erros: `400` `backend.usuarios.nao_pode_desativar_a_si_mesmo`, `400` `backend.usuarios.nao_pode_rebaixar_a_si_mesmo` e `409` `backend.usuarios.ultimo_administrador` (deve restar ao menos um administrador ativo). |
 | `POST` | `/usuarios/:id/password-reset` | Administrador; corpo `{ "senha": "..." }` com a política forte (12+ caracteres, maiúscula, minúscula, número, símbolo, máx. 72 bytes). Grava o novo hash, incrementa `sessionVersion` (encerra as sessões do usuário) e registra `PASSWORD_RESET` na auditoria na mesma transação. Retorna `204`. Usado pela ação **Redefinir senha** em **Cadastros → Usuários**. |
@@ -87,7 +89,7 @@ Inscrição de dispositivos de administradores em notificações Web Push (Push 
 - `PUT` e `POST /teste` respondem `503` com `{ erro: 'backend.notificacoes.push_indisponivel' }` quando o push não está configurado. Outras chaves de erro: `backend.notificacoes.endpoint_invalido`, `backend.notificacoes.chave_invalida`, `backend.notificacoes.preferencias_invalidas` e `backend.notificacoes.muitas_requisicoes`.
 - Payload recebido pelo service worker: `{ v: 1, tipo: 'EMPRESTIMO_CRIADO' | 'DEVOLUCAO_REGISTRADA' | 'OCORRENCIA_REGISTRADA' | 'TESTE', titulo, corpo, url, tag, criadoEm }`.
 - O envio ocorre após o commit da operação e nunca atrasa nem faz falhar a requisição original. TTL de 1 hora e urgência `high`. Resposta `404` ou `410` do serviço de push remove a inscrição.
-- Alvo do clique na notificação: empréstimo e devolução abrem `/#panel-dashboard` (aba Histórico); ocorrência abre `/#panel-controle`; teste abre `/#panel-inicio`.
+- Alvo do clique na notificação: empréstimo e devolução abrem `/#panel-dashboard` (aba Histórico); ocorrência abre `/#panel-controle`; teste abre `/#panel-inicio`. O app aceita também os endereços `#app/<painel>` (por exemplo, `/#app/controle`).
 
 ## Autoria dos registros
 

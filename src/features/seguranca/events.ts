@@ -1,9 +1,9 @@
 import { showToast } from '../../core/ui/index.js';
-import { traduzirErro } from '../../core/state/i18nStore.js';
+import { t, traduzirErro } from '../../core/state/i18nStore.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import { getUsuario, atualizarUsuarioLocal } from '../../core/state/authStore.js';
 import { fetchMe } from '../../core/api/auth.js';
-import { trocarSenha } from './service.js';
+import { trocarSenha, validarTrocaSenha } from './service.js';
 import { alternarFormSenha, mostrarErro, renderInfoConta } from './render.js';
 import type { SegurancaEls, SegurancaEstado } from './render.js';
 
@@ -27,10 +27,16 @@ export function attachSegurancaEvents(els: SegurancaEls, estado: SegurancaEstado
 
     els.btnCancelar.addEventListener('click', () => alternarFormSenha(els, estado, false));
 
-    els.btnSalvar.addEventListener('click', async () => {
-        if (bloquearSeConvidado()) return;
+    els.formSenha.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (bloquearSeConvidado() || els.btnSalvar.disabled) return;
 
         mostrarErro(els, '');
+        const problema = validarTrocaSenha(els.inputAtual.value, els.inputNova.value, els.inputConfirmar.value);
+        if (problema) {
+            mostrarErro(els, t(problema));
+            return;
+        }
         els.btnSalvar.disabled = true;
 
         try {

@@ -90,7 +90,11 @@ export function openModal(id: string): void {
 
 export function closeModal(id: string): void {
     const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+        // Campos de senha voltam a "oculto" (tratado por aprimorarCampoSenha) para não vazar o estado ao próximo usuário.
+        modal.querySelectorAll('input[data-password-field="true"]').forEach((campo) => campo.dispatchEvent(new CustomEvent('passwordfield:reset')));
+    }
 
     elementoComFocoAnterior?.focus();
     elementoComFocoAnterior = null;

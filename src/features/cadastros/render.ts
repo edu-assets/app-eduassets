@@ -1,16 +1,19 @@
 import { openModal, closeModal } from '../../core/ui/index.js';
 import { gerarIniciais } from '../../core/utils/iniciais.js';
+import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
 import {
     renderCampo,
     renderItemRegistro,
     renderItemRegistroUsuario,
     renderItemRegistroEquipamento,
+    renderItemRegistroCategoria,
+    renderItemRegistroResponsavel,
     renderListaVazia,
     renderListaCarregando,
     renderListaErro
 } from './templates.js';
 import type { CadastroConfig, CampoCadastro, CampoOpcao } from './service.js';
-import type { Equipamento, Usuario } from '../../types/index.js';
+import type { Categoria, Equipamento, Responsavel, Usuario } from '../../types/index.js';
 import type { OpcoesItemUsuario, OpcoesItemEquipamento } from './templates.js';
 import type { ErrosCampos, ItemComAutoria } from './logic.js';
 import { t } from '../../core/state/i18nStore.js';
@@ -75,6 +78,9 @@ export function abrirModalCadastro(
         })
         .join('');
 
+    const senhaNovoUsuario = document.getElementById('cad-senha-usuario');
+    if (senhaNovoUsuario instanceof HTMLInputElement) aprimorarCampoSenha(senhaNovoUsuario, { checklist: true });
+
     openModal('modal-cadastro');
 }
 
@@ -86,30 +92,44 @@ export function exibirListaErro(els: CadastroListaEls): void {
     els.listaWrap.innerHTML = renderListaErro();
 }
 
-export function renderListaRegistros(els: CadastroListaEls, itensTexto: string[], itens?: ItemComAutoria[]): void {
+export function renderListaRegistros(els: CadastroListaEls, itensTexto: string[], itens?: ItemComAutoria[], termoBusca = ''): void {
     els.listaWrap.innerHTML = itensTexto.length
         ? itensTexto.map((texto, i) => renderItemRegistro(texto, itens?.[i])).join('')
-        : renderListaVazia();
+        : renderListaVazia(termoBusca);
 }
 
 export function renderListaUsuarios(
     els: CadastroListaEls,
     usuarios: Usuario[],
-    opcoes: OpcoesItemUsuario = {}
+    opcoes: OpcoesItemUsuario = {},
+    termoBusca = ''
 ): void {
     els.listaWrap.innerHTML = usuarios.length
         ? usuarios.map((u) => renderItemRegistroUsuario(u, opcoes)).join('')
-        : renderListaVazia();
+        : renderListaVazia(termoBusca);
+}
+
+export function renderListaCategorias(els: CadastroListaEls, categorias: Categoria[], editandoId: number | null = null, termoBusca = ''): void {
+    els.listaWrap.innerHTML = categorias.length
+        ? categorias.map((c) => renderItemRegistroCategoria(c, { editandoId })).join('')
+        : renderListaVazia(termoBusca);
+}
+
+export function renderListaResponsaveis(els: CadastroListaEls, responsaveis: Responsavel[], editandoId: number | null = null, termoBusca = ''): void {
+    els.listaWrap.innerHTML = responsaveis.length
+        ? responsaveis.map((r) => renderItemRegistroResponsavel(r, { editandoId })).join('')
+        : renderListaVazia(termoBusca);
 }
 
 export function renderListaEquipamentos(
     els: CadastroListaEls,
     equipamentos: Equipamento[],
-    opcoes: OpcoesItemEquipamento = {}
+    opcoes: OpcoesItemEquipamento = {},
+    termoBusca = ''
 ): void {
     els.listaWrap.innerHTML = equipamentos.length
         ? equipamentos.map((e) => renderItemRegistroEquipamento(e, opcoes)).join('')
-        : renderListaVazia();
+        : renderListaVazia(termoBusca);
 }
 
 /* ===== Inline field errors ===== */
@@ -196,6 +216,7 @@ export function abrirModalResetSenha(els: ResetSenhaModalEls, usuario: Usuario):
     els.login.textContent = usuario.login;
     els.novaSenha.value = '';
     els.confirmarSenha.value = '';
+    els.novaSenha.dispatchEvent(new Event('input'));
     openModal('modal-cadastro-senha');
     els.novaSenha.focus();
 }
@@ -203,5 +224,6 @@ export function abrirModalResetSenha(els: ResetSenhaModalEls, usuario: Usuario):
 export function fecharModalResetSenha(els: ResetSenhaModalEls): void {
     els.novaSenha.value = '';
     els.confirmarSenha.value = '';
+    els.novaSenha.dispatchEvent(new Event('input'));
     closeModal('modal-cadastro-senha');
 }

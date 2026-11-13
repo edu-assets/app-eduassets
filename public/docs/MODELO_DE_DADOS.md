@@ -43,11 +43,12 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `id` | `Int` | Não | Chave primária; `autoincrement()` |
 | `nome` | `String` | Não | — |
 | `cargo` | `String` | Não | — |
+| `ativo` | `Boolean` | Não | `@default(true)`; responsáveis inativos não aparecem em `GET /responsaveis` (exceto para admin com `incluirInativos=true`) nem podem receber novos empréstimos |
 | `emprestimos` | `Emprestimo[]` | Não | Relação Prisma, 1:N |
 | `criadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
 | `criadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
 
-`Responsavel` é uma entidade de domínio referenciada pelos empréstimos. O schema não lhe atribui nível de acesso ao sistema; o acesso é representado separadamente por `Usuario`.
+`Responsavel` é uma entidade de domínio referenciada pelos empréstimos. O schema não lhe atribui nível de acesso ao sistema; o acesso é representado separadamente por `Usuario`. A migration `20261114100000_loan_history_filters_responsavel_active` (aditiva) adiciona `Responsavel.ativo` (padrão `true`, então os registros existentes continuam ativos) e o índice `Emprestimo(dataRetirada, id)`.
 
 ### Usuario
 
@@ -171,7 +172,7 @@ As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.
 - `createdAt` de `Equipamento`, `Usuario`, `Emprestimo` e `Ocorrencia` usa `@default(now())`.
 - `Equipamento.updatedAt` usa `@updatedAt` do Prisma; não é declarado como campo nulo fornecido pelo usuário.
 - As declarações únicas são `Categoria.nome`, `Usuario.login`, `Usuario.rfidTokenHash` (nulo) e `PushSubscription.endpoint`. Elas geram enforcement/índices de unicidade para esses campos.
-- Os índices secundários explícitos cobrem `Emprestimo.status`, `Ocorrencia.status`, quantidades disponível/quebrada do equipamento, `ItemEmprestimo.emprestimoId`, o composto `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)` e `PushSubscription.usuarioId`.
+- Os índices secundários explícitos cobrem `Emprestimo.status`, `Ocorrencia.status`, quantidades disponível/quebrada do equipamento, `ItemEmprestimo.emprestimoId`, o composto `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)` e `PushSubscription.usuarioId`. `Emprestimo(dataRetirada, id)` sustenta a paginação do histórico (ordem `dataRetirada` e `id` decrescentes).
 - `ItemEmprestimo.emprestimoId` e `Ocorrencia.equipamentoId` agora têm índices explícitos para as consultas e referências usadas; o primeiro também integra índice composto para localizar empréstimos abertos por equipamento.
 
 ## Regras de negócio verificadas nos serviços do backend

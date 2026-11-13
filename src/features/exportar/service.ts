@@ -1,5 +1,8 @@
+import { showToast } from '../../core/ui/index.js';
+import { t } from '../../core/state/i18nStore.js';
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
-import { getLoans } from '../../core/state/loanStore.js';
+import { listarTodasPaginasEmprestimos } from '../../core/api/emprestimos.js';
+import { mapEmprestimo } from '../../core/state/loanMapper.js';
 import { getOcorrenciasPorTipo } from '../../core/state/ocorrenciasStore.js';
 import { gerarLinhasCsv, baixarArquivoCsv } from '../../core/services/csv.js';
 import { gerarArquivoXlsx, baixarArquivoXlsx } from '../../core/services/excel.js';
@@ -7,7 +10,6 @@ import { gerarBaixarPdf } from '../../core/services/pdf.js';
 import type { PdfTabelaSecao } from '../../core/services/pdf.js';
 import type { Equipamento, LoanUI, FiltrosExportacao } from '../../types/index.js';
 import { isAutenticado } from '../../core/state/authStore.js';
-import { filtrarPorPeriodo } from './dateFilters.js';
 export { filtrarPorPeriodo } from './dateFilters.js';
 
 const FORMATOS_SUPORTADOS = ['csv', 'excel', 'pdf'];
@@ -18,8 +20,20 @@ export function prepararDadosEquipamentos(): Equipamento[] {
     return getEquipamentos();
 }
 
-export function prepararDadosEmprestimos(): LoanUI[] {
-    return getLoans();
+/**
+ * Todos os empréstimos do período (dias locais AAAA-MM-DD; vazio = sem limite), lidos direto da API página a página
+ * (`paginado=1`, limit 100) em vez da lista paginada da tela. O período vale sobre a data de retirada.
+ */
+export async function prepararDadosEmprestimos(dataInicial = '', dataFinal = ''): Promise<LoanUI[]> {
+    const { items, completo } = await listarTodasPaginasEmprestimos({
+        autenticado: isAutenticado(),
+        filtros: { de: dataInicial || undefined, ate: dataFinal || undefined }
+    });
+    if (!completo) {
+        console.warn('[eduAssets] Exportação de empréstimos truncada no limite de páginas.');
+        showToast(t('feedback.exportacao_truncada'), 'warning');
+    }
+    return items.map(mapEmprestimo);
 }
 
 /* ===== 2. filtering ===== */
@@ -194,12 +208,7 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
         titulo = 'Relatório de Equipamentos';
         secoes = montarSecoesOcorrencias(filtros.equipamentoIds, comAutoria);
     } else if (filtros.tipoDados === 'devolucoes') {
-        const emprestimosFiltrados = filtrarPorPeriodo(
-            prepararDadosEmprestimos(),
-            filtros.dataInicial,
-            filtros.dataFinal,
-            (loan) => loan.createdAt
-        );
+        const emprestimosFiltrados = await prepararDadosEmprestimos(filtros.dataInicial, filtros.dataFinal);
         cabecalho = comAutoria ? [...CABECALHO_EMPRESTIMOS, ...CABECALHO_AUTORIA_EMPRESTIMOS] : CABECALHO_EMPRESTIMOS;
         linhas = linhasEmprestimos(emprestimosFiltrados, comAutoria);
         prefixoArquivo = 'emprestimos';

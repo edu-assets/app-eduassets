@@ -41,7 +41,9 @@ export interface Responsavel {
     id: number;
     nome: string;
     cargo: string;
+    ativo?: boolean;
     criadoPor?: Autor | null;
+    atualizadoPor?: Autor | null;
 }
 
 export interface Usuario {
@@ -128,6 +130,12 @@ export interface EquipamentoUpdatePayload {
     quantidadeTotal?: number;
     quantidadeDisponivel?: number;
     quantidadeQuebrada?: number;
+}
+
+export interface ResponsavelUpdatePayload {
+    nome?: string;
+    cargo?: string;
+    ativo?: boolean;
 }
 
 export interface ResponsavelCreatePayload {

@@ -3,9 +3,11 @@ import { criarDataAutoPicker } from '../../core/ui/index.js';
 import { renderLista, popularSelectDetalheEquipamento } from './render.js';
 import { attachDevolucaoEvents } from './events.js';
 import { getLoansAbertos, subscribe } from '../../core/state/loanStore.js';
+import { aoTrocarSessao } from '../../core/state/sessionChange.js';
 import { subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
 import { subscribeLoadStatus } from '../../core/state/loadStatus.js';
 import { ligarTentarNovamente } from '../../shared/components/loadState.js';
+import { criarFiltroDevolucoes, filtrarOrdenarDevolucoes, montarFerramentasDevolucoes } from './filtro.js';
 import type { LoanItemUI } from '../../types/index.js';
 
 export async function initDevolucao(): Promise<void> {
@@ -62,10 +64,23 @@ export async function initDevolucao(): Promise<void> {
 
     attachDevolucaoEvents(els, estado);
 
-    renderLista(els, estado, getLoansAbertos());
-    subscribe(() => renderLista(els, estado, getLoansAbertos()));
-    subscribeLoadStatus((chave) => { if (chave === 'emprestimos') renderLista(els, estado, getLoansAbertos()); });
+    const filtro = criarFiltroDevolucoes();
+    const renderAtual = (): void => {
+        const abertos = getLoansAbertos();
+        renderLista(els, estado, filtrarOrdenarDevolucoes(abertos, filtro), { termo: filtro.termo, totalBase: abertos.length });
+    };
+    const ferramentas = montarFerramentasDevolucoes(els.lista, filtro, renderAtual);
+
+    renderAtual();
+    aoTrocarSessao(() => {
+        filtro.termo = '';
+        const campo = document.getElementById('devolucao-busca') as HTMLInputElement | null;
+        if (campo) campo.value = '';
+        renderAtual();
+    });
+    subscribe(renderAtual);
+    subscribeLoadStatus((chave) => { if (chave === 'emprestimos') renderAtual(); });
     ligarTentarNovamente(els.lista, 'emprestimos');
     subscribeEquipamentos((equipamentos) => popularSelectDetalheEquipamento(els.detalheEquipamentoSelect, equipamentos));
-    subscribeI18n(() => renderLista(els, estado, getLoansAbertos()));
+    subscribeI18n(() => { ferramentas.atualizarRotulos(); renderAtual(); });
 }

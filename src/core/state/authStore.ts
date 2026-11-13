@@ -10,7 +10,11 @@ localStorage.removeItem('eduassets_guest_mode');
 
 type AuthListener = (state: AuthState) => void;
 
+/** How the current session began: an interactive sign-in or a restore from the session cookie on page load. */
+export type OrigemSessao = 'login' | 'restaurada';
+
 let user: AuthUser | null = null;
+let origemSessao: OrigemSessao | null = null;
 let listeners: AuthListener[] = [];
 let acessoConvidadoAutorizado = sessionStorage.getItem(GUEST_ENTRY_SESSION_KEY) === 'true';
 
@@ -20,6 +24,10 @@ export function isAutenticado(): boolean {
 
 export function getUsuario(): AuthUser | null {
     return user;
+}
+
+export function getOrigemSessao(): OrigemSessao | null {
+    return origemSessao;
 }
 
 export function isAcessoConvidadoAutorizado(): boolean {
@@ -83,15 +91,18 @@ export async function iniciarSessao(): Promise<void> {
         if (!concluido) agendarRepeticaoLogout();
         setToken(null);
         user = null;
+        origemSessao = null;
         notify();
         return;
     }
     try {
         user = await fetchMe();
+        origemSessao = 'restaurada';
         definirAcessoConvidadoAutorizado(false);
     } catch {
         setToken(null);
         user = null;
+        origemSessao = null;
         if (!acessoConvidadoAutorizado) definirAcessoConvidadoAutorizado(false);
     }
     notify();
@@ -109,6 +120,7 @@ export async function entrar(login: string, senha: string): Promise<void> {
     definirLogoutPendente(false);
     setToken(null);
     user = resposta.user;
+    origemSessao = 'login';
     definirAcessoConvidadoAutorizado(false);
     notify();
 }
@@ -116,6 +128,7 @@ export async function entrar(login: string, senha: string): Promise<void> {
 export function entrarComoConvidado(): void {
     setToken(null);
     user = null;
+    origemSessao = null;
     definirAcessoConvidadoAutorizado(true);
     notify();
 }
@@ -130,6 +143,7 @@ export function sair(revogarNoServidor = true): Promise<void> {
     }
     setToken(null);
     user = null;
+    origemSessao = null;
     definirAcessoConvidadoAutorizado(false);
     notify();
     return revogacao;
@@ -138,6 +152,7 @@ export function sair(revogarNoServidor = true): Promise<void> {
 export function atualizarToken(novoToken: string): void {
     if (!setToken(novoToken)) {
         user = null;
+        origemSessao = null;
         definirAcessoConvidadoAutorizado(false);
         notify();
         throw new Error('auth.token_invalido');

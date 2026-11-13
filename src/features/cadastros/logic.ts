@@ -1,4 +1,5 @@
-import type { Autor, NivelAcesso, UsuarioUpdatePayload } from '../../types/index.js';
+import type { Autor, NivelAcesso, ResponsavelUpdatePayload, UsuarioUpdatePayload } from '../../types/index.js';
+import { senhaAtendeRegras } from '../../shared/components/passwordField.js';
 
 /** Same rule of thumb the API uses for `login` (a plain e-mail shape). */
 const EMAIL_RE = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:[.][A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+$/;
@@ -7,19 +8,7 @@ export function loginPareceEmail(login: string): boolean {
     return EMAIL_RE.test(login.trim());
 }
 
-export function normalizarBusca(texto: string): string {
-    return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
-}
-
-/** Client-side filter: every word in the query must appear (accent/case-insensitive). */
-export function filtrarPorBusca<T>(itens: T[], termo: string, textoDe: (item: T) => string): T[] {
-    const palavras = normalizarBusca(termo).split(/\s+/).filter(Boolean);
-    if (!palavras.length) return itens;
-    return itens.filter((item) => {
-        const texto = normalizarBusca(textoDe(item));
-        return palavras.every((p) => texto.includes(p));
-    });
-}
+export { normalizarBusca, filtrarPorBusca } from '../../core/utils/busca.js';
 
 /* ===== Per-field validation (returns i18n keys by field id) ===== */
 
@@ -76,6 +65,44 @@ export function validarEdicaoUsuario(
     const login = valores.login.trim();
     if (!login) erros['edit-usuario-login'] = 'validation.cadastros.campo_obrigatorio';
     else if (login !== original.login && !loginPareceEmail(login)) erros['edit-usuario-login'] = 'validation.cadastros.email_invalido';
+    return erros;
+}
+
+/* ===== New user password ===== */
+
+/** Client-side mirror of the API password policy for the new-user form; returns an i18n key or null. */
+export function validarSenhaNovoUsuario(senha: string): string | null {
+    return senhaAtendeRegras(senha) ? null : 'validation.cadastros.senha_fraca';
+}
+
+/* ===== Category rename / responsible edit ===== */
+
+export function validarRenomearCategoria(original: string, nome: string): string | null {
+    return nome.trim() ? null : 'validation.cadastros.campo_obrigatorio';
+}
+
+/** Returns the trimmed new name, or null when unchanged. */
+export function nomeCategoriaAlterado(original: string, nome: string): string | null {
+    const novo = nome.trim();
+    return novo && novo !== original ? novo : null;
+}
+
+export function montarPayloadAtualizacaoResponsavel(
+    original: { nome: string; cargo: string },
+    valores: { nome: string; cargo: string }
+): ResponsavelUpdatePayload {
+    const payload: ResponsavelUpdatePayload = {};
+    const nome = valores.nome.trim();
+    const cargo = valores.cargo.trim();
+    if (nome !== original.nome) payload.nome = nome;
+    if (cargo !== original.cargo) payload.cargo = cargo;
+    return payload;
+}
+
+export function validarEdicaoResponsavel(valores: { nome: string; cargo: string }): ErrosCampos {
+    const erros: ErrosCampos = {};
+    if (!valores.nome.trim()) erros['edit-responsavel-nome'] = 'validation.cadastros.campo_obrigatorio';
+    if (!valores.cargo.trim()) erros['edit-responsavel-cargo'] = 'validation.cadastros.campo_obrigatorio';
     return erros;
 }
 

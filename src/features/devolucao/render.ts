@@ -4,6 +4,7 @@ import {
     renderDevolucaoTabelaHeader,
     renderDevolucaoCard,
     renderDevolucaoEmptyState,
+    renderDevolucaoSemResultados,
     renderDetalheItensView,
     renderDetalheItensEdit,
     renderDetalheObservacao
@@ -81,13 +82,21 @@ interface ModalConfirmacaoEls {
     devolucaoDataInput: HTMLInputElement;
 }
 
-export function renderLista(els: ListaEls & FecharDetalheEls, estado: DevolucaoEstado, loans: LoanUI[]): void {
+/** `consulta`: busca ativa e total antes do filtro, para distinguir "sem resultados" de "nenhum em aberto". */
+export function renderLista(
+    els: ListaEls & FecharDetalheEls,
+    estado: DevolucaoEstado,
+    loans: LoanUI[],
+    consulta?: { termo: string; totalBase: number }
+): void {
     if (aplicarEstadoCarga(els.lista, getLoadStatus('emprestimos').status, renderSkeletonLinhas(5))) {
         fecharDetalhe(els, estado);
         return;
     }
     if (!loans.length) {
-        els.lista.innerHTML = renderDevolucaoEmptyState();
+        els.lista.innerHTML = consulta && consulta.totalBase > 0 && consulta.termo.trim()
+            ? renderDevolucaoSemResultados(consulta.termo)
+            : renderDevolucaoEmptyState();
         fecharDetalhe(els, estado);
         return;
     }

@@ -1,6 +1,19 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.4.0 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.5.0 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.5.0 — Histórico com filtros, rotas por painel e sessão mais segura — 13 de novembro de 2026
+
+- **Navegação:** cada painel tem endereço próprio (`#app/<painel>`, por exemplo `#app/devolucoes` e `#app/dashboard/historico`). Recarregar a página mantém o painel, os botões voltar e avançar do navegador funcionam e o título da aba mostra o painel. Painéis exclusivos de administrador redirecionam quem não tem acesso.
+- **Sessão:** aviso 2 minutos antes de a sessão de administrador expirar por inatividade (30 min), com contagem regressiva e os botões **Continuar conectado** e **Sair agora**. A atividade em uma aba vale para todas as abas, e enquanto o administrador está ativo o app confirma a atividade com o servidor no máximo uma vez por minuto. Depois de expirar e entrar de novo, o usuário volta ao painel em que estava; o logout explícito leva o próximo usuário ao **Início** e desconecta as outras abas. Editores podem ativar um limite opcional de inatividade em **Configurações → Sessão** (desligado por padrão; 15, 30 ou 60 min; vale só neste navegador).
+- **Dashboard → Histórico:** carrega 50 empréstimos por vez, com **Carregar mais** e **Mostrando N empréstimos** (Convidados também; o limite silencioso de 50 acabou). Filtros de status (**Todos**, **Abertos**, **Devolvidos**) e de período (**Hoje**, **7 dias**, **Este mês**, **Tudo**), busca no servidor para quem está logado e **Limpar filtros**.
+- **Exportar:** busca todas as páginas do período e filtra pela data de retirada (`dataRetirada`); antes filtrava localmente pela data de criação.
+- **Devoluções:** busca (solicitante, responsável, equipamento e registrado por) e ordenação (mais antigos ou mais recentes primeiro). Os estados vazios distinguem "nenhum resultado para x" e oferecem **Limpar busca** e **Limpar filtros**.
+- **Cadastros:** renomear categorias; editar, desativar e reativar responsáveis (os inativos somem do formulário de empréstimo); o formulário de novo usuário bloqueia senhas fracas.
+- **Senhas:** campos com botão mostrar/ocultar e lista de requisitos em tempo real (Segurança, redefinição pelo administrador, recuperação e novo usuário); o formulário de Segurança envia com Enter. A nova senha na troca precisa seguir a regra forte e ser diferente da atual.
+- **Notificações (toasts):** anunciadas a leitores de tela, erros permanecem até serem fechados, botão de fechar, pausa ao passar o mouse e posição inferior central no celular.
+- **API:** `GET /emprestimos` ganha `status`, `de`/`ate`, `q` e `paginado=1`; novos `PATCH /categorias/:id` e `PATCH /responsaveis/:id`; `GET /responsaveis` retorna só ativos por padrão; `POST /emprestimos` com responsável inativo retorna `409`. Migration `20261114100000_loan_history_filters_responsavel_active` (`Responsavel.ativo` e índice `Emprestimo(dataRetirada, id)`).
+- **Documentação:** Manual do Usuário §2, §5, §6, §8, §9, §10 e §11; Referência da API (empréstimos, categorias, responsáveis, senha, alvo das notificações); Modelo de Dados (`Responsavel.ativo`, índice, migration); Arquitetura (rotas e sessão).
 
 ## v1.4.0 — Autoria dos registros, gestão de usuários e refinamentos de interface — 13 de novembro de 2026
 

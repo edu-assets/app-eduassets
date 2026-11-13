@@ -354,6 +354,31 @@ html[data-theme="dark"] .config-system-toggle.active {
     cursor: not-allowed;
 }
 
+/* Sessão: tempo sem uso (editores) */
+.config-select {
+    flex-shrink: 0;
+    min-width: 140px;
+    min-height: 40px;
+    padding: 8px 10px;
+    background-color: var(--input-bg);
+    border: 1.5px solid var(--input-border);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.config-select:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.config-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Notificações push: estado do dispositivo e instruções */
 .config-card[hidden],
 #config-notif-card .btn[hidden],

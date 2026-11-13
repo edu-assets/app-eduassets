@@ -504,3 +504,36 @@
         overflow-y: auto;
     }
 }
+
+/* Session expiry warning (core/auth/sessionTimeout.ts) */
+@media (min-width: 641px) {
+    .modal-box--sessao { max-width: 480px; }
+}
+
+.sessao-aviso-contagem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: var(--warning-bg);
+}
+
+.sessao-aviso-rotulo {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.sessao-aviso-tempo {
+    font-size: 2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--warning-color);
+}
+
+.sessao-aviso-erro[hidden] {
+    display: none;
+}

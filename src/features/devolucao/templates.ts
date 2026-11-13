@@ -1,7 +1,7 @@
 import { html, raw } from '../../core/utils/html.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { gerarIniciais, formatarHora } from './utils.js';
-import { renderEmptyState } from '../../shared/components/emptyState.js';
+import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
 import { renderPessoaProtegida, renderIniciaisProtegidas } from '../../shared/components/restrictedPerson.js';
 import { t } from '../../core/state/i18nStore.js';
 import { renderAutoriaCriador } from '../../shared/components/autoria.js';
@@ -18,6 +18,15 @@ export function renderDevolucaoEmptyState(): string {
         tituloClass: 'devolucao-vazia-texto',
         subtitulo: t('devolucao.registre_um_novo_emprestimo_para_comecar'),
         subtituloClass: 'devolucao-vazia-sub'
+    });
+}
+
+export function renderDevolucaoSemResultados(consulta: string): string {
+    return renderEmptyStateSemResultados({
+        consulta,
+        limpar: 'busca',
+        containerClass: 'devolucao-vazia',
+        tituloClass: 'devolucao-vazia-texto'
     });
 }
 

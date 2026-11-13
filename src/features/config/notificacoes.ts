@@ -1,6 +1,8 @@
 import { isAdmin } from '../../core/auth/permissions.js';
 import { subscribe as subscribeAuth } from '../../core/state/authStore.js';
 import { subscribe as subscribeI18n, t, traduzirErro } from '../../core/state/i18nStore.js';
+import { EVENTO_PAINEL_ATIVADO } from '../../core/layout/appRoutes.js';
+import type { PainelAtivadoDetalhe } from '../../core/layout/appRoutes.js';
 import { showToast } from '../../core/ui/index.js';
 import {
     EVENTO_ESTADO_PUSH,
@@ -185,8 +187,8 @@ export function initNotificacoesConfig(): void {
     // (the user may have changed the browser permission in between).
     subscribeAuth(() => { void renderizar(); });
     subscribeI18n(() => { void renderizar(); });
-    document.addEventListener('click', (evento) => {
-        if ((evento.target as HTMLElement).closest('.nav-link[data-panel="panel-config"]')) void renderizar();
+    document.addEventListener(EVENTO_PAINEL_ATIVADO, (evento) => {
+        if ((evento as CustomEvent<PainelAtivadoDetalhe>).detail?.painelId === 'panel-config') void renderizar();
     });
     // Activation, deactivation or automatic activation (also triggered from the banner) changes this card.
     window.addEventListener(EVENTO_ESTADO_PUSH, () => { void renderizar(); });

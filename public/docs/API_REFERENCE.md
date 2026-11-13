@@ -27,7 +27,7 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `POST` | `/auth/login` | Public; rate limited, with Origin validation when cookie mode is requested | Authenticates `login` and `password`; sets the cookie and returns the profile in cookie mode, including `senhaAlteradaEm` (ISO 8601 or `null`) like `GET /auth/me`. |
 | `GET` | `/auth/me` | Authenticated session | Returns the current session profile, including `senhaAlteradaEm` (ISO 8601 or `null`), derived from the audit log (`PASSWORD_CHANGE`, `PASSWORD_RESET`, `PASSWORD_RESET_SELF`). |
 | `POST` | `/auth/logout` | Authenticated session | Revokes the user's session version and clears the cookie. Returns `204`. |
-| `PATCH` | `/auth/senha` | Authenticated session | Changes the password using `senhaAtual` and `novaSenha`; successful changes reissue the current session. |
+| `PATCH` | `/auth/senha` | Authenticated session | Changes the password using `senhaAtual` and `novaSenha`; successful changes reissue the current session. | The new password must meet the strong rule (12+ characters, max 72 UTF-8 bytes, lowercase, uppercase, digit and symbol) and differ from the current one.
 | `POST` | `/auth/senha/recuperar` | Public; 10 requests per IP every 15 min and 3 per email per hour; Origin validated in cookie mode | Body `{ "login": "...", "idioma": "pt" \| "en" }`. Always answers `202` with the same body, before any lookup, so it never reveals whether the account exists. When the login is the email of an active account, it invalidates earlier links, stores only the SHA-256 hash of a random 256-bit token valid for 30 minutes, records `PASSWORD_RESET_REQUEST` and emails the link `APP_PUBLIC_URL/#redefinir-senha=<token>` in the requested language (HTML with an inline banner plus plain text; Reply-To set to `SUPPORT_EMAIL` when configured). Returns `503` when SMTP is not configured. |
 | `POST` | `/auth/senha/redefinir` | Public; 10 attempts per IP every 15 min; Origin validated in cookie mode | Body `{ "token": "...", "senha": "..." }` following the strong policy. Consumes the token (single use), stores the new hash, increments `sessionVersion` (ending every session), deletes the account's other tokens and records `PASSWORD_RESET_SELF`. An invalid, expired or used token returns `400` `backend.auth.link_recuperacao_invalido`. Returns `204`. |
 | `POST` | `/auth/rfid` | Only when `RFID_BRIDGE_ENABLED=true`; authorized bridge | Receives an RFID scan from the bridge process; it is not a browser login endpoint. |
@@ -41,18 +41,20 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 |---|---|---|
 | `GET` | `/categorias` | Public/guest or authenticated. |
 | `POST` | `/categorias` | Administrator. |
+| `PATCH` | `/categorias/:id` | Administrator; body `{ "nome" }`. Errors: `404` `backend.categorias.nao_encontrada` and `409` `backend.categorias.nome_duplicado`. |
 | `GET` | `/equipamentos` | Public/guest or authenticated. |
 | `POST`, `PATCH` | `/equipamentos`, `/equipamentos/:id` | Administrator. When `PATCH` sends `quantidadeTotal` without `quantidadeDisponivel`, the server applies the difference to `quantidadeDisponivel` atomically under a row lock and answers `409` `backend.equipamentos.quantidade_em_uso` if the new total is below the units in use; sending both fields keeps the explicit values. |
-| `GET` | `/emprestimos` | Public/guest or authenticated. Without a session, accepts `limit` (default 50, maximum 100) and a positive `cursor`; returns `{ items, nextCursor, limit }` in descending ID order with a reduced public projection. |
-| `POST` | `/emprestimos` | Authenticated user (editor or administrator). `dataRetirada` more than 5 minutes in the future returns `400` `backend.emprestimos.data_retirada_futura`. |
+| `GET` | `/emprestimos` | Public/guest or authenticated. Optional filters: `status` (`ABERTO` or `DEVOLVIDO`); `de` and `ate` on `dataRetirada`, inclusive, accepting `YYYY-MM-DD` (whole UTC day) or ISO with offset; `q` (authenticated only; case-insensitive on requester, responsible and equipment model; guests receive `400`). With `paginado=1`, returns `{ items, nextCursor, limit }` ordered by `dataRetirada` descending then `id` descending, with `limit` 1 to 100 (default 50) and `cursor` = the id of the last loan received. Without `paginado`, authenticated users still receive the full array (legacy, kept for compatibility; the `status` filter applies). Guests always receive the paged response with a masked DTO (`limit` default 50, maximum 100, and a positive `cursor`). |
+| `POST` | `/emprestimos` | Authenticated user (editor or administrator). `dataRetirada` more than 5 minutes in the future returns `400` `backend.emprestimos.data_retirada_futura`. | An inactive responsible party returns `409` `backend.emprestimos.responsavel_inativo`.
 | `PATCH` | `/emprestimos/:id` | Authenticated user; updates loan items. |
 | `PATCH` | `/emprestimos/:id/devolver` | Authenticated user; records a return. `dataDevolucao` is optional (omitted = server time). More than 5 minutes in the future returns `400` `backend.emprestimos.data_devolucao_futura`; earlier than the checkout, compared at minute precision, returns `400` `backend.emprestimos.data_devolucao_anterior`. |
 | `GET` | `/ocorrencias` | Public/guest or authenticated; reduced public projection. |
 | `POST`, `PATCH` | `/ocorrencias`, `/ocorrencias/:id` | Authenticated user. |
 | `PATCH` | `/ocorrencias/:id/resolver` | Authenticated user. |
 | `DELETE` | `/ocorrencias/:id` | Administrator. |
-| `GET` | `/responsaveis` | Authenticated session. |
+| `GET` | `/responsaveis` | Authenticated session. Returns only active responsible parties; an Administrator can pass `?incluirInativos=true`. |
 | `POST` | `/responsaveis` | Administrator. |
+| `PATCH` | `/responsaveis/:id` | Administrator; body `{ nome?, cargo?, ativo? }`. Error: `404` `backend.responsaveis.nao_encontrado`. |
 | `GET`, `POST` | `/usuarios` | Administrator. `POST` and `PATCH /usuarios/:id` require an email-format `login` (password sign-in is unchanged and existing accounts keep working). Password recovery only works if the mailbox exists. `GET` includes `criadoPor` and `atualizadoPor`. |
 | `PATCH` | `/usuarios/:id` | Administrator; updates name, login, access level or the `ativo` status. Errors: `400` `backend.usuarios.nao_pode_desativar_a_si_mesmo`, `400` `backend.usuarios.nao_pode_rebaixar_a_si_mesmo` and `409` `backend.usuarios.ultimo_administrador` (at least one active administrator must remain). |
 | `POST` | `/usuarios/:id/password-reset` | Administrator; body `{ "senha": "..." }` following the strong policy (12+ characters, uppercase, lowercase, digit, symbol, max. 72 bytes). Stores the new hash, increments `sessionVersion` (ending the user's sessions) and records `PASSWORD_RESET` in the audit log in the same transaction. Returns `204`. Used by the **Reset password** action in **Records → System Users**. |
@@ -87,7 +89,7 @@ Enrollment of administrator devices for Web Push notifications (Push API + servi
 - `PUT` and `POST /teste` respond `503` with `{ erro: 'backend.notificacoes.push_indisponivel' }` when push is not configured. Other error keys: `backend.notificacoes.endpoint_invalido`, `backend.notificacoes.chave_invalida`, `backend.notificacoes.preferencias_invalidas` and `backend.notificacoes.muitas_requisicoes`.
 - Payload received by the service worker: `{ v: 1, tipo: 'EMPRESTIMO_CRIADO' | 'DEVOLUCAO_REGISTRADA' | 'OCORRENCIA_REGISTRADA' | 'TESTE', titulo, corpo, url, tag, criadoEm }`.
 - Delivery happens after the operation is committed and never delays or fails the original request. TTL is 1 hour and urgency `high`. A `404` or `410` response from the push service removes the subscription.
-- Notification click targets: loan and return open `/#panel-dashboard` (History tab); occurrence opens `/#panel-controle`; test opens `/#panel-inicio`.
+- Notification click targets: loan and return open `/#panel-dashboard` (History tab); occurrence opens `/#panel-controle`; test opens `/#panel-inicio`. The app also accepts `#app/<panel>` addresses (for example, `/#app/controle`).
 
 ## Record authorship
 

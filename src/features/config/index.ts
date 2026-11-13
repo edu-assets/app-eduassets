@@ -1,5 +1,6 @@
 import { attachConfigEvents, attachTemaToggle, attachIdiomaToggle } from './events.js';
 import { initNotificacoesConfig } from './notificacoes.js';
+import { initSessaoConfig } from './sessao.js';
 
 export function initConfig(): void {
     attachConfigEvents();
@@ -11,4 +12,5 @@ export function initConfig(): void {
     if (grupoIdioma) attachIdiomaToggle(grupoIdioma);
 
     initNotificacoesConfig();
+    initSessaoConfig();
 }

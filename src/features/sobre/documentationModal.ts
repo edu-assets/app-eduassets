@@ -5,6 +5,8 @@ import type { LoadedDocument } from '../../core/docs/docsService.js';
 import { iniciarScrollSpy, scrollParaSecao } from '../../core/docs/toc.js';
 import { renderSidebar, renderFooterMetadata, renderToc, renderSearchResults, renderAboutDocTiles } from './documentationTemplates.js';
 import { subscribe as subscribeI18n, t } from '../../core/state/i18nStore.js';
+import { EVENTO_PAINEL_ATIVADO } from '../../core/layout/appRoutes.js';
+import type { PainelAtivadoDetalhe } from '../../core/layout/appRoutes.js';
 
 const MODAL_ID = 'modal-documentacao';
 
@@ -156,9 +158,8 @@ export function initDocumentation(): void {
 
     if (painelSobre.classList.contains('active')) acionarPreload();
 
-    document.addEventListener('click', (e) => {
-        const link = (e.target as HTMLElement).closest<HTMLElement>('.nav-link[data-panel="panel-sobre"]');
-        if (link) acionarPreload();
+    document.addEventListener(EVENTO_PAINEL_ATIVADO, (e) => {
+        if ((e as CustomEvent<PainelAtivadoDetalhe>).detail?.painelId === 'panel-sobre') acionarPreload();
     });
 
     painelSobre.addEventListener('click', (e) => {

@@ -1,3 +1,5 @@
+import { ehHashApp } from './appRoutes.js';
+
 export const LOGIN_ROUTE_HASH = '#login';
 export const APP_ROUTE_HASH = '#app';
 export const TERMS_ROUTE_HASH = '#termos';
@@ -30,5 +32,7 @@ export function isLoginRoute(): boolean {
 export function setEntryRoute(destination: EntryDestination): void {
     const nextHash = ROUTE_BY_DESTINATION[destination];
     document.documentElement.dataset.entryState = destination;
+    // Entering the app keeps a panel route that is already in the URL ("#app/devolucoes" survives a reload).
+    if (destination === 'app' && ehHashApp(window.location.hash)) return;
     if (window.location.hash !== nextHash) window.location.hash = nextHash;
 }

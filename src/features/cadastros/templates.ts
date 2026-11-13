@@ -1,11 +1,11 @@
 import { html, raw } from '../../core/utils/html.js';
-import { renderEmptyState } from '../../shared/components/emptyState.js';
+import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
 import { gerarIniciais } from '../../core/utils/iniciais.js';
 import { t } from '../../core/state/i18nStore.js';
 import { loginPareceEmail, partesAutoria } from './logic.js';
 import type { ItemComAutoria } from './logic.js';
 import type { CampoCadastro, CampoOpcao } from './service.js';
-import type { Equipamento, Usuario } from '../../types/index.js';
+import type { Categoria, Equipamento, Responsavel, Usuario } from '../../types/index.js';
 
 export function renderCampo(campo: CampoCadastro, opcoes: CampoOpcao[] | null): string {
     return campo.type === 'select' ? renderCampoSelect(campo, opcoes || []) : renderCampoTexto(campo);
@@ -19,7 +19,9 @@ function renderErroCampo(id: string): string {
 function renderCampoTexto(campo: CampoCadastro): string {
     const dica = campo.hint ? html`<small class="form-hint" id="${campo.id}-dica">${t(campo.hint)}</small>` : '';
     const descritoPor = campo.hint ? `${campo.id}-dica ${campo.id}-erro` : `${campo.id}-erro`;
-    const extra = campo.type === 'email' ? ' autocomplete="off" inputmode="email"' : '';
+    const extra = campo.type === 'email'
+        ? ' autocomplete="off" inputmode="email"'
+        : campo.type === 'password' ? ' autocomplete="new-password"' : '';
     return html`
         <div class="form-group">
             <label for="${campo.id}">${t(campo.label)}</label>
@@ -194,7 +196,88 @@ export function renderItemRegistroEquipamento(eq: Equipamento, opcoes: OpcoesIte
     `;
 }
 
-export function renderListaVazia(): string {
+/* ===== Categorias (rename) e responsáveis (edit/deactivate) ===== */
+
+export function responsavelAtivo(r: Responsavel): boolean {
+    return r.ativo !== false;
+}
+
+export function textoCategoria(c: Categoria): string {
+    return c.nome;
+}
+
+export function textoResponsavel(r: Responsavel): string {
+    return `${r.nome} — ${r.cargo}${responsavelAtivo(r) ? '' : ` ${t('cadastros.inativo')}`}`;
+}
+
+export function renderItemRegistroCategoria(c: Categoria, opcoes: { editandoId?: number | null } = {}): string {
+    if (opcoes.editandoId === c.id) {
+        return html`
+            <div class="cadastro-modal-item cadastro-modal-item--ajuste">
+                <form class="cadastro-ajuste-form" data-renomear-categoria-form="${c.id}" novalidate>
+                    <div class="form-group">
+                        <label for="edit-categoria-nome">${t('cadastros.campo_nome_categoria_novo')}</label>
+                        <input type="text" id="edit-categoria-nome" value="${c.nome}" aria-describedby="edit-categoria-nome-erro">
+                        <span class="form-error" id="edit-categoria-nome-erro" role="alert" hidden></span>
+                    </div>
+                    <div class="cadastro-edit-acoes">
+                        <button type="button" class="btn btn-neutral" data-renomear-categoria-cancelar>${t('shell.cancelar')}</button>
+                        <button type="submit" class="btn btn-success">${t('shell.salvar')}</button>
+                    </div>
+                </form>
+            </div>
+        `;
+    }
+    return html`
+        <div class="cadastro-modal-item cadastro-modal-item--acao">
+            <span class="cadastro-item-texto">${c.nome}${raw(renderAutoria(c, 'autoria.cadastrado_por'))}</span>
+            ${raw(renderBotaoAcaoTexto('data-renomear-categoria-id', c.id, 'edit', t('cadastros.renomear')))}
+        </div>
+    `;
+}
+
+export function renderItemRegistroResponsavel(r: Responsavel, opcoes: { editandoId?: number | null } = {}): string {
+    if (opcoes.editandoId === r.id) {
+        return html`
+            <div class="cadastro-modal-item cadastro-modal-item--ajuste">
+                <form class="cadastro-ajuste-form" data-editar-responsavel-form="${r.id}" novalidate>
+                    <div class="form-group">
+                        <label for="edit-responsavel-nome">${t('cadastros.campo_nome')}</label>
+                        <input type="text" id="edit-responsavel-nome" value="${r.nome}" aria-describedby="edit-responsavel-nome-erro">
+                        <span class="form-error" id="edit-responsavel-nome-erro" role="alert" hidden></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-responsavel-cargo">${t('cadastros.campo_cargo')}</label>
+                        <input type="text" id="edit-responsavel-cargo" value="${r.cargo}" aria-describedby="edit-responsavel-cargo-erro">
+                        <span class="form-error" id="edit-responsavel-cargo-erro" role="alert" hidden></span>
+                    </div>
+                    <div class="cadastro-edit-acoes">
+                        <button type="button" class="btn btn-neutral" data-editar-responsavel-cancelar>${t('shell.cancelar')}</button>
+                        <button type="submit" class="btn btn-success">${t('shell.salvar')}</button>
+                    </div>
+                </form>
+            </div>
+        `;
+    }
+    const ativo = responsavelAtivo(r);
+    const badge = ativo ? '' : html`<span class="cadastro-badge cadastro-badge--inativo">${t('cadastros.inativo')}</span>`;
+    const botaoStatus = ativo
+        ? renderBotaoAcaoTexto('data-desativar-responsavel-id', r.id, 'person_off', t('cadastros.desativar'))
+        : renderBotaoAcaoTexto('data-reativar-responsavel-id', r.id, 'person_check', t('cadastros.reativar'));
+    return html`
+        <div class="cadastro-modal-item cadastro-modal-item--acao${raw(ativo ? '' : ' cadastro-usuario-row--inativo')}">
+            <span class="cadastro-item-texto">${r.nome} — ${r.cargo} ${raw(badge)}${raw(renderAutoria(r, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}</span>
+            ${raw(renderBotaoAcaoTexto('data-editar-responsavel-id', r.id, 'edit', t('cadastros.editar')))}
+            ${raw(botaoStatus)}
+        </div>
+    `;
+}
+
+/** `termoBusca`: busca ativa que zerou a lista => "sem resultados" com Limpar busca (em vez de "nada cadastrado"). */
+export function renderListaVazia(termoBusca = ''): string {
+    if (termoBusca.trim()) {
+        return renderEmptyStateSemResultados({ consulta: termoBusca, containerClass: 'cadastro-modal-empty', limpar: 'busca' });
+    }
     return renderEmptyState({
         containerClass: 'cadastro-modal-empty',
         titulo: t('cadastros.nenhum_registro_cadastrado'),

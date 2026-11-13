@@ -5,6 +5,8 @@ import { attachAuthEvents } from './events.js';
 import { consumirTokenRecuperacaoDaUrl, initPasswordRecovery } from './passwordRecovery.js';
 import { renderAuthStatus } from './render.js';
 import type { AuthEls } from './render.js';
+import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
+import { restaurarRotaPosLogin } from '../../core/auth/rotaPosLogin.js';
 
 export async function initAuth(): Promise<void> {
     const sidebarFooter = document.getElementById('sidebar-footer');
@@ -25,6 +27,7 @@ export async function initAuth(): Promise<void> {
         btnContinuarConvidado: document.getElementById('login-continuar-convidado') as HTMLButtonElement
     };
 
+    aprimorarCampoSenha(els.senhaInput);
     const tokenRecuperacao = consumirTokenRecuperacaoDaUrl();
     attachAuthEvents(els, liberarEntrada);
     const recuperacao = initPasswordRecovery(tokenRecuperacao);
@@ -51,6 +54,8 @@ export async function initAuth(): Promise<void> {
         recuperacao.focar();
         await escolhaInicial;
     } else {
+        // Session restored on load (e.g. card sign-in reloads the tab at #login): reopen the panel saved at expiry.
+        if (autenticado) restaurarRotaPosLogin();
         setEntryRoute('app');
     }
 }
