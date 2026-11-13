@@ -25,12 +25,12 @@
 .dashboard-resumo-card {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     background-color: var(--surface-white);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: var(--shadow-sm);
-    padding: 18px;
+    padding: 16px 14px;
     min-width: 0;
     box-sizing: border-box;
     overflow: hidden;
@@ -38,8 +38,8 @@
 
 .dashboard-resumo-icon {
     flex-shrink: 0;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 9px;
     display: flex;
     align-items: center;
@@ -87,7 +87,7 @@
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--text-secondary);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .dashboard-resumo-numero {
@@ -96,12 +96,6 @@
     color: var(--text-primary);
     font-family: var(--font-heading);
     line-height: 1.3;
-}
-
-.dashboard-resumo-sub {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    overflow-wrap: anywhere;
 }
 
 /* ===== Tabela de estoque / histórico: ocupa 100% da largura ===== */
@@ -313,6 +307,15 @@
     border-radius: 5px;
     font-size: 0.75rem;
     color: var(--text-secondary);
+}
+
+.historico-item-nome {
+    display: none;
+}
+
+
+.historico-item-mais-compacto {
+    display: none;
 }
 
 .historico-item-chip-mais {
@@ -651,8 +654,18 @@
 }
 
 @media (max-width: 1024px) {
+    /* Total em linha própria (largura total); os outros 4 abaixo, lado a lado. */
     .dashboard-resumo-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .dashboard-resumo-card:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .dashboard-resumo-card {
+        padding: 14px;
     }
 }
 
@@ -661,37 +674,56 @@
         flex-wrap: wrap;
     }
 
+    /*
+     * Resumo no mobile: "Total" ocupa a primeira linha, alinhado à esquerda (ícone + rótulo + número à direita);
+     * Disponíveis / Emprestados / Manutenção / Quebrados ficam numa grade 2x2 abaixo. Escolha 2x2 (e não 4 numa
+     * linha) porque a 360px a área útil é ~328px: 4 colunas dariam ~75px por card, insuficiente para ícone +
+     * "Disponíveis"/"Em Manutenção" sem quebrar palavras; 2 colunas dão ~160px e mantêm ícone, rótulo e número legíveis.
+     */
     .dashboard-resumo-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        width: min(100%, 420px);
-        margin-inline: auto;
-    }
-
-    .dashboard-resumo-card:last-child {
-        grid-column: 1 / -1;
+        gap: 8px;
         width: 100%;
-        box-sizing: border-box;
     }
 
     .dashboard-resumo-card {
-        padding: 14px 12px;
+        padding: 10px 12px;
         gap: 10px;
         min-width: 0;
     }
 
+    .dashboard-resumo-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+    }
+
+    .dashboard-resumo-icon .material-symbols-outlined {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+
     .dashboard-resumo-titulo {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         line-height: 1.2;
     }
 
     .dashboard-resumo-numero {
-        font-size: 1.3rem;
-        margin-top: 2px;
+        font-size: 1.4rem;
+        line-height: 1.15;
     }
 
-    .dashboard-resumo-sub {
-        font-size: 0.7rem;
+    .dashboard-resumo-card:first-child .dashboard-resumo-texto {
+        flex: 1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .dashboard-resumo-card:first-child .dashboard-resumo-titulo {
+        font-size: 0.8rem;
     }
 
     .dashboard-tabs {
@@ -765,7 +797,6 @@
         display: none;
     }
 
-    .historico-row,
     .estoque-row {
         display: flex;
         flex-direction: column;
@@ -774,20 +805,11 @@
         gap: 8px;
     }
 
-    .historico-row [data-col],
     .estoque-row [data-col]:not([data-col="categoria"]) {
         display: flex;
         justify-content: space-between;
         align-items: center;
         width: 100%;
-    }
-
-    .historico-row [data-col="numero"] {
-        justify-content: flex-start;
-        font-size: 1rem;
-        font-weight: 700;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 6px;
     }
 
     .estoque-row {
@@ -837,88 +859,200 @@
         letter-spacing: 0.02em;
     }
 
-    /* ----- History cards ----- */
+    /*
+     * ----- History cards -----
+     * Mesmo tratamento de separação dos cards de Estoque (borda na cor primária, faixa lateral, raio, sombra, 10px
+     * entre cards). Hierarquia em 4 linhas:
+     *   1. #número  ........................ badge de status
+     *   2. solicitante (linha principal, em destaque)
+     *   3. data de retirada · responsável (meta compacta)
+     *   4. itens (chip com o 1º item + "+N")  ....  Detalhes
+     * Devolução e autoria ficam só no detalhe (drawer/modal).
+     */
     .historico-header {
         display: none;
     }
 
     .historico-row {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        padding: 14px 16px;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "numero numero status"
+            "solic solic solic"
+            "data resp resp"
+            "itens itens btn";
+        align-items: center;
+        column-gap: 8px;
+        row-gap: 6px;
+        min-height: 0;
+        padding: 12px 14px;
         background-color: var(--surface-white, #ffffff);
-        border: 1px solid var(--border-color);
+        border: 1.5px solid color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
+        border-left: 4px solid var(--primary-color);
         border-radius: 8px;
         margin-bottom: 10px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        box-shadow: 0 2px 6px color-mix(in srgb, var(--primary-color) 10%, transparent);
+        min-width: 0;
     }
 
-    .historico-row [data-col] {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 6px 0;
-        border-top: 1px solid var(--border-color);
-        font-size: 0.85rem;
-    }
-
-    .historico-row [data-col="numero"] {
-        border-top: none;
-        justify-content: center;
-        font-size: 1.1rem;
-        margin-bottom: 8px;
+    .historico-row > [data-col],
+    .historico-row > .historico-detalhes-btn {
+        min-width: 0;
     }
 
     .historico-row [data-col]::before {
-        content: attr(data-label);
-        color: var(--text-muted);
-        font-weight: 600;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
+        content: none;
     }
 
-    .historico-row [data-col="responsavel"] {
+    .historico-row [data-col="numero"] {
+        grid-area: numero;
+        font-size: 1rem;
         font-weight: 700;
-        font-size: 0.95rem;
-        color: var(--primary-dark, #1e293b);
-
-    }
-
-    .historico-row [data-col="responsavel"]::before {
-        color: var(--primary-color);
-    }
-
-    .historico-row [data-col="itens"] {
-        padding-top: 12px;
-        padding-bottom: 12px;
-        align-items: flex-end;
-    }
-
-    .historico-row [data-col="itens"]::before {
-        color: var(--primary-color);
-    }
-
-    .historico-detalhes-btn {
-        width: 100%;
-        margin-top: 8px;
-    }
-
-    .historico-row [data-col="solicitante"],
-    .historico-row [data-col="responsavel"] {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-weight: 500;
     }
 
     .historico-row [data-col="status"] {
+        grid-area: status;
+        width: auto;
+        justify-content: flex-end;
+    }
+
+    .historico-row [data-col="status"] > * {
+        min-width: 0;
+        width: auto;
+        padding: 3px 10px;
+        font-size: 0.72rem;
+    }
+
+    .historico-row [data-col="solicitante"] {
+        grid-area: solic;
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.3;
+        color: var(--text-primary);
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .historico-row [data-col="retirada"] {
+        grid-area: data;
+        display: block;
+        width: auto;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    .historico-row [data-col="responsavel"] {
+        grid-area: resp;
+        font-size: 0.78rem;
+        font-weight: 400;
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .historico-row [data-col="responsavel"]::before {
+        content: "\0000b7\0000a0";
+    }
+
+    .historico-row [data-col="devolucao"] {
+        display: none;
+    }
+
+    .historico-row [data-col="itens"] {
+        grid-area: itens;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 4px;
+        overflow: hidden;
+    }
+
+    .historico-row .historico-item-chip {
+        min-width: 0;
+        max-width: 100%;
+        flex: 0 1 auto;
+        padding: 3px 8px;
+        font-size: 0.78rem;
+    }
+
+    .historico-row .historico-item-chip .icon-badge {
+        display: none;
+    }
+
+    .historico-row .historico-item-qtd {
+        flex-shrink: 0;
+        font-weight: 700;
+    }
+
+    .historico-row .historico-item-qtd::after {
+        content: "\0000d7";
+        margin-left: 1px;
+    }
+
+    .historico-row .historico-item-nome {
+        display: block;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .historico-row .historico-item-chip-mais {
+        flex-shrink: 0;
+    }
+
+    /* Só o 1º item (com nome) + "+N" compacto com o total restante. */
+    .historico-row .historico-item-chip:not(:first-child):not(.historico-item-mais-compacto) {
+        display: none;
+    }
+
+    .historico-row .historico-item-mais-compacto {
+        display: inline-flex;
+    }
+
+    .historico-detalhes-btn {
+        grid-area: btn;
+        width: auto;
+        margin: 0;
+        justify-self: end;
+    }
+
+    .historico-filtros {
+        gap: 8px;
+        padding-bottom: 12px;
+    }
+
+    .historico-filtro-grupo {
+        width: 100%;
+        gap: 6px;
+    }
+
+    .historico-filtro-rotulo {
+        flex: 0 0 100%;
+        margin: 0;
+    }
+
+    .historico-filtro-chip {
+        min-height: 34px;
+        padding: 4px 12px;
+    }
+
+    .historico-filtros-limpar {
+        width: 100%;
         justify-content: center;
-        gap: 10px;
-        border-top: none;
-        margin-top: 8px;
-        padding: 6px 12px
+    }
+
+    .historico-paginacao {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .historico-paginacao .btn {
+        width: 100%;
+        justify-content: center;
     }
 
     /* ----- edit modal ----- */
@@ -973,23 +1107,6 @@
     }
 }
 
-@media (max-width: 480px) {
-    .dashboard-resumo-grid {
-        grid-template-columns: minmax(0, 1fr);
-        width: 100%;
-        gap: 10px;
-    }
-
-    .dashboard-resumo-card:last-child {
-        grid-column: auto;
-    }
-
-    .dashboard-resumo-card {
-        width: 100%;
-        padding: 13px 14px;
-    }
-}
-
 @media (max-width: 360px) {
     .dashboard-main {
         padding: 12px 8px;
@@ -997,6 +1114,23 @@
 
     .dashboard-resumo-titulo {
         font-size: 0.72rem;
+    }
+
+    /* 320-360px: ícone e espaçamento menores para "Emprestados"/"Em Manutenção" não quebrarem no meio da palavra. */
+    .dashboard-resumo-card {
+        padding: 10px 8px;
+        gap: 6px;
+    }
+
+    .dashboard-resumo-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .dashboard-resumo-icon .material-symbols-outlined {
+        font-size: 17px;
+        width: 17px;
+        height: 17px;
     }
 }
 
@@ -1021,9 +1155,6 @@
     }
     .dashboard-resumo-titulo {
         font-size: 0.72rem;
-    }
-    .dashboard-resumo-sub {
-        font-size: 0.68rem;
     }
     .dashboard-main {
         padding: 12px;

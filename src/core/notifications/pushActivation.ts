@@ -6,6 +6,7 @@ import { showToast } from '../ui/toast.js';
 import {
     ativar,
     concluirAtivacao,
+    erroDoNavegadorParaChave,
     ERRO_PERMISSAO_NEGADA,
     ERRO_PERMISSAO_SEM_RESPOSTA,
     obterEstadoPush
@@ -41,6 +42,15 @@ export function notificarEstadoPush(): void {
 function ehErroDePermissao(erro: unknown): boolean {
     return erro instanceof Error
         && (erro.message === ERRO_PERMISSAO_NEGADA || erro.message === ERRO_PERMISSAO_SEM_RESPOSTA);
+}
+
+/**
+ * Toast text for a failed activation. Raw browser failures (DOMException, e.g. "Registration failed - push service
+ * error") are mapped to a translated message; i18n keys and API messages go through traduzirErro as usual.
+ */
+function textoDoErro(erro: unknown): string {
+    const doNavegador = typeof DOMException !== 'undefined' && erro instanceof DOMException;
+    return traduzirErro(doNavegador ? new Error(erroDoNavegadorParaChave(erro)) : erro, 'notif.erro_generico');
 }
 
 function lerPermissao(): PermissaoNavegador {
@@ -139,7 +149,7 @@ async function aoPermissaoConcedida(): Promise<void> {
         usuarioPediu = false;
         showToast(t('notif.ativado_automaticamente'), 'success');
     } catch (erro) {
-        showToast(traduzirErro(erro, 'notif.erro_generico'), 'error');
+        showToast(textoDoErro(erro), 'error');
     } finally {
         ocupado = false;
         notificarEstadoPush();
@@ -164,11 +174,11 @@ export async function solicitarAtivacao(): Promise<boolean> {
     } catch (erro) {
         if (ehErroDePermissao(erro)) {
             orientacao = (erro as Error).message;
-            showToast(traduzirErro(erro, 'notif.erro_generico'), 'warning', DURACAO_ORIENTACAO_MS);
+            showToast(textoDoErro(erro), 'warning', DURACAO_ORIENTACAO_MS);
             // The user can fix it in the browser UI: finish the job when they do.
             iniciarObservacaoDePermissao();
         } else {
-            showToast(traduzirErro(erro, 'notif.erro_generico'), 'error');
+            showToast(textoDoErro(erro), 'error');
         }
         return false;
     } finally {

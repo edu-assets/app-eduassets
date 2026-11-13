@@ -93,8 +93,7 @@ describe('dashboard durante a carga', () => {
         return {
             historicoLista: document.createElement('div'),
             historicoVazio: document.createElement('div'),
-            resumoTotal: mk(), resumoDisponivel: mk(), resumoEmprestado: mk(), resumoQuebrado: mk(), resumoManutencao: mk(),
-            resumoDisponivelPct: mk(), resumoEmprestadoPct: mk(), resumoQuebradoPct: mk(), resumoManutencaoPct: mk()
+            resumoTotal: mk(), resumoDisponivel: mk(), resumoEmprestado: mk(), resumoQuebrado: mk(), resumoManutencao: mk()
         } as unknown as DashboardEls;
     }
 

@@ -71,7 +71,10 @@ export function initModals(): void {
 
     document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
-        const activeModal = document.querySelector<HTMLElement>('.modal-overlay.active');
+        if (e.defaultPrevented) return;
+        // Topmost open modal (later in the DOM = stacked above), e.g. a confirm dialog over the Cadastros sheet.
+        const abertos = document.querySelectorAll<HTMLElement>('.modal-overlay.active');
+        const activeModal = abertos[abertos.length - 1];
         if (activeModal && activeModal.dataset.closeOnOverlay !== 'false') closeModal(activeModal.id);
     });
 }

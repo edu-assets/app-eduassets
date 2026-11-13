@@ -39,9 +39,9 @@ The browser uses cookie-only sessions with an `HttpOnly` cookie and a JWT lifeti
 RFID is an alternative login path, not a system requirement or a replacement for password login.
 
 1. An **Administrator** opens **Records → System Users** and selects **Link card** next to the account.
-2. In the **RFID Card** modal, use **Generate token and link card**. The backend sends the credential to the bridge for writing and returns confirmation only; the API response does not expose the RFID token.
+2. On the **RFID Card** screen (opened inside the **Records** window itself, with **Back**), use **Generate token and link card**. The backend sends the credential to the bridge for writing and returns confirmation only; the API response does not expose the RFID token.
 3. With the bridge and reader ready, follow the README procedure and tap the card within the next 30 seconds to write it.
-4. Once linked, the modal shows **Card linked**. **Generate new token** replaces the current token; **Revoke card** invalidates that card for automatic login.
+4. Once linked, the screen shows **Card linked**. **Generate new token** replaces the current token; **Revoke card** invalidates that card for automatic login.
 5. For browser-side tap login, the installation must also enable the RFID listener. While in Guest Mode, tap the card; the bridge sends a one-time code that the browser exchanges for an `HttpOnly` session cookie, without receiving a raw JWT.
 
 The flow works only when configuration, networking, the local bridge, dependencies, and compatible hardware are correct. The backend requires loopback communication for `/auth/rfid` and `/ws/rfid`; a Raspberry Pi on the same LAN is not automatically sufficient. If it fails, use **Log in** with **E-mail / Login** and **Password**.
@@ -58,7 +58,7 @@ The sidebar item is **New loan** and the panel title is **Register Loan**. It re
 
 1. Under **Loan Details**, fill in **Requester** (for signed-in users the field suggests names already used) and select the **Responsible** person.
 2. Check **Date and Time**. It is filled automatically; click it to choose a different pickup date when needed.
-3. Under **Loan Items**, choose **Equipment**, enter **Qty.**, and click **Add**. Repeat for each model; items appear under **Added items**.
+3. Under **Loan Items**, choose **Equipment**, enter **Qty.**, and click **Add**. Repeat for each model; items appear under **Added items** as compact chips with the equipment icon and only the model name on one line (the category appears on hover and for screen readers).
 4. Optionally fill in **Note**.
 5. Click **Register Loan**.
 
@@ -76,7 +76,7 @@ While **Date and Time** is untouched, the field follows the server clock and the
 4. Click **Return** in the list or **Confirm Return** in the detail panel.
 5. Review the **Confirm Return** modal and click **Confirm Return**; **Cancel** closes it without completing the return.
 
-Each loan card has a **Details** button (also keyboard accessible). Signed-in users see in **Details** who registered and who returned the loan. Use the search box (requester, responsible, equipment and who registered it) and the sort option **Oldest first** / **Newest first** to find a loan. With no results the screen says "No results for x" and offers **Clear search** or **Clear filters**.
+Each loan card has a **Details** button (also keyboard accessible). Signed-in users see in **Details** who registered and who returned the loan. Use the search box (requester, responsible, equipment and who registered it) and the sort control, two buttons **Oldest first** / **Newest first**, to find a loan. On mobile, the search field ("Search requester, equipment…") takes the full width. With no results the screen says "No results for x" and offers **Clear search** or **Clear filters**.
 
 Items become available again after confirmation. **Return Date and Time** is filled automatically and can be edited; on confirmation the UI sends the selected offset-aware ISO timestamp, which the backend validates and persists. Older clients that omit the field continue to use server-current time.
 
@@ -84,10 +84,10 @@ If **Return Date and Time** is untouched, the record uses the server time at the
 
 ## 6. Dashboard
 
-The **Dashboard** shows **Total equipment**, **Available**, **On Loan**, **Maintenance**, and **Broken** summary cards.
+The **Dashboard** shows **Total equipment**, **Available**, **On Loan**, **Maintenance**, and **Broken** summary cards, without percentage text. On phones the cards are narrower: **Total** sits on its own row and the others in a 2×2 grid.
 
 - In **Stock**, review totals by category; the **Out of stock** badge appears when no unit is available and **Low stock** when 10% or less of the total (at least 1 unit) is available. Click a row for the category's read-only details.
-- In **History**, review loan dates, items, and status. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Signed-in users also see authorship (who registered and who returned); Guests never receive this data. Stock details show who created and changed the equipment. On first load the Dashboard shows loading skeletons and "—" counters; if loading fails, an in-panel error with **Try again** appears. Click **Details** when available.
+- In **History**, review loan dates, items, and status. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Signed-in users also see authorship (who registered and who returned); Guests never receive this data. Stock details show who created and changed the equipment. On phones the History cards have a clearer hierarchy (title, status and details separated, like the **Stock** cards). On first load the Dashboard shows loading skeletons and "—" counters; if loading fails, an in-panel error with **Try again** appears. Click **Details** when available.
 - Use **Search by information...**. In **Stock**, it searches the category; in **History**, it searches number, requester, and responsible party.
 - **History filters:** History loads 50 loans at a time; use **Load more** and follow **Showing N loans** (guests too). The status chips (**All**, **Open**, **Returned**) and period chips (**Today**, **7 days**, **This month**, **All time**) combine with search, which for signed-in users runs on the server over the whole history. **Clear filters** returns to the full view.
 - In **Stock**, **Export** immediately downloads a CSV of the current stock. In **History**, **Export** takes you to the **Export** panel for more options.
@@ -96,7 +96,7 @@ Displayed stock is derived from open loans and maintenance/broken issues. Check 
 
 ## 7. Control
 
-**Control** separates records into **Observation**, **Maintenance**, **Broken**, and **Resolved** tabs. Summary cards show open records. Signed-in users see who created, changed and resolved each record. **Learn more** opens this manual. If loading fails, the panel shows an error with **Try again**.
+**Control** separates records into **Observation**, **Maintenance**, **Broken**, and **Resolved** tabs. Summary cards show open records. The record cards separate title, status and details, like the **Stock** cards. Signed-in users see who created, changed and resolved each record. **Learn more** opens this manual. If loading fails, the panel shows an error with **Try again**.
 
 ### Create or edit a record
 
@@ -118,16 +118,16 @@ Creating, editing, and resolving require authentication (**Editor** or **Adminis
 
 ## 8. Records (Administrator)
 
-**Records** is administrative. Open a card, fill in the fields, and click **Save**; **Cancel** closes the modal. **Registered** lists the data loaded from the API.
+**Records** is administrative. Open a card, fill in the fields, and click **Save**. The **Records** window has a single scroll (full-screen on phones) and never opens another modal on top of it. **Edit**, **Adjust total**, **Rename**, **Reset password** and **RFID Card** open an edit view inside the same window, with **Back**, a title and the record name; **Cancel** and **Save** stay fixed at the bottom (above the phone keyboard). **Back**, **Cancel**, Esc or saving return to the list, keeping the search and scroll position. **Registered** lists the data loaded from the API; the **System Users** list does not scroll sideways on phones.
 
 - **Equipment:** **Category**, **Model**, and **Quantity**. **Adjust total** changes a model's total quantity and cannot go below the items in use.
 - **Responsible Parties:** **Name** and **Role**. They can be edited, deactivated and reactivated; inactive responsible parties do not appear in the **Register Loan** form, but older loans stay in the history.
 - **System Users:** **Name**, **Email / Login** (must be an email), **Password**, and **Access level** (**Administrator** or **Editor**). Name, access level and login can be edited, and the user can be deactivated or reactivated (with confirmation); deactivated users show an **Inactive** badge, and logins that are not valid emails show a warning. You cannot deactivate or demote your own account, nor remove the last active administrator. Password recovery only works if the login's mailbox really exists.
 - **Equipment Categories:** **Category Name**; an existing category can be renamed (the name cannot duplicate another).
 
-On a user row, **Link card** opens **RFID Card**. After linking, use **Generate new token** (replaces the current one), **Copy token** when available, or **Revoke card**. Treat the token as sensitive; do not publish it or include it in reports.
+On a user row, **Link card** opens the **RFID Card** edit view. After linking, use **Generate new token** (replaces the current one), **Copy token** when available, or **Revoke card**. Treat the token as sensitive; do not publish it or include it in reports.
 
-The **Reset password** button (padlock icon) next to each user opens a dialog to set a temporary password. Fill in **New password** and **Confirm new password**: at least 12 characters with an uppercase letter, a lowercase letter, a number and a symbol are required (72 bytes maximum). On confirmation, all of the user's open sessions are ended and the action is recorded in the audit log as `PASSWORD_RESET`. Hand over the temporary password through a secure channel and ask the user to change it in **Security**. For your own account, use **Security** (the button shows a notice instead of opening the dialog).
+The **Reset password** button (padlock icon) next to each user opens the edit view to set a temporary password. Fill in **New password** and **Confirm new password**: at least 12 characters with an uppercase letter, a lowercase letter, a number and a symbol are required (72 bytes maximum). On confirmation, all of the user's open sessions are ended and the action is recorded in the audit log as `PASSWORD_RESET`. Hand over the temporary password through a secure channel and ask the user to change it in **Security**. For your own account, use **Security** (the button shows a notice instead of opening the edit view).
 
 **Records** lists have search and, for signed-in users, show who created each record. The current UI is designed to list/view, create and, for users and equipment totals, adjust the records shown. Do not assume that an edit or delete action available in another panel exists for every record type.
 
@@ -170,7 +170,7 @@ Administrators receive a system notification, on the computer or the phone, when
 
 To enable it:
 
-1. Click **Enable notifications** in the banner at the top of the app or, in **Settings**, on the **Notifications** card, **Turn on notifications on this device**. The banner appears for administrators without notifications on this device; **Not now** hides it for 7 days on that device.
+1. Click **Turn on notifications** in the banner at the top of the app or, in **Settings**, on the **Notifications** card, **Turn on notifications on this device**. The banner appears for administrators without notifications on this device; **Not now** hides it for 7 days on that device.
 2. When the browser asks, click **Allow**.
 3. Click **Send test notification** to confirm that it arrives.
 4. Use the switches for **loans**, **returns** and **issues** to choose what reaches this device. They apply immediately.
@@ -179,7 +179,8 @@ To turn it off on this device, click **Turn off on this device**.
 
 - **Android:** Chrome works directly.
 - **iPhone and iPad:** require iOS 16.4 or later and the app installed on the home screen. In Safari, tap **Share → Add to Home Screen**, open the app from its icon, sign in as an administrator and then enable notifications.
-- **Permission prompt does not appear:** click the icon next to the site address (crossed-out bell, padlock or site settings) › **Notifications** › **Allow**. The app finishes the activation by itself, provided you asked for it in this session or the banner is showing.
+- **Permission prompt does not appear:** click the icon next to the site address (crossed-out bell, padlock or site settings) › **Notifications** › **Allow**. The app finishes the activation by itself, provided you asked for it in this session or the banner is showing. If you allow the permission after the prompt disappeared, the activation finishes on its own and the banner goes away.
+- **Activation error messages:** only one activation runs at a time (also across tabs and the installed app) and a transient failure is retried once automatically. If the message says the browser's notification service did not respond, check your connection and try again in a moment. If it says the browser rejected the server's notification key, try again and, if it persists, tell the administrator of the installation. If the permission prompt was closed without an answer, tap **Turn on notifications** and choose **Allow**. Subscriptions created with an old server key are replaced automatically.
 - **Blocked by the browser:** in the same place, change it to **Allow** and reload the page.
 - **Brave:** turn on **Use Google services for push messaging** in `brave://settings/privacy`.
 - **Only appears inside the app:** the notification is a system notification and appears even with the eduAssets tab in the background, another program in front, or the tab closed (browser open). If it only appears inside the app, check the operating system: on Windows, **Settings › System › Notifications** (notifications on, the browser allowed and **Do not disturb** off); on macOS, **System Settings › Notifications › the browser**.
@@ -196,7 +197,7 @@ Open **Security** from the user menu and click **Change password**. Fill in **Cu
 
 Changing a password is available only to the authenticated account and requires the current password. If the password is lost, use **Forgot my password** on the entry screen (section 2) or **Contact the administrator**: an administrator can reset it in **Records → System Users** (section 8).
 
-**On-screen notifications:** app notifications are announced to screen readers, have a close button, pause on hover and sit at the bottom center on mobile; error notifications stay until closed.
+**On-screen notifications:** app notifications are announced to screen readers, have a close button, pause briefly on hover and sit at the bottom center on mobile. All of them close on their own, including errors (after 8 seconds). Identical messages are not stacked (a repeated one refreshes the one already shown) and at most 3 are visible at once.
 
 ## 12. My Profile
 
@@ -235,4 +236,4 @@ Anyone preparing an installation should follow the README and provide local valu
 
 **The export is not generated.** Review the type, period, selected equipment, and format. The application does not create a file when no record matches the filters.
 
-**I do not receive push notifications.** Confirm that your account is an **Administrator** and that notifications are enabled on this device under **Settings → Notifications**; use **Send test notification**. On iPhone or iPad, the app must be installed on the home screen (iOS 16.4 or later). If the browser blocked the prompt, allow notifications in the site settings and reload the page.
+**I do not receive push notifications.** Confirm that your account is an **Administrator** and that notifications are enabled on this device under **Settings → Notifications**; use **Send test notification**. On iPhone or iPad, the app must be installed on the home screen (iOS 16.4 or later). If the browser blocked the prompt, allow notifications in the site settings and reload the page. If a message says the browser's notification service did not respond or that the browser rejected the server key, try again in a moment; if the **server key** message persists, contact the administrator of the installation.

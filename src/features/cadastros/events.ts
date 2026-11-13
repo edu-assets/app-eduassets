@@ -28,17 +28,17 @@ import {
     aplicarErrosCampos,
     mostrarErroCampo,
     limparCamposFormulario,
-    abrirModalRfid,
+    prepararPainelRfid,
     exibirModoGravacao,
     exibirCartaoRevogado,
-    fecharModalRfid,
-    abrirModalResetSenha,
-    fecharModalResetSenha
+    prepararResetSenha,
+    limparResetSenha
 } from './render.js';
 import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { getUsuario } from '../../core/state/authStore.js';
 import type { CampoCadastro } from './service.js';
 import type { CampoComOpcoes, RfidModalEls, ResetSenhaModalEls } from './render.js';
+import type { SheetCadastro } from './sheet.js';
 import type { Categoria, Equipamento, Responsavel, Usuario } from '../../types/index.js';
 import {
     filtrarPorBusca,
@@ -53,7 +53,16 @@ import {
     montarPayloadAtualizacaoResponsavel
 } from './logic.js';
 import type { ItemComAutoria } from './logic.js';
-import { textoEquipamento, textoCategoria, textoResponsavel } from './templates.js';
+import {
+    textoEquipamento,
+    textoCategoria,
+    textoResponsavel,
+    renderFormEdicaoUsuario,
+    renderFormAjusteTotal,
+    renderFormRenomearCategoria,
+    renderFormEdicaoResponsavel,
+    renderRodapeEdicao
+} from './templates.js';
 import { traduzirErro, t } from '../../core/state/i18nStore.js';
 import { getEquipamentos, carregarEquipamentos } from '../../core/state/equipamentoStore.js';
 import { carregarResponsaveis } from '../../core/state/responsavelStore.js';
@@ -70,6 +79,8 @@ export interface CadastrosEls {
     btnCancelar: HTMLElement | null;
     btnSalvar: HTMLButtonElement | null;
     busca?: HTMLInputElement | null;
+    /** Single-scroll sheet hosting the list view and the per-record detail views (no stacked modals). */
+    sheet: SheetCadastro;
     rfidModal: RfidModalEls;
     resetSenhaModal: ResetSenhaModalEls;
 }
@@ -81,10 +92,6 @@ export interface CadastrosEstado {
 let usuariosCache: Usuario[] = [];
 let itensCache: unknown[] = [];
 let estadoAtual: CadastrosEstado | null = null;
-let editandoUsuarioId: number | null = null;
-let ajustandoEquipamentoId: number | null = null;
-let editandoCategoriaId: number | null = null;
-let editandoResponsavelId: number | null = null;
 /** Double-submit guard: keys of operations currently running. */
 const emAndamento = new Set<string>();
 
@@ -118,7 +125,7 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
         if (alvo?.getAttribute('aria-invalid') === 'true' && alvo.id) mostrarErroCampo(alvo.id, null);
     };
     els.camposWrap.addEventListener('input', limparErroAoDigitar);
-    els.listaWrap.addEventListener('input', limparErroAoDigitar);
+    els.sheet.detalhe.addEventListener('input', limparErroAoDigitar);
 
     els.cards.forEach((card) => {
         card.addEventListener('click', (e) => {
@@ -157,8 +164,7 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
                 showToast(t('feedback.redefinir_propria_senha'), 'warning');
                 return;
             }
-            usuarioResetSenhaAtual = usuario;
-            abrirModalResetSenha(els.resetSenhaModal, usuario);
+            abrirResetSenha(els, usuario);
             return;
         }
 
@@ -169,11 +175,11 @@ export function attachCadastrosEvents(els: CadastrosEls, estado: CadastrosEstado
         const usuario = usuariosCache.find((u) => String(u.id) === chip.dataset.rfidUsuarioId);
         if (!usuario) return;
 
-        usuarioRfidAtual = usuario;
-        abrirModalRfid(els.rfidModal, usuario);
+        abrirPainelRfid(els, usuario);
     });
 
-    els.listaWrap.addEventListener('submit', (e) => {
+    // Edit forms live in the sheet's detail view; the pinned footer submit targets them via `form=`.
+    els.sheet.detalhe.addEventListener('submit', (e) => {
         const form = e.target as HTMLFormElement;
         if (form.matches('[data-editar-usuario-form]')) {
             e.preventDefault();
@@ -198,10 +204,7 @@ function attachResetSenhaModalEvents(els: CadastrosEls): void {
     const modal = els.resetSenhaModal;
     if (!modal.form) return;
 
-    modal.btnCancelar.addEventListener('click', () => {
-        usuarioResetSenhaAtual = null;
-        fecharModalResetSenha(modal);
-    });
+    modal.btnCancelar.addEventListener('click', () => els.sheet.voltarParaLista());
 
     modal.form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -217,8 +220,7 @@ function attachResetSenhaModalEvents(els: CadastrosEls): void {
         setButtonLoading(modal.btnSalvar, true);
         try {
             await redefinirSenhaUsuario(usuario.id, modal.novaSenha.value);
-            usuarioResetSenhaAtual = null;
-            fecharModalResetSenha(modal);
+            if (usuarioResetSenhaAtual === usuario) els.sheet.voltarParaLista();
             showToast(t('feedback.senha_redefinida').replace('{nome}', usuario.nome), 'success');
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_redefinir_senha'), 'error');
@@ -231,7 +233,7 @@ function attachResetSenhaModalEvents(els: CadastrosEls): void {
 function attachRfidModalEvents(els: CadastrosEls): void {
     const { rfidModal } = els;
 
-    rfidModal.btnFechar.addEventListener('click', () => fecharModalRfid());
+    rfidModal.btnFechar.addEventListener('click', () => els.sheet.voltarParaLista());
 
     rfidModal.btnGerar.addEventListener('click', () => gerarOuRegerarToken(els, rfidModal.btnGerar));
     rfidModal.btnRegerar.addEventListener('click', () => gerarOuRegerarToken(els, rfidModal.btnRegerar));
@@ -248,6 +250,8 @@ function attachRfidModalEvents(els: CadastrosEls): void {
 
     rfidModal.btnRevogar.addEventListener('click', async () => {
         if (bloquearSeNaoAdmin() || !usuarioRfidAtual) return;
+        // Captured: Voltar/closing the sheet during the awaits clears usuarioRfidAtual.
+        const usuario = usuarioRfidAtual;
 
         const confirmado = await confirmarExclusao({
             titulo: 'Revogar cartão RFID',
@@ -258,9 +262,9 @@ function attachRfidModalEvents(els: CadastrosEls): void {
 
         rfidModal.btnRevogar.disabled = true;
         try {
-            await revogarCartaoRfid(usuarioRfidAtual.id);
-            exibirCartaoRevogado(rfidModal);
-            atualizarUsuarioLocal(els, { ...usuarioRfidAtual, possuiCartaoRfid: false });
+            await revogarCartaoRfid(usuario.id);
+            if (usuarioRfidAtual?.id === usuario.id) exibirCartaoRevogado(rfidModal);
+            atualizarUsuarioLocal(els, { ...usuario, possuiCartaoRfid: false });
             showToast('Cartão revogado com sucesso.', 'success');
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_revogar_cartao'), 'error');
@@ -273,6 +277,8 @@ function attachRfidModalEvents(els: CadastrosEls): void {
 async function gerarOuRegerarToken(els: CadastrosEls, botaoClicado: HTMLButtonElement): Promise<void> {
     const { rfidModal } = els;
     if (bloquearSeNaoAdmin() || !usuarioRfidAtual) return;
+    // Captured: Voltar/closing the sheet during the await clears usuarioRfidAtual.
+    const usuario = usuarioRfidAtual;
 
     const textoOriginal = botaoClicado.innerHTML;
     rfidModal.btnGerar.disabled = true;
@@ -280,9 +286,9 @@ async function gerarOuRegerarToken(els: CadastrosEls, botaoClicado: HTMLButtonEl
     botaoClicado.innerHTML = '<span class="material-symbols-outlined">progress_activity</span> Iniciando hardware...';
 
     try {
-        await gerarCartaoRfid(usuarioRfidAtual.id);
-        exibirModoGravacao(rfidModal);
-        atualizarUsuarioLocal(els, { ...usuarioRfidAtual, possuiCartaoRfid: true });
+        await gerarCartaoRfid(usuario.id);
+        if (usuarioRfidAtual?.id === usuario.id) exibirModoGravacao(rfidModal);
+        atualizarUsuarioLocal(els, { ...usuario, possuiCartaoRfid: true });
         showToast('Leitor pronto para gravar.', 'success');
     } catch (erro) {
         showToast(traduzirErro(erro, 'feedback.erro_gerar_token'), 'error');
@@ -293,8 +299,58 @@ async function gerarOuRegerarToken(els: CadastrosEls, botaoClicado: HTMLButtonEl
     }
 }
 
+/* ===== Detail views (hosted in the sheet, replacing the list) ===== */
+
+function abrirEdicao(els: CadastrosEls, titulo: string, subtitulo: string, corpoHtml: string, gatilho: string, focar: string): void {
+    els.sheet.abrirDetalhe({ titulo, subtitulo, corpoHtml, rodapeHtml: renderRodapeEdicao(), gatilho, focar });
+}
+
+function abrirResetSenha(els: CadastrosEls, usuario: Usuario): void {
+    const modal = els.resetSenhaModal;
+    usuarioResetSenhaAtual = usuario;
+    prepararResetSenha(modal, usuario);
+    els.sheet.abrirDetalhe({
+        titulo: t('cadastros.redefinir_senha'),
+        subtitulo: t('cadastros.reset_senha_subtitulo'),
+        hospedarCorpo: [modal.form],
+        hospedarRodape: [modal.btnCancelar, modal.btnSalvar],
+        gatilho: `[data-reset-senha-usuario-id="${usuario.id}"]`,
+        focar: '#reset-senha-nova',
+        aoSair: () => {
+            usuarioResetSenhaAtual = null;
+            limparResetSenha(modal);
+        }
+    });
+}
+
+function abrirPainelRfid(els: CadastrosEls, usuario: Usuario): void {
+    const { rfidModal } = els;
+    const corpo = rfidModal.overlay.querySelector<HTMLElement>('.modal-body');
+    if (!corpo) return;
+    usuarioRfidAtual = usuario;
+    prepararPainelRfid(rfidModal, usuario);
+    els.sheet.abrirDetalhe({
+        titulo: t('shell.cartao_rfid'),
+        subtitulo: rfidModal.overlay.querySelector('.modal-subtitle')?.textContent?.trim() ?? '',
+        hospedarCorpo: [corpo],
+        gatilho: `[data-rfid-usuario-id="${usuario.id}"]`,
+        aoSair: () => { usuarioRfidAtual = null; }
+    });
+}
+
+/** Leaves the detail view after a save, unless the user already navigated away from this form. */
+function concluirEdicao(els: CadastrosEls, form: HTMLFormElement): void {
+    if (form.isConnected) els.sheet.voltarParaLista();
+}
+
+function botaoSubmit(form: HTMLFormElement): HTMLButtonElement | null {
+    return form.querySelector<HTMLButtonElement>('button[type="submit"]')
+        ?? (form.id ? document.querySelector<HTMLButtonElement>(`button[type="submit"][form="${form.id}"]`) : null);
+}
+
 function atualizarUsuarioLocal(els: CadastrosEls, usuarioAtualizado: Usuario): void {
-    usuarioRfidAtual = usuarioAtualizado;
+    // Only while the RFID panel still shows this user (it may have been left during the request).
+    if (usuarioRfidAtual?.id === usuarioAtualizado.id) usuarioRfidAtual = usuarioAtualizado;
     usuariosCache = usuariosCache.map((u) => (u.id === usuarioAtualizado.id ? usuarioAtualizado : u));
     itensCache = usuariosCache;
     renderizarLista(els);
@@ -307,10 +363,7 @@ async function abrirCadastro(els: CadastrosEls, estado: CadastrosEstado, tipo: s
     estado.tipoAtual = tipo;
     itensCache = [];
     usuariosCache = [];
-    editandoUsuarioId = null;
-    ajustandoEquipamentoId = null;
-    editandoCategoriaId = null;
-    editandoResponsavelId = null;
+    els.sheet.voltarParaLista({ restaurarFoco: false });
     if (els.busca) els.busca.value = '';
 
     let camposComOpcoes: CampoComOpcoes[];
@@ -327,9 +380,13 @@ async function abrirCadastro(els: CadastrosEls, estado: CadastrosEstado, tipo: s
     await recarregarLista(els, estado);
 }
 
-async function recarregarLista(els: CadastrosEls, estado: CadastrosEstado): Promise<void> {
+/**
+ * `silencioso`: refresh after a mutation without the "Carregando..." placeholder, so the list keeps
+ * its height and the sheet keeps its scroll position (the user returns to where they were).
+ */
+async function recarregarLista(els: CadastrosEls, estado: CadastrosEstado, silencioso = false): Promise<void> {
     const tipo = estado.tipoAtual;
-    exibirListaCarregando(els);
+    if (!silencioso) exibirListaCarregando(els);
 
     try {
         const itens = await listarRegistros(tipo);
@@ -381,7 +438,7 @@ async function criarEAtualizar(
         if (estado.tipoAtual === 'responsaveis') await carregarResponsaveis();
         showToast('Registro criado com sucesso', 'success');
         limparCamposFormulario(campos);
-        await recarregarLista(els, estado);
+        await recarregarLista(els, estado, true);
     } catch (erro) {
         showToast(traduzirErro(erro, 'feedback.erro_salvar_registro'), 'error');
     } finally {
@@ -398,17 +455,14 @@ function renderizarLista(els: CadastrosEls): void {
 
     if (tipo === 'usuarios') {
         renderListaUsuarios(els, filtrarPorBusca(usuariosCache, termo, textoBuscaUsuario), {
-            usuarioAtualId: getUsuario()?.id ?? null,
-            editandoId: editandoUsuarioId
+            usuarioAtualId: getUsuario()?.id ?? null
         }, termo);
     } else if (tipo === 'equipamentos') {
-        renderListaEquipamentos(els, filtrarPorBusca(itensCache as Equipamento[], termo, textoEquipamento), {
-            ajustandoId: ajustandoEquipamentoId
-        }, termo);
+        renderListaEquipamentos(els, filtrarPorBusca(itensCache as Equipamento[], termo, textoEquipamento), termo);
     } else if (tipo === 'categorias') {
-        renderListaCategorias(els, filtrarPorBusca(itensCache as Categoria[], termo, textoCategoria), editandoCategoriaId, termo);
+        renderListaCategorias(els, filtrarPorBusca(itensCache as Categoria[], termo, textoCategoria), termo);
     } else if (tipo === 'responsaveis') {
-        renderListaResponsaveis(els, filtrarPorBusca(itensCache as Responsavel[], termo, textoResponsavel), editandoResponsavelId, termo);
+        renderListaResponsaveis(els, filtrarPorBusca(itensCache as Responsavel[], termo, textoResponsavel), termo);
     } else {
         const pares = itensCache.map((item) => ({ texto: formatarItem(tipo, item), item: item as ItemComAutoria }));
         const filtrados = filtrarPorBusca(pares, termo, (par) => par.texto);
@@ -421,14 +475,12 @@ function tratarCliqueAcaoLista(els: CadastrosEls, estado: CadastrosEstado, targe
     const editar = target.closest<HTMLElement>('[data-editar-usuario-id]');
     if (editar) {
         if (bloquearSeNaoAdmin()) return true;
-        editandoUsuarioId = Number(editar.dataset.editarUsuarioId);
-        renderizarLista(els);
-        els.listaWrap.querySelector<HTMLInputElement>('#edit-usuario-nome')?.focus();
-        return true;
-    }
-    if (target.closest('[data-editar-usuario-cancelar]')) {
-        editandoUsuarioId = null;
-        renderizarLista(els);
+        const usuario = usuariosCache.find((u) => String(u.id) === editar.dataset.editarUsuarioId);
+        if (usuario) {
+            const ehProprio = usuario.id === (getUsuario()?.id ?? null);
+            abrirEdicao(els, t('cadastros.editar_usuario'), usuario.nome, renderFormEdicaoUsuario(usuario, ehProprio),
+                `[data-editar-usuario-id="${usuario.id}"]`, '#edit-usuario-nome');
+        }
         return true;
     }
 
@@ -446,28 +498,22 @@ function tratarCliqueAcaoLista(els: CadastrosEls, estado: CadastrosEstado, targe
     const renomear = target.closest<HTMLElement>('[data-renomear-categoria-id]');
     if (renomear) {
         if (bloquearSeNaoAdmin()) return true;
-        editandoCategoriaId = Number(renomear.dataset.renomearCategoriaId);
-        renderizarLista(els);
-        els.listaWrap.querySelector<HTMLInputElement>('#edit-categoria-nome')?.focus();
-        return true;
-    }
-    if (target.closest('[data-renomear-categoria-cancelar]')) {
-        editandoCategoriaId = null;
-        renderizarLista(els);
+        const categoria = (itensCache as Categoria[]).find((c) => String(c.id) === renomear.dataset.renomearCategoriaId);
+        if (categoria) {
+            abrirEdicao(els, t('cadastros.renomear_categoria'), categoria.nome, renderFormRenomearCategoria(categoria),
+                `[data-renomear-categoria-id="${categoria.id}"]`, '#edit-categoria-nome');
+        }
         return true;
     }
 
     const editarResp = target.closest<HTMLElement>('[data-editar-responsavel-id]');
     if (editarResp) {
         if (bloquearSeNaoAdmin()) return true;
-        editandoResponsavelId = Number(editarResp.dataset.editarResponsavelId);
-        renderizarLista(els);
-        els.listaWrap.querySelector<HTMLInputElement>('#edit-responsavel-nome')?.focus();
-        return true;
-    }
-    if (target.closest('[data-editar-responsavel-cancelar]')) {
-        editandoResponsavelId = null;
-        renderizarLista(els);
+        const responsavel = (itensCache as Responsavel[]).find((r) => String(r.id) === editarResp.dataset.editarResponsavelId);
+        if (responsavel) {
+            abrirEdicao(els, t('cadastros.editar_responsavel'), `${responsavel.nome} — ${responsavel.cargo}`,
+                renderFormEdicaoResponsavel(responsavel), `[data-editar-responsavel-id="${responsavel.id}"]`, '#edit-responsavel-nome');
+        }
         return true;
     }
     const desativarResp = target.closest<HTMLButtonElement>('[data-desativar-responsavel-id]');
@@ -484,14 +530,12 @@ function tratarCliqueAcaoLista(els: CadastrosEls, estado: CadastrosEstado, targe
     const ajustar = target.closest<HTMLElement>('[data-ajustar-total-id]');
     if (ajustar) {
         if (bloquearSeNaoAdmin()) return true;
-        ajustandoEquipamentoId = Number(ajustar.dataset.ajustarTotalId);
-        renderizarLista(els);
-        els.listaWrap.querySelector<HTMLInputElement>('#ajuste-total-valor')?.focus();
-        return true;
-    }
-    if (target.closest('[data-ajustar-total-cancelar]')) {
-        ajustandoEquipamentoId = null;
-        renderizarLista(els);
+        const id = Number(ajustar.dataset.ajustarTotalId);
+        const equipamento = (itensCache as Equipamento[]).find((e) => e.id === id);
+        if (equipamento) {
+            abrirEdicao(els, t('cadastros.ajustar_total'), textoEquipamento(equipamento), renderFormAjusteTotal(equipamento),
+                `[data-ajustar-total-id="${equipamento.id}"]`, '#ajuste-total-valor');
+        }
         return true;
     }
     return false;
@@ -518,7 +562,7 @@ async function alternarAtivoUsuario(
         try {
             await atualizarUsuario(usuario.id, { ativo: ativar });
             showToast(t(ativar ? 'feedback.usuario_reativado' : 'feedback.usuario_desativado').replace('{nome}', usuario.nome), 'success');
-            await recarregarLista(els, estado);
+            await recarregarLista(els, estado, true);
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_atualizar_usuario'), 'error');
         } finally {
@@ -541,19 +585,18 @@ async function salvarEdicaoUsuario(els: CadastrosEls, estado: CadastrosEstado, f
 
     const payload = montarPayloadAtualizacaoUsuario(usuario, valores);
     if (!Object.keys(payload).length) {
-        editandoUsuarioId = null;
-        renderizarLista(els);
+        concluirEdicao(els, form);
         return;
     }
 
     await executarUnico(`editar-usuario-${usuario.id}`, async () => {
-        const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const botao = botaoSubmit(form);
         setButtonLoading(botao, true);
         try {
             await atualizarUsuario(usuario.id, payload);
-            editandoUsuarioId = null;
+            concluirEdicao(els, form);
             showToast(t('feedback.usuario_atualizado'), 'success');
-            await recarregarLista(els, estado);
+            await recarregarLista(els, estado, true);
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_atualizar_usuario'), 'error');
         } finally {
@@ -582,19 +625,18 @@ async function salvarAjusteTotal(els: CadastrosEls, estado: CadastrosEstado, for
     }
     mostrarErroCampo(campo, null);
     if (resultado.payload.quantidadeTotal === equipamento.quantidadeTotal) {
-        ajustandoEquipamentoId = null;
-        renderizarLista(els);
+        concluirEdicao(els, form);
         return;
     }
 
     await executarUnico(`ajustar-total-${id}`, async () => {
-        const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const botao = botaoSubmit(form);
         setButtonLoading(botao, true);
         try {
             await ajustarTotalEquipamento(id, resultado.payload);
-            ajustandoEquipamentoId = null;
+            concluirEdicao(els, form);
             showToast(t('feedback.total_ajustado'), 'success');
-            await recarregarLista(els, estado);
+            await recarregarLista(els, estado, true);
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_ajustar_total'), 'error');
         } finally {
@@ -620,20 +662,19 @@ async function salvarRenomearCategoria(els: CadastrosEls, estado: CadastrosEstad
     }
     const novoNome = nomeCategoriaAlterado(categoria.nome, entrada);
     if (!novoNome) {
-        editandoCategoriaId = null;
-        renderizarLista(els);
+        concluirEdicao(els, form);
         return;
     }
 
     await executarUnico(`renomear-categoria-${id}`, async () => {
-        const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const botao = botaoSubmit(form);
         setButtonLoading(botao, true);
         try {
             await renomearCategoria(id, novoNome);
-            editandoCategoriaId = null;
+            concluirEdicao(els, form);
             await carregarEquipamentos().catch(() => undefined);
             showToast(t('feedback.categoria_renomeada'), 'success');
-            await recarregarLista(els, estado);
+            await recarregarLista(els, estado, true);
         } catch (erroApi) {
             // Inline: duplicate name / not found appear under the field so the admin can fix it in place.
             mostrarErroCampoTexto(campo, traduzirErro(erroApi, 'feedback.erro_renomear_categoria'));
@@ -666,20 +707,19 @@ async function salvarEdicaoResponsavel(els: CadastrosEls, estado: CadastrosEstad
 
     const payload = montarPayloadAtualizacaoResponsavel(responsavel, valores);
     if (!Object.keys(payload).length) {
-        editandoResponsavelId = null;
-        renderizarLista(els);
+        concluirEdicao(els, form);
         return;
     }
 
     await executarUnico(`editar-responsavel-${id}`, async () => {
-        const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const botao = botaoSubmit(form);
         setButtonLoading(botao, true);
         try {
             await atualizarResponsavel(id, payload);
-            editandoResponsavelId = null;
+            concluirEdicao(els, form);
             await carregarResponsaveis().catch(() => undefined);
             showToast(t('feedback.responsavel_atualizado'), 'success');
-            await recarregarLista(els, estado);
+            await recarregarLista(els, estado, true);
         } catch (erro) {
             mostrarErroCampoTexto('edit-responsavel-nome', traduzirErro(erro, 'feedback.erro_atualizar_responsavel'));
         } finally {
@@ -711,7 +751,7 @@ async function alternarAtivoResponsavel(
             // Shared store (loan form select) uses the default active-only list, so the person appears/disappears there.
             await carregarResponsaveis().catch(() => undefined);
             showToast(t(ativar ? 'feedback.responsavel_reativado' : 'feedback.responsavel_desativado').replace('{nome}', responsavel.nome), 'success');
-            await recarregarLista(els, estado);
+            await recarregarLista(els, estado, true);
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_atualizar_responsavel'), 'error');
         } finally {

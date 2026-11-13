@@ -68,8 +68,6 @@ const NIVEL_LABEL: Record<string, string> = {
 export interface OpcoesItemUsuario {
     /** Id of the signed-in user: self-deactivation is not offered (the API also refuses it). */
     usuarioAtualId?: number | null;
-    /** Row currently showing the inline edit form. */
-    editandoId?: number | null;
 }
 
 export function usuarioAtivo(usuario: Usuario): boolean {
@@ -82,29 +80,38 @@ function renderBotaoAcaoTexto(atributo: string, id: number, icone: string, texto
         </button>`;
 }
 
-function renderFormEdicaoUsuario(usuario: Usuario, ehProprio: boolean): string {
+/** Id of the edit form hosted in the Cadastros sheet's detail view; the pinned footer submit targets it via `form=`. */
+export const ID_FORM_EDICAO = 'cadastro-edicao-form';
+
+/** Footer of the detail view: Cancelar (back to the list) + primary Salvar, submitting `ID_FORM_EDICAO`. */
+export function renderRodapeEdicao(): string {
+    return html`
+        <button type="button" class="btn btn-neutral" data-edicao-voltar>${t('shell.cancelar')}</button>
+        <button type="submit" class="btn btn-success" form="${ID_FORM_EDICAO}" data-edicao-salvar>
+            <span class="material-symbols-outlined" aria-hidden="true">save</span>${t('shell.salvar')}
+        </button>
+    `;
+}
+
+export function renderFormEdicaoUsuario(usuario: Usuario, ehProprio: boolean): string {
     const opcoes = Object.entries(NIVEL_LABEL)
         .map(([valor, chave]) => html`<option value="${valor}"${raw(valor === usuario.nivelAcesso ? ' selected' : '')}>${t(chave)}</option>`)
         .join('');
     return html`
-        <form class="cadastro-usuario-edit" data-editar-usuario-form="${usuario.id}" novalidate>
+        <form class="cadastro-edicao-form" id="${ID_FORM_EDICAO}" data-editar-usuario-form="${usuario.id}" novalidate>
             <div class="form-group">
                 <label for="edit-usuario-nome">${t('cadastros.campo_nome')}</label>
-                <input type="text" id="edit-usuario-nome" value="${usuario.nome}" aria-describedby="edit-usuario-nome-erro">
+                <input type="text" id="edit-usuario-nome" value="${usuario.nome}" autocomplete="off" aria-describedby="edit-usuario-nome-erro">
                 <span class="form-error" id="edit-usuario-nome-erro" role="alert" hidden></span>
             </div>
             <div class="form-group">
                 <label for="edit-usuario-login">${t('cadastros.campo_email_login')}</label>
-                <input type="email" id="edit-usuario-login" value="${usuario.login}" autocomplete="off" inputmode="email" aria-describedby="edit-usuario-login-erro">
+                <input type="email" id="edit-usuario-login" value="${usuario.login}" autocomplete="off" inputmode="email" autocapitalize="off" spellcheck="false" aria-describedby="edit-usuario-login-erro">
                 <span class="form-error" id="edit-usuario-login-erro" role="alert" hidden></span>
             </div>
             <div class="form-group">
                 <label for="edit-usuario-nivel">${t('cadastros.campo_nivel_acesso')}</label>
                 <select id="edit-usuario-nivel"${raw(ehProprio ? ' disabled' : '')}>${raw(opcoes)}</select>
-            </div>
-            <div class="cadastro-edit-acoes">
-                <button type="button" class="btn btn-neutral" data-editar-usuario-cancelar>${t('shell.cancelar')}</button>
-                <button type="submit" class="btn btn-success">${t('shell.salvar')}</button>
             </div>
         </form>
     `;
@@ -113,10 +120,6 @@ function renderFormEdicaoUsuario(usuario: Usuario, ehProprio: boolean): string {
 export function renderItemRegistroUsuario(usuario: Usuario, opcoes: OpcoesItemUsuario = {}): string {
     const ehProprio = usuario.id === opcoes.usuarioAtualId;
     const ativo = usuarioAtivo(usuario);
-
-    if (opcoes.editandoId === usuario.id) {
-        return html`<div class="cadastro-usuario-row cadastro-usuario-row--edicao">${raw(renderFormEdicaoUsuario(usuario, ehProprio))}</div>`;
-    }
 
     const chip = usuario.possuiCartaoRfid
         ? html`<button type="button" class="cadastro-rfid-chip cadastro-rfid-chip--vinculado" data-rfid-usuario-id="${usuario.id}">
@@ -160,38 +163,27 @@ export function renderItemRegistroUsuario(usuario: Usuario, opcoes: OpcoesItemUs
     `;
 }
 
-export interface OpcoesItemEquipamento {
-    ajustandoId?: number | null;
-}
-
 export function textoEquipamento(eq: Equipamento): string {
     return `${eq.categoria?.nome ?? '—'} — ${eq.modelo} (${eq.quantidadeDisponivel}/${eq.quantidadeTotal})`;
 }
 
-export function renderItemRegistroEquipamento(eq: Equipamento, opcoes: OpcoesItemEquipamento = {}): string {
-    const texto = textoEquipamento(eq);
-    if (opcoes.ajustandoId === eq.id) {
-        return html`
-            <div class="cadastro-modal-item cadastro-modal-item--ajuste">
-                <form class="cadastro-ajuste-form" data-ajustar-total-form="${eq.id}" novalidate>
-                    <span class="cadastro-item-texto">${texto}</span>
-                    <div class="form-group">
-                        <label for="ajuste-total-valor">${t('cadastros.novo_total')}</label>
-                        <input type="number" id="ajuste-total-valor" min="1" step="1" value="${eq.quantidadeTotal}" aria-describedby="ajuste-total-valor-erro">
-                        <span class="form-error" id="ajuste-total-valor-erro" role="alert" hidden></span>
-                    </div>
-                    <div class="cadastro-edit-acoes">
-                        <button type="button" class="btn btn-neutral" data-ajustar-total-cancelar>${t('shell.cancelar')}</button>
-                        <button type="submit" class="btn btn-success">${t('shell.salvar')}</button>
-                    </div>
-                </form>
+export function renderFormAjusteTotal(eq: Equipamento): string {
+    return html`
+        <form class="cadastro-edicao-form" id="${ID_FORM_EDICAO}" data-ajustar-total-form="${eq.id}" novalidate>
+            <div class="form-group">
+                <label for="ajuste-total-valor">${t('cadastros.novo_total')}</label>
+                <input type="number" id="ajuste-total-valor" min="1" step="1" inputmode="numeric" value="${eq.quantidadeTotal}" aria-describedby="ajuste-total-valor-erro">
+                <span class="form-error" id="ajuste-total-valor-erro" role="alert" hidden></span>
             </div>
-        `;
-    }
+        </form>
+    `;
+}
+
+export function renderItemRegistroEquipamento(eq: Equipamento): string {
     return html`
         <div class="cadastro-modal-item cadastro-modal-item--acao">
-            <span class="cadastro-item-texto">${texto}${raw(renderAutoria(eq, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}</span>
-            ${raw(renderBotaoAcaoTexto('data-ajustar-total-id', eq.id, 'tune', t('cadastros.ajustar_total')))}
+            <span class="cadastro-item-texto">${textoEquipamento(eq)}${raw(renderAutoria(eq, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}</span>
+            <span class="cadastro-item-acoes">${raw(renderBotaoAcaoTexto('data-ajustar-total-id', eq.id, 'tune', t('cadastros.ajustar_total')))}</span>
         </div>
     `;
 }
@@ -210,55 +202,45 @@ export function textoResponsavel(r: Responsavel): string {
     return `${r.nome} — ${r.cargo}${responsavelAtivo(r) ? '' : ` ${t('cadastros.inativo')}`}`;
 }
 
-export function renderItemRegistroCategoria(c: Categoria, opcoes: { editandoId?: number | null } = {}): string {
-    if (opcoes.editandoId === c.id) {
-        return html`
-            <div class="cadastro-modal-item cadastro-modal-item--ajuste">
-                <form class="cadastro-ajuste-form" data-renomear-categoria-form="${c.id}" novalidate>
-                    <div class="form-group">
-                        <label for="edit-categoria-nome">${t('cadastros.campo_nome_categoria_novo')}</label>
-                        <input type="text" id="edit-categoria-nome" value="${c.nome}" aria-describedby="edit-categoria-nome-erro">
-                        <span class="form-error" id="edit-categoria-nome-erro" role="alert" hidden></span>
-                    </div>
-                    <div class="cadastro-edit-acoes">
-                        <button type="button" class="btn btn-neutral" data-renomear-categoria-cancelar>${t('shell.cancelar')}</button>
-                        <button type="submit" class="btn btn-success">${t('shell.salvar')}</button>
-                    </div>
-                </form>
+export function renderFormRenomearCategoria(c: Categoria): string {
+    return html`
+        <form class="cadastro-edicao-form" id="${ID_FORM_EDICAO}" data-renomear-categoria-form="${c.id}" novalidate>
+            <div class="form-group">
+                <label for="edit-categoria-nome">${t('cadastros.campo_nome_categoria_novo')}</label>
+                <input type="text" id="edit-categoria-nome" value="${c.nome}" autocomplete="off" aria-describedby="edit-categoria-nome-erro">
+                <span class="form-error" id="edit-categoria-nome-erro" role="alert" hidden></span>
             </div>
-        `;
-    }
+        </form>
+    `;
+}
+
+export function renderItemRegistroCategoria(c: Categoria): string {
     return html`
         <div class="cadastro-modal-item cadastro-modal-item--acao">
             <span class="cadastro-item-texto">${c.nome}${raw(renderAutoria(c, 'autoria.cadastrado_por'))}</span>
-            ${raw(renderBotaoAcaoTexto('data-renomear-categoria-id', c.id, 'edit', t('cadastros.renomear')))}
+            <span class="cadastro-item-acoes">${raw(renderBotaoAcaoTexto('data-renomear-categoria-id', c.id, 'edit', t('cadastros.renomear')))}</span>
         </div>
     `;
 }
 
-export function renderItemRegistroResponsavel(r: Responsavel, opcoes: { editandoId?: number | null } = {}): string {
-    if (opcoes.editandoId === r.id) {
-        return html`
-            <div class="cadastro-modal-item cadastro-modal-item--ajuste">
-                <form class="cadastro-ajuste-form" data-editar-responsavel-form="${r.id}" novalidate>
-                    <div class="form-group">
-                        <label for="edit-responsavel-nome">${t('cadastros.campo_nome')}</label>
-                        <input type="text" id="edit-responsavel-nome" value="${r.nome}" aria-describedby="edit-responsavel-nome-erro">
-                        <span class="form-error" id="edit-responsavel-nome-erro" role="alert" hidden></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-responsavel-cargo">${t('cadastros.campo_cargo')}</label>
-                        <input type="text" id="edit-responsavel-cargo" value="${r.cargo}" aria-describedby="edit-responsavel-cargo-erro">
-                        <span class="form-error" id="edit-responsavel-cargo-erro" role="alert" hidden></span>
-                    </div>
-                    <div class="cadastro-edit-acoes">
-                        <button type="button" class="btn btn-neutral" data-editar-responsavel-cancelar>${t('shell.cancelar')}</button>
-                        <button type="submit" class="btn btn-success">${t('shell.salvar')}</button>
-                    </div>
-                </form>
+export function renderFormEdicaoResponsavel(r: Responsavel): string {
+    return html`
+        <form class="cadastro-edicao-form" id="${ID_FORM_EDICAO}" data-editar-responsavel-form="${r.id}" novalidate>
+            <div class="form-group">
+                <label for="edit-responsavel-nome">${t('cadastros.campo_nome')}</label>
+                <input type="text" id="edit-responsavel-nome" value="${r.nome}" autocomplete="off" aria-describedby="edit-responsavel-nome-erro">
+                <span class="form-error" id="edit-responsavel-nome-erro" role="alert" hidden></span>
             </div>
-        `;
-    }
+            <div class="form-group">
+                <label for="edit-responsavel-cargo">${t('cadastros.campo_cargo')}</label>
+                <input type="text" id="edit-responsavel-cargo" value="${r.cargo}" autocomplete="off" aria-describedby="edit-responsavel-cargo-erro">
+                <span class="form-error" id="edit-responsavel-cargo-erro" role="alert" hidden></span>
+            </div>
+        </form>
+    `;
+}
+
+export function renderItemRegistroResponsavel(r: Responsavel): string {
     const ativo = responsavelAtivo(r);
     const badge = ativo ? '' : html`<span class="cadastro-badge cadastro-badge--inativo">${t('cadastros.inativo')}</span>`;
     const botaoStatus = ativo
@@ -267,8 +249,10 @@ export function renderItemRegistroResponsavel(r: Responsavel, opcoes: { editando
     return html`
         <div class="cadastro-modal-item cadastro-modal-item--acao${raw(ativo ? '' : ' cadastro-usuario-row--inativo')}">
             <span class="cadastro-item-texto">${r.nome} — ${r.cargo} ${raw(badge)}${raw(renderAutoria(r, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}</span>
-            ${raw(renderBotaoAcaoTexto('data-editar-responsavel-id', r.id, 'edit', t('cadastros.editar')))}
-            ${raw(botaoStatus)}
+            <span class="cadastro-item-acoes">
+                ${raw(renderBotaoAcaoTexto('data-editar-responsavel-id', r.id, 'edit', t('cadastros.editar')))}
+                ${raw(botaoStatus)}
+            </span>
         </div>
     `;
 }

@@ -29,7 +29,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'auto_stories',
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
-        version: '1.5.1',
+        version: '1.5.2',
         updatedAt: '2026-11-13'
     },
     {
@@ -56,8 +56,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'cloud',
         file: { pt: '/docs/Hospedagem.md', en: '/docs/Hosting.md' },
         category: 'tecnico',
-        version: '1.2.0',
-        updatedAt: '2026-11-12'
+        version: '1.5.2',
+        updatedAt: '2026-11-13'
     },
     {
         id: 'database-model',
@@ -83,7 +83,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: '1.5.1',
+        version: '1.5.2',
         updatedAt: '2026-11-13'
     },
     {

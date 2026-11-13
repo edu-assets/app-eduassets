@@ -31,18 +31,23 @@ export function filtrarOrdenarDevolucoes(loans: LoanUI[], filtro: FiltroDevoluco
 }
 
 export function renderDevolucoesFerramentas(filtro: FiltroDevolucoes): string {
-    const opcao = (valor: OrdemDevolucoes, chave: string) =>
-        html`<option value="${valor}"${raw(filtro.ordem === valor ? ' selected' : '')}>${t(chave)}</option>`;
+    const opcao = (valor: OrdemDevolucoes, chave: string, icone: string) => {
+        const ativo = filtro.ordem === valor;
+        return html`<button type="button" class="devolucao-ordem-opcao${raw(ativo ? ' is-active' : '')}" data-ordem="${valor}" aria-pressed="${ativo ? 'true' : 'false'}">
+            <span class="material-symbols-outlined" aria-hidden="true">${icone}</span>
+            <span>${t(chave)}</span>
+        </button>`;
+    };
     return html`
         <div class="controle-busca-wrap devolucao-busca-wrap">
             <span class="material-symbols-outlined">search</span>
             <input type="text" id="devolucao-busca" value="${filtro.termo}" placeholder="${t('devolucao.buscar_placeholder')}"
                 aria-label="${t('devolucao.buscar_placeholder')}" autocomplete="off">
         </div>
-        <select id="devolucao-ordem" class="devolucao-ordem" aria-label="${t('devolucao.ordenar')}">
-            ${raw(opcao('antigos', 'devolucao.mais_antigos_primeiro'))}
-            ${raw(opcao('recentes', 'devolucao.mais_recentes_primeiro'))}
-        </select>
+        <div class="devolucao-ordem" id="devolucao-ordem" role="group" aria-label="${t('devolucao.ordenar')}">
+            ${raw(opcao('antigos', 'devolucao.mais_antigos_primeiro', 'arrow_upward'))}
+            ${raw(opcao('recentes', 'devolucao.mais_recentes_primeiro', 'arrow_downward'))}
+        </div>
     `;
 }
 
@@ -71,10 +76,14 @@ export function montarFerramentasDevolucoes(
         filtro.termo = (el as HTMLInputElement).value;
         aoMudar();
     });
-    alvo.addEventListener('change', (e) => {
-        const el = e.target as HTMLElement;
-        if (el.id !== 'devolucao-ordem') return;
-        filtro.ordem = (el as HTMLSelectElement).value === 'recentes' ? 'recentes' : 'antigos';
+    alvo.addEventListener('click', (e) => {
+        const botao = (e.target as HTMLElement).closest<HTMLElement>('[data-ordem]');
+        if (!botao) return;
+        const nova: OrdemDevolucoes = botao.dataset.ordem === 'recentes' ? 'recentes' : 'antigos';
+        if (nova === filtro.ordem) return;
+        filtro.ordem = nova;
+        desenhar();
+        alvo.querySelector<HTMLElement>(`[data-ordem="${nova}"]`)?.focus();
         aoMudar();
     });
     // Limpar busca (botão do estado vazio) devolve o foco ao campo.

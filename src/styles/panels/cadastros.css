@@ -141,11 +141,11 @@
     font-weight: 600;
 }
 
+/* No inner scroll: the list grows inside the sheet, which is the only scroll container. */
 .cadastro-modal-list {
     display: flex;
     flex-direction: column;
-    max-height: 180px;
-    overflow-y: auto;
+    min-width: 0;
     border: 1px solid var(--border-color);
     border-radius: 4px;
 }
@@ -155,6 +155,8 @@
     font-size: 0.9rem;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cadastro-modal-item:last-child {
@@ -206,17 +208,14 @@
     font-size: 0.88rem;
     font-weight: 600;
     color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
 }
 
+/* Logins / e-mails wrap instead of pushing the row wider than the screen. */
 .cadastro-usuario-meta {
     font-size: 0.76rem;
     color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
 }
 
 .cadastro-rfid-chip {
@@ -374,29 +373,20 @@
     opacity: 0.6;
 }
 
-.cadastro-usuario-row--edicao {
-    display: block;
-}
-
-.cadastro-usuario-edit,
-.cadastro-ajuste-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-}
-
-.cadastro-edit-acoes {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
 .cadastro-modal-item--acao {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+}
+
+.cadastro-item-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
 }
 
 .cadastro-autoria {
@@ -412,20 +402,13 @@
 }
 
 .cadastro-item-texto {
-    flex: 1;
+    flex: 1 1 12rem;
     min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .cadastro-usuario-acoes .cadastro-rfid-chip {
     margin-left: 0;
-}
-
-@media (max-width: 640px) {
-    .cadastro-usuario-acoes {
-        flex-basis: 100%;
-        justify-content: flex-start;
-        margin-left: 46px;
-    }
 }
 
 .cadastro-senha-regras {
@@ -623,15 +606,33 @@
         font-size: 0.8rem;
     }
 
+    /* Avatar + info on the first line, actions wrap on a full-width line below (no overflow:
+       the old `flex-basis:100%` + `margin-left:46px` made the row 46px wider than the screen). */
     .cadastro-usuario-row {
-        align-items: flex-start;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        align-items: start;
         gap: 10px 12px;
     }
 
+    .cadastro-usuario-acoes {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        min-width: 0;
+        padding-left: 46px;
+    }
+
+    .cadastro-usuario-acao,
     .cadastro-rfid-chip {
-        margin-left: 46px;
         min-height: 36px;
+    }
+
+    .cadastro-usuario-acao:not(.cadastro-usuario-acao--texto) {
+        width: 36px;
+    }
+
+    .cadastro-item-texto {
+        flex-basis: 100%;
     }
 }
 
@@ -642,5 +643,230 @@
 
     .cadastro-card {
         padding: 14px 12px;
+    }
+}
+
+/* =====================================================================
+   Cadastros sheet (features/cadastros/sheet.ts)
+   One scroll container — the .modal-box — with a sticky header and a sticky
+   footer. Editing a record (or Redefinir senha / Cartão RFID) swaps the list
+   view for a detail view inside the same box: no stacked modals, no inner
+   scroll areas, no horizontal overflow.
+   Desktop: centered dialog (max 640px) capped to the dynamic viewport height.
+   Mobile (<=640px): full-screen sheet sized to the visualViewport
+   (--cadastro-vv-h / --cadastro-vv-top set from JS) so the pinned primary
+   action stays above the on-screen keyboard; dvh fallback, never 100vh.
+   ===================================================================== */
+.modal-box--md.cadastro-sheet {
+    --sheet-gutter: 32px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 48px);
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.cadastro-sheet > * {
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.cadastro-sheet [hidden] {
+    display: none !important;
+}
+
+.cadastro-sheet > .modal-header,
+.cadastro-detalhe-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    margin: 0;
+    padding: 24px var(--sheet-gutter) 16px;
+    background-color: var(--surface-white);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cadastro-sheet > .modal-header .modal-close-btn {
+    top: 18px;
+    right: 18px;
+}
+
+.cadastro-sheet > .modal-body {
+    flex-grow: 1;
+    margin: 0;
+    padding: 20px var(--sheet-gutter) 24px;
+}
+
+.cadastro-sheet > .modal-footer,
+.cadastro-detalhe-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 14px var(--sheet-gutter) calc(14px + env(safe-area-inset-bottom, 0px));
+    background-color: var(--surface-white);
+    border-top: 1px solid var(--border-color);
+}
+
+.cadastro-modal-list-wrap {
+    min-width: 0;
+}
+
+/* ----- Detail view ----- */
+.cadastro-detalhe {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 100%;
+}
+
+.cadastro-detalhe-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.cadastro-detalhe-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    margin-left: -8px;
+    padding: 4px 10px 4px 6px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--primary-color);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cadastro-detalhe-voltar:hover {
+    background-color: var(--hover-light);
+}
+
+.cadastro-detalhe-voltar:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+}
+
+.cadastro-detalhe-voltar .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.cadastro-detalhe-titulos {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.cadastro-detalhe-titulo {
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    overflow-wrap: anywhere;
+}
+
+.cadastro-detalhe-titulo:focus {
+    outline: none;
+}
+
+.cadastro-detalhe-subtitulo {
+    overflow-wrap: anywhere;
+}
+
+.cadastro-detalhe-body {
+    flex-grow: 1;
+    min-width: 0;
+    padding: 20px var(--sheet-gutter) 24px;
+}
+
+.cadastro-edicao-form,
+.cadastro-detalhe-body > .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+}
+
+.cadastro-detalhe-body .modal-summary-title,
+.cadastro-detalhe-body .modal-summary-sub {
+    overflow-wrap: anywhere;
+}
+
+.cadastro-detalhe-body .modal-summary-person > div {
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    #modal-cadastro.modal-overlay {
+        top: var(--cadastro-vv-top, 0px);
+        bottom: auto;
+        height: var(--cadastro-vv-h, 100dvh);
+        align-items: stretch;
+    }
+
+    .modal-box--md.cadastro-sheet {
+        --sheet-gutter: 16px;
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .cadastro-sheet > .modal-header,
+    .cadastro-detalhe-header {
+        padding-top: calc(14px + env(safe-area-inset-top, 0px));
+        padding-bottom: 12px;
+    }
+
+    .cadastro-sheet > .modal-header .modal-header-titles {
+        padding-right: 44px;
+    }
+
+    .cadastro-sheet > .modal-header .modal-close-btn {
+        top: calc(10px + env(safe-area-inset-top, 0px));
+        right: 8px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .cadastro-sheet > .modal-body,
+    .cadastro-detalhe-body {
+        padding-top: 16px;
+        padding-bottom: 20px;
+    }
+
+    /* Primary action full width, pinned above the keyboard. */
+    .cadastro-sheet > .modal-footer,
+    .cadastro-detalhe-footer {
+        flex-direction: row;
+        padding-top: 10px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .cadastro-sheet > .modal-footer .btn,
+    .cadastro-detalhe-footer .btn {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    .cadastro-modal-busca {
+        min-height: 44px;
+        font-size: 1rem;
     }
 }

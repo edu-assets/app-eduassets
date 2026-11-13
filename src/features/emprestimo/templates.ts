@@ -1,18 +1,23 @@
 import { html } from '../../core/utils/html.js';
+import { t } from '../../core/state/i18nStore.js';
+import { getEquipamentos } from '../../core/state/equipamentoStore.js';
+import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
 import type { LoanItemUI } from '../../types/index.js';
 import type { Equipamento, Responsavel } from '../../types/index.js';
 
 
 export function renderItemRow(item: LoanItemUI): string {
+    const icone = getEquipamentoIcon(item.id);
+    const categoria = getEquipamentos().find((eq) => String(eq.id) === String(item.id))?.categoria?.nome;
+    const rotulo = `${item.quantidade}x ${item.nome}${categoria ? ` — ${categoria}` : ''}`;
     return html`
-        <div class="item-emprestimo-row">
-            <div class="item-emprestimo-info">
-                <span class="item-emprestimo-qtd">${item.quantidade}x</span>
-                <span>${item.nome}</span>
-            </div>
-            <button type="button" class="item-emprestimo-remover" data-id="${item.id}" aria-label="Remover">
-                <span class="material-symbols-outlined">close</span>
+        <div class="item-emprestimo-row" title="${rotulo}">
+            <span class="material-symbols-outlined item-emprestimo-icone" aria-hidden="true">${icone}</span>
+            <span class="item-emprestimo-qtd">${item.quantidade}x</span>
+            <span class="item-emprestimo-nome">${item.nome}</span>
+            <button type="button" class="item-emprestimo-remover" data-id="${item.id}" aria-label="${t('devolucao.remover')}: ${rotulo}" title="${t('devolucao.remover')}">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
             </button>
         </div>
     `;

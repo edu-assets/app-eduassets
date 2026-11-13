@@ -39,9 +39,9 @@ O navegador usa exclusivamente sessão por cookie `HttpOnly`, com validade do JW
 O RFID é um caminho alternativo de login, não um requisito do sistema nem um substituto do login por senha.
 
 1. Um **Administrador** abre **Cadastros → Usuários** e seleciona **Vincular cartão** ao lado da conta.
-2. No modal **Cartão RFID**, use **Gerar token e vincular cartão**. O backend envia a credencial ao bridge para gravação e retorna somente uma confirmação; a resposta da API não expõe o token RFID.
+2. Na tela **Cartão RFID** (aberta dentro da própria janela de **Cadastros**, com **Voltar**), use **Gerar token e vincular cartão**. O backend envia a credencial ao bridge para gravação e retorna somente uma confirmação; a resposta da API não expõe o token RFID.
 3. Com a ponte e o leitor preparados, siga o procedimento do README e aproxime o cartão dentro dos próximos 30 segundos para gravá-lo.
-4. Quando o cartão estiver vinculado, o modal mostra **Cartão vinculado**. **Gerar novo token** substitui o atual; **Revogar cartão** invalida o cartão para login automático.
+4. Quando o cartão estiver vinculado, a tela mostra **Cartão vinculado**. **Gerar novo token** substitui o atual; **Revogar cartão** invalida o cartão para login automático.
 5. Para o login por aproximação no navegador, a instalação também precisa habilitar o listener RFID. Em uma sessão de convidado, aproxime o cartão; o bridge encaminha um código de uso único e o navegador o troca por uma sessão em cookie `HttpOnly`, sem receber JWT bruto.
 
 O fluxo só funciona quando a configuração, a rede, a ponte local, as dependências e o hardware compatível estão corretos. O backend exige comunicação de loopback para `/auth/rfid` e `/ws/rfid`; um Raspberry Pi na mesma LAN não é automaticamente suficiente. Se algo falhar, use **Login** com **E-mail / Login** e **Senha**.
@@ -58,7 +58,7 @@ O painel aparece no menu como **Novo empréstimo** e tem o título **Registrar E
 
 1. Em **Dados do Empréstimo**, preencha **Solicitante** (para usuários logados, o campo sugere nomes já usados) e selecione o **Responsável**.
 2. Confira **Data e Hora**. O campo é preenchido automaticamente; clique nele se precisar selecionar outra data de retirada.
-3. Em **Itens do Empréstimo**, escolha **Equipamento**, informe **Qtd.** e clique em **Adicionar**. Repita para cada modelo; os itens aparecem em **Itens adicionados**.
+3. Em **Itens do Empréstimo**, escolha **Equipamento**, informe **Qtd.** e clique em **Adicionar**. Repita para cada modelo; os itens aparecem em **Itens adicionados** como chips compactos, com o ícone do equipamento e só o modelo em uma linha (a categoria aparece ao passar o mouse e para leitores de tela).
 4. Se necessário, preencha **Observação (opcional)**.
 5. Clique em **Registrar Empréstimo**.
 
@@ -76,7 +76,7 @@ Enquanto **Data e Hora** não for alterada, o campo acompanha o relógio do serv
 4. Clique em **Devolver** na lista ou em **Confirmar Devolução** no painel.
 5. Revise o modal **Confirmar Devolução** e clique em **Confirmar Devolução**; **Cancelar** fecha sem concluir.
 
-O cartão de cada empréstimo tem o botão **Detalhes** (também acessível pelo teclado). Usuários autenticados veem em **Detalhes** quem registrou e quem devolveu o empréstimo. Use o campo de busca (solicitante, responsável, equipamento e quem registrou) e a ordenação **Mais antigos primeiro** / **Mais recentes primeiro** para localizar um empréstimo. Sem resultados, a tela diz "Nenhum resultado para x" e oferece **Limpar busca** ou **Limpar filtros**.
+O cartão de cada empréstimo tem o botão **Detalhes** (também acessível pelo teclado). Usuários autenticados veem em **Detalhes** quem registrou e quem devolveu o empréstimo. Use o campo de busca (solicitante, responsável, equipamento e quem registrou) e a ordenação, um controle de dois botões **Mais antigos primeiro** / **Mais recentes primeiro**, para localizar um empréstimo. No celular, o campo de busca ("Buscar solicitante, equipamento…") ocupa a largura toda. Sem resultados, a tela diz "Nenhum resultado para x" e oferece **Limpar busca** ou **Limpar filtros**.
 
 Os itens retornam à quantidade disponível depois da confirmação. **Data e Hora da Devolução** é preenchido automaticamente e pode ser editado; ao confirmar, a UI envia o timestamp ISO com offset selecionado, que o backend valida e persiste. Clientes antigos que não enviem esse campo continuam usando o horário atual do servidor.
 
@@ -84,10 +84,10 @@ Se **Data e Hora da Devolução** não for alterada, o registro usa a hora do se
 
 ## 6. Dashboard
 
-O **Dashboard** apresenta os cartões **Total de equipamentos**, **Disponíveis**, **Emprestados**, **Em Manutenção** e **Quebrados**.
+O **Dashboard** apresenta os cartões **Total de equipamentos**, **Disponíveis**, **Emprestados**, **Em Manutenção** e **Quebrados**, sem texto de porcentagem. No celular, os cartões são mais estreitos: **Total** fica em uma linha própria e os demais em grade 2×2.
 
 - Na aba **Estoque**, consulte os totais por categoria; o selo **Esgotado** aparece quando não há unidade disponível e **Estoque baixo** quando 10% ou menos do total (no mínimo 1 unidade) está disponível. Clique em uma linha para abrir os detalhes somente leitura da categoria.
-- Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível. Usuários autenticados também veem a autoria (quem registrou e quem devolveu); Convidados nunca recebem esses dados. Os detalhes do estoque mostram quem cadastrou e alterou o equipamento. Na primeira carga, o Dashboard exibe esqueletos de carregamento e contadores "—"; se a carga falhar, aparece um erro no painel com **Tentar novamente**.
+- Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível. Usuários autenticados também veem a autoria (quem registrou e quem devolveu); Convidados nunca recebem esses dados. Os detalhes do estoque mostram quem cadastrou e alterou o equipamento. No celular, os cartões do Histórico têm hierarquia mais clara (título, status e detalhes separados, como nos cartões de **Estoque**). Na primeira carga, o Dashboard exibe esqueletos de carregamento e contadores "—"; se a carga falhar, aparece um erro no painel com **Tentar novamente**.
 - Use o campo **Buscar por informações...**. Em **Estoque**, a busca considera a categoria; em **Histórico**, considera número, solicitante e responsável.
 - **Filtros do Histórico:** o Histórico carrega 50 empréstimos por vez; use **Carregar mais** e acompanhe **Mostrando N empréstimos** (vale também para Convidados). Os chips de status (**Todos**, **Abertos**, **Devolvidos**) e de período (**Hoje**, **7 dias**, **Este mês**, **Tudo**) combinam com a busca, que para usuários logados é feita no servidor sobre todo o histórico. **Limpar filtros** volta à visão completa.
 - Na aba **Estoque**, o botão **Exportar** baixa imediatamente um CSV do estoque atual. Na aba **Histórico**, **Exportar** leva ao painel **Exportar**, onde há mais opções.
@@ -96,7 +96,7 @@ O estoque exibido é derivado de empréstimos abertos e ocorrências de manuten�
 
 ## 7. Controle
 
-O painel **Controle** separa os registros nas abas **Observação**, **Manutenção**, **Quebrado** e **Resolvidos**. Os cartões de resumo mostram registros em aberto. Usuários autenticados veem quem criou, alterou e resolveu cada registro. **Saiba mais** abre este manual. Se a carga falhar, o painel mostra um erro com **Tentar novamente**.
+O painel **Controle** separa os registros nas abas **Observação**, **Manutenção**, **Quebrado** e **Resolvidos**. Os cartões de resumo mostram registros em aberto. Os cartões dos registros separam título, status e detalhes, como os cartões de **Estoque**. Usuários autenticados veem quem criou, alterou e resolveu cada registro. **Saiba mais** abre este manual. Se a carga falhar, o painel mostra um erro com **Tentar novamente**.
 
 ### Criar ou editar um registro
 
@@ -118,16 +118,16 @@ Criar, editar e resolver exigem autenticação (**Editor** ou **Administrador**)
 
 ## 8. Cadastros (Administrador)
 
-**Cadastros** é administrativo. Abra um cartão, preencha os campos e clique em **Salvar**; **Cancelar** fecha o modal. A lista **Cadastrados** mostra os registros carregados pela API.
+**Cadastros** é administrativo. Abra um cartão, preencha os campos e clique em **Salvar**. A janela de **Cadastros** tem uma única rolagem (no celular ocupa a tela toda) e não abre outro modal por cima. **Editar**, **Ajustar total**, **Renomear**, **Redefinir senha** e **Cartão RFID** abrem uma tela de edição dentro da mesma janela, com **Voltar**, um título e o nome do registro; **Cancelar** e **Salvar** ficam fixos no rodapé (acima do teclado do celular). **Voltar**, **Cancelar**, Esc ou salvar retornam à lista, mantendo a busca e a posição de rolagem. A lista **Cadastrados** mostra os registros carregados pela API; a lista de **Usuários** não rola para os lados no celular.
 
 - **Equipamentos:** **Categoria**, **Modelo** e **Quantidade**. **Ajustar total** altera a quantidade total de um modelo, sem poder ficar abaixo dos itens em uso.
 - **Responsáveis:** **Nome** e **Cargo**. Podem ser editados, desativados e reativados; responsáveis inativos não aparecem no formulário de **Registrar Empréstimo**, mas os empréstimos antigos continuam no histórico.
 - **Usuários:** **Nome**, **E-mail / Login** (deve ser um e-mail), **Senha** e **Nível de acesso** (**Administrador** ou **Editor**). Nome, nível de acesso e login podem ser editados, e o usuário pode ser desativado ou reativado (com confirmação); usuários desativados mostram o selo **Inativo**, e logins que não são e-mails válidos mostram um aviso. Você não pode desativar nem rebaixar a própria conta, nem remover o último administrador ativo. A recuperação de senha só funciona se a caixa de e-mail do login realmente existir.
 - **Categorias:** **Nome da categoria**; é possível renomear uma categoria existente (o nome não pode repetir o de outra).
 
-No cartão de um usuário, **Vincular cartão** abre **Cartão RFID**. Depois do vínculo, use **Gerar novo token** (substitui o atual), **Copiar token** quando disponível ou **Revogar cartão**. O token é sensível: não o publique nem o inclua em relatórios.
+No cartão de um usuário, **Vincular cartão** abre a tela de edição **Cartão RFID**. Depois do vínculo, use **Gerar novo token** (substitui o atual), **Copiar token** quando disponível ou **Revogar cartão**. O token é sensível: não o publique nem o inclua em relatórios.
 
-O botão **Redefinir senha** (ícone de cadeado) ao lado de cada usuário abre um modal para definir uma senha temporária. Preencha **Nova senha** e **Confirmar nova senha**: são exigidos pelo menos 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo (máximo de 72 bytes). Ao confirmar, todas as sessões abertas do usuário são encerradas e a ação é registrada na auditoria como `PASSWORD_RESET`. Entregue a senha temporária por um canal seguro e oriente o usuário a trocá-la em **Segurança**. Para a sua própria conta, use **Segurança** (o botão avisa e não abre o modal).
+O botão **Redefinir senha** (ícone de cadeado) ao lado de cada usuário abre a tela de edição para definir uma senha temporária. Preencha **Nova senha** e **Confirmar nova senha**: são exigidos pelo menos 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo (máximo de 72 bytes). Ao confirmar, todas as sessões abertas do usuário são encerradas e a ação é registrada na auditoria como `PASSWORD_RESET`. Entregue a senha temporária por um canal seguro e oriente o usuário a trocá-la em **Segurança**. Para a sua própria conta, use **Segurança** (o botão avisa e não abre a tela de edição).
 
 As listas de **Cadastros** têm busca e, para quem está autenticado, mostram quem criou cada registro. A interface atual é voltada a consultar/listar, criar e, para usuários, responsáveis, categorias e totais de equipamento, ajustar os registros mostrados. Não presuma que uma ação de edição ou exclusão exibida em outro painel exista para cada cadastro.
 
@@ -179,7 +179,8 @@ Para desativar neste dispositivo, clique em **Desativar neste dispositivo**.
 
 - **Android:** o Chrome funciona diretamente.
 - **iPhone e iPad:** exigem iOS 16.4 ou superior e o app instalado na tela de início. No Safari, toque em **Compartilhar → Adicionar à Tela de Início**, abra o app pelo ícone, entre como administrador e então ative as notificações.
-- **Aviso de permissão não aparece:** clique no ícone ao lado do endereço do site (sino riscado, cadeado ou configurações do site) › **Notificações** › **Permitir**. O app conclui a ativação sozinho, desde que você a tenha pedido nesta sessão ou o banner esteja visível.
+- **Aviso de permissão não aparece:** clique no ícone ao lado do endereço do site (sino riscado, cadeado ou configurações do site) › **Notificações** › **Permitir**. O app conclui a ativação sozinho, desde que você a tenha pedido nesta sessão ou o banner esteja visível. Se você permitir depois que o pedido sumiu, a ativação termina sozinha e o banner desaparece.
+- **Mensagens de erro na ativação:** só uma ativação roda por vez (também entre abas e o app instalado) e uma falha momentânea é repetida uma vez automaticamente. Se aparecer a mensagem de que o serviço de notificações do navegador não respondeu, verifique a conexão e tente novamente em instantes. Se aparecer que o navegador recusou a chave de notificações do servidor, tente novamente e, se persistir, avise o administrador da instalação. Se o pedido de permissão foi fechado sem resposta, toque em **Ativar notificações** e escolha **Permitir**. Inscrições criadas com uma chave antiga do servidor são substituídas automaticamente.
 - **Bloqueio do navegador:** no mesmo lugar, altere para **Permitir** e recarregue a página.
 - **Brave:** ative **Usar serviços do Google para mensagens push** em `brave://settings/privacy`.
 - **Só aparece dentro do app:** a notificação é do sistema e aparece mesmo com a aba do eduAssets em segundo plano, com outro programa à frente ou com a aba fechada (navegador aberto). Se ela só aparece dentro do app, confira o sistema operacional: no Windows, **Configurações › Sistema › Notificações** (notificações ativadas, navegador permitido e **Não incomodar** desligado); no macOS, **Ajustes do Sistema › Notificações › o navegador**.
@@ -196,7 +197,7 @@ Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preench
 
 A troca é permitida somente para a conta autenticada e exige a senha atual. Se a senha for perdida, use **Esqueci minha senha** na tela de entrada (seção 2) ou **Contate o administrador**, que pode redefini-la em **Cadastros → Usuários** (seção 8).
 
-**Avisos na tela:** as notificações do app são lidas por leitores de tela, têm botão de fechar, pausam ao passar o mouse e ficam na parte inferior central no celular; as de erro permanecem até serem fechadas.
+**Avisos na tela:** as notificações do app são lidas por leitores de tela, têm botão de fechar, pausam por pouco tempo ao passar o mouse e ficam na parte inferior central no celular. Todas fecham sozinhas, inclusive as de erro (após 8 segundos). Mensagens idênticas não se empilham (a repetida renova a já exibida) e no máximo 3 ficam visíveis ao mesmo tempo.
 
 ## 12. Meu Perfil
 
@@ -235,4 +236,4 @@ Quem prepara uma instância deve seguir o README e preencher valores próprios n
 
 **A exportação não é gerada.** Revise o tipo, o período, os equipamentos marcados e o formato. A aplicação não cria arquivo quando não encontra registros para os filtros.
 
-**Não recebo notificações push.** Confirme que sua conta é **Administrador** e que as notificações estão ativadas neste dispositivo em **Configurações → Notificações**; use **Enviar notificação de teste**. No iPhone ou iPad, o app precisa estar instalado na tela de início (iOS 16.4 ou superior). Se o navegador bloqueou o aviso, libere as notificações nas configurações do site e recarregue a página.
+**Não recebo notificações push.** Confirme que sua conta é **Administrador** e que as notificações estão ativadas neste dispositivo em **Configurações → Notificações**; use **Enviar notificação de teste**. No iPhone ou iPad, o app precisa estar instalado na tela de início (iOS 16.4 ou superior). Se o navegador bloqueou o aviso, libere as notificações nas configurações do site e recarregue a página. Se aparecer uma mensagem de que o serviço de notificações do navegador não respondeu ou de que o navegador recusou a chave do servidor, tente novamente em instantes; se a mensagem sobre a **chave do servidor** persistir, contate o administrador da instalação.

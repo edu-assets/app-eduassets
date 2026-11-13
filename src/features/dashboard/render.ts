@@ -38,11 +38,7 @@ export interface DashboardEls {
     resumoDisponivel: HTMLElement;
     resumoEmprestado: HTMLElement;
     resumoQuebrado: HTMLElement;
-    resumoDisponivelPct: HTMLElement;
-    resumoEmprestadoPct: HTMLElement;
-    resumoQuebradoPct: HTMLElement;
     resumoManutencao: HTMLElement;
-    resumoManutencaoPct: HTMLElement;
     inputBusca: HTMLInputElement | null;
 }
 
@@ -65,8 +61,6 @@ export function renderResumo(els: DashboardEls, equipamentos: Equipamento[]): vo
     });
     if (indisponivel) {
         cards.forEach((el) => { el.textContent = CONTADOR_INDISPONIVEL; });
-        [els.resumoDisponivelPct, els.resumoEmprestadoPct, els.resumoQuebradoPct, els.resumoManutencaoPct]
-            .forEach((el) => { el.textContent = CONTADOR_INDISPONIVEL; });
         return;
     }
 
@@ -75,11 +69,6 @@ export function renderResumo(els: DashboardEls, equipamentos: Equipamento[]): vo
     els.resumoEmprestado.textContent = String(resumo.emprestado);
     els.resumoQuebrado.textContent = String(resumo.quebrado);
     els.resumoManutencao.textContent = String(resumo.manutencao);
-
-    els.resumoDisponivelPct.textContent = `${resumo.disponivelPct} / Total`;
-    els.resumoEmprestadoPct.textContent = `${resumo.emprestadoPct} / Total`;
-    els.resumoQuebradoPct.textContent = `${resumo.quebradoPct} / Total`;
-    els.resumoManutencaoPct.textContent = `${resumo.manutencaoPct} / Total`;
 }
 
 /** Texto "Mostrando N empréstimos" (já traduzido). */

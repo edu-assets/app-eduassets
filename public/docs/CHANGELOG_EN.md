@@ -1,6 +1,19 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.5.1**, released on November 13, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.5.2**, released on November 13, 2026; earlier entries remain historical.
+
+## v1.5.2 — Fixes for push notifications, on-screen notices, Records and cards — November 13, 2026
+
+Correction release (app and API); the site only aligns the version number. All fixes apply on mobile and desktop.
+
+- **Returns:** sorting is now a two-button control, **Oldest first** / **Newest first**, styled like the app (it used to be a plain browser select). On mobile, the search field takes the full width ("Search requester, equipment…").
+- **Push notifications (activation):** on phones, if the browser permission prompt took a few seconds, it disappeared and errors such as "Registration failed - push service error" stacked on screen; even after allowing, the banner could only be dismissed with **Not now**; **Settings → Notifications** had the same problem. Now only one activation runs at a time (also across tabs and the installed app), a transient failure is retried once automatically, browser errors appear as clear translated messages (notification service unavailable, server key problem, permission prompt without an answer), if you allow the permission later the activation finishes on its own and the banner disappears, and subscriptions created with an old server key are replaced automatically.
+- **API:** at startup the API checks that `VAPID_PUBLIC_KEY` is the public key of `VAPID_PRIVATE_KEY`; if they do not match, push is disabled and the log shows "VAPID_PUBLIC_KEY não corresponde a VAPID_PRIVATE_KEY." Fix: generate a new pair with `npx web-push generate-vapid-keys`, set both variables and restart the API. Existing device subscriptions must be re-activated by each administrator (the app does it automatically on its next open when the key changed; otherwise administrators may need to click **Turn on notifications** again).
+- **On-screen notices (toasts):** identical messages are no longer stacked (a repeated message refreshes the one already shown), at most 3 messages are visible at once, and all of them close on their own, including errors (after 8 seconds), while keeping the close button and pausing on hover (briefly).
+- **New loan:** added items are compact chips with the equipment icon and only the model name on one line (the category appears on hover and for screen readers), so they no longer overflow the form on phones.
+- **Dashboard:** the equipment summary cards (**Total equipment**, **Available**, **On Loan**, **Maintenance**, **Broken**) no longer show the percentage "of total" text; on phones they are narrower, with **Total** on its own row and the other cards in a 2×2 grid. The **History** cards on phones and the **Control** cards were reorganized with a clearer hierarchy (title, status and details separated, like the **Stock** cards).
+- **Records:** no more modal inside a modal. The **Records** window has a single scroll; **Edit**, **Adjust total**, **Rename**, **Reset password** and **RFID Card** open an edit view inside the same window, with **Back**, a title and the record name; **Cancel** and **Save** stay fixed at the bottom (above the phone keyboard). **Back**, **Cancel**, Esc or saving return to the list keeping the search and scroll position. On phones the window is full-screen and the **System Users** list no longer scrolls sideways.
+- **Documentation:** User Manual §2, §4, §5, §6, §7, §8, §10, §11 and §15; Hosting §5.3 (VAPID keys).
 
 ## v1.5.1 — Clearer guest mode, stock alerts and dates in the selected language — November 13, 2026
 

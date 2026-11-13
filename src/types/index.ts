@@ -258,10 +258,6 @@ export interface ResumoDashboard {
     emprestado: number;
     manutencao: number;
     quebrado: number;
-    disponivelPct: string;
-    emprestadoPct: string;
-    manutencaoPct: string;
-    quebradoPct: string;
 }
 
 export interface ControleRegistroDados {

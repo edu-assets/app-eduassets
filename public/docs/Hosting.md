@@ -239,6 +239,8 @@ VAPID_SUBJECT=mailto:<administrator-contact>     # mailto: or https: URL
 
 The three variables must be set together or not at all. Without them, the API works normally and reports `pushNotifications: false` in `GET /auth/session-capabilities`. An incomplete or invalid set disables push and writes a warning to the API log. Generate the key pair once, with `npx web-push generate-vapid-keys`, and never commit the private key. Changing either key invalidates every existing subscription: administrators must enable notifications again on each device.
 
+At startup, the API checks that `VAPID_PUBLIC_KEY` is the public key of `VAPID_PRIVATE_KEY`. If they do not match, push is disabled and the log shows `VAPID_PUBLIC_KEY não corresponde a VAPID_PRIVATE_KEY.` To fix it, generate a new pair with `npx web-push generate-vapid-keys`, set both variables and restart (recreate) the `api` service. Existing device subscriptions must be re-activated: the app does it automatically on its next open when the key changed, but administrators may need to click **Turn on notifications** again.
+
 `docker-compose.production.yml` passes the three variables to the `api` container; after editing them, recreate the `api` service as described in section 5. No Nginx change is needed and the CSP did not change: the app (Cloudflare Pages) serves `/sw.js` (with `Cache-Control: no-cache`) and `/manifest.webmanifest`.
 
 Delivery happens after the operation is committed to the database and never delays or fails the original request.

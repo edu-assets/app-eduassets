@@ -1,4 +1,5 @@
 import { attachCadastrosEvents } from './events.js';
+import { criarSheetCadastro } from './sheet.js';
 import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
 import type { CadastrosEls, CadastrosEstado } from './events.js';
 
@@ -6,6 +7,8 @@ export function initCadastros(): void {
     const cards = document.querySelectorAll<HTMLElement>('.cadastro-card');
     const modal = document.getElementById('modal-cadastro');
     if (!cards.length || !modal) return;
+    const sheet = criarSheetCadastro(modal);
+    if (!sheet) return;
 
     const els: CadastrosEls = {
         cards,
@@ -18,6 +21,7 @@ export function initCadastros(): void {
         btnCancelar: document.getElementById('cadastro-modal-cancelar'),
         btnSalvar: document.getElementById('cadastro-modal-salvar') as HTMLButtonElement | null,
         busca: document.getElementById('cadastro-modal-busca') as HTMLInputElement | null,
+        sheet,
         rfidModal: {
             overlay: document.getElementById('modal-cadastro-rfid') as HTMLElement,
             avatar: document.getElementById('rfid-modal-avatar') as HTMLElement,

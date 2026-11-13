@@ -30,6 +30,7 @@ vi.mock('../core/notifications/pushNotifications.js', () => ({
     ERRO_PERMISSAO_SEM_RESPOSTA: 'notif.erro_permissao_sem_resposta',
     ativar: mocks.ativar,
     concluirAtivacao: mocks.concluirAtivacao,
+    erroDoNavegadorParaChave: () => 'notif.erro_servico_push',
     obterEstadoPush: mocks.obterEstadoPush
 }));
 
@@ -273,6 +274,26 @@ describe('push activation and permission watcher', () => {
         expect(m.observandoPermissao()).toBe(true);
         m.definirBannerVisivel(false);
         expect(m.observandoPermissao()).toBe(false);
+    });
+
+    it('never shows a raw browser message (DOMException) in the toast', async () => {
+        mocks.ativar.mockRejectedValueOnce(new DOMException('Registration failed - push service error', 'AbortError'));
+        await expect(m.solicitarAtivacao()).resolves.toBe(false);
+        expect(mocks.showToast).toHaveBeenCalledTimes(1);
+        expect(mocks.showToast).toHaveBeenCalledWith('notif.erro_servico_push', 'error');
+        expect(m.ativacaoEmAndamento()).toBe(false);
+    });
+
+    it('ignores re-entrant clicks while an activation is running', async () => {
+        let liberar: () => void = () => undefined;
+        mocks.ativar.mockImplementationOnce(() => new Promise((resolve) => {
+            liberar = () => resolve({ emprestimo: true, devolucao: true, ocorrencia: true });
+        }));
+        const primeiro = m.solicitarAtivacao();
+        await expect(m.solicitarAtivacao()).resolves.toBe(false);
+        liberar();
+        await expect(primeiro).resolves.toBe(true);
+        expect(mocks.ativar).toHaveBeenCalledTimes(1);
     });
 
     it('shows an error toast when the automatic activation fails', async () => {

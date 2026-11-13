@@ -31,11 +31,7 @@ export function calcularResumo(equipamentos: Equipamento[]): ResumoDashboard {
         disponivel: dispGeral,
         emprestado: emprestGeral,
         manutencao: manutGeral,
-        quebrado: quebGeral,
-        disponivelPct: formatarPct(dispGeral, totalGeral),
-        emprestadoPct: formatarPct(emprestGeral, totalGeral),
-        manutencaoPct: formatarPct(manutGeral, totalGeral),
-        quebradoPct: formatarPct(quebGeral, totalGeral)
+        quebrado: quebGeral
     };
 }
 
@@ -70,11 +66,6 @@ export function gerarCsvEstoque(equipamentos: Equipamento[]): string {
     ]);
 
     return gerarLinhasCsv([['Modelo', 'Categoria', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'], ...linhas]);
-}
-
-function formatarPct(valor: number, total: number): string {
-    if (!total) return '0%';
-    return `${(valor / total * 100).toFixed(1).replace('.', ',')}%`;
 }
 
 /* ===== Actions ===== */

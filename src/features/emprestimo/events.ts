@@ -98,7 +98,8 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
 
         const equipamentoId = els.equipamentoSelect.value;
         const quantidade = Number(els.quantidadeInput.value) || 1;
-        const nome = els.equipamentoSelect.options[els.equipamentoSelect.selectedIndex].text;
+        const equipamentoSel = getEquipamentos().find((eq) => String(eq.id) === String(equipamentoId));
+        const nome = equipamentoSel?.modelo ?? els.equipamentoSelect.options[els.equipamentoSelect.selectedIndex].text;
 
         const resultado = adicionarItemComValidacao(estado.itens, { id: equipamentoId, nome, quantidade });
 

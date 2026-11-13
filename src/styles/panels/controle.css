@@ -790,13 +790,45 @@
 }
 
 @media (max-width: 640px) {
+    /* Resumo compacto em 3 colunas que nunca estouram a largura (minmax(0, 1fr)); sem o texto repetido. */
     .controle-resumo-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
     }
 
+    .controle-resumo-card {
+        min-width: 0;
+        padding: 12px 6px;
+        gap: 6px;
+    }
+
+    .controle-resumo-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .controle-resumo-icon .material-symbols-outlined {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+
+    .controle-resumo-titulo {
+        font-size: 0.72rem;
+        overflow-wrap: anywhere;
+    }
+
+    .controle-resumo-numero {
+        font-size: 1.4rem;
+        line-height: 1.15;
+    }
+
+    .controle-resumo-sub {
+        display: none;
+    }
+
     .controle-registros-container {
-        padding: 18px;
+        padding: 16px 14px;
     }
 
     .controle-registros-header-row {
@@ -835,10 +867,11 @@
     }
 
     .controle-tab-link {
-        flex: 1;
+        flex: 1 1 auto;
+        min-width: 0;
         text-align: center;
-        padding: 10px 4px;
-        font-size: 0.75rem;
+        padding: 10px 2px;
+        font-size: 0.72rem;
         white-space: nowrap;
     }
 
@@ -860,7 +893,15 @@
         gap: 12px;
     }
 
-    /* ----- Registers cards ----- */
+    /*
+     * ----- Registers cards -----
+     * Mesma separação dos cards de Estoque/Histórico (borda primária, faixa lateral, raio, sombra, 10px entre cards).
+     *   1. modelo (título)  ............................ badge do problema   [menu ⋮ no canto]
+     *   2. categoria · Nº número
+     *   3. descrição do problema
+     *   (medidas tomadas, só em Resolvidos)
+     *   4. data · autoria resumida numa única linha curta
+     */
     .registros-header,
     .registros-header-resolvidos {
         display: none;
@@ -869,75 +910,103 @@
     .registros-row,
     .registros-row-resolvidos {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: minmax(0, max-content) minmax(0, 1fr) auto;
         grid-template-areas:
-            "titulo titulo"
-            "sub sub"
-            "numero badge"
-            "desc desc"
-            "meta meta";
-        row-gap: 8px;
-        column-gap: 10px;
+            "titulo titulo badge"
+            "cat num num"
+            "desc desc desc"
+            "meta meta meta";
+        align-items: center;
+        row-gap: 6px;
+        column-gap: 6px;
         position: relative;
-        padding: 14px 40px 14px 14px;
+        padding: 12px 14px;
+        background-color: var(--surface-white, #ffffff);
+        border: 1.5px solid color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
+        border-left: 4px solid var(--primary-color);
         border-radius: 8px;
         margin-bottom: 10px;
+        box-shadow: 0 2px 6px color-mix(in srgb, var(--primary-color) 10%, transparent);
+        min-width: 0;
     }
 
     .registros-row-resolvidos {
         grid-template-areas:
-            "titulo titulo"
-            "sub sub"
-            "numero badge"
-            "desc desc"
-            "medidas medidas"
-            "meta meta";
+            "titulo titulo badge"
+            "cat num num"
+            "desc desc desc"
+            "medidas medidas medidas"
+            "meta meta meta";
+    }
+
+    .registros-row > * {
+        min-width: 0;
     }
 
     .registros-row-icon {
         display: none;
     }
 
-    .registros-row [data-col="categoria"] {
+    .registros-row [data-col="modelo"] {
         grid-area: titulo;
-        font-size: 0.95rem;
+        font-size: 1rem;
         font-weight: 700;
+        line-height: 1.3;
         color: var(--text-primary);
+        overflow-wrap: anywhere;
     }
 
-    .registros-row [data-col="modelo"] {
-        grid-area: sub;
-        font-size: 0.82rem;
-        color: var(--text-secondary);
+    .registros-row [data-col="categoria"] {
+        grid-area: cat;
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .registros-row [data-col="numero"] {
-        grid-area: numero;
-        align-self: center;
+        grid-area: num;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .registros-row [data-col="numero"]::before {
+        content: "\0000b7\0000a0N\0000ba\0000a0";
+        color: var(--text-muted);
+        font-weight: 400;
     }
 
     .registros-row .controle-problema-badge {
         grid-area: badge;
         justify-self: end;
-        align-self: center;
+        align-self: start;
+        margin-right: 38px;
+        padding: 3px 10px;
+        font-size: 0.72rem;
     }
 
     .registros-row [data-col="descricao"] {
         grid-area: desc;
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        line-height: 1.5;
-        padding-top: 8px;
-        border-top: 1px solid var(--border-color);
+        font-size: 0.88rem;
+        color: var(--text-primary);
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .registros-row-resolvidos [data-col="medidas"] {
         grid-area: medidas;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         color: var(--text-secondary);
-        line-height: 1.5;
-        padding-top: 8px;
+        line-height: 1.4;
+        padding-top: 6px;
         border-top: 1px solid var(--border-color);
+        overflow-wrap: anywhere;
     }
 
     .registros-row-resolvidos [data-col="medidas"]::before {
@@ -948,19 +1017,48 @@
         text-transform: uppercase;
         letter-spacing: 0.03em;
         color: var(--text-muted);
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
 
     .registros-row .registros-data {
         grid-area: meta;
+        display: flex;
+        align-items: baseline;
+        flex-wrap: nowrap;
+        gap: 4px;
+        min-width: 0;
+        padding-top: 6px;
+        border-top: 1px solid var(--border-color);
         font-size: 0.75rem;
         color: var(--text-muted);
+        white-space: nowrap;
+    }
+
+    /* Autoria resumida: só a 1ª linha ("Criada por X"), sem data, truncada. */
+    .registros-row .registros-data .autoria-bloco {
+        display: block;
+        flex: 1 1 auto;
+        min-width: 0;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: inherit;
+    }
+
+    .registros-row .registros-data .autoria-bloco::before {
+        content: "\0000b7\0000a0";
+    }
+
+    .registros-row .registros-data .autoria-linha:not(:first-child),
+    .registros-row .registros-data .autoria-data {
+        display: none;
     }
 
     .registros-row .registros-row-menu-wrap {
         position: absolute;
-        top: 12px;
-        right: 12px;
+        top: 8px;
+        right: 6px;
     }
 
     #btn-editar-registro,
@@ -990,5 +1088,12 @@
     .registros-row-menu-btn .material-symbols-outlined {
         font-size: 22px;
         color: var(--primary-color);
+    }
+}
+
+@media (max-width: 360px) {
+    .controle-tab-link {
+        font-size: 0.66rem;
+        padding-inline: 0;
     }
 }

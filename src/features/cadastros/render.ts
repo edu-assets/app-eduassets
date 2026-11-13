@@ -1,4 +1,4 @@
-import { openModal, closeModal } from '../../core/ui/index.js';
+import { openModal } from '../../core/ui/index.js';
 import { gerarIniciais } from '../../core/utils/iniciais.js';
 import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
 import {
@@ -14,7 +14,7 @@ import {
 } from './templates.js';
 import type { CadastroConfig, CampoCadastro, CampoOpcao } from './service.js';
 import type { Categoria, Equipamento, Responsavel, Usuario } from '../../types/index.js';
-import type { OpcoesItemUsuario, OpcoesItemEquipamento } from './templates.js';
+import type { OpcoesItemUsuario } from './templates.js';
 import type { ErrosCampos, ItemComAutoria } from './logic.js';
 import { t } from '../../core/state/i18nStore.js';
 
@@ -109,26 +109,21 @@ export function renderListaUsuarios(
         : renderListaVazia(termoBusca);
 }
 
-export function renderListaCategorias(els: CadastroListaEls, categorias: Categoria[], editandoId: number | null = null, termoBusca = ''): void {
+export function renderListaCategorias(els: CadastroListaEls, categorias: Categoria[], termoBusca = ''): void {
     els.listaWrap.innerHTML = categorias.length
-        ? categorias.map((c) => renderItemRegistroCategoria(c, { editandoId })).join('')
+        ? categorias.map((c) => renderItemRegistroCategoria(c)).join('')
         : renderListaVazia(termoBusca);
 }
 
-export function renderListaResponsaveis(els: CadastroListaEls, responsaveis: Responsavel[], editandoId: number | null = null, termoBusca = ''): void {
+export function renderListaResponsaveis(els: CadastroListaEls, responsaveis: Responsavel[], termoBusca = ''): void {
     els.listaWrap.innerHTML = responsaveis.length
-        ? responsaveis.map((r) => renderItemRegistroResponsavel(r, { editandoId })).join('')
+        ? responsaveis.map((r) => renderItemRegistroResponsavel(r)).join('')
         : renderListaVazia(termoBusca);
 }
 
-export function renderListaEquipamentos(
-    els: CadastroListaEls,
-    equipamentos: Equipamento[],
-    opcoes: OpcoesItemEquipamento = {},
-    termoBusca = ''
-): void {
+export function renderListaEquipamentos(els: CadastroListaEls, equipamentos: Equipamento[], termoBusca = ''): void {
     els.listaWrap.innerHTML = equipamentos.length
-        ? equipamentos.map((e) => renderItemRegistroEquipamento(e, opcoes)).join('')
+        ? equipamentos.map((e) => renderItemRegistroEquipamento(e)).join('')
         : renderListaVazia(termoBusca);
 }
 
@@ -177,13 +172,13 @@ function mostrarEstadoRfid(els: RfidModalEls, estado: EstadoRfid): void {
     els.estadoVinculado.style.display = estado === 'vinculado' ? 'flex' : 'none';
 }
 
-export function abrirModalRfid(els: RfidModalEls, usuario: Usuario): void {
+/** Fills the RFID panel; it is shown inside the Cadastros sheet (detail view), not as a stacked modal. */
+export function prepararPainelRfid(els: RfidModalEls, usuario: Usuario): void {
     els.avatar.textContent = gerarIniciais(usuario.nome);
     els.nome.textContent = usuario.nome;
     els.login.textContent = usuario.login;
 
     mostrarEstadoRfid(els, usuario.possuiCartaoRfid ? 'vinculado' : 'vazio');
-    openModal('modal-cadastro-rfid');
 }
 
 export function exibirModoGravacao(els: RfidModalEls): void {
@@ -194,9 +189,6 @@ export function exibirCartaoRevogado(els: RfidModalEls): void {
     mostrarEstadoRfid(els, 'vazio');
 }
 
-export function fecharModalRfid(): void {
-    closeModal('modal-cadastro-rfid');
-}
 /* ===== Modal Redefinir senha ===== */
 
 export interface ResetSenhaModalEls {
@@ -210,20 +202,18 @@ export interface ResetSenhaModalEls {
     btnCancelar: HTMLElement;
 }
 
-export function abrirModalResetSenha(els: ResetSenhaModalEls, usuario: Usuario): void {
+/** Fills the reset-password form; it is shown inside the Cadastros sheet (detail view), not as a stacked modal. */
+export function prepararResetSenha(els: ResetSenhaModalEls, usuario: Usuario): void {
     els.avatar.textContent = gerarIniciais(usuario.nome);
     els.nome.textContent = usuario.nome;
     els.login.textContent = usuario.login;
-    els.novaSenha.value = '';
-    els.confirmarSenha.value = '';
-    els.novaSenha.dispatchEvent(new Event('input'));
-    openModal('modal-cadastro-senha');
-    els.novaSenha.focus();
+    limparResetSenha(els);
 }
 
-export function fecharModalResetSenha(els: ResetSenhaModalEls): void {
+/** Clears the passwords (and the checklist / reveal state) so nothing leaks to the next user. */
+export function limparResetSenha(els: ResetSenhaModalEls): void {
     els.novaSenha.value = '';
     els.confirmarSenha.value = '';
     els.novaSenha.dispatchEvent(new Event('input'));
-    closeModal('modal-cadastro-senha');
+    [els.novaSenha, els.confirmarSenha].forEach((campo) => campo.dispatchEvent(new CustomEvent('passwordfield:reset')));
 }

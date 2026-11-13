@@ -1,6 +1,19 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.5.1 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.5.2 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.5.2 — Correções em notificações push, avisos na tela, Cadastros e cartões — 13 de novembro de 2026
+
+Versão de correção (app e API); o site só alinha o número da versão. Todas as correções valem no celular e no computador.
+
+- **Devoluções:** a ordenação agora é um controle de dois botões, **Mais antigos primeiro** / **Mais recentes primeiro**, no estilo do app (antes era uma lista simples do navegador). No celular, o campo de busca ocupa a largura toda ("Buscar solicitante, equipamento…").
+- **Notificações push (ativação):** no celular, se o pedido de permissão do navegador demorava alguns segundos, ele sumia e erros como "Registration failed - push service error" se empilhavam na tela; mesmo após permitir, o banner só saía com **Agora não**; **Configurações → Notificações** tinha o mesmo problema. Agora só uma ativação roda por vez (também entre abas e o app instalado), uma falha momentânea é repetida uma vez automaticamente, os erros do navegador aparecem como mensagens claras e traduzidas (serviço de notificações indisponível, problema na chave do servidor, pedido de permissão sem resposta), se você permitir depois a ativação termina sozinha e o banner some, e inscrições criadas com uma chave antiga do servidor são substituídas automaticamente.
+- **API:** na inicialização, a API confere se `VAPID_PUBLIC_KEY` é a chave pública de `VAPID_PRIVATE_KEY`; se não corresponderem, o push fica desativado e o log mostra "VAPID_PUBLIC_KEY não corresponde a VAPID_PRIVATE_KEY." Correção: gerar um novo par com `npx web-push generate-vapid-keys`, definir as duas variáveis e reiniciar a API. As inscrições existentes precisam ser reativadas por cada administrador (o app faz isso sozinho na próxima abertura quando a chave mudou; se não, o administrador pode precisar clicar em **Ativar notificações** novamente).
+- **Avisos na tela (toasts):** mensagens idênticas não se empilham mais (uma mensagem repetida renova a já exibida), no máximo 3 mensagens ficam visíveis ao mesmo tempo, e todas fecham sozinhas, inclusive as de erro (após 8 segundos), mantendo o botão de fechar e a pausa ao passar o mouse (por pouco tempo).
+- **Novo empréstimo:** os itens adicionados viram chips compactos, com o ícone do equipamento e só o modelo em uma linha (a categoria aparece ao passar o mouse e para leitores de tela), sem estourar o formulário no celular.
+- **Dashboard:** os cartões de resumo do equipamento (**Total de equipamentos**, **Disponíveis**, **Emprestados**, **Em Manutenção**, **Quebrados**) não mostram mais o texto de porcentagem "do total"; no celular ficam mais estreitos, com **Total** em uma linha própria e os demais em grade 2×2. Os cartões do **Histórico** no celular e os cartões de **Controle** foram reorganizados com hierarquia mais clara (título, status e detalhes separados, como nos cartões de **Estoque**).
+- **Cadastros:** acabou o modal dentro de modal. A janela de **Cadastros** tem uma única rolagem; **Editar**, **Ajustar total**, **Renomear**, **Redefinir senha** e **Cartão RFID** abrem uma tela de edição na mesma janela, com **Voltar**, título e nome do registro; **Cancelar** e **Salvar** ficam fixos no rodapé (acima do teclado do celular). **Voltar**, **Cancelar**, Esc ou salvar retornam à lista mantendo a busca e a posição de rolagem. No celular a janela ocupa a tela toda e a lista de **Usuários** não rola mais para os lados.
+- **Documentação:** Manual do Usuário §2, §4, §5, §6, §7, §8, §10, §11 e §15; Hospedagem §5.3 (chaves VAPID).
 
 ## v1.5.1 — Modo convidado mais claro, alerta de estoque e datas no idioma escolhido — 13 de novembro de 2026
 

@@ -4,8 +4,11 @@ export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 const DEFAULT_DURATION = 3500;
 // "info" carries notifications the user should actually read (e.g. a new loan), so it stays longer.
-const DURATIONS: Partial<Record<ToastType, number>> = { info: 9000 };
-const MAX_TOASTS = 4;
+const DURATIONS: Partial<Record<ToastType, number>> = { info: 9000, error: 8000, warning: 5000 };
+const MAX_TOASTS = 3;
+// A pause (hover/focus) can never hold a toast longer than this: focus may stick after a tap on mobile.
+const MAX_PAUSE = 4000;
+const active = new Map<string, { el: HTMLElement; restart: () => void; discard: () => void }>();
 
 const ICONS: Record<ToastType, string> = {
     success: 'check_circle',
@@ -48,6 +51,12 @@ export function showToast(message: string, type: ToastType = 'success', options:
     const duration = opts.duration ?? DURATIONS[type] ?? DEFAULT_DURATION;
     message = traduzirTexto(message);
     const region = getRegion(type);
+    const key = `${type}:${message}`;
+    const existing = active.get(key);
+    if (existing && existing.el.isConnected && !existing.el.classList.contains('toast-leaving')) {
+        existing.restart();
+        return;
+    }
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
 
@@ -73,6 +82,7 @@ export function showToast(message: string, type: ToastType = 'success', options:
     toast.append(icon, text, close);
 
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let pauseTimer: ReturnType<typeof setTimeout> | undefined;
     let remaining = duration;
     let startedAt = 0;
     let removed = false;
@@ -81,35 +91,58 @@ export function showToast(message: string, type: ToastType = 'success', options:
         if (removed) return;
         removed = true;
         if (timer) clearTimeout(timer);
+        if (pauseTimer) clearTimeout(pauseTimer);
+        if (active.get(key)?.el === toast) active.delete(key);
         toast.classList.add('toast-leaving');
         toast.addEventListener('animationend', () => toast.remove());
         // Fallback when animations are disabled (reduced motion / no animation events).
         setTimeout(() => toast.remove(), 400);
     };
     const start = (): void => {
-        if (type === 'error' || removed) return; // errors persist until closed
+        if (removed) return;
+        if (pauseTimer) { clearTimeout(pauseTimer); pauseTimer = undefined; }
         if (timer) clearTimeout(timer);
         startedAt = Date.now();
         timer = setTimeout(dismiss, remaining);
     };
     const pause = (): void => {
-        if (!timer) return;
-        clearTimeout(timer);
-        timer = undefined;
-        remaining = Math.max(0, remaining - (Date.now() - startedAt));
+        if (removed) return;
+        if (timer) {
+            clearTimeout(timer);
+            timer = undefined;
+            remaining = Math.max(0, remaining - (Date.now() - startedAt));
+        }
+        if (!pauseTimer) pauseTimer = setTimeout(() => { pauseTimer = undefined; start(); }, MAX_PAUSE);
+    };
+    /** Evicted by the visible-toast cap: removed at once, timers cleared. */
+    const discard = (): void => {
+        removed = true;
+        if (timer) clearTimeout(timer);
+        if (pauseTimer) clearTimeout(pauseTimer);
+        toast.remove();
+    };
+    const restart = (): void => {
+        if (removed) return;
+        remaining = duration;
+        start();
+        toast.classList.remove('toast-pulse');
+        void toast.offsetWidth;
+        toast.classList.add('toast-pulse');
     };
 
-    close.addEventListener('click', dismiss);
+    close.addEventListener('click', (e) => { e.stopPropagation(); dismiss(); });
     toast.addEventListener('mouseenter', pause);
-    toast.addEventListener('mouseleave', () => { if (!toast.matches(':focus-within')) start(); });
+    toast.addEventListener('mouseleave', () => start());
     toast.addEventListener('focusin', pause);
-    toast.addEventListener('focusout', () => { if (!toast.matches(':hover')) start(); });
+    toast.addEventListener('focusout', () => start());
 
+    active.set(key, { el: toast, restart, discard });
     region.appendChild(toast);
 
-    const active = [...(root as HTMLElement).querySelectorAll('.toast:not(.toast-leaving)')];
-    if (active.length > MAX_TOASTS) {
-        active.slice(0, active.length - MAX_TOASTS).forEach(el => el.remove());
+    while (active.size > MAX_TOASTS) {
+        const [k, v] = active.entries().next().value as [string, { discard: () => void }];
+        active.delete(k);
+        v.discard();
     }
 
     start();

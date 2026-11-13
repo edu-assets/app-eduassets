@@ -130,21 +130,30 @@ export function renderDashboardChip(item: LoanItemUI): string {
             <span class="icon-badge icon-badge--sm icon-badge--primary">
                 <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
             </span>
-            ${item.quantidade}
+            <span class="historico-item-qtd">${item.quantidade}</span>
+            <span class="historico-item-nome">${item.nome}</span>
         </span>
     `;
 }
 
+/**
+ * Desktop: até `limiteChips` chips (ícone + quantidade) e "+N". Mobile (via CSS): só o 1º chip, com nome, seguido
+ * do "+N" compacto (`historico-item-mais-compacto`, oculto no desktop) com o total de itens restantes.
+ */
 export function renderDashboardChipsItens(itens: LoanItemUI[], limiteChips: number = LIMITE_CHIPS_HISTORICO_PADRAO): string {
+    const compacto = itens.length > 1
+        ? html`<span class="historico-item-chip historico-item-chip-mais historico-item-mais-compacto">+${itens.length - 1}</span>`
+        : '';
+
     if (itens.length <= limiteChips) {
-        return itens.map(renderDashboardChip).join('');
+        return itens.map(renderDashboardChip).join('') + compacto;
     }
 
     const visiveis = itens.slice(0, limiteChips);
     const restantes = itens.length - visiveis.length;
 
     return visiveis.map(renderDashboardChip).join('') +
-        html`<span class="historico-item-chip historico-item-chip-mais">+${restantes}</span>`;
+        html`<span class="historico-item-chip historico-item-chip-mais">+${restantes}</span>` + compacto;
 }
 
 export function renderDashboardHistoricoContent(loans: LoanUI[], limiteChips: number = LIMITE_CHIPS_HISTORICO_PADRAO): string {

@@ -26,11 +26,7 @@ export function initDashboard(): void {
         resumoDisponivel: document.getElementById('resumo-disponivel') as HTMLElement,
         resumoEmprestado: document.getElementById('resumo-emprestado') as HTMLElement,
         resumoQuebrado: document.getElementById('resumo-quebrado') as HTMLElement,
-        resumoDisponivelPct: document.getElementById('resumo-disponivel-pct') as HTMLElement,
-        resumoEmprestadoPct: document.getElementById('resumo-emprestado-pct') as HTMLElement,
-        resumoQuebradoPct: document.getElementById('resumo-quebrado-pct') as HTMLElement,
         resumoManutencao: document.getElementById('resumo-manutencao') as HTMLElement,
-        resumoManutencaoPct: document.getElementById('resumo-manutencao-pct') as HTMLElement,
         inputBusca: document.getElementById('dashboard-busca') as HTMLInputElement | null
     };
 

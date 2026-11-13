@@ -10,7 +10,7 @@ import {
     validarRenomearCategoria,
     validarSenhaNovoUsuario
 } from '../features/cadastros/logic.js';
-import { renderItemRegistroResponsavel, renderItemRegistroCategoria } from '../features/cadastros/templates.js';
+import { renderItemRegistroResponsavel, renderFormRenomearCategoria } from '../features/cadastros/templates.js';
 import { popularSelectResponsaveis } from '../features/emprestimo/render.js';
 
 const CHAVES = [
@@ -120,7 +120,7 @@ describe('templates', () => {
         expect(ativo).toContain('data-desativar-responsavel-id="2"');
     });
     it('categoria em edição mostra formulário com erro inline', () => {
-        const h = renderItemRegistroCategoria({ id: 5, nome: 'Notebook' }, { editandoId: 5 });
+        const h = renderFormRenomearCategoria({ id: 5, nome: 'Notebook' });
         expect(h).toContain('data-renomear-categoria-form="5"');
         expect(h).toContain('edit-categoria-nome-erro');
     });
