@@ -51,6 +51,19 @@ npm run build      # Production build to dist/
 npm run preview    # Preview the production build locally
 ```
 
+## Versioning
+
+The product version has a single source: `version` in this repository's `package.json`. The app reads it at build time (`__APP_VERSION__`, exported by `src/core/version.ts`) for the badge in About. Never edit the version number by hand anywhere else.
+
+To change the version (for example, a new release), run in this folder:
+
+```bash
+npm run version:set -- X.Y.Z --date YYYY-MM-DD   # e.g. npm run version:set -- 1.4.0 --date 2026-12-01
+npm run version:set -- --check                   # verifies every location agrees
+```
+
+The command updates the version in every repository of the workspace (`app`, `api`, `site` package files and README status lines, plus the release date in the `docs` READMEs), as long as they are cloned side by side (`../api`, `../docs`, `../site`). Then add the `vX.Y.Z` entry to the changelog in the docs repository, pin the new docs commit (see *Documentation*) and commit each repository. The full release workflow is in the Development guide (*Versioning*).
+
 ## Cloudflare Pages deployment
 
 The production site is served at `https://app.eduassets.tech`. For the Cloudflare Pages project connected to this repository, use:

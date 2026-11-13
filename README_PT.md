@@ -51,6 +51,19 @@ npm run build      # Build de produção em dist/
 npm run preview    # Pré-visualização local da build de produção
 ```
 
+## Versionamento
+
+A versão do produto tem uma única fonte: o campo `version` do `package.json` deste repositório. O app a lê no build (`__APP_VERSION__`, exportada por `src/core/version.ts`) para o selo em Sobre. Nunca edite o número da versão à mão em outro lugar.
+
+Para mudar a versão (por exemplo, num novo lançamento), rode nesta pasta:
+
+```bash
+npm run version:set -- X.Y.Z --date AAAA-MM-DD   # ex.: npm run version:set -- 1.4.0 --date 2026-12-01
+npm run version:set -- --check                   # confere se todos os lugares estão iguais
+```
+
+O comando atualiza a versão em todos os repositórios do workspace (arquivos de pacote e linhas de status dos READMEs de `app`, `api` e `site`, além da data de lançamento nos READMEs de `docs`), desde que estejam clonados lado a lado (`../api`, `../docs`, `../site`). Depois, acrescente a entrada `vX.Y.Z` ao changelog no repositório de documentação, fixe o novo commit da documentação (veja *Documentação*) e faça o commit de cada repositório. O fluxo completo de lançamento está no guia de Desenvolvimento (*Versionamento*).
+
 ## Deploy no Cloudflare Pages
 
 O site de produção é servido em `https://app.eduassets.tech`. Para o projeto Cloudflare Pages conectado a este repositório, configure:
