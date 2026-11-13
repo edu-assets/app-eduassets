@@ -5,6 +5,10 @@ import { listarCategoriasDisponiveis, filtrarOcorrencias, listarEquipamentosPorC
 import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect.js';
 import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
 import { t } from '../../core/state/i18nStore.js';
+import { sincronizarAbasAria } from '../../shared/dom/tabs.js';
+import { limparErrosModal } from './validacao.js';
+import { getLoadStatus } from '../../core/state/loadStatus.js';
+import { aplicarEstadoCarga, renderSkeletonLinhas, semDadosProntos, CONTADOR_INDISPONIVEL } from '../../shared/components/loadState.js';
 
 const TIPOS_VISIVEIS = ['observacao', 'manutencao', 'quebrado', 'resolvidos'];
 
@@ -49,13 +53,13 @@ export interface ControleEls {
     linhaMedidas: HTMLElement | null;
     campoMedidas: HTMLTextAreaElement | null;
     btnModalCancelar: HTMLElement | null;
-    btnModalSalvar: HTMLElement | null;
+    btnModalSalvar: HTMLButtonElement | null;
     resolverCategoriaModelo: HTMLElement | null;
     resolverNumeroProblema: HTMLElement | null;
     resolverDescricao: HTMLElement | null;
     resolverMedidas: HTMLTextAreaElement | null;
     btnResolverCancelar: HTMLElement | null;
-    btnResolverConfirmar: HTMLElement | null;
+    btnResolverConfirmar: HTMLButtonElement | null;
     inputBusca: HTMLInputElement | null;
 }
 
@@ -76,6 +80,8 @@ export function renderControle(els: ControleEls, estado: ControleEstado): void {
         const header = tabContent.querySelector('.registros-header')?.outerHTML
             || tabContent.querySelector('.registros-header-resolvidos')?.outerHTML
             || '';
+
+        if (aplicarEstadoCarga(tabContent, getLoadStatus('ocorrencias').status, renderSkeletonLinhas(4), header)) return;
 
         const registros = getOcorrenciasPorTipo(tipo);
         // NOVO: Aplica o filtro antes de renderizar
@@ -109,7 +115,9 @@ export function atualizarContagem(tipo: string): void {
     const contadorEl = document.getElementById(`contagem-${tipo}`);
     const tabContent = document.getElementById(`tab-${tipo}`);
     if (contadorEl && tabContent) {
-        contadorEl.textContent = String(tabContent.querySelectorAll('.registros-row').length);
+        contadorEl.textContent = semDadosProntos(getLoadStatus('ocorrencias').status)
+            ? CONTADOR_INDISPONIVEL
+            : String(tabContent.querySelectorAll('.registros-row').length);
     }
 }
 
@@ -130,6 +138,7 @@ export function ativarAba(els: ControleEls, estado: ControleEstado, tab: string)
 
     if (tabLink) tabLink.classList.add('active');
     if (targetTab) targetTab.classList.add('active');
+    sincronizarAbasAria(document.querySelectorAll('.controle-tab-link'));
 
     limparSelecao(els, estado);
     fecharTodosMenus();
@@ -138,7 +147,9 @@ export function ativarAba(els: ControleEls, estado: ControleEstado, tab: string)
 
 export function fecharTodosMenus(exceto: Element | null = null): void {
     document.querySelectorAll('.registros-row-menu.active').forEach((menu) => {
-        if (menu !== exceto) menu.classList.remove('active');
+        if (menu === exceto) return;
+        menu.classList.remove('active');
+        menu.previousElementSibling?.setAttribute('aria-expanded', 'false');
     });
 }
 
@@ -214,6 +225,7 @@ export function abrirNovoRegistro(els: ControleEls, estado: ControleEstado, tipo
     popularSelectCategorias(els);
     popularSelectModelos(els, null);
     limparCamposModal(els);
+    limparErrosModal(els);
     alternarCampoMedidas(els, false);
 
     openModal('modal-controle-novo');
@@ -242,6 +254,7 @@ export function abrirEdicaoRegistro(els: ControleEls, estado: ControleEstado, ro
     els.campoNumero.value = row.dataset.numero || '';
     els.campoProblema.value = row.dataset.problema || '';
     els.campoDescricao.value = row.dataset.descricao || '';
+    limparErrosModal(els);
 
     const ehResolvido = tipo === 'resolvidos';
     alternarCampoMedidas(els, ehResolvido);

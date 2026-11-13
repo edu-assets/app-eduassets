@@ -24,8 +24,8 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `GET` | `/health` | Public | Process liveness. |
 | `GET` | `/ready` | Public | Readiness with a bounded PostgreSQL check. |
 | `GET` | `/auth/session-capabilities` | Public | Reports whether the server supports browser cookie sessions (`cookieSession`), whether email password recovery is configured (`passwordRecovery`) and whether push notifications are available (`pushNotifications`). |
-| `POST` | `/auth/login` | Public; rate limited, with Origin validation when cookie mode is requested | Authenticates `login` and `password`; sets the cookie and returns the profile in cookie mode. |
-| `GET` | `/auth/me` | Authenticated session | Returns the current session profile. |
+| `POST` | `/auth/login` | Public; rate limited, with Origin validation when cookie mode is requested | Authenticates `login` and `password`; sets the cookie and returns the profile in cookie mode, including `senhaAlteradaEm` (ISO 8601 or `null`) like `GET /auth/me`. |
+| `GET` | `/auth/me` | Authenticated session | Returns the current session profile, including `senhaAlteradaEm` (ISO 8601 or `null`), derived from the audit log (`PASSWORD_CHANGE`, `PASSWORD_RESET`, `PASSWORD_RESET_SELF`). |
 | `POST` | `/auth/logout` | Authenticated session | Revokes the user's session version and clears the cookie. Returns `204`. |
 | `PATCH` | `/auth/senha` | Authenticated session | Changes the password using `senhaAtual` and `novaSenha`; successful changes reissue the current session. |
 | `POST` | `/auth/senha/recuperar` | Public; 10 requests per IP every 15 min and 3 per email per hour; Origin validated in cookie mode | Body `{ "login": "...", "idioma": "pt" \| "en" }`. Always answers `202` with the same body, before any lookup, so it never reveals whether the account exists. When the login is the email of an active account, it invalidates earlier links, stores only the SHA-256 hash of a random 256-bit token valid for 30 minutes, records `PASSWORD_RESET_REQUEST` and emails the link `APP_PUBLIC_URL/#redefinir-senha=<token>` in the requested language (HTML with an inline banner plus plain text; Reply-To set to `SUPPORT_EMAIL` when configured). Returns `503` when SMTP is not configured. |
@@ -42,7 +42,7 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `GET` | `/categorias` | Public/guest or authenticated. |
 | `POST` | `/categorias` | Administrator. |
 | `GET` | `/equipamentos` | Public/guest or authenticated. |
-| `POST`, `PATCH` | `/equipamentos`, `/equipamentos/:id` | Administrator. |
+| `POST`, `PATCH` | `/equipamentos`, `/equipamentos/:id` | Administrator. When `PATCH` sends `quantidadeTotal` without `quantidadeDisponivel`, the server applies the difference to `quantidadeDisponivel` atomically under a row lock and answers `409` `backend.equipamentos.quantidade_em_uso` if the new total is below the units in use; sending both fields keeps the explicit values. |
 | `GET` | `/emprestimos` | Public/guest or authenticated. Without a session, accepts `limit` (default 50, maximum 100) and a positive `cursor`; returns `{ items, nextCursor, limit }` in descending ID order with a reduced public projection. |
 | `POST` | `/emprestimos` | Authenticated user (editor or administrator). `dataRetirada` more than 5 minutes in the future returns `400` `backend.emprestimos.data_retirada_futura`. |
 | `PATCH` | `/emprestimos/:id` | Authenticated user; updates loan items. |
@@ -53,8 +53,8 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `DELETE` | `/ocorrencias/:id` | Administrator. |
 | `GET` | `/responsaveis` | Authenticated session. |
 | `POST` | `/responsaveis` | Administrator. |
-| `GET`, `POST` | `/usuarios` | Administrator. |
-| `PATCH` | `/usuarios/:id` | Administrator; updates name, login, access level or the `ativo` status. |
+| `GET`, `POST` | `/usuarios` | Administrator. `POST` and `PATCH /usuarios/:id` require an email-format `login` (password sign-in is unchanged and existing accounts keep working). Password recovery only works if the mailbox exists. `GET` includes `criadoPor` and `atualizadoPor`. |
+| `PATCH` | `/usuarios/:id` | Administrator; updates name, login, access level or the `ativo` status. Errors: `400` `backend.usuarios.nao_pode_desativar_a_si_mesmo`, `400` `backend.usuarios.nao_pode_rebaixar_a_si_mesmo` and `409` `backend.usuarios.ultimo_administrador` (at least one active administrator must remain). |
 | `POST` | `/usuarios/:id/password-reset` | Administrator; body `{ "senha": "..." }` following the strong policy (12+ characters, uppercase, lowercase, digit, symbol, max. 72 bytes). Stores the new hash, increments `sessionVersion` (ending the user's sessions) and records `PASSWORD_RESET` in the audit log in the same transaction. Returns `204`. Used by the **Reset password** action in **Records → System Users**. |
 | `POST`, `DELETE` | `/usuarios/:id/rfid-token` | Administrator; provisions or revokes an RFID token. |
 
@@ -88,6 +88,10 @@ Enrollment of administrator devices for Web Push notifications (Push API + servi
 - Payload received by the service worker: `{ v: 1, tipo: 'EMPRESTIMO_CRIADO' | 'DEVOLUCAO_REGISTRADA' | 'OCORRENCIA_REGISTRADA' | 'TESTE', titulo, corpo, url, tag, criadoEm }`.
 - Delivery happens after the operation is committed and never delays or fails the original request. TTL is 1 hour and urgency `high`. A `404` or `410` response from the push service removes the subscription.
 - Notification click targets: loan and return open `/#panel-dashboard` (History tab); occurrence opens `/#panel-controle`; test opens `/#panel-inicio`.
+
+## Record authorship
+
+Authenticated responses (Administrator or Editor) for loans, occurrences, equipment, categories and responsible parties include author objects `{ id, nome }` (or `null`): `criadoPor` and `atualizadoPor` where the entity has them, `devolvidoPor` on loans and `resolvidoPor` on occurrences; categories and responsible parties only have `criadoPor`. Guests never receive authorship data; guest `GET /categorias` returns `{ id, nome }`. The fields come from migration `20261113150000_record_authorship` (see the Data Model).
 
 ## Validation and rules
 

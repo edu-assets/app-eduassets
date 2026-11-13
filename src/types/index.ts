@@ -7,12 +7,25 @@ export type StatusOcorrencia = 'ABERTO' | 'RESOLVIDO';
 
 /* ===== Entidades ===== */
 
-export interface Categoria {
+/** Autor de um registro. Só vem da API para usuários autenticados; `null` quando o usuário foi removido. */
+export interface Autor {
     id: number;
     nome: string;
 }
 
-export interface Equipamento {
+/** Campos de autoria opcionais: ausentes nos dados de convidado. */
+export interface AutoriaCampos {
+    criadoPor?: Autor | null;
+    atualizadoPor?: Autor | null;
+}
+
+export interface Categoria {
+    id: number;
+    nome: string;
+    criadoPor?: Autor | null;
+}
+
+export interface Equipamento extends AutoriaCampos {
     id: number;
     categoriaId: number;
     modelo: string;
@@ -28,6 +41,7 @@ export interface Responsavel {
     id: number;
     nome: string;
     cargo: string;
+    criadoPor?: Autor | null;
 }
 
 export interface Usuario {
@@ -37,6 +51,17 @@ export interface Usuario {
     nivelAcesso: NivelAcesso;
     createdAt: string;
     possuiCartaoRfid: boolean;
+    /** Absent on older API versions: treat as active. */
+    ativo?: boolean;
+    criadoPor?: Autor | null;
+    atualizadoPor?: Autor | null;
+}
+
+export interface UsuarioUpdatePayload {
+    nome?: string;
+    login?: string;
+    nivelAcesso?: NivelAcesso;
+    ativo?: boolean;
 }
 
 export interface ItemEmprestimo {
@@ -47,7 +72,9 @@ export interface ItemEmprestimo {
     equipamento?: Equipamento;
 }
 
-export interface Emprestimo {
+export interface Emprestimo extends AutoriaCampos {
+    devolvidoPor?: Autor | null;
+    atualizadoEm?: string | null;
     id: number;
     solicitanteNome: string;
     responsavelId: number;
@@ -60,7 +87,9 @@ export interface Emprestimo {
     itens: ItemEmprestimo[];
 }
 
-export interface Ocorrencia {
+export interface Ocorrencia extends AutoriaCampos {
+    resolvidoPor?: Autor | null;
+    atualizadoEm?: string | null;
     id: number;
     equipamentoId: number;
     numero: string | null;
@@ -79,6 +108,8 @@ export interface AuthUser {
     nome: string;
     login: string;
     nivelAcesso: NivelAcesso;
+    /** ISO timestamp of the last password change; absent or null when never recorded. */
+    senhaAlteradaEm?: string | null;
 }
 
 export interface LoginResponse {
@@ -149,7 +180,9 @@ export type LoanItemUI = {
 
 export type StatusLoanUI = 'aberto' | 'devolvido';
 
-export interface LoanUI {
+export interface LoanUI extends AutoriaCampos {
+    devolvidoPor?: Autor | null;
+    atualizadoEm?: string | null;
     id: number;
     numero: number;
     aluno: string;
@@ -178,7 +211,9 @@ export interface LoanUpdate {
 
 export type StatusOcorrenciaUI = 'aberto' | 'resolvidos';
 
-export interface OcorrenciaUI {
+export interface OcorrenciaUI extends AutoriaCampos {
+    resolvidoPor?: Autor | null;
+    atualizadoEm?: string | null;
     id: number;
     equipamentoId: number;
     tipo: string;

@@ -27,12 +27,10 @@ const CHAVES_DE_BOTOES: Record<string, string> = {
     '#cadastro-modal-salvar': 'shell.salvar',
     '#btn-rfid-revogar': 'shell.revogar_cartao',
     '#rfid-modal-fechar': 'dashboard.fechar',
-    '#config-salvar': 'shell.salvar_configuracoes',
     '#seguranca-senha-cancelar': 'shell.cancelar',
     '#seguranca-senha-salvar': 'shell.atualizar_senha',
     '#login-btn-entrar': 'shell.entrar',
-    '#confirmar-exclusao-cancelar': 'shell.cancelar',
-    '#confirmar-exclusao-btn': 'shell.excluir_registro'
+    '#confirmar-exclusao-cancelar': 'shell.cancelar'
 };
 let observador: MutationObserver | null = null;
 

@@ -40,7 +40,7 @@ function definirRotuloBotao(botao: HTMLButtonElement, texto: string): void {
 
 /**
  * Wires the "Notificações" card of the settings panel. These controls apply immediately (not through
- * "Salvar Configurações") and are marked data-notif-switch so the generic .config-switch handler skips them.
+ * a save button) and are marked data-notif-switch so the generic .config-switch handler skips them.
  */
 export function initNotificacoesConfig(): void {
     const card = document.getElementById('config-notif-card');

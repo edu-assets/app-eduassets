@@ -4,6 +4,8 @@ import { renderLista, popularSelectDetalheEquipamento } from './render.js';
 import { attachDevolucaoEvents } from './events.js';
 import { getLoansAbertos, subscribe } from '../../core/state/loanStore.js';
 import { subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
+import { subscribeLoadStatus } from '../../core/state/loadStatus.js';
+import { ligarTentarNovamente } from '../../shared/components/loadState.js';
 import type { LoanItemUI } from '../../types/index.js';
 
 export async function initDevolucao(): Promise<void> {
@@ -62,6 +64,8 @@ export async function initDevolucao(): Promise<void> {
 
     renderLista(els, estado, getLoansAbertos());
     subscribe(() => renderLista(els, estado, getLoansAbertos()));
+    subscribeLoadStatus((chave) => { if (chave === 'emprestimos') renderLista(els, estado, getLoansAbertos()); });
+    ligarTentarNovamente(els.lista, 'emprestimos');
     subscribeEquipamentos((equipamentos) => popularSelectDetalheEquipamento(els.detalheEquipamentoSelect, equipamentos));
     subscribeI18n(() => renderLista(els, estado, getLoansAbertos()));
 }

@@ -290,6 +290,144 @@
     outline-offset: 2px;
 }
 
+/* ===== Busca, edição inline, badges e ações de texto ===== */
+.cadastro-modal-busca {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--surface-2);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+}
+
+.cadastro-modal-busca:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+}
+
+.form-group select[aria-invalid="true"] {
+    border-color: var(--danger-color, #dc2626);
+}
+
+.form-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.cadastro-usuario-acoes {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.cadastro-usuario-acao--texto {
+    width: auto;
+    gap: 4px;
+    padding: 0 10px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cadastro-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 3px;
+}
+
+.cadastro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.cadastro-badge .material-symbols-outlined {
+    font-size: 13px;
+}
+
+.cadastro-badge--inativo {
+    background-color: var(--surface-2);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.cadastro-badge--aviso {
+    background-color: color-mix(in srgb, var(--warning-color, #d97706) 14%, transparent);
+    color: var(--warning-color, #b45309);
+}
+
+.cadastro-usuario-row--inativo .cadastro-usuario-nome,
+.cadastro-usuario-row--inativo .cadastro-usuario-avatar {
+    opacity: 0.6;
+}
+
+.cadastro-usuario-row--edicao {
+    display: block;
+}
+
+.cadastro-usuario-edit,
+.cadastro-ajuste-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.cadastro-edit-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.cadastro-modal-item--acao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.cadastro-autoria {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.cadastro-modal-item--autoria {
+    display: flex;
+    flex-direction: column;
+}
+
+.cadastro-item-texto {
+    flex: 1;
+    min-width: 0;
+}
+
+.cadastro-usuario-acoes .cadastro-rfid-chip {
+    margin-left: 0;
+}
+
+@media (max-width: 640px) {
+    .cadastro-usuario-acoes {
+        flex-basis: 100%;
+        justify-content: flex-start;
+        margin-left: 46px;
+    }
+}
+
 .cadastro-senha-regras {
     margin: 0;
     color: var(--text-muted);

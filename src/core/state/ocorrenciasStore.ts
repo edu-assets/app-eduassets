@@ -7,8 +7,10 @@ import {
 } from '../api/ocorrencias.js';
 import type { Ocorrencia, OcorrenciaUI, OcorrenciaCreatePayload, OcorrenciaUpdatePayload } from '../../types/index.js';
 import type { OpcoesLeitura } from '../api/apiClient.js';
+import { iniciarCarga, concluirCarga, falharCarga, reiniciarCarga, registrarCarregador } from './loadStatus.js';
 import { getSessionDataVersion } from './sessionDataVersion.js';
 import { carregarEquipamentos } from './equipamentoStore.js';
+import { extrairAutoria } from '../utils/autoria.js';
 import { criarLeituraOrdenada, mesmoConteudo } from './leituraOrdenada.js';
 
 type OcorrenciaListener = (ocorrencias: OcorrenciaUI[]) => void;
@@ -21,16 +23,30 @@ const leituras = criarLeituraOrdenada();
 export async function carregarOcorrencias(opcoes?: OpcoesLeitura): Promise<OcorrenciaUI[]> {
     const version = getSessionDataVersion();
     const leitura = leituras.iniciar();
-    const dados = await listarOcorrencias(opcoes);
+    iniciarCarga('ocorrencias');
+    let dados: Awaited<ReturnType<typeof listarOcorrencias>>;
+    try {
+        dados = await listarOcorrencias(opcoes);
+    } catch (erro) {
+        if (version === getSessionDataVersion()) falharCarga('ocorrencias');
+        throw erro;
+    }
     if (version !== getSessionDataVersion() || !leituras.podeAplicar(leitura)) return ocorrencias;
     const novas = dados.map(mapOcorrencia);
-    if (mesmoConteudo(novas, ocorrencias)) return ocorrencias;
+    if (mesmoConteudo(novas, ocorrencias)) {
+        concluirCarga('ocorrencias');
+        return ocorrencias;
+    }
     ocorrencias = novas;
     notify();
+    concluirCarga('ocorrencias');
     return ocorrencias;
 }
 
+registrarCarregador('ocorrencias', () => carregarOcorrencias());
+
 export function limparOcorrencias(): void {
+    reiniciarCarga('ocorrencias');
     ocorrencias = [];
     notify();
 }
@@ -99,6 +115,7 @@ function mapOcorrencia(ocorrencia: Ocorrencia): OcorrenciaUI {
         descricao: ocorrencia.descricao ?? '',
         registradoEm: new Date(ocorrencia.createdAt).toLocaleString('pt-BR'),
         resolvidoEm: ocorrencia.resolvidoEm ? new Date(ocorrencia.resolvidoEm).toLocaleString('pt-BR') : '',
-        medidas: ocorrencia.medidasTomadas ?? ''
+        medidas: ocorrencia.medidasTomadas ?? '',
+        ...extrairAutoria(ocorrencia)
     };
 }

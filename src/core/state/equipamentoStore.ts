@@ -1,6 +1,7 @@
 import { listarEquipamentos, atualizarEquipamento } from '../api/equipamentos.js';
 import type { Equipamento, EquipamentoUpdatePayload } from '../../types/index.js';
 import type { OpcoesLeitura } from '../api/apiClient.js';
+import { iniciarCarga, concluirCarga, falharCarga, reiniciarCarga, registrarCarregador } from './loadStatus.js';
 import { getSessionDataVersion } from './sessionDataVersion.js';
 import { criarLeituraOrdenada, mesmoConteudo } from './leituraOrdenada.js';
 
@@ -14,15 +15,29 @@ const leituras = criarLeituraOrdenada();
 export async function carregarEquipamentos(opcoes?: OpcoesLeitura): Promise<Equipamento[]> {
     const version = getSessionDataVersion();
     const leitura = leituras.iniciar();
-    const dados = await listarEquipamentos(opcoes);
+    iniciarCarga('equipamentos');
+    let dados: Awaited<ReturnType<typeof listarEquipamentos>>;
+    try {
+        dados = await listarEquipamentos(opcoes);
+    } catch (erro) {
+        if (version === getSessionDataVersion()) falharCarga('equipamentos');
+        throw erro;
+    }
     if (version !== getSessionDataVersion() || !leituras.podeAplicar(leitura)) return equipamentos;
-    if (mesmoConteudo(dados, equipamentos)) return equipamentos;
+    if (mesmoConteudo(dados, equipamentos)) {
+        concluirCarga('equipamentos');
+        return equipamentos;
+    }
     equipamentos = dados;
     notify();
+    concluirCarga('equipamentos');
     return equipamentos;
 }
 
+registrarCarregador('equipamentos', () => carregarEquipamentos());
+
 export function limparEquipamentos(): void {
+    reiniciarCarga('equipamentos');
     equipamentos = [];
     notify();
 }

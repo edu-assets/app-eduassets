@@ -1,7 +1,8 @@
 import { showToast, openModal } from '../../core/ui/index.js';
 import { removerItemPorId } from '../../core/utils/listaItens.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
-import { renderItens, renderModalItens } from './render.js';
+import { renderItens, renderModalItens, popularSelectEquipamentos, disponivelRestante } from './render.js';
+import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { adicionarItemComValidacao, registrarEmprestimo } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import type { LoanItemUI, LoanDraft } from '../../types/index.js';
@@ -29,7 +30,66 @@ interface EmprestimoEventosEstado {
     itens: LoanItemUI[];
 }
 
+const LIMITE_OBSERVACAO = 250;
+
+function atualizarContador(els: Pick<EmprestimoEventosEls, 'observacaoInput'>): void {
+    const contador = document.getElementById('observacao-contador');
+    if (contador) contador.textContent = `${els.observacaoInput.value.length}/${els.observacaoInput.maxLength > 0 ? els.observacaoInput.maxLength : LIMITE_OBSERVACAO}`;
+}
+
+function limparErroQuantidade(input: HTMLInputElement, erro: HTMLElement | null): void {
+    input.removeAttribute('aria-invalid');
+    if (erro) {
+        erro.textContent = '';
+        erro.hidden = true;
+    }
+}
+
+/** Ajusta o max da quantidade ao modelo selecionado e mostra/limpa o erro inline. */
+export function atualizarLimiteQuantidade(
+    els: Pick<EmprestimoEventosEls, 'equipamentoSelect' | 'quantidadeInput'>,
+    estado: EmprestimoEventosEstado
+): void {
+    const erro = document.getElementById('quantidade-erro');
+    const equipamento = getEquipamentos().find((eq) => String(eq.id) === els.equipamentoSelect.value);
+    if (!equipamento) {
+        els.quantidadeInput.removeAttribute('max');
+        limparErroQuantidade(els.quantidadeInput, erro);
+        return;
+    }
+
+    const max = disponivelRestante(equipamento, estado.itens);
+    els.quantidadeInput.max = String(max);
+    const quantidade = Number(els.quantidadeInput.value) || 0;
+
+    if (max <= 0 || quantidade > max) {
+        els.quantidadeInput.setAttribute('aria-invalid', 'true');
+        if (erro) {
+            erro.textContent = max <= 0
+                ? t('emprestimo.sem_unidades_disponiveis')
+                : t('emprestimo.quantidade_maxima').replace('{max}', String(max));
+            erro.hidden = false;
+        }
+    } else {
+        limparErroQuantidade(els.quantidadeInput, erro);
+    }
+}
+
+function sincronizarDisponibilidade(els: EmprestimoEventosEls, estado: EmprestimoEventosEstado): void {
+    popularSelectEquipamentos(els.equipamentoSelect, getEquipamentos(), estado.itens);
+    atualizarLimiteQuantidade(els, estado);
+}
+
 export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: EmprestimoEventosEstado): void {
+    els.equipamentoSelect.addEventListener('change', () => atualizarLimiteQuantidade(els, estado));
+    els.quantidadeInput.addEventListener('input', () => atualizarLimiteQuantidade(els, estado));
+    els.observacaoInput.addEventListener('input', () => atualizarContador(els));
+    els.form.addEventListener('reset', () => setTimeout(() => {
+        atualizarContador(els);
+        sincronizarDisponibilidade(els, estado);
+    }, 0));
+    atualizarContador(els);
+
     els.btnAdicionar.addEventListener('click', () => {
         if (!els.equipamentoSelect.value) {
             els.equipamentoSelect.reportValidity();
@@ -51,6 +111,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
         renderItens(els, estado.itens);
         els.equipamentoSelect.value = '';
         els.quantidadeInput.value = '1';
+        sincronizarDisponibilidade(els, estado);
     });
 
     els.itensList.addEventListener('click', (e) => {
@@ -66,6 +127,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
         if (btnRemover) {
             estado.itens = removerItemPorId(estado.itens, btnRemover.dataset.id ?? '');
             renderItens(els, estado.itens);
+            sincronizarDisponibilidade(els, estado);
         }
     });
 
@@ -76,6 +138,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
         estado.itens = removerItemPorId(estado.itens, btnRemover.dataset.id ?? '');
         renderItens(els, estado.itens);
         renderModalItens(els, estado.itens);
+        sincronizarDisponibilidade(els, estado);
     });
 
     els.form.addEventListener('submit', async (e) => {
@@ -108,6 +171,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             els.dataInput.classList.add('input-auto');
             estado.itens = [];
             renderItens(els, estado.itens);
+            sincronizarDisponibilidade(els, estado);
         } catch (erro) {
             const chave = erro instanceof Error ? erro.message : null;
             const mensagem = chave && !chave.includes(' ') ? t(chave) : formatarErroEstoque(erro, 'feedback.erro_registrar_emprestimo');

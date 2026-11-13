@@ -6,6 +6,7 @@ import { gerarArquivoXlsx, baixarArquivoXlsx } from '../../core/services/excel.j
 import { gerarBaixarPdf } from '../../core/services/pdf.js';
 import type { PdfTabelaSecao } from '../../core/services/pdf.js';
 import type { Equipamento, LoanUI, FiltrosExportacao } from '../../types/index.js';
+import { isAutenticado } from '../../core/state/authStore.js';
 import { filtrarPorPeriodo } from './dateFilters.js';
 export { filtrarPorPeriodo } from './dateFilters.js';
 
@@ -56,14 +57,19 @@ function contarManutencaoPorEquipamentoLocal(): Map<string, number> {
     return mapa;
 }
 
-function linhasEmprestimos(emprestimos: LoanUI[]): Array<Array<string | number>> {
+function nomeAutor(autor: { nome: string } | null | undefined): string {
+    return autor?.nome ?? '—';
+}
+
+function linhasEmprestimos(emprestimos: LoanUI[], comAutoria = false): Array<Array<string | number>> {
     return emprestimos.map((loan) => [
         loan.numero,
         loan.aluno,
         loan.responsavel,
         loan.data,
         loan.dataDevolucao || '',
-        loan.status
+        loan.status,
+        ...(comAutoria ? [nomeAutor(loan.criadoPor), loan.status === 'devolvido' ? nomeAutor(loan.devolvidoPor) : ''] : [])
     ]);
 }
 
@@ -76,6 +82,7 @@ interface OcorrenciaExportLinha {
     problema: string;
     descricao: string;
     registradoEm: string;
+    criadaPor?: string;
 }
 
 interface SecaoOcorrenciasExport {
@@ -104,7 +111,7 @@ const SECOES_OCORRENCIAS_CONFIG: Array<{ tipo: string; titulo: string; corRgb: [
 
 const CABECALHO_OCORRENCIAS = ['Categoria', 'Modelo', 'Número', 'Problema', 'Descrição', 'Registrado em'];
 
-function montarSecoesOcorrencias(equipamentoIds: string[]): SecaoOcorrenciasExport[] {
+function montarSecoesOcorrencias(equipamentoIds: string[], comAutoria = false): SecaoOcorrenciasExport[] {
     const idsSet = equipamentoIds.length ? new Set(equipamentoIds.map(String)) : null;
 
     return SECOES_OCORRENCIAS_CONFIG
@@ -119,7 +126,8 @@ function montarSecoesOcorrencias(equipamentoIds: string[]): SecaoOcorrenciasExpo
                 numero: ocorrencia.numero,
                 problema: PROBLEMA_LABELS[ocorrencia.problema] ?? ocorrencia.problema,
                 descricao: ocorrencia.descricao,
-                registradoEm: ocorrencia.registradoEm
+                registradoEm: ocorrencia.registradoEm,
+                ...(comAutoria ? { criadaPor: nomeAutor(ocorrencia.criadoPor) } : {})
             }));
 
             return { titulo, corRgb, linhas };
@@ -127,15 +135,26 @@ function montarSecoesOcorrencias(equipamentoIds: string[]): SecaoOcorrenciasExpo
         .filter((secao) => secao.linhas.length > 0);
 }
 
-function linhasSecaoParaMatriz(secao: SecaoOcorrenciasExport): Array<Array<string | number>> {
-    return secao.linhas.map((l) => [l.categoria, l.modelo, l.numero, l.problema, l.descricao, l.registradoEm]);
+function linhasSecaoParaMatriz(secao: SecaoOcorrenciasExport, comAutoria = false): Array<Array<string | number>> {
+    return secao.linhas.map((l) => [
+        l.categoria, l.modelo, l.numero, l.problema, l.descricao, l.registradoEm,
+        ...(comAutoria ? [l.criadaPor ?? '—'] : [])
+    ]);
+}
+
+const CABECALHO_AUTORIA_EMPRESTIMOS = ['Registrado por', 'Devolvido por'];
+const CABECALHO_AUTORIA_OCORRENCIAS = ['Criada por'];
+
+function cabecalhoOcorrencias(comAutoria: boolean): string[] {
+    return comAutoria ? [...CABECALHO_OCORRENCIAS, ...CABECALHO_AUTORIA_OCORRENCIAS] : CABECALHO_OCORRENCIAS;
 }
 
 function montarMatrizCompleta(
     cabecalho: string[],
     linhas: Array<Array<string | number>>,
     secoes: SecaoOcorrenciasExport[],
-    observacaoGeral: string
+    observacaoGeral: string,
+    comAutoria = false
 ): Array<Array<string | number>> {
     const matriz: Array<Array<string | number>> = [];
 
@@ -146,7 +165,7 @@ function montarMatrizCompleta(
     matriz.push(cabecalho, ...linhas);
 
     secoes.forEach((secao) => {
-        matriz.push([], [`${secao.titulo} (${secao.linhas.length})`], CABECALHO_OCORRENCIAS, ...linhasSecaoParaMatriz(secao));
+        matriz.push([], [`${secao.titulo} (${secao.linhas.length})`], cabecalhoOcorrencias(comAutoria), ...linhasSecaoParaMatriz(secao, comAutoria));
     });
 
     return matriz;
@@ -164,6 +183,8 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
     let prefixoArquivo: string;
     let titulo: string;
     let secoes: SecaoOcorrenciasExport[] = [];
+    // Autoria só existe nos dados de usuários autenticados; convidados mantêm as colunas originais.
+    const comAutoria = isAutenticado();
 
     if (filtros.tipoDados === 'equipamentos') {
         const equipamentosFiltrados = filtrarEquipamentosPorIds(prepararDadosEquipamentos(), filtros.equipamentoIds);
@@ -171,7 +192,7 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
         linhas = linhasEquipamentos(equipamentosFiltrados);
         prefixoArquivo = 'equipamentos';
         titulo = 'Relatório de Equipamentos';
-        secoes = montarSecoesOcorrencias(filtros.equipamentoIds);
+        secoes = montarSecoesOcorrencias(filtros.equipamentoIds, comAutoria);
     } else if (filtros.tipoDados === 'devolucoes') {
         const emprestimosFiltrados = filtrarPorPeriodo(
             prepararDadosEmprestimos(),
@@ -179,8 +200,8 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
             filtros.dataFinal,
             (loan) => loan.createdAt
         );
-        cabecalho = CABECALHO_EMPRESTIMOS;
-        linhas = linhasEmprestimos(emprestimosFiltrados);
+        cabecalho = comAutoria ? [...CABECALHO_EMPRESTIMOS, ...CABECALHO_AUTORIA_EMPRESTIMOS] : CABECALHO_EMPRESTIMOS;
+        linhas = linhasEmprestimos(emprestimosFiltrados, comAutoria);
         prefixoArquivo = 'emprestimos';
         titulo = 'Relatório de Empréstimos e Devoluções';
     } else {
@@ -194,13 +215,13 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
     const nomeBase = `${prefixoArquivo}-eduassets-${new Date().toISOString().slice(0, 10)}`;
 
     if (filtros.formato === 'csv') {
-        const matriz = montarMatrizCompleta(cabecalho, linhas, secoes, filtros.observacao);
+        const matriz = montarMatrizCompleta(cabecalho, linhas, secoes, filtros.observacao, comAutoria);
         baixarArquivoCsv(gerarLinhasCsv(matriz), `${nomeBase}.csv`);
         return;
     }
 
     if (filtros.formato === 'excel') {
-        const matriz = montarMatrizCompleta(cabecalho, linhas, secoes, filtros.observacao);
+        const matriz = montarMatrizCompleta(cabecalho, linhas, secoes, filtros.observacao, comAutoria);
         const buffer = await gerarArquivoXlsx(matriz, 'Dados');
         baixarArquivoXlsx(buffer, `${nomeBase}.xlsx`);
         return;
@@ -209,8 +230,8 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
     const secoesPdf: PdfTabelaSecao[] = secoes.map((secao) => ({
         titulo: `${secao.titulo} (${secao.linhas.length})`,
         corRgb: secao.corRgb,
-        cabecalho: CABECALHO_OCORRENCIAS,
-        linhas: linhasSecaoParaMatriz(secao)
+        cabecalho: cabecalhoOcorrencias(comAutoria),
+        linhas: linhasSecaoParaMatriz(secao, comAutoria)
     }));
 
     await gerarBaixarPdf(titulo, cabecalho, linhas, `${nomeBase}.pdf`, filtros.observacao, secoesPdf);

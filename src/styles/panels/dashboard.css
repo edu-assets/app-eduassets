@@ -130,7 +130,17 @@
     margin-left: auto;
 }
 
+.dashboard-tablist {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
 .dashboard-tab-link {
+    background: none;
+    border: 0;
+    font-family: inherit;
     display: inline-flex;
     align-items: center;
     gap: 6px;

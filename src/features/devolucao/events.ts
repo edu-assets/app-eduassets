@@ -73,6 +73,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
             return;
         }
 
+        // O botão Detalhes (acessível por teclado) cai no mesmo caminho do clique no card.
         const card = target.closest<HTMLElement>('.devolucao-item');
         if (!card) return;
 

@@ -332,7 +332,9 @@
 
                                         <div class="form-group col-sm">
                                             <label for="quantidade">Qtd.</label>
-                                            <input type="number" id="quantidade" name="quantidade" min="1" value="1">
+                                            <input type="number" id="quantidade" name="quantidade" min="1" value="1"
+                                                aria-describedby="quantidade-erro">
+                                            <span class="form-error" id="quantidade-erro" role="alert" hidden></span>
                                         </div>
 
                                         <div class="form-group form-group-align-btn">
@@ -359,10 +361,13 @@
                                     <span class="form-label-description">Inclua uma observação se necessário.</span>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="observacao"></label>
+                                            <label for="observacao" class="sr-only-label">Observação</label>
                                             <textarea id="observacao" name="observacao" rows="3"
                                                 placeholder="Adicione observações sobre o empréstimo..." maxlength="250"
+                                                aria-describedby="observacao-contador"
                                                 style="resize: none;"></textarea>
+                                            <span class="form-hint form-counter" id="observacao-contador"
+                                                aria-live="polite">0/250</span>
                                         </div>
                                     </div>
                                 </div>
@@ -588,7 +593,7 @@
                                         class="material-symbols-outlined">devices</span></span>
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Total de equipamentos</span>
-                                    <span class="dashboard-resumo-numero" id="resumo-total">0</span>
+                                    <span class="dashboard-resumo-numero" id="resumo-total">—</span>
                                     <span class="dashboard-resumo-sub" data-i18n-exclude>100% / Total</span>
                                 </div>
                             </div>
@@ -597,7 +602,7 @@
                                         class="material-symbols-outlined">check_circle</span></span>
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Disponíveis</span>
-                                    <span class="dashboard-resumo-numero" id="resumo-disponivel">0</span>
+                                    <span class="dashboard-resumo-numero" id="resumo-disponivel">—</span>
                                     <span class="dashboard-resumo-sub" id="resumo-disponivel-pct" data-i18n-exclude>0%
                                         do total</span>
                                 </div>
@@ -607,7 +612,7 @@
                                         class="material-symbols-outlined">schedule</span></span>
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Emprestados</span>
-                                    <span class="dashboard-resumo-numero" id="resumo-emprestado">0</span>
+                                    <span class="dashboard-resumo-numero" id="resumo-emprestado">—</span>
                                     <span class="dashboard-resumo-sub" id="resumo-emprestado-pct" data-i18n-exclude>0%
                                         do total</span>
                                 </div>
@@ -618,7 +623,7 @@
                                         class="material-symbols-outlined">build</span></span>
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Em Manutenção</span>
-                                    <span class="dashboard-resumo-numero" id="resumo-manutencao">0</span>
+                                    <span class="dashboard-resumo-numero" id="resumo-manutencao">—</span>
                                     <span class="dashboard-resumo-sub" id="resumo-manutencao-pct" data-i18n-exclude>0%
                                         do total</span>
                                 </div>
@@ -630,7 +635,7 @@
                                         class="material-symbols-outlined">warning</span></span>
                                 <div class="dashboard-resumo-texto">
                                     <span class="dashboard-resumo-titulo">Quebrados</span>
-                                    <span class="dashboard-resumo-numero" id="resumo-quebrado">0</span>
+                                    <span class="dashboard-resumo-numero" id="resumo-quebrado">—</span>
                                     <span class="dashboard-resumo-sub" id="resumo-quebrado-pct" data-i18n-exclude>0% do
                                         total</span>
                                 </div>
@@ -640,12 +645,16 @@
                         <div class="dashboard-main">
 
                             <div class="dashboard-tabs">
-                                <span class="dashboard-tab-link active" data-tab="estoque">
+                                <div class="dashboard-tablist" role="tablist">
+                                <button type="button" class="dashboard-tab-link active" role="tab" id="tab-btn-estoque"
+                                    aria-selected="true" aria-controls="tab-estoque" tabindex="0" data-tab="estoque">
                                     <span class="material-symbols-outlined">inventory_2</span>Estoque
-                                </span>
-                                <span class="dashboard-tab-link" data-tab="historico">
+                                </button>
+                                <button type="button" class="dashboard-tab-link" role="tab" id="tab-btn-historico"
+                                    aria-selected="false" aria-controls="tab-historico" tabindex="-1" data-tab="historico">
                                     <span class="material-symbols-outlined">history</span>Histórico
-                                </span>
+                                </button>
+                                </div>
 
                                 <div class="dashboard-toolbar" id="dashboard-toolbar">
                                     <div class="controle-tabs-ferramentas">
@@ -658,9 +667,9 @@
                                 </div>
                             </div>
 
-                            <div class="dashboard-tab-content active" id="tab-estoque"></div>
+                            <div class="dashboard-tab-content active" id="tab-estoque" role="tabpanel" aria-labelledby="tab-btn-estoque"></div>
 
-                            <div class="dashboard-tab-content" id="tab-historico">
+                            <div class="dashboard-tab-content" id="tab-historico" role="tabpanel" aria-labelledby="tab-btn-historico">
                                 <div class="historico-header">
                                     <span>ID</span>
                                     <span>Solicitante</span>
@@ -726,13 +735,13 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="controle-modal-categoria">Categoria</label>
-                                        <select id="controle-modal-categoria">
+                                        <select id="controle-modal-categoria" required>
                                             <option value="" disabled selected hidden>Selecionar categoria</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
                                         <label for="controle-modal-modelo">Modelo</label>
-                                        <select id="controle-modal-modelo">
+                                        <select id="controle-modal-modelo" required>
                                             <option value="" disabled selected hidden>Selecionar modelo</option>
                                         </select>
                                     </div>
@@ -740,11 +749,11 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="controle-modal-numero">Número</label>
-                                        <input type="text" id="controle-modal-numero" placeholder="Ex: NB-014">
+                                        <input type="text" id="controle-modal-numero" placeholder="Ex: NB-014" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="controle-modal-problema">Problema</label>
-                                        <select id="controle-modal-problema">
+                                        <select id="controle-modal-problema" required>
                                             <option value="" disabled selected hidden>Selecionar tipo de problema
                                             </option>
                                             <option value="tela">Tela</option>
@@ -853,7 +862,7 @@
                                 </span>
                                 <div class="controle-resumo-texto">
                                     <span class="controle-resumo-titulo">Observações</span>
-                                    <span class="controle-resumo-numero" id="contagem-observacao">0</span>
+                                    <span class="controle-resumo-numero" id="contagem-observacao">—</span>
                                     <span class="controle-resumo-sub">Registros em aberto</span>
                                 </div>
                                 <span class="material-symbols-outlined controle-resumo-chevron">chevron_right</span>
@@ -866,7 +875,7 @@
                                 </span>
                                 <div class="controle-resumo-texto">
                                     <span class="controle-resumo-titulo">Manutenção</span>
-                                    <span class="controle-resumo-numero" id="contagem-manutencao">0</span>
+                                    <span class="controle-resumo-numero" id="contagem-manutencao">—</span>
                                     <span class="controle-resumo-sub">Registros em aberto</span>
                                 </div>
                                 <span class="material-symbols-outlined controle-resumo-chevron">chevron_right</span>
@@ -879,7 +888,7 @@
                                 </span>
                                 <div class="controle-resumo-texto">
                                     <span class="controle-resumo-titulo">Quebrados</span>
-                                    <span class="controle-resumo-numero" id="contagem-quebrado">0</span>
+                                    <span class="controle-resumo-numero" id="contagem-quebrado">—</span>
                                     <span class="controle-resumo-sub">Registros em aberto</span>
                                 </div>
                                 <span class="material-symbols-outlined controle-resumo-chevron">chevron_right</span>
@@ -898,13 +907,14 @@
                                 <div class="controle-registros-toolbar">
                                     <div class="novo-registro-dropdown">
                                         <button class="btn btn-primary btn-sm" id="btn-novo-registro" data-requires-auth
-                                            type="button">
+                                            type="button" aria-haspopup="menu" aria-expanded="false"
+                                            aria-controls="novo-registro-menu">
                                             <span class="material-symbols-outlined">add</span> Novo
                                         </button>
-                                        <div class="novo-registro-menu" id="novo-registro-menu">
-                                            <span class="novo-registro-opcao" data-tipo="observacao">Observação</span>
-                                            <span class="novo-registro-opcao" data-tipo="manutencao">Manutenção</span>
-                                            <span class="novo-registro-opcao" data-tipo="quebrado">Quebrado</span>
+                                        <div class="novo-registro-menu" id="novo-registro-menu" role="menu">
+                                            <button type="button" role="menuitem" class="novo-registro-opcao" data-tipo="observacao">Observação</button>
+                                            <button type="button" role="menuitem" class="novo-registro-opcao" data-tipo="manutencao">Manutenção</button>
+                                            <button type="button" role="menuitem" class="novo-registro-opcao" data-tipo="quebrado">Quebrado</button>
                                         </div>
                                     </div>
 
@@ -924,12 +934,19 @@
                             </div>
 
                             <div class="controle-tabs-row">
-                                <div class="controle-tabs">
-                                    <span class="controle-tab-link active"
-                                        data-controle-tab="observacao">Observação</span>
-                                    <span class="controle-tab-link" data-controle-tab="manutencao">Manutenção</span>
-                                    <span class="controle-tab-link" data-controle-tab="quebrado">Quebrado</span>
-                                    <span class="controle-tab-link" data-controle-tab="resolvidos">Resolvidos</span>
+                                <div class="controle-tabs" role="tablist">
+                                    <button type="button" role="tab" class="controle-tab-link active" id="controle-tab-btn-observacao"
+                                        aria-selected="true" aria-controls="tab-observacao" tabindex="0"
+                                        data-controle-tab="observacao">Observação</button>
+                                    <button type="button" role="tab" class="controle-tab-link" id="controle-tab-btn-manutencao"
+                                        aria-selected="false" aria-controls="tab-manutencao" tabindex="-1"
+                                        data-controle-tab="manutencao">Manutenção</button>
+                                    <button type="button" role="tab" class="controle-tab-link" id="controle-tab-btn-quebrado"
+                                        aria-selected="false" aria-controls="tab-quebrado" tabindex="-1"
+                                        data-controle-tab="quebrado">Quebrado</button>
+                                    <button type="button" role="tab" class="controle-tab-link" id="controle-tab-btn-resolvidos"
+                                        aria-selected="false" aria-controls="tab-resolvidos" tabindex="-1"
+                                        data-controle-tab="resolvidos">Resolvidos</button>
                                 </div>
 
                                 <div class="controle-tabs-ferramentas">
@@ -940,7 +957,7 @@
                                 </div>
                             </div>
 
-                            <div class="controle-tab-content active" id="tab-observacao" data-tipo="observacao">
+                            <div class="controle-tab-content active" id="tab-observacao" data-tipo="observacao" role="tabpanel" aria-labelledby="controle-tab-btn-observacao">
                                 <div class="registros-header">
                                     <span></span>
                                     <span>Categoria</span>
@@ -953,7 +970,7 @@
                                 </div>
                             </div>
 
-                            <div class="controle-tab-content" id="tab-manutencao" data-tipo="manutencao">
+                            <div class="controle-tab-content" id="tab-manutencao" data-tipo="manutencao" role="tabpanel" aria-labelledby="controle-tab-btn-manutencao">
                                 <div class="registros-header">
                                     <span></span>
                                     <span>Categoria</span>
@@ -966,7 +983,7 @@
                                 </div>
                             </div>
 
-                            <div class="controle-tab-content" id="tab-quebrado" data-tipo="quebrado">
+                            <div class="controle-tab-content" id="tab-quebrado" data-tipo="quebrado" role="tabpanel" aria-labelledby="controle-tab-btn-quebrado">
                                 <div class="registros-header">
                                     <span></span>
                                     <span>Categoria</span>
@@ -979,7 +996,7 @@
                                 </div>
                             </div>
 
-                            <div class="controle-tab-content" id="tab-resolvidos" data-tipo="resolvidos">
+                            <div class="controle-tab-content" id="tab-resolvidos" data-tipo="resolvidos" role="tabpanel" aria-labelledby="controle-tab-btn-resolvidos">
                                 <div class="registros-header registros-header-resolvidos">
                                     <span></span>
                                     <span>Categoria</span>
@@ -995,17 +1012,6 @@
 
                             <div class="controle-paginacao">
                                 <span class="controle-paginacao-texto" id="controle-paginacao-texto"></span>
-                                <div class="controle-paginacao-controles">
-                                    <button type="button" class="controle-pagina-btn" disabled
-                                        aria-label="Página anterior">
-                                        <span class="material-symbols-outlined">chevron_left</span>
-                                    </button>
-                                    <button type="button" class="controle-pagina-btn active">1</button>
-                                    <button type="button" class="controle-pagina-btn" disabled
-                                        aria-label="Próxima página">
-                                        <span class="material-symbols-outlined">chevron_right</span>
-                                    </button>
-                                </div>
                             </div>
 
                             <div class="controle-dica-bar">
@@ -1014,11 +1020,10 @@
                                         <span class="material-symbols-outlined">info</span>
                                     </span>
                                     <span><strong data-i18n-key="shell.dica">Dica:</strong> <span
-                                            data-i18n-key="controle.dica_texto">Clique em um registro para visualizar
-                                            detalhes, adicionar resolução e acompanhar o histórico.</span></span>
+                                            data-i18n-key="controle.dica_texto">Clique em um registro para selecioná-lo e, em seguida, resolver, editar ou excluir.</span></span>
                                 </div>
-                                <button type="button" class="btn btn-neutral btn-sm" disabled>
-                                    Saiba mais <span class="material-symbols-outlined">open_in_new</span>
+                                <button type="button" class="btn btn-neutral btn-sm" id="controle-btn-saiba-mais">
+                                    <span data-i18n-key="shell.saiba_mais">Saiba mais</span> <span class="material-symbols-outlined">open_in_new</span>
                                 </button>
                             </div>
                         </div>
@@ -1052,6 +1057,9 @@
 
                                 <div class="cadastro-modal-list-wrap">
                                     <span class="cadastro-modal-list-title">Cadastrados</span>
+                                    <input type="search" id="cadastro-modal-busca" class="cadastro-modal-busca"
+                                        placeholder="Buscar nos cadastrados" aria-label="Buscar nos cadastrados"
+                                        autocomplete="off">
                                     <div class="cadastro-modal-list" id="cadastro-modal-list"></div>
                                 </div>
                             </div>
@@ -1673,7 +1681,7 @@
                                 </button>
                             </div>
 
-                            <p class="config-notif-note" data-i18n-key="notif.aplicacao_imediata">As opções desta seção são aplicadas na hora, sem precisar clicar em Salvar Configurações.</p>
+                            <p class="config-notif-note" data-i18n-key="notif.aplicacao_imediata">As opções desta seção são aplicadas na hora.</p>
                         </div>
 
                         <div class="config-footer-bar">
@@ -1681,11 +1689,8 @@
                                 <span class="icon-badge icon-badge--sm icon-badge--info">
                                     <span class="material-symbols-outlined">info</span>
                                 </span>
-                                <span>As alterações só serão aplicadas depois de clicar em Salvar Configurações.</span>
+                                <span data-i18n-key="shell.tema_idioma_salvos_neste_navegador">Tema e idioma são aplicados na hora e salvos neste navegador.</span>
                             </div>
-                            <button class="btn btn-primary" id="config-salvar" data-requires-admin>
-                                <span class="material-symbols-outlined">save</span> Salvar Configurações
-                            </button>
                         </div>
 
                     </div>
@@ -1943,7 +1948,7 @@
                                             <span class="material-symbols-outlined">history</span>
                                         </span> Última alteração
                                     </div>
-                                    <span class="sobre-info-valor">Não disponível</span>
+                                    <span class="sobre-info-valor" id="seguranca-senha-alterada-em">Sem registro</span>
                                 </div>
                             </div>
 
@@ -2005,7 +2010,7 @@
                         </span>
                         Meu Perfil
                     </h2>
-                    <p class="panel-subtitle">Informações da sua conta de administrador.</p>
+                    <p class="panel-subtitle">Informações da sua conta.</p>
 
                     <div class="perfil-container">
                         <div class="config-card">

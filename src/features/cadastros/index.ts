@@ -16,6 +16,7 @@ export function initCadastros(): void {
         listaWrap: document.getElementById('cadastro-modal-list') as HTMLElement,
         btnCancelar: document.getElementById('cadastro-modal-cancelar'),
         btnSalvar: document.getElementById('cadastro-modal-salvar') as HTMLButtonElement | null,
+        busca: document.getElementById('cadastro-modal-busca') as HTMLInputElement | null,
         rfidModal: {
             overlay: document.getElementById('modal-cadastro-rfid') as HTMLElement,
             avatar: document.getElementById('rfid-modal-avatar') as HTMLElement,

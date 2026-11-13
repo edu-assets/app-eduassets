@@ -14,7 +14,7 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 | --- | --- | --- |
 | **Convidado** | Consultar estoque, categorias, histórico e ocorrências anonimizados; usar consultas/exportações derivadas desses dados. | Não cria, altera, resolve, devolve ou exclui registros. Identificação do solicitante, responsável, observações e detalhes da ocorrência são omitidos/mascarados. Listagem de responsáveis, **Cadastros**, **Segurança** e **Meu Perfil** exigem autenticação. |
 | **Editor** | Fazer login, registrar empréstimos, editar itens de empréstimos abertos, confirmar devoluções e criar/editar/resolver registros em **Controle**; alterar a própria senha. | Não acessa a gestão de **Cadastros**, não provisiona/revoga RFID e não exclui ocorrências. |
-| **Administrador** | Tudo que o Editor faz, além de operar **Cadastros**, gerenciar usuários e cartões RFID, salvar **Configurações** e excluir registros de **Controle**. | Continua sujeito às validações de estoque, formato e campos obrigatórios. |
+| **Administrador** | Tudo que o Editor faz, além de operar **Cadastros**, gerenciar usuários e cartões RFID e excluir registros de **Controle**. | Continua sujeito às validações de estoque, formato e campos obrigatórios. |
 
 > **Importante:** os indicadores, menus e bloqueios da UI ajudam na usabilidade, mas **não são o controle de segurança**. A fronteira de segurança é o backend, que exige autenticação/JWT e aplica as permissões nas rotas. Não trate a ocultação de um botão como prova de autorização.
 
@@ -60,6 +60,8 @@ O painel aparece no menu como **Novo empréstimo** e tem o título **Registrar E
 4. Se necessário, preencha **Observação (opcional)**.
 5. Clique em **Registrar Empréstimo**.
 
+Na lista **Equipamento**, cada modelo mostra "(N disponíveis)" e os indisponíveis ficam desabilitados; a **Qtd.** é limitada ao disponível, com mensagem de erro no próprio campo. A **Observação** tem contador de caracteres (0/250).
+
 O formulário exige pelo menos um item. A UI e o backend verificam a quantidade disponível em uma operação transacional; se o estoque não comportar a quantidade, o empréstimo não é registrado. Ao concluir, a quantidade disponível é reduzida.
 
 Enquanto **Data e Hora** não for alterada, o campo acompanha o relógio do servidor e o registro usa a hora do servidor no momento do salvamento. Se você alterar o campo, o horário escolhido é mantido. Datas com mais de 5 minutos no futuro não são aceitas.
@@ -72,6 +74,8 @@ Enquanto **Data e Hora** não for alterada, o campo acompanha o relógio do serv
 4. Clique em **Devolver** na lista ou em **Confirmar Devolução** no painel.
 5. Revise o modal **Confirmar Devolução** e clique em **Confirmar Devolução**; **Cancelar** fecha sem concluir.
 
+O cartão de cada empréstimo tem o botão **Detalhes** (também acessível pelo teclado). Usuários autenticados veem em **Detalhes** quem registrou e quem devolveu o empréstimo.
+
 Os itens retornam à quantidade disponível depois da confirmação. **Data e Hora da Devolução** é preenchido automaticamente e pode ser editado; ao confirmar, a UI envia o timestamp ISO com offset selecionado, que o backend valida e persiste. Clientes antigos que não enviem esse campo continuam usando o horário atual do servidor.
 
 Se **Data e Hora da Devolução** não for alterada, o registro usa a hora do servidor no momento da confirmação. A devolução não pode ser anterior à retirada do empréstimo, e datas com mais de 5 minutos no futuro não são aceitas.
@@ -81,7 +85,7 @@ Se **Data e Hora da Devolução** não for alterada, o registro usa a hora do se
 O **Dashboard** apresenta os cartões **Total de equipamentos**, **Disponíveis**, **Emprestados**, **Em Manutenção** e **Quebrados**.
 
 - Na aba **Estoque**, consulte os totais por categoria. Clique em uma linha para abrir os detalhes somente leitura da categoria.
-- Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível.
+- Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível. Usuários autenticados também veem a autoria (quem registrou e quem devolveu); Convidados nunca recebem esses dados. Os detalhes do estoque mostram quem cadastrou e alterou o equipamento. Na primeira carga, o Dashboard exibe esqueletos de carregamento e contadores "—"; se a carga falhar, aparece um erro no painel com **Tentar novamente**.
 - Use o campo **Buscar por informações...**. Em **Estoque**, a busca considera a categoria; em **Histórico**, considera número, solicitante e responsável.
 - Na aba **Estoque**, o botão **Exportar** baixa imediatamente um CSV do estoque atual. Na aba **Histórico**, **Exportar** leva ao painel **Exportar**, onde há mais opções.
 
@@ -89,13 +93,15 @@ O estoque exibido é derivado de empréstimos abertos e ocorrências de manuten�
 
 ## 7. Controle
 
-O painel **Controle** separa os registros nas abas **Observação**, **Manutenção**, **Quebrado** e **Resolvidos**. Os cartões de resumo mostram registros em aberto.
+O painel **Controle** separa os registros nas abas **Observação**, **Manutenção**, **Quebrado** e **Resolvidos**. Os cartões de resumo mostram registros em aberto. Usuários autenticados veem quem criou, alterou e resolveu cada registro. **Saiba mais** abre este manual. Se a carga falhar, o painel mostra um erro com **Tentar novamente**.
 
 ### Criar ou editar um registro
 
 1. Clique em **Novo** e escolha **Observação**, **Manutenção** ou **Quebrado**.
 2. No formulário, selecione **Categoria** e **Modelo**, informe **Número**, escolha o **Problema** e, se quiser, preencha **Descrição**; se ficar vazia, o sistema registra “—”. Os tipos de problema disponíveis incluem **Tela**, **Áudio**, **Bateria**, **Cabo**, **Touch**, **Teclado**, **Botão**, **Carcaça** e **Outro**.
-3. Clique em **Salvar**. Para uma linha existente, selecione-a, clique em **Editar**, ajuste os campos e salve.
+3. Clique em **Salvar**. Para uma linha existente, selecione-a, clique em **Editar**, ajuste os campos e salve. Os campos obrigatórios mostram o erro no próprio campo, e salvar, resolver e excluir ignoram cliques duplos.
+
+As abas e os menus de **Controle** funcionam pelo teclado: setas e Home/End para navegar e Esc para fechar.
 
 **Observação** é uma anotação e não altera o estoque. **Manutenção** retira a quantidade afetada de disponíveis até a resolução. **Quebrado** também retira de disponíveis e incrementa a contagem de quebrados.
 
@@ -111,16 +117,16 @@ Criar, editar e resolver exigem autenticação (**Editor** ou **Administrador**)
 
 **Cadastros** é administrativo. Abra um cartão, preencha os campos e clique em **Salvar**; **Cancelar** fecha o modal. A lista **Cadastrados** mostra os registros carregados pela API.
 
-- **Equipamentos:** **Categoria**, **Modelo** e **Quantidade**.
+- **Equipamentos:** **Categoria**, **Modelo** e **Quantidade**. **Ajustar total** altera a quantidade total de um modelo, sem poder ficar abaixo dos itens em uso.
 - **Responsáveis:** **Nome** e **Cargo**.
-- **Usuários:** **Nome**, **E-mail / Login**, **Senha** e **Nível de acesso** (**Administrador** ou **Editor**).
+- **Usuários:** **Nome**, **E-mail / Login** (deve ser um e-mail), **Senha** e **Nível de acesso** (**Administrador** ou **Editor**). Nome, nível de acesso e login podem ser editados, e o usuário pode ser desativado ou reativado (com confirmação); usuários desativados mostram o selo **Inativo**, e logins que não são e-mails válidos mostram um aviso. Você não pode desativar nem rebaixar a própria conta, nem remover o último administrador ativo. A recuperação de senha só funciona se a caixa de e-mail do login realmente existir.
 - **Categorias:** **Nome da categoria**.
 
 No cartão de um usuário, **Vincular cartão** abre **Cartão RFID**. Depois do vínculo, use **Gerar novo token** (substitui o atual), **Copiar token** quando disponível ou **Revogar cartão**. O token é sensível: não o publique nem o inclua em relatórios.
 
 O botão **Redefinir senha** (ícone de cadeado) ao lado de cada usuário abre um modal para definir uma senha temporária. Preencha **Nova senha** e **Confirmar nova senha**: são exigidos pelo menos 12 caracteres, com letra maiúscula, letra minúscula, número e símbolo (máximo de 72 bytes). Ao confirmar, todas as sessões abertas do usuário são encerradas e a ação é registrada na auditoria como `PASSWORD_RESET`. Entregue a senha temporária por um canal seguro e oriente o usuário a trocá-la em **Segurança**. Para a sua própria conta, use **Segurança** (o botão avisa e não abre o modal).
 
-A interface atual de **Cadastros** é voltada a consultar/listar e criar os registros mostrados. Não presuma que uma ação de edição ou exclusão exibida em outro painel exista para cada cadastro.
+As listas de **Cadastros** têm busca e, para quem está autenticado, mostram quem criou cada registro. A interface atual é voltada a consultar/listar, criar e, para usuários e totais de equipamento, ajustar os registros mostrados. Não presuma que uma ação de edição ou exclusão exibida em outro painel exista para cada cadastro.
 
 ## 9. Exportar
 
@@ -137,6 +143,8 @@ Depois:
 2. Opcionalmente, escreva uma nota em **Observação**; ela aparece no relatório.
 3. Revise **Resumo da exportação** e clique em **Exportar Dados**.
 
+Com login, as exportações incluem **Registrado por** e **Devolvido por** (empréstimos) e **Criada por** (ocorrências).
+
 Formatos confirmados: `.csv`, `.xlsx` (Excel) e `.pdf`. O CSV e o Excel usam a tabela principal e, quando aplicável, seções de ocorrências; o PDF gera o relatório equivalente. Se nenhum registro atender aos filtros, a exportação é recusada com uma mensagem em vez de criar um arquivo vazio.
 
 ## 10. Configurações
@@ -146,9 +154,8 @@ Em **Configurações**:
 - **Aparência → Tema:** escolha **Claro**, **Escuro** ou **Sistema**.
 - **Idioma / Language:** escolha **Português** ou **English**; a interface troca de idioma imediatamente.
 - **Notificações:** ativação por dispositivo, com interruptores para empréstimos, devoluções e ocorrências (veja a subseção abaixo).
-- **Salvar Configurações:** o botão disponível ao Administrador mostra uma confirmação visual. Tema e idioma são salvos automaticamente como preferências deste navegador; as notificações não dependem desse botão.
 
-O tema e o idioma são preferências do navegador.
+Tema e idioma são aplicados imediatamente e salvos como preferências deste navegador; não há botão de salvar.
 
 ### Notificações push para administradores
 
@@ -159,7 +166,7 @@ Para ativar:
 1. Clique em **Ativar notificações** no banner no topo do app ou, em **Configurações**, no cartão **Notificações**, em **Ativar notificações neste dispositivo**. O banner aparece para administradores sem notificações neste dispositivo; **Agora não** o oculta por 7 dias naquele dispositivo.
 2. Quando o navegador pedir, clique em **Permitir**.
 3. Clique em **Enviar notificação de teste** para confirmar o recebimento.
-4. Use os interruptores de **empréstimos**, **devoluções** e **ocorrências** para escolher o que chega neste dispositivo. Eles são aplicados imediatamente; não é preciso clicar em **Salvar Configurações**.
+4. Use os interruptores de **empréstimos**, **devoluções** e **ocorrências** para escolher o que chega neste dispositivo. Eles são aplicados imediatamente.
 
 Para desativar neste dispositivo, clique em **Desativar neste dispositivo**.
 
@@ -178,13 +185,13 @@ Para desativar neste dispositivo, clique em **Desativar neste dispositivo**.
 
 ## 11. Segurança da conta
 
-Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preencha **Senha atual**, **Nova senha** e **Confirmar nova senha**; a nova senha precisa ter pelo menos 12 caracteres e a confirmação deve coincidir. Clique em **Atualizar senha** ou **Cancelar**.
+Abra **Segurança** pelo menu do usuário e clique em **Alterar senha**. Preencha **Senha atual**, **Nova senha** e **Confirmar nova senha**; a nova senha precisa ter pelo menos 12 caracteres e a confirmação deve coincidir. Clique em **Atualizar senha** ou **Cancelar**. **Última alteração** mostra a data da última troca de senha (**Sem registro** se não houver).
 
 A troca é permitida somente para a conta autenticada e exige a senha atual. Se a senha for perdida, use **Esqueci minha senha** na tela de entrada (seção 2) ou **Contate o administrador**, que pode redefini-la em **Cadastros → Usuários** (seção 8).
 
 ## 12. Meu Perfil
 
-No menu do usuário, abra **Meu perfil**. O painel **Meu Perfil** mostra, em modo somente leitura, **Nome completo**, **E-mail** (o login da conta) e **Nível de acesso**. Para sair, use **Sair**.
+No menu do usuário, abra **Meu perfil**. O painel **Meu Perfil** mostra, em modo somente leitura, **Nome completo**, **E-mail** (o login da conta) e **Nível de acesso**. Para sair, use **Sair**. O subtítulo do painel é neutro para Editores. No Modo Convidado, ações bloqueadas mostram "Faça login para registrar alterações."
 
 ## 13. Referência de dados e operação da instalação
 

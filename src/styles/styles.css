@@ -16,6 +16,8 @@
 @import "components/push-banner.css";
 @import "components/scrollbar.css";
 @import "components/toast.css";
+@import "components/load-state.css";
+@import "components/autoria.css";
 
 /* layout */
 @import "layout/footer.css";

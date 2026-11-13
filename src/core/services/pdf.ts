@@ -14,6 +14,12 @@ const LARGURA_PAGINA = 210;
 const MARGEM = 14;
 const LARGURA_UTIL = LARGURA_PAGINA - MARGEM * 2;
 
+/** Larguras (mm) das colunas das seções de ocorrências; com a coluna de autoria (7 colunas, 182 mm) a tabela é compactada para caber na página. */
+function larguraColunasSecao(colunas: number): Record<number, { cellWidth: number }> {
+    const larguras = colunas > 6 ? [24, 26, 14, 18, 52, 24, 24] : [26, 30, 16, 20, 60, 30];
+    return Object.fromEntries(larguras.map((cellWidth, i) => [i, { cellWidth }]));
+}
+
 export async function gerarBaixarPdf(
     titulo: string,
     cabecalhoPrincipal: string[],
@@ -101,14 +107,7 @@ export async function gerarBaixarPdf(
             margin: { left: MARGEM, right: MARGEM },
             styles: { fontSize: 7.5 },
             headStyles: { fillColor: secao.corRgb },
-            columnStyles: {
-                0: { cellWidth: 26 },
-                1: { cellWidth: 30 },
-                2: { cellWidth: 16 },
-                3: { cellWidth: 20 },
-                4: { cellWidth: 60 },
-                5: { cellWidth: 30 }
-            }
+            columnStyles: larguraColunasSecao(secao.cabecalho.length)
         });
 
         cursorY = ((doc as any).lastAutoTable?.finalY ?? cursorY) + 10;

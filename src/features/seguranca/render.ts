@@ -1,7 +1,9 @@
 import type { AuthUser } from '../../types/index.js';
+import { getIdioma, t } from '../../core/state/i18nStore.js';
 
 export interface SegurancaEls {
     email: HTMLElement | null;
+    senhaAlteradaEm: HTMLElement | null;
     btnToggleSenha: HTMLElement;
     formSenha: HTMLElement;
     inputAtual: HTMLInputElement;
@@ -18,6 +20,19 @@ export interface SegurancaEstado {
 
 export function renderInfoConta(els: SegurancaEls, usuario: AuthUser | null): void {
     if (els.email) els.email.textContent = usuario?.login ?? '—';
+    if (els.senhaAlteradaEm) {
+        const valor = usuario?.senhaAlteradaEm;
+        els.senhaAlteradaEm.textContent = valor
+            ? formatarDataHora(valor)
+            : t('shell.sem_registro');
+    }
+}
+
+function formatarDataHora(iso: string): string {
+    const data = new Date(iso);
+    if (Number.isNaN(data.getTime())) return t('shell.sem_registro');
+    const locale = getIdioma() === 'en' ? 'en-US' : 'pt-BR';
+    return data.toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' });
 }
 
 function liberarReadonlyNoFoco(input: HTMLInputElement): void {

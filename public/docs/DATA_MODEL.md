@@ -13,6 +13,8 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `id` | `Int` | No | Primary key; `autoincrement()` |
 | `nome` | `String` | No | `@unique` |
 | `equipamentos` | `Equipamento[]` | No | Prisma relation, 1:N |
+| `criadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
 
 ### Equipamento (Equipment)
 
@@ -29,6 +31,10 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `categoria` | `Categoria` | No | Prisma relation, N:1 |
 | `itensEmprestimo` | `ItemEmprestimo[]` | No | Prisma relation, 1:N |
 | `ocorrencias` | `Ocorrencia[]` | No | Prisma relation, 1:N |
+| `criadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
+| `atualizadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
 
 ### Responsavel (Responsible party)
 
@@ -38,6 +44,8 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `nome` | `String` | No | — |
 | `cargo` | `String` | No | — |
 | `emprestimos` | `Emprestimo[]` | No | Prisma relation, 1:N |
+| `criadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
 
 `Responsavel` is a domain entity referenced by loans. The schema does not give it a system access level; access is represented separately by `Usuario`.
 
@@ -55,7 +63,7 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `createdAt` | `DateTime` | No | `@default(now())` |
 | `pushSubscriptions` | `PushSubscription[]` | No | Prisma relation, 1:N |
 
-`Usuario` has no relation to the domain entities (equipment, loans and occurrences); the `pushSubscriptions` relation links the user to their push notification subscriptions.
+`Usuario` is referenced by the nullable authorship fields of the domain entities (`criadoPorId`, `atualizadoPorId`, `devolvidoPorId`, `resolvidoPorId`); the `pushSubscriptions` relation links the user to their push notification subscriptions.
 
 ### Emprestimo (Loan)
 
@@ -71,6 +79,13 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `createdAt` | `DateTime` | No | `@default(now())` |
 | `responsavel` | `Responsavel` | No | Prisma relation, N:1 |
 | `itens` | `ItemEmprestimo[]` | No | Prisma relation, 1:N |
+| `criadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoEm` | `DateTime` | Yes | Timestamp of the last change |
+| `devolvidoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
+| `atualizadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
+| `devolvidoPor` | `Usuario` | Yes | Prisma relation, N:1 |
 
 ### ItemEmprestimo (Loan item)
 
@@ -100,6 +115,13 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `medidasTomadas` | `String` | Yes | — |
 | `createdAt` | `DateTime` | No | `@default(now())` |
 | `equipamento` | `Equipamento` | No | Prisma relation, N:1 |
+| `criadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoEm` | `DateTime` | Yes | Timestamp of the last change |
+| `resolvidoPorId` | `Int` | Yes | Foreign-key scalar to `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
+| `atualizadoPor` | `Usuario` | Yes | Prisma relation, N:1 |
+| `resolvidoPor` | `Usuario` | Yes | Prisma relation, N:1 |
 
 ### PushSubscription
 
@@ -140,7 +162,7 @@ Usuario 1───N PushSubscription
 Usuario (independent; no relation to the domain entities)
 ```
 
-The foreign-key relations are `Equipamento.categoriaId → Categoria.id`, `Emprestimo.responsavelId → Responsavel.id`, `ItemEmprestimo.emprestimoId → Emprestimo.id`, `ItemEmprestimo.equipamentoId → Equipamento.id`, and `Ocorrencia.equipamentoId → Equipamento.id`. The Prisma schema does not declare `onDelete`/`onUpdate` actions; however, the versioned initial SQL migration creates all five FKs with `ON DELETE RESTRICT` and `ON UPDATE CASCADE`. The FK `PushSubscription.usuarioId → Usuario.id` is created by the `20261113090000_push_subscriptions` migration with `ON DELETE CASCADE`. Inspect SQL migrations together with the Prisma schema to determine the behavior of a migrated database.
+The foreign-key relations are `Equipamento.categoriaId → Categoria.id`, `Emprestimo.responsavelId → Responsavel.id`, `ItemEmprestimo.emprestimoId → Emprestimo.id`, `ItemEmprestimo.equipamentoId → Equipamento.id`, and `Ocorrencia.equipamentoId → Equipamento.id`. The Prisma schema does not declare `onDelete`/`onUpdate` actions; however, the versioned initial SQL migration creates all five FKs with `ON DELETE RESTRICT` and `ON UPDATE CASCADE`. The authorship fields (`criadoPorId`, `atualizadoPorId`, `devolvidoPorId`, `resolvidoPorId`) are FKs to `Usuario.id` with `ON DELETE SET NULL`, created by the additive migration `20261113150000_record_authorship`, which backfills existing records from `AuditLog`; records without audit rows keep a null author. The FK `PushSubscription.usuarioId → Usuario.id` is created by the `20261113090000_push_subscriptions` migration with `ON DELETE CASCADE`. Inspect SQL migrations together with the Prisma schema to determine the behavior of a migrated database.
 
 ## Defaults, keys, uniqueness, and indexes
 
@@ -174,6 +196,7 @@ The foreign-key relations are `Equipamento.categoriaId → Categoria.id`, `Empre
 
 ### Users and RFID
 
+- `criarUsuario` and user editing require an email-format `login` (older accounts with another format can still sign in). The API prevents deactivating or demoting yourself and leaving the system without an active administrator.
 - `criarUsuario` rejects an existing `login`, hashes the supplied password with bcrypt (cost `12`), and stores the hash in `passwordHash`; the plaintext password is not a model field.
 - User listing exposes `possuiCartaoRfid` as a boolean derived from `rfidTokenHash`, rather than returning the stored hash. The schema stores only the hash value, which is nullable.
 - RFID provisioning first requires the bridge to be enabled and the user to exist, then sends a generated token to the local bridge. Only after a successful bridge response does it store `hashRfidToken(token)` in `rfidTokenHash`; the generated token is returned by that service operation. A disabled bridge returns a service error, and bridge failures/timeouts return service errors.

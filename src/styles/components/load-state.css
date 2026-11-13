@@ -1,0 +1,47 @@
+/* Estados de carga inicial: esqueleto e erro com nova tentativa. */
+.skeleton-linha {
+    display: grid;
+    grid-template-columns: 1fr 3fr 2fr;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.skeleton-bloco {
+    display: block;
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border-color) 25%, var(--bg-light-alt) 50%, var(--border-color) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-bloco--curto { width: 50%; }
+.skeleton-bloco--medio { width: 75%; }
+
+@keyframes skeleton-shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-bloco {
+        animation: none;
+        background: var(--border-color);
+    }
+}
+
+.load-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 48px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.load-error .material-symbols-outlined {
+    font-size: 40px;
+}

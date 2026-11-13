@@ -1,5 +1,3 @@
-import { showToast } from '../../core/ui/index.js';
-import { bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { getPreferenciaTema, getTemaResolvido, definirTema, subscribe as subscribeTema } from '../../core/state/themeStore.js';
 import { getIdioma, definirIdioma, subscribe as subscribeI18n, t } from '../../core/state/i18nStore.js';
 import { marcarTemaAtivo, marcarIdiomaAtivo } from './render.js';
@@ -34,7 +32,7 @@ function animarTrocaIdioma(grupoIdioma: HTMLElement, idioma: IdiomaPreferencia):
     }, 280));
 }
 
-export function attachConfigEvents(btnSalvar: HTMLElement): void {
+export function attachConfigEvents(): void {
     // Push notification switches (data-notif-switch) are wired in notificacoes.ts and apply immediately.
     document.querySelectorAll<HTMLElement>('.config-switch:not([data-notif-switch])').forEach((switchEl) => {
         switchEl.addEventListener('click', () => {
@@ -43,11 +41,6 @@ export function attachConfigEvents(btnSalvar: HTMLElement): void {
             const label = switchEl.querySelector<HTMLElement>('.config-switch-label');
             if (label) label.textContent = ativo ? 'Ativado' : 'Desativado';
         });
-    });
-
-    btnSalvar.addEventListener('click', () => {
-        if (bloquearSeNaoAdmin()) return;
-        showToast('Configurações salvas com sucesso', 'success');
     });
 }
 

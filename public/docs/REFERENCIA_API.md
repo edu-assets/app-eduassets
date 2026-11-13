@@ -24,8 +24,8 @@ O middleware da API ainda aceita `Authorization: Bearer <JWT>` para integraçõe
 | `GET` | `/health` | Público | Liveness do processo. |
 | `GET` | `/ready` | Público | Readiness com verificação limitada do PostgreSQL. |
 | `GET` | `/auth/session-capabilities` | Público | Informa se o servidor suporta sessão de navegador via cookie (`cookieSession`), se a recuperação de senha por e-mail está configurada (`passwordRecovery`) e se as notificações push estão disponíveis (`pushNotifications`). |
-| `POST` | `/auth/login` | Público; rate limited e Origin validado ao solicitar modo cookie | Autentica com `login` e `password`; grava cookie e retorna o perfil no modo cookie. |
-| `GET` | `/auth/me` | Sessão autenticada | Retorna o perfil da sessão atual. |
+| `POST` | `/auth/login` | Público; rate limited e Origin validado ao solicitar modo cookie | Autentica com `login` e `password`; grava cookie e retorna o perfil no modo cookie, incluindo `senhaAlteradaEm` (ISO 8601 ou `null`) como em `GET /auth/me`. |
+| `GET` | `/auth/me` | Sessão autenticada | Retorna o perfil da sessão atual, incluindo `senhaAlteradaEm` (ISO 8601 ou `null`), derivado da auditoria (`PASSWORD_CHANGE`, `PASSWORD_RESET`, `PASSWORD_RESET_SELF`). |
 | `POST` | `/auth/logout` | Sessão autenticada | Revoga a versão de sessão do usuário e remove o cookie. Retorna `204`. |
 | `PATCH` | `/auth/senha` | Sessão autenticada | Altera a senha usando `senhaAtual` e `novaSenha`; reemite a sessão atual quando a alteração tem sucesso. |
 | `POST` | `/auth/senha/recuperar` | Público; 10 pedidos por IP a cada 15 min e 3 por e-mail por hora; Origin validado no modo cookie | Corpo `{ "login": "...", "idioma": "pt" \| "en" }`. Responde sempre `202` com o mesmo corpo, antes de qualquer consulta, para não revelar se a conta existe. Se o login for um e-mail de conta ativa, invalida links anteriores, grava apenas o hash SHA-256 de um token aleatório de 256 bits válido por 30 minutos, registra `PASSWORD_RESET_REQUEST` e envia o link `APP_PUBLIC_URL/#redefinir-senha=<token>` no idioma pedido (HTML com banner inline e texto puro; Reply-To em `SUPPORT_EMAIL`, quando configurado). Retorna `503` quando o SMTP não está configurado. |
@@ -42,7 +42,7 @@ O middleware da API ainda aceita `Authorization: Bearer <JWT>` para integraçõe
 | `GET` | `/categorias` | Público/convidado ou autenticado. |
 | `POST` | `/categorias` | Administrador. |
 | `GET` | `/equipamentos` | Público/convidado ou autenticado. |
-| `POST`, `PATCH` | `/equipamentos`, `/equipamentos/:id` | Administrador. |
+| `POST`, `PATCH` | `/equipamentos`, `/equipamentos/:id` | Administrador. Quando o `PATCH` envia `quantidadeTotal` sem `quantidadeDisponivel`, o servidor aplica a diferença em `quantidadeDisponivel` de forma atômica sob bloqueio de linha e responde `409` `backend.equipamentos.quantidade_em_uso` se o novo total ficar abaixo das unidades em uso; enviando os dois campos, os valores explícitos são mantidos. |
 | `GET` | `/emprestimos` | Público/convidado ou autenticado. Sem sessão, aceita `limit` (padrão 50, máximo 100) e `cursor` positivo; retorna `{ items, nextCursor, limit }` em ordem de ID decrescente, com projeção pública reduzida. |
 | `POST` | `/emprestimos` | Usuário autenticado (editor ou administrador). `dataRetirada` com mais de 5 minutos no futuro retorna `400` `backend.emprestimos.data_retirada_futura`. |
 | `PATCH` | `/emprestimos/:id` | Usuário autenticado; atualização dos itens de empréstimo. |
@@ -53,8 +53,8 @@ O middleware da API ainda aceita `Authorization: Bearer <JWT>` para integraçõe
 | `DELETE` | `/ocorrencias/:id` | Administrador. |
 | `GET` | `/responsaveis` | Sessão autenticada. |
 | `POST` | `/responsaveis` | Administrador. |
-| `GET`, `POST` | `/usuarios` | Administrador. |
-| `PATCH` | `/usuarios/:id` | Administrador; altera nome, login, nível de acesso ou status `ativo`. |
+| `GET`, `POST` | `/usuarios` | Administrador. `POST` e `PATCH /usuarios/:id` exigem `login` em formato de e-mail (o login por senha não mudou e contas existentes continuam funcionando). A recuperação de senha só funciona se a caixa de e-mail existir. `GET` inclui `criadoPor` e `atualizadoPor`. |
+| `PATCH` | `/usuarios/:id` | Administrador; altera nome, login, nível de acesso ou status `ativo`. Erros: `400` `backend.usuarios.nao_pode_desativar_a_si_mesmo`, `400` `backend.usuarios.nao_pode_rebaixar_a_si_mesmo` e `409` `backend.usuarios.ultimo_administrador` (deve restar ao menos um administrador ativo). |
 | `POST` | `/usuarios/:id/password-reset` | Administrador; corpo `{ "senha": "..." }` com a política forte (12+ caracteres, maiúscula, minúscula, número, símbolo, máx. 72 bytes). Grava o novo hash, incrementa `sessionVersion` (encerra as sessões do usuário) e registra `PASSWORD_RESET` na auditoria na mesma transação. Retorna `204`. Usado pela ação **Redefinir senha** em **Cadastros → Usuários**. |
 | `POST`, `DELETE` | `/usuarios/:id/rfid-token` | Administrador; provisiona ou revoga token RFID. |
 
@@ -88,6 +88,10 @@ Inscrição de dispositivos de administradores em notificações Web Push (Push 
 - Payload recebido pelo service worker: `{ v: 1, tipo: 'EMPRESTIMO_CRIADO' | 'DEVOLUCAO_REGISTRADA' | 'OCORRENCIA_REGISTRADA' | 'TESTE', titulo, corpo, url, tag, criadoEm }`.
 - O envio ocorre após o commit da operação e nunca atrasa nem faz falhar a requisição original. TTL de 1 hora e urgência `high`. Resposta `404` ou `410` do serviço de push remove a inscrição.
 - Alvo do clique na notificação: empréstimo e devolução abrem `/#panel-dashboard` (aba Histórico); ocorrência abre `/#panel-controle`; teste abre `/#panel-inicio`.
+
+## Autoria dos registros
+
+Respostas autenticadas (Administrador ou Editor) de empréstimos, ocorrências, equipamentos, categorias e responsáveis incluem objetos de autor `{ id, nome }` (ou `null`): `criadoPor` e `atualizadoPor` em todos os que os possuem, `devolvidoPor` em empréstimos e `resolvidoPor` em ocorrências; categorias e responsáveis têm apenas `criadoPor`. Convidados nunca recebem dados de autoria; `GET /categorias` para Convidados retorna `{ id, nome }`. Os campos vêm da migration `20261113150000_record_authorship` (veja o Modelo de Dados).
 
 ## Validação e regras
 

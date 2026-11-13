@@ -15,6 +15,9 @@ import type { LoanItemUI, LoanUI, Equipamento } from '../../types/index.js';
 import { definirAgora, type FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { getLoansAbertos } from '../../core/state/loanStore.js';
 import { t } from '../../core/state/i18nStore.js';
+import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
+import { getLoadStatus } from '../../core/state/loadStatus.js';
+import { aplicarEstadoCarga, renderSkeletonLinhas } from '../../shared/components/loadState.js';
 
 interface DevolucaoEstado {
     idPendente: string | number | null;
@@ -79,6 +82,10 @@ interface ModalConfirmacaoEls {
 }
 
 export function renderLista(els: ListaEls & FecharDetalheEls, estado: DevolucaoEstado, loans: LoanUI[]): void {
+    if (aplicarEstadoCarga(els.lista, getLoadStatus('emprestimos').status, renderSkeletonLinhas(5))) {
+        fecharDetalhe(els, estado);
+        return;
+    }
     if (!loans.length) {
         els.lista.innerHTML = renderDevolucaoEmptyState();
         fecharDetalhe(els, estado);
@@ -112,6 +119,7 @@ export function abrirDetalhe(els: AbrirDetalheEls, estado: DevolucaoEstado, loan
     els.detalheResp.textContent = loan.responsavel;
     els.detalheAluno.textContent = loan.aluno;
     els.detalheData.textContent = t('devolucao.emprestimo_realizado_em').replace('{data}', formatarDataCard(loan.createdAt));
+    atualizarAutoriaDetalhe(els.detalheData, loan);
 
     setModoEdicao(els, estado, false);
     renderDetalheItens(els, estado.itensEditando, false);
@@ -216,4 +224,11 @@ export function abrirModalConfirmacao(els: ModalConfirmacaoEls, estado: Devoluca
     definirAgora(els.devolucaoPicker);
     els.devolucaoDataInput.classList.add('input-auto');
     openModal('modal-confirmar-devolucao');
+}
+
+/** Bloco de autoria logo abaixo da data do empréstimo; vazio para convidados (sem campos de autoria). */
+function atualizarAutoriaDetalhe(ancora: HTMLElement, loan: LoanUI): void {
+    ancora.parentElement?.querySelectorAll('.autoria-detalhe').forEach((el) => el.remove());
+    const conteudo = envolverAutoria(renderAutoriaEmprestimo(loan), 'autoria-bloco autoria-detalhe');
+    if (conteudo) ancora.insertAdjacentHTML('afterend', conteudo);
 }

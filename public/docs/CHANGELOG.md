@@ -1,6 +1,21 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.3.0 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.4.0 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.4.0 — Autoria dos registros, gestão de usuários e refinamentos de interface — 13 de novembro de 2026
+
+- **Autoria dos registros:** empréstimos, ocorrências, equipamentos, categorias e responsáveis passam a guardar quem os criou, alterou, devolveu ou resolveu. A migration `20261113150000_record_authorship` é aditiva e preenche os registros existentes a partir da auditoria; registros sem linhas de auditoria ficam sem autor. Usuários autenticados (Administrador ou Editor) veem a autoria em Devoluções, Dashboard (Histórico e detalhes do estoque), Controle e Cadastros; Convidados nunca recebem esses dados. As exportações CSV, Excel e PDF ganham **Registrado por** e **Devolvido por** (empréstimos) e **Criada por** (ocorrências) quando há login.
+- **Cadastros → Usuários:** edição de nome, nível de acesso e login, desativação e reativação (com confirmação), selo **Inativo** e aviso para logins que não são e-mails válidos. Novos logins e alterações de login precisam ser e-mails. A API impede desativar ou rebaixar a si mesmo e remover o último administrador ativo.
+- **Cadastros:** **Ajustar total** de equipamentos (não pode ficar abaixo dos itens em uso), busca nas listas e erros nos próprios campos.
+- **Configurações:** o botão **Salvar Configurações** foi removido (não salvava nada); tema e idioma valem na hora e ficam salvos neste navegador.
+- **Controle:** paginação sem função removida, **Saiba mais** abre o manual, validação de campos obrigatórios, proteção contra clique duplo ao salvar, resolver e excluir, e abas e menus acessíveis pelo teclado (setas, Home/End, Esc).
+- **Novo empréstimo:** os equipamentos mostram "(N disponíveis)", modelos indisponíveis ficam desabilitados, a quantidade é limitada com erro no campo e a observação tem contador 0/250.
+- **Devoluções:** botão **Detalhes** em cada cartão, acessível pelo teclado.
+- **Carregamento e erros:** esqueletos de carregamento e contadores "—" no primeiro carregamento; erro no próprio painel com **Tentar novamente** no Dashboard, em Devoluções e em Controle.
+- **Segurança e perfil:** **Última alteração** mostra a data da última troca de senha (**Sem registro** se não houver); o subtítulo de Meu Perfil é neutro para Editores; Convidados veem "Faça login para registrar alterações." ao tentar uma ação bloqueada.
+- **API:** `GET /auth/me` retorna `senhaAlteradaEm`; respostas autenticadas incluem objetos de autor `{ id, nome }`; `GET /categorias` para Convidados retorna `{ id, nome }`; novos erros em `PATCH /usuarios/:id`.
+- **Observação:** a recuperação de senha só funciona se a caixa de e-mail do login realmente existir.
+- **Documentação:** Manual do Usuário §2, §4, §5, §6, §7, §8, §9, §10, §11 e §12; Referência da API (autoria, `/auth/me`, `/usuarios`); Modelo de Dados (campos de autoria e migration).
 
 ## v1.3.0 — Banner de notificações, ativação guiada e versão única — 13 de novembro de 2026
 

@@ -1,6 +1,21 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.3.0**, released on November 13, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.4.0**, released on November 13, 2026; earlier entries remain historical.
+
+## v1.4.0 — Record authorship, user management and interface refinements — November 13, 2026
+
+- **Record authorship:** loans, occurrences, equipment, categories and responsible parties now store who created, changed, returned or resolved them. Migration `20261113150000_record_authorship` is additive and backfills existing records from the audit log; records without audit rows have no author. Signed-in users (Administrator or Editor) see authorship in Returns, Dashboard (History and stock details), Control and Records; Guests never receive this data. CSV, Excel and PDF exports gain **Registered by** and **Returned by** (loans) and **Created by** (occurrences) when signed in.
+- **Records → Users:** edit name, access level and login, deactivate and reactivate (with confirmation), an **Inactive** badge and a warning for logins that are not valid emails. New logins and login changes must be emails. The API prevents deactivating or demoting yourself and removing the last active administrator.
+- **Records:** **Adjust total** for equipment (cannot go below items in use), list search and inline field errors.
+- **Settings:** the **Save Settings** button was removed (it saved nothing); theme and language apply immediately and are saved in this browser.
+- **Control:** non-functional pagination removed, **Learn more** opens the manual, required-field validation, double-click protection on save, resolve and delete, and keyboard-accessible tabs and menus (arrows, Home/End, Esc).
+- **New loan:** equipment options show "(N available)", unavailable models are disabled, quantity is limited with an inline error, and the note has a 0/250 counter.
+- **Returns:** **Details** button on each card, keyboard accessible.
+- **Loading and errors:** loading skeletons and "—" counters on first load; in-panel error with **Try again** on Dashboard, Returns and Control.
+- **Security and profile:** **Last change** shows the date of the last password change (**No record** if none); the My Profile subtitle is neutral for Editors; Guests see "Sign in to record changes." when attempting a blocked action.
+- **API:** `GET /auth/me` returns `senhaAlteradaEm`; authenticated responses include author objects `{ id, nome }`; guest `GET /categorias` returns `{ id, nome }`; new errors on `PATCH /usuarios/:id`.
+- **Note:** password recovery only works if the login's mailbox really exists.
+- **Documentation:** User Manual §2, §4, §5, §6, §7, §8, §9, §10, §11 and §12; API Reference (authorship, `/auth/me`, `/usuarios`); Data Model (authorship fields and migration).
 
 ## v1.3.0 — Notification banner, guided activation and single version source — November 13, 2026
 

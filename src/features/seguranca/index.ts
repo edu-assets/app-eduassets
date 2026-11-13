@@ -9,6 +9,7 @@ export function initSeguranca(): void {
 
     const els: SegurancaEls = {
         email: document.getElementById('seguranca-email'),
+        senhaAlteradaEm: document.getElementById('seguranca-senha-alterada-em'),
         btnToggleSenha: document.getElementById('seguranca-toggle-senha') as HTMLElement,
         formSenha: document.getElementById('seguranca-form-senha') as HTMLElement,
         inputAtual: document.getElementById('seguranca-senha-atual') as HTMLInputElement,

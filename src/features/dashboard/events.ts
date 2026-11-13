@@ -12,7 +12,10 @@ import {
 } from './render.js';
 import type { DashboardEls, DashboardEstado } from './render.js';
 import { exportarEstoqueCsv, filtrarEquipamentos, filtrarHistorico, buscarEquipamentoPorId } from './service.js';
+import { attachTablistKeyboard } from '../../shared/dom/tabs.js';
 import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
+import { subscribeLoadStatus } from '../../core/state/loadStatus.js';
+import { ligarTentarNovamente } from '../../shared/components/loadState.js';
 
 export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado): void {
     const abrirDetalheEstoquePorLinha = (row: HTMLElement): void => {
@@ -69,6 +72,9 @@ export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado
         });
     });
 
+    const dashboardTablist = document.querySelector<HTMLElement>('.dashboard-tablist');
+    if (dashboardTablist) attachTablistKeyboard(dashboardTablist, '.dashboard-tab-link');
+
     if (els.btnExportar) {
         els.btnExportar.addEventListener('click', () => {
             const abaAtiva = document.querySelector<HTMLElement>('.dashboard-tab-link.active')?.dataset.tab;
@@ -105,4 +111,17 @@ export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado
     subscribeOcorrencias(() => {
         renderResumo(els, getEquipamentos());
     });
+
+    // Troca de estado da carga inicial (esqueleto / erro / pronto); atualizações em segundo plano não passam por aqui.
+    subscribeLoadStatus((chave) => {
+        if (chave === 'equipamentos') {
+            renderEstoque(els, filtrarEquipamentos(getEquipamentos(), estado.termoBusca));
+            renderResumo(els, getEquipamentos());
+        } else if (chave === 'emprestimos') {
+            const loansOrdenados = [...getLoans()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+            renderHistorico(els, filtrarHistorico(loansOrdenados, estado.termoBusca));
+        }
+    });
+    ligarTentarNovamente(els.estoqueContainer, 'equipamentos');
+    ligarTentarNovamente(els.historicoLista, 'emprestimos');
 }

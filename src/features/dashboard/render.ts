@@ -7,7 +7,11 @@ import {
 } from './templates.js';
 import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overlayPanel.js';
 import type { Equipamento, LoanUI, CategoriaResumoDados } from '../../types/index.js';
+import { renderAutoriaEquipamento, envolverAutoria } from '../../shared/components/autoria.js';
 import { t } from '../../core/state/i18nStore.js';
+import { sincronizarAbasAria } from '../../shared/dom/tabs.js';
+import { getLoadStatus } from '../../core/state/loadStatus.js';
+import { aplicarEstadoCarga, renderSkeletonLinhas, semDadosProntos, CONTADOR_INDISPONIVEL } from '../../shared/components/loadState.js';
 
 const LIMITE_CHIPS_HISTORICO = 2;
 
@@ -38,11 +42,24 @@ export interface DashboardEstado {
 }
 
 export function renderEstoque(els: DashboardEls, equipamentos: Equipamento[]): void {
+    if (aplicarEstadoCarga(els.estoqueContainer, getLoadStatus('equipamentos').status, renderSkeletonLinhas(6))) return;
     els.estoqueContainer.innerHTML = renderDashboardEstoqueContent(equipamentos);
 }
 
 export function renderResumo(els: DashboardEls, equipamentos: Equipamento[]): void {
     const resumo = calcularResumo(equipamentos);
+    const indisponivel = semDadosProntos(getLoadStatus('equipamentos').status);
+    const cards = [els.resumoTotal, els.resumoDisponivel, els.resumoEmprestado, els.resumoQuebrado, els.resumoManutencao];
+    cards.forEach((el) => {
+        const card = el.closest('.dashboard-resumo-card');
+        if (indisponivel) card?.setAttribute('aria-busy', 'true'); else card?.removeAttribute('aria-busy');
+    });
+    if (indisponivel) {
+        cards.forEach((el) => { el.textContent = CONTADOR_INDISPONIVEL; });
+        [els.resumoDisponivelPct, els.resumoEmprestadoPct, els.resumoQuebradoPct, els.resumoManutencaoPct]
+            .forEach((el) => { el.textContent = CONTADOR_INDISPONIVEL; });
+        return;
+    }
 
     els.resumoTotal.textContent = String(resumo.total);
     els.resumoDisponivel.textContent = String(resumo.disponivel);
@@ -57,6 +74,10 @@ export function renderResumo(els: DashboardEls, equipamentos: Equipamento[]): vo
 }
 
 export function renderHistorico(els: DashboardEls, loans: LoanUI[]): void {
+    if (aplicarEstadoCarga(els.historicoLista, getLoadStatus('emprestimos').status, renderSkeletonLinhas(5))) {
+        els.historicoVazio.style.display = 'none';
+        return;
+    }
     if (!loans.length) {
         els.historicoLista.innerHTML = '';
         els.historicoVazio.style.display = 'flex';
@@ -76,6 +97,7 @@ export function ativarAbaDashboard(els: DashboardEls, tab: string): void {
 
     if (tabLink) tabLink.classList.add('active');
     if (targetTab) targetTab.classList.add('active');
+    sincronizarAbasAria(document.querySelectorAll('.dashboard-tab-link'));
 }
 
 function montarDadosFormularioCategoria(equipamento: Equipamento): CategoriaResumoDados {
@@ -95,7 +117,8 @@ export function exibirDetalheEstoque(els: DashboardEls, equipamento: Equipamento
     const dadosFormulario = montarDadosFormularioCategoria(equipamento);
 
     els.detalheTitulo.textContent = t('dashboard.detalhes_do_equipamento');
-    els.detalheBody.innerHTML = renderDashboardCategoriaForm(dadosFormulario);
+    els.detalheBody.innerHTML = renderDashboardCategoriaForm(dadosFormulario)
+        + envolverAutoria(renderAutoriaEquipamento(equipamento));
 
     abrirDetalhe(els);
 }

@@ -1,5 +1,5 @@
 import { http } from './apiClient.js';
-import type { Usuario, UsuarioCreatePayload } from '../../types/index.js';
+import type { Usuario, UsuarioCreatePayload, UsuarioUpdatePayload } from '../../types/index.js';
 
 export function listarUsuarios(): Promise<Usuario[]> {
     return http.get<Usuario[]>('/usuarios');
@@ -7,6 +7,10 @@ export function listarUsuarios(): Promise<Usuario[]> {
 
 export function criarUsuario(dados: UsuarioCreatePayload): Promise<Usuario> {
     return http.post<Usuario>('/usuarios', dados);
+}
+
+export function atualizarUsuario(id: number, dados: UsuarioUpdatePayload): Promise<Usuario> {
+    return http.patch<Usuario>(`/usuarios/${id}`, dados);
 }
 
 export function gerarTokenRfid(id: number): Promise<{ usuario: { id: number; nome: string }; token: string }> {

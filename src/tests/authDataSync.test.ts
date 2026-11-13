@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   authListener: undefined as undefined | ((state: { autenticado: boolean; usuario: unknown }) => void),
   isAuthenticated: vi.fn(() => false),
+  currentUser: vi.fn(() => null as null | { id: number }),
   clearEquipment: vi.fn(),
   clearLoans: vi.fn(),
   clearOccurrences: vi.fn(),
@@ -18,6 +19,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../core/state/authStore.js', () => ({
   isAutenticado: mocks.isAuthenticated,
+  getUsuario: mocks.currentUser,
   subscribe: (listener: typeof mocks.authListener) => {
     mocks.authListener = listener;
     return () => { mocks.authListener = undefined; };
@@ -46,6 +48,21 @@ describe('auth-driven data synchronization', () => {
     vi.clearAllMocks();
     mocks.authListener = undefined;
     mocks.isAuthenticated.mockReturnValue(false);
+    mocks.currentUser.mockReturnValue(null);
+  });
+
+  it('ignores notifications where authentication state and user id did not change', async () => {
+    mocks.isAuthenticated.mockReturnValue(true);
+    mocks.currentUser.mockReturnValue({ id: 10 });
+    const { initAuthDataSync } = await import('../core/state/authDataSync.js');
+    await initAuthDataSync();
+    const clears = mocks.clearEquipment.mock.calls.length;
+    const loads = mocks.loadEquipment.mock.calls.length;
+
+    mocks.authListener?.({ autenticado: true, usuario: { id: 10, senhaAlteradaEm: '2026-01-01T00:00:00Z' } });
+    await Promise.resolve();
+    expect(mocks.clearEquipment).toHaveBeenCalledTimes(clears);
+    expect(mocks.loadEquipment).toHaveBeenCalledTimes(loads);
   });
 
   it('Guest loads public stores only and never requests responsible parties', async () => {

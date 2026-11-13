@@ -1,4 +1,4 @@
-import { subscribe, isAutenticado } from './authStore.js';
+import { subscribe, isAutenticado, getUsuario } from './authStore.js';
 import { http } from '../api/apiClient.js';
 import {
     carregarEquipamentos, limparEquipamentos,
@@ -11,6 +11,7 @@ import { createSessionDataCoordinator } from './sessionDataCoordinator.js';
 import { iniciarLiveSync } from './liveSync.js';
 import { showToast } from '../ui/index.js';
 import { t } from './i18nStore.js';
+import { falharCargasPendentes } from './loadStatus.js';
 
 const coordinator = createSessionDataCoordinator({
     nextVersion: advanceSessionDataVersion,
@@ -28,13 +29,23 @@ const coordinator = createSessionDataCoordinator({
 });
 
 let unsubscribeAuth: (() => void) | undefined;
+let ultimaChave: string | undefined;
+
+function chaveDaSessao(autenticado: boolean, usuarioId: unknown): string {
+    return autenticado ? `u:${String(usuarioId ?? '')}` : 'guest';
+}
 
 export async function initAuthDataSync(): Promise<void> {
     if (!unsubscribeAuth) {
-        unsubscribeAuth = subscribe(({ autenticado }) => {
+        unsubscribeAuth = subscribe(({ autenticado, usuario }) => {
+            // Profile-only updates (same auth state and user id) must not clear stores nor reload data.
+            const chave = chaveDaSessao(autenticado, usuario?.id);
+            if (chave === ultimaChave) return;
+            ultimaChave = chave;
             void synchronize(autenticado);
         });
     }
+    ultimaChave = chaveDaSessao(isAutenticado(), getUsuario()?.id);
     const cargaInicial = synchronize(isAutenticado());
     // A sincronização ao vivo começa junto com a carga inicial: o cursor é obtido em paralelo, antes das listas.
     iniciarLiveSync();
@@ -46,6 +57,8 @@ async function synchronize(authenticated: boolean): Promise<void> {
         await coordinator.sync(authenticated);
     } catch (error) {
         console.error('[eduAssets] Falha ao sincronizar dados da sessão:', error);
+        // Listas sem dados passam a mostrar o estado de erro no próprio painel (com "Tentar novamente").
+        falharCargasPendentes();
         const erroPrincipal = error instanceof AggregateError
             ? error.errors.find((item): item is Error => item instanceof Error)
             : error;

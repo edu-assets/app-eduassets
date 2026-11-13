@@ -927,3 +927,13 @@
         font-size: 0.82rem;
     }
 }
+
+.devolucao-col-acao {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.devolucao-col-acao .detalhes-btn {
+    width: 100%;
+}

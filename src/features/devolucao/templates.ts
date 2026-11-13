@@ -4,6 +4,7 @@ import { gerarIniciais, formatarHora } from './utils.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
 import { renderPessoaProtegida, renderIniciaisProtegidas } from '../../shared/components/restrictedPerson.js';
 import { t } from '../../core/state/i18nStore.js';
+import { renderAutoriaCriador } from '../../shared/components/autoria.js';
 import type { LoanItemUI, LoanUI } from '../../types/index.js';
 
 const LIMITE_ICONES_CARD = 3;
@@ -48,6 +49,7 @@ export function renderDevolucaoCard(loan: LoanUI): string {
                 <div class="devolucao-textos-resp">
                     <span class="info-resp-nome">${raw(renderPessoaProtegida(loan.responsavel))}</span>
                     <span class="info-aluno-nome">${raw(renderPessoaProtegida(loan.aluno))}</span>
+                    ${raw(renderAutoriaCriador(loan, 'autoria.registrado_por'))}
                 </div>
             </div>
             <div class="devolucao-col-equip">
@@ -64,6 +66,7 @@ export function renderDevolucaoCard(loan: LoanUI): string {
             </div>
             <div class="devolucao-col-acao">
                 <button class="btn btn-primary btn-sm devolver-btn" data-id="${loan.id}" data-requires-auth>${t('devolucao.devolver')}</button>
+                <button type="button" class="btn btn-neutral btn-sm detalhes-btn" data-id="${loan.id}">${t('dashboard.detalhes')}</button>
             </div>
         </div>
     `;

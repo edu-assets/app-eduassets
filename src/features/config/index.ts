@@ -2,10 +2,7 @@ import { attachConfigEvents, attachTemaToggle, attachIdiomaToggle } from './even
 import { initNotificacoesConfig } from './notificacoes.js';
 
 export function initConfig(): void {
-    const btnSalvar = document.getElementById('config-salvar');
-    if (!btnSalvar) return;
-
-    attachConfigEvents(btnSalvar);
+    attachConfigEvents();
 
     const grupoTema = document.getElementById('config-tema-group');
     if (grupoTema) attachTemaToggle(grupoTema);

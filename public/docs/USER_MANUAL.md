@@ -14,7 +14,7 @@ The current data model tracks quantities by **category/model**. It does not prov
 | --- | --- | --- |
 | **Guest** | View anonymized stock, categories, loan summaries and issue summaries; use searches/exports derived from those views. | Cannot create, update, resolve, return, or delete records. Requester/responsible identities, notes and issue details are omitted/masked. Responsible-party listing, **Records**, **Security** and **My Profile** require authentication. |
 | **Editor** | Sign in, register loans, edit items in open loans, confirm returns, create/edit/resolve **Control** records, and change the account's own password. | Cannot use **Records**, provision/revoke RFID, or delete issues. |
-| **Administrator** | Everything an Editor can do, plus **Records**, user and RFID-card management, **Save Settings**, and deleting **Control** records. | Still subject to stock, format, and required-field validation. |
+| **Administrator** | Everything an Editor can do, plus **Records**, user and RFID-card management, and deleting **Control** records. | Still subject to stock, format, and required-field validation. |
 
 > **Important:** menus, indicators, and UI guards improve usability, but **they are not the security control**. The backend is the security boundary: it requires authentication/JWTs and enforces permissions on its routes. Do not treat a hidden button as proof of authorization.
 
@@ -60,6 +60,8 @@ The sidebar item is **New loan** and the panel title is **Register Loan**. It re
 4. Optionally fill in **Note**.
 5. Click **Register Loan**.
 
+In the **Equipment** list each model shows "(N available)" and unavailable models are disabled; **Qty.** is limited to what is available, with an inline error. **Note** has a character counter (0/250).
+
 At least one item is required. Both the UI and backend validate available quantity in a transaction; if stock is insufficient, the loan is not created. When successful, available quantity is reduced.
 
 While **Date and Time** is untouched, the field follows the server clock and the record uses the server time at the moment of saving. If you change the field, your chosen time is kept. Dates more than 5 minutes in the future are not accepted.
@@ -72,6 +74,8 @@ While **Date and Time** is untouched, the field follows the server clock and the
 4. Click **Return** in the list or **Confirm Return** in the detail panel.
 5. Review the **Confirm Return** modal and click **Confirm Return**; **Cancel** closes it without completing the return.
 
+Each loan card has a **Details** button (also keyboard accessible). Signed-in users see in **Details** who registered and who returned the loan.
+
 Items become available again after confirmation. **Return Date and Time** is filled automatically and can be edited; on confirmation the UI sends the selected offset-aware ISO timestamp, which the backend validates and persists. Older clients that omit the field continue to use server-current time.
 
 If **Return Date and Time** is untouched, the record uses the server time at the moment of confirmation. A return cannot be earlier than the loan's checkout, and dates more than 5 minutes in the future are not accepted.
@@ -81,7 +85,7 @@ If **Return Date and Time** is untouched, the record uses the server time at the
 The **Dashboard** shows **Total equipment**, **Available**, **On Loan**, **Maintenance**, and **Broken** summary cards.
 
 - In **Stock**, review totals by category. Click a row for the category's read-only details.
-- In **History**, review loan dates, items, and status. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Click **Details** when available.
+- In **History**, review loan dates, items, and status. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Signed-in users also see authorship (who registered and who returned); Guests never receive this data. Stock details show who created and changed the equipment. On first load the Dashboard shows loading skeletons and "—" counters; if loading fails, an in-panel error with **Try again** appears. Click **Details** when available.
 - Use **Search by information...**. In **Stock**, it searches the category; in **History**, it searches number, requester, and responsible party.
 - In **Stock**, **Export** immediately downloads a CSV of the current stock. In **History**, **Export** takes you to the **Export** panel for more options.
 
@@ -89,13 +93,15 @@ Displayed stock is derived from open loans and maintenance/broken issues. Check 
 
 ## 7. Control
 
-**Control** separates records into **Observation**, **Maintenance**, **Broken**, and **Resolved** tabs. Summary cards show open records.
+**Control** separates records into **Observation**, **Maintenance**, **Broken**, and **Resolved** tabs. Summary cards show open records. Signed-in users see who created, changed and resolved each record. **Learn more** opens this manual. If loading fails, the panel shows an error with **Try again**.
 
 ### Create or edit a record
 
 1. Click **New** and choose **Observation**, **Maintenance**, or **Broken**.
 2. In the form, select **Category** and **Model**, enter **Number**, choose the **Issue**, and optionally fill in **Description**; an empty description is stored as “—”. Available issue choices include **Screen**, **Audio**, **Battery**, **Cable**, **Touchscreen**, **Keyboard**, **Button**, **Casing**, and **Other**.
-3. Click **Save**. For an existing row, select it, click **Edit**, change the fields, and save.
+3. Click **Save**. For an existing row, select it, click **Edit**, change the fields, and save. Required fields show the error inline, and save, resolve and delete ignore double clicks.
+
+The **Control** tabs and menus work with the keyboard: arrows and Home/End to navigate and Esc to close.
 
 **Observation** is a note and does not change stock. **Maintenance** removes the affected quantity from available stock until resolution. **Broken** also removes it from available stock and increments the broken count.
 
@@ -111,16 +117,16 @@ Creating, editing, and resolving require authentication (**Editor** or **Adminis
 
 **Records** is administrative. Open a card, fill in the fields, and click **Save**; **Cancel** closes the modal. **Registered** lists the data loaded from the API.
 
-- **Equipment:** **Category**, **Model**, and **Quantity**.
+- **Equipment:** **Category**, **Model**, and **Quantity**. **Adjust total** changes a model's total quantity and cannot go below the items in use.
 - **Responsible Parties:** **Name** and **Role**.
-- **System Users:** **Name**, **Email / Login**, **Password**, and **Access level** (**Administrator** or **Editor**).
+- **System Users:** **Name**, **Email / Login** (must be an email), **Password**, and **Access level** (**Administrator** or **Editor**). Name, access level and login can be edited, and the user can be deactivated or reactivated (with confirmation); deactivated users show an **Inactive** badge, and logins that are not valid emails show a warning. You cannot deactivate or demote your own account, nor remove the last active administrator. Password recovery only works if the login's mailbox really exists.
 - **Equipment Categories:** **Category Name**.
 
 On a user row, **Link card** opens **RFID Card**. After linking, use **Generate new token** (replaces the current one), **Copy token** when available, or **Revoke card**. Treat the token as sensitive; do not publish it or include it in reports.
 
 The **Reset password** button (padlock icon) next to each user opens a dialog to set a temporary password. Fill in **New password** and **Confirm new password**: at least 12 characters with an uppercase letter, a lowercase letter, a number and a symbol are required (72 bytes maximum). On confirmation, all of the user's open sessions are ended and the action is recorded in the audit log as `PASSWORD_RESET`. Hand over the temporary password through a secure channel and ask the user to change it in **Security**. For your own account, use **Security** (the button shows a notice instead of opening the dialog).
 
-The current **Records** UI is designed to list/view and create the records shown. Do not assume that an edit or delete action available in another panel exists for every record type.
+**Records** lists have search and, for signed-in users, show who created each record. The current UI is designed to list/view, create and, for users and equipment totals, adjust the records shown. Do not assume that an edit or delete action available in another panel exists for every record type.
 
 ## 9. Export
 
@@ -137,6 +143,8 @@ Then:
 2. Optionally add a note in **Note**; it appears in the report.
 3. Review **Export summary** and click **Export Data**.
 
+When signed in, exports include **Registered by** and **Returned by** (loans) and **Created by** (occurrences).
+
 Confirmed formats are `.csv`, `.xlsx` (Excel), and `.pdf`. CSV and Excel contain the main table and, when applicable, issue sections; PDF produces the equivalent report. If no record matches the filters, the application refuses the export instead of creating an empty file.
 
 ## 10. Settings
@@ -146,9 +154,8 @@ In **Settings**:
 - **Appearance → Theme:** choose **Light**, **Dark**, or **System**.
 - **Language:** choose **Português** or **English**; the interface switches immediately.
 - **Notifications:** per-device activation, with switches for loans, returns and issues (see the subsection below).
-- **Save Settings:** the button available to Administrators shows a visual confirmation. Theme and language are saved automatically as preferences in this browser; notifications do not depend on this button.
 
-Theme and language are browser preferences.
+Theme and language apply immediately and are saved as preferences in this browser; there is no save button.
 
 ### Push notifications for administrators
 
@@ -159,7 +166,7 @@ To enable it:
 1. Click **Enable notifications** in the banner at the top of the app or, in **Settings**, on the **Notifications** card, **Turn on notifications on this device**. The banner appears for administrators without notifications on this device; **Not now** hides it for 7 days on that device.
 2. When the browser asks, click **Allow**.
 3. Click **Send test notification** to confirm that it arrives.
-4. Use the switches for **loans**, **returns** and **issues** to choose what reaches this device. They apply immediately; you do not need to click **Save Settings**.
+4. Use the switches for **loans**, **returns** and **issues** to choose what reaches this device. They apply immediately.
 
 To turn it off on this device, click **Turn off on this device**.
 
@@ -178,13 +185,13 @@ To turn it off on this device, click **Turn off on this device**.
 
 ## 11. Account Security
 
-Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 12 characters and the confirmation must match. Click **Update password** or **Cancel**.
+Open **Security** from the user menu and click **Change password**. Fill in **Current password**, **New password**, and **Confirm new password**; the new password must contain at least 12 characters and the confirmation must match. Click **Update password** or **Cancel**. **Last change** shows the date of the last password change (**No record** if none).
 
 Changing a password is available only to the authenticated account and requires the current password. If the password is lost, use **Forgot my password** on the entry screen (section 2) or **Contact the administrator**: an administrator can reset it in **Records → System Users** (section 8).
 
 ## 12. My Profile
 
-From the user menu, open **My profile**. The **My Profile** panel is read-only and shows **Full name**, **Email** (the account login), and **Access level**. Use **Log out** to end the session.
+From the user menu, open **My profile**. The **My Profile** panel is read-only and shows **Full name**, **Email** (the account login), and **Access level**. Use **Log out** to end the session. The panel subtitle is neutral for Editors. In Guest Mode, blocked actions show "Sign in to record changes."
 
 ## 13. Data and installation reference
 

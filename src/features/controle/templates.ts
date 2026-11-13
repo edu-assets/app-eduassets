@@ -1,6 +1,7 @@
 import { attr, html, raw } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
 import { t } from '../../core/state/i18nStore.js';
+import { renderAutoriaOcorrencia, envolverAutoria } from '../../shared/components/autoria.js';
 import type { OcorrenciaUI } from '../../types/index.js';
 
 interface ProblemaInfo {
@@ -29,21 +30,21 @@ export const ICONE_POR_TIPO: Record<string, string> = {
 
 export function renderControleMenuAcoes(tipo: string): string {
     const opcaoEditar = tipo !== 'resolvidos'
-        ? html`<span class="registros-row-menu-opcao" data-acao="editar" data-requires-auth>${t('controle.editar')}</span>`
+        ? html`<button type="button" role="menuitem" class="registros-row-menu-opcao" data-acao="editar" data-requires-auth>${t('controle.editar')}</button>`
         : '';
     const opcaoResolver = (tipo === 'manutencao' || tipo === 'quebrado')
-        ? html`<span class="registros-row-menu-opcao" data-acao="resolver" data-requires-auth>${t('controle.resolver')}</span>`
+        ? html`<button type="button" role="menuitem" class="registros-row-menu-opcao" data-acao="resolver" data-requires-auth>${t('controle.resolver')}</button>`
         : '';
 
     return html`
         <span class="registros-row-menu-wrap">
-            <button type="button" class="registros-row-menu-btn" aria-label="${t('controle.mais_opcoes')}">
+            <button type="button" class="registros-row-menu-btn" aria-label="${t('controle.mais_opcoes')}" aria-haspopup="menu" aria-expanded="false">
                 <span class="material-symbols-outlined">more_vert</span>
             </button>
-            <div class="registros-row-menu">
+            <div class="registros-row-menu" role="menu">
                 ${raw(opcaoResolver)}
                 ${raw(opcaoEditar)}
-                <span class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir" data-requires-admin>${t('controle.excluir')}</span>
+                <button type="button" role="menuitem" class="registros-row-menu-opcao registros-row-menu-opcao-danger" data-acao="excluir" data-requires-admin>${t('controle.excluir')}</button>
             </div>
         </span>
     `;
@@ -74,7 +75,7 @@ export function renderControleLinha(tipo: string, dados: OcorrenciaUI): string {
         <span class="registros-numero" data-col="numero">${dados.numero}</span>
         <span class="controle-problema-badge"><span class="material-symbols-outlined">${problemaInfo.icon}</span>${t(problemaInfo.label)}</span>
         <span data-col="descricao">${dados.descricao}</span>
-        <span class="registros-data" data-col="registrado-em">${dataTexto}</span>
+        <span class="registros-data" data-col="registrado-em">${dataTexto}${raw(envolverAutoria(renderAutoriaOcorrencia(dados)))}</span>
         ${raw(colunaMedidas)}
         ${raw(renderControleMenuAcoes(tipo))}
         </div>

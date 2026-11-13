@@ -4,12 +4,15 @@ import {
     renderCampo,
     renderItemRegistro,
     renderItemRegistroUsuario,
+    renderItemRegistroEquipamento,
     renderListaVazia,
     renderListaCarregando,
     renderListaErro
 } from './templates.js';
 import type { CadastroConfig, CampoCadastro, CampoOpcao } from './service.js';
-import type { Usuario } from '../../types/index.js';
+import type { Equipamento, Usuario } from '../../types/index.js';
+import type { OpcoesItemUsuario, OpcoesItemEquipamento } from './templates.js';
+import type { ErrosCampos, ItemComAutoria } from './logic.js';
 import { t } from '../../core/state/i18nStore.js';
 
 export interface CampoComOpcoes {
@@ -83,22 +86,63 @@ export function exibirListaErro(els: CadastroListaEls): void {
     els.listaWrap.innerHTML = renderListaErro();
 }
 
-export function renderListaRegistros(els: CadastroListaEls, itensTexto: string[]): void {
+export function renderListaRegistros(els: CadastroListaEls, itensTexto: string[], itens?: ItemComAutoria[]): void {
     els.listaWrap.innerHTML = itensTexto.length
-        ? itensTexto.map(renderItemRegistro).join('')
+        ? itensTexto.map((texto, i) => renderItemRegistro(texto, itens?.[i])).join('')
         : renderListaVazia();
 }
 
-export function renderListaUsuarios(els: CadastroListaEls, usuarios: Usuario[]): void {
+export function renderListaUsuarios(
+    els: CadastroListaEls,
+    usuarios: Usuario[],
+    opcoes: OpcoesItemUsuario = {}
+): void {
     els.listaWrap.innerHTML = usuarios.length
-        ? usuarios.map(renderItemRegistroUsuario).join('')
+        ? usuarios.map((u) => renderItemRegistroUsuario(u, opcoes)).join('')
         : renderListaVazia();
+}
+
+export function renderListaEquipamentos(
+    els: CadastroListaEls,
+    equipamentos: Equipamento[],
+    opcoes: OpcoesItemEquipamento = {}
+): void {
+    els.listaWrap.innerHTML = equipamentos.length
+        ? equipamentos.map((e) => renderItemRegistroEquipamento(e, opcoes)).join('')
+        : renderListaVazia();
+}
+
+/* ===== Inline field errors ===== */
+
+export function mostrarErroCampo(id: string, chave: string | null): void {
+    const campo = document.getElementById(id);
+    const erro = document.getElementById(`${id}-erro`);
+    if (campo) {
+        if (chave) campo.setAttribute('aria-invalid', 'true');
+        else campo.removeAttribute('aria-invalid');
+    }
+    if (erro) {
+        erro.textContent = chave ? t(chave) : '';
+        erro.hidden = !chave;
+    }
+}
+
+export function limparErrosCampos(ids: string[]): void {
+    ids.forEach((id) => mostrarErroCampo(id, null));
+}
+
+/** Shows the errors and focuses the first invalid field (in `ordem`). */
+export function aplicarErrosCampos(ordem: string[], erros: ErrosCampos): void {
+    ordem.forEach((id) => mostrarErroCampo(id, erros[id] ?? null));
+    const primeiro = ordem.find((id) => erros[id]);
+    if (primeiro) document.getElementById(primeiro)?.focus();
 }
 
 export function limparCamposFormulario(campos: CampoCadastro[]): void {
     campos.forEach((campo) => {
         const el = document.getElementById(campo.id) as HTMLInputElement | HTMLSelectElement | null;
         if (el) el.value = '';
+        mostrarErroCampo(campo.id, null);
     });
 }
 

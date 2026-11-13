@@ -1,8 +1,10 @@
 import { listarEmprestimos, criarEmprestimo, atualizarItensEmprestimo, devolverEmprestimo } from '../api/emprestimos.js';
 import type { Emprestimo, LoanUI, LoanDraft, LoanUpdate } from '../../types/index.js';
 import type { OpcoesLeitura } from '../api/apiClient.js';
+import { iniciarCarga, concluirCarga, falharCarga, reiniciarCarga, registrarCarregador } from './loadStatus.js';
 import { getSessionDataVersion } from './sessionDataVersion.js';
 import { carregarEquipamentos } from './equipamentoStore.js';
+import { extrairAutoria } from '../utils/autoria.js';
 import { criarLeituraOrdenada, mesmoConteudo } from './leituraOrdenada.js';
 
 type LoanListener = (emprestimos: LoanUI[]) => void;
@@ -15,20 +17,34 @@ const leituras = criarLeituraOrdenada();
 export async function carregarEmprestimos(opcoes?: OpcoesLeitura): Promise<LoanUI[]> {
     const version = getSessionDataVersion();
     const leitura = leituras.iniciar();
-    const dados = await listarEmprestimos(opcoes);
+    iniciarCarga('emprestimos');
+    let dados: Awaited<ReturnType<typeof listarEmprestimos>>;
+    try {
+        dados = await listarEmprestimos(opcoes);
+    } catch (erro) {
+        if (version === getSessionDataVersion()) falharCarga('emprestimos');
+        throw erro;
+    }
     if (version !== getSessionDataVersion() || !leituras.podeAplicar(leitura)) return emprestimos;
     const novos = dados.map(mapEmprestimo);
-    if (mesmoConteudo(novos, emprestimos)) return emprestimos;
+    if (mesmoConteudo(novos, emprestimos)) {
+        concluirCarga('emprestimos');
+        return emprestimos;
+    }
     emprestimos = novos;
     notify();
+    concluirCarga('emprestimos');
     return emprestimos;
 }
+
+registrarCarregador('emprestimos', () => carregarEmprestimos());
 
 export function getLoans(): LoanUI[] {
     return emprestimos;
 }
 
 export function limparEmprestimos(): void {
+    reiniciarCarga('emprestimos');
     emprestimos = [];
     notify();
 }
@@ -100,6 +116,7 @@ function mapEmprestimo(loan: Emprestimo): LoanUI {
         dataDevolucao: loan.dataDevolucao ? new Date(loan.dataDevolucao).toLocaleString('pt-BR') : null,
         observacao: loan.observacao ?? '',
         createdAt: new Date(loan.createdAt),
+        ...extrairAutoria(loan),
         itens: (loan.itens ?? []).map((item) => ({
             id: item.equipamentoId,
             nome: item.equipamento?.modelo ?? '',

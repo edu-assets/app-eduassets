@@ -1,5 +1,7 @@
 import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
 import { attachControleEvents } from './events.js';
+import { subscribeLoadStatus } from '../../core/state/loadStatus.js';
+import { ligarTentarNovamente } from '../../shared/components/loadState.js';
 import { renderControle } from './render.js';
 import type { ControleEls, ControleEstado } from './render.js';
 
@@ -27,13 +29,13 @@ export function initControle(): void {
         linhaMedidas: document.getElementById('controle-modal-medidas-row'),
         campoMedidas: document.getElementById('controle-modal-medidas') as HTMLTextAreaElement | null,
         btnModalCancelar: document.getElementById('controle-modal-cancelar'),
-        btnModalSalvar: document.getElementById('controle-modal-salvar'),
+        btnModalSalvar: document.getElementById('controle-modal-salvar') as HTMLButtonElement | null,
         resolverCategoriaModelo: document.getElementById('controle-resolver-categoria-modelo'),
         resolverNumeroProblema: document.getElementById('controle-resolver-numero-problema'),
         resolverDescricao: document.getElementById('controle-resolver-descricao'),
         resolverMedidas: document.getElementById('controle-resolver-medidas') as HTMLTextAreaElement | null,
         btnResolverCancelar: document.getElementById('controle-resolver-cancelar'),
-        btnResolverConfirmar: document.getElementById('controle-resolver-confirmar'),
+        btnResolverConfirmar: document.getElementById('controle-resolver-confirmar') as HTMLButtonElement | null,
         inputBusca: document.getElementById('controle-busca') as HTMLInputElement | null
     };
 
@@ -50,4 +52,6 @@ export function initControle(): void {
 
     renderControle(els, estado);
     subscribeOcorrencias(() => renderControle(els, estado));
+    subscribeLoadStatus((chave) => { if (chave === 'ocorrencias') renderControle(els, estado); });
+    ligarTentarNovamente(registrosContainer, 'ocorrencias');
 }

@@ -4,6 +4,7 @@ import {
     fecharTodosMenus,
     selecionarLinha,
     limparSelecao,
+    atualizarToolbar,
     abrirNovoRegistro,
     abrirEdicaoRegistro,
     abrirResolverRegistro,
@@ -16,8 +17,79 @@ import { bloquearSeConvidado, bloquearSeNaoAdmin } from '../../core/auth/guestGa
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 import type { ControleRegistroDados } from '../../types/index.js';
 import { traduzirErro } from '../../core/state/i18nStore.js';
+import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
+import { attachTablistKeyboard } from '../../shared/dom/tabs.js';
+import { abrirDocumentacao } from '../sobre/index.js';
+import { attachLimpezaErros, validarModal } from './validacao.js';
+
+const SELETOR_ITEM_MENU = '[role="menuitem"]:not(:disabled)';
+
+let salvandoModal = false;
+let resolvendoRegistro = false;
+let excluindoRegistro = false;
+
+function abrirMenu(trigger: HTMLElement | null, menu: HTMLElement): void {
+    menu.classList.add('active');
+    trigger?.setAttribute('aria-expanded', 'true');
+}
+
+function fecharMenu(trigger: HTMLElement | null, menu: HTMLElement): void {
+    menu.classList.remove('active');
+    trigger?.setAttribute('aria-expanded', 'false');
+}
+
+function focarPrimeiroItem(menu: HTMLElement): void {
+    menu.querySelector<HTMLElement>(SELETOR_ITEM_MENU)?.focus();
+}
+
+function gatilhoDoMenu(els: ControleEls, menu: HTMLElement): HTMLElement | null {
+    return menu === els.menuNovo ? els.btnNovo : (menu.previousElementSibling as HTMLElement | null);
+}
+
+function attachTecladoMenus(els: ControleEls): void {
+    document.addEventListener('keydown', (e) => {
+        const aberto = document.querySelector<HTMLElement>('.novo-registro-menu.active, .registros-row-menu.active');
+        if (!aberto) return;
+        const gatilho = gatilhoDoMenu(els, aberto);
+
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            fecharMenu(gatilho, aberto);
+            gatilho?.focus();
+            return;
+        }
+
+        if (e.key === 'Tab') {
+            fecharMenu(gatilho, aberto);
+            return;
+        }
+
+        if (!aberto.contains(e.target as Node)) return;
+        const itens = Array.from(aberto.querySelectorAll<HTMLElement>(SELETOR_ITEM_MENU));
+        const indice = itens.indexOf(e.target as HTMLElement);
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            itens[(indice + 1) % itens.length]?.focus();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            itens[(indice - 1 + itens.length) % itens.length]?.focus();
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            itens[0]?.focus();
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            itens[itens.length - 1]?.focus();
+        }
+    });
+}
 
 export function attachControleEvents(els: ControleEls, estado: ControleEstado): void {
+    const tablist = document.querySelector<HTMLElement>('.controle-tabs');
+    if (tablist) attachTablistKeyboard(tablist, '.controle-tab-link');
+    attachTecladoMenus(els);
+    attachLimpezaErros(els);
+    document.getElementById('controle-btn-saiba-mais')?.addEventListener('click', () => abrirDocumentacao('manual-usuario'));
+
     document.querySelectorAll<HTMLElement>('.controle-tab-link').forEach((tabLink) => {
         tabLink.addEventListener('click', () => ativarAba(els, estado, tabLink.dataset.controleTab ?? ''));
     });
@@ -33,12 +105,17 @@ export function attachControleEvents(els: ControleEls, estado: ControleEstado): 
         btnNovo.addEventListener('click', (e) => {
             e.stopPropagation();
             if (bloquearSeConvidado()) return;
-            menuNovo.classList.toggle('active');
+            if (menuNovo.classList.contains('active')) {
+                fecharMenu(btnNovo, menuNovo);
+                return;
+            }
+            abrirMenu(btnNovo, menuNovo);
+            focarPrimeiroItem(menuNovo);
         });
 
         menuNovo.querySelectorAll<HTMLElement>('.novo-registro-opcao').forEach((opcao) => {
             opcao.addEventListener('click', () => {
-                menuNovo.classList.remove('active');
+                fecharMenu(btnNovo, menuNovo);
                 abrirNovoRegistro(els, estado, opcao.dataset.tipo ?? '');
             });
         });
@@ -47,7 +124,7 @@ export function attachControleEvents(els: ControleEls, estado: ControleEstado): 
     document.addEventListener('click', (e) => {
         const target = e.target as Node;
         if (els.menuNovo && !els.menuNovo.contains(target) && target !== els.btnNovo) {
-            els.menuNovo.classList.remove('active');
+            fecharMenu(els.btnNovo, els.menuNovo);
         }
         fecharTodosMenus(target as Element);
     });
@@ -80,7 +157,10 @@ export function attachControleEvents(els: ControleEls, estado: ControleEstado): 
             if (!menu) return;
             const jaAberto = menu.classList.contains('active');
             fecharTodosMenus();
-            if (!jaAberto) menu.classList.add('active');
+            if (!jaAberto) {
+                abrirMenu(menuBtn, menu);
+                focarPrimeiroItem(menu);
+            }
             return;
         }
 
@@ -146,13 +226,11 @@ export function attachControleEvents(els: ControleEls, estado: ControleEstado): 
 }
 
 async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<void> {
+    if (salvandoModal) return;
     if (bloquearSeConvidado()) return;
     if (!estado.tipoAtual) return;
 
-    if (!els.campoCategoria.value || !els.campoModelo.value || !els.campoNumero.value || !els.campoProblema.value) {
-        els.campoProblema.reportValidity?.();
-        return;
-    }
+    if (!validarModal(els)) return;
 
     if (estado.tipoAtual === 'resolvidos' && !els.campoMedidas?.value.trim()) {
         showToast('Descreva as medidas tomadas antes de salvar', 'warning');
@@ -172,6 +250,8 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
         medidas: estado.tipoAtual === 'resolvidos' ? els.campoMedidas?.value : undefined
     };
 
+    salvandoModal = true;
+    setButtonLoading(els.btnModalSalvar, true);
     try {
         if (estado.idEditando) {
             await editarRegistro(estado.idEditando, estado.tipoAtual, dados);
@@ -183,6 +263,9 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
     } catch (erro) {
         showToast(formatarErroEstoque(erro, 'feedback.erro_salvar_registro'), 'error');
         return;
+    } finally {
+        setButtonLoading(els.btnModalSalvar, false);
+        salvandoModal = false;
     }
 
     closeModal('modal-controle-novo');
@@ -191,6 +274,7 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
 }
 
 async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promise<void> {
+    if (resolvendoRegistro) return;
     if (bloquearSeConvidado()) return;
     if (!estado.idResolvendo) return;
 
@@ -201,12 +285,17 @@ async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promis
         return;
     }
 
+    resolvendoRegistro = true;
+    setButtonLoading(els.btnResolverConfirmar, true);
     try {
         await resolverRegistro(estado.idResolvendo, medidas);
         showToast('Registro marcado como resolvido', 'success');
     } catch (erro) {
         showToast(traduzirErro(erro, 'feedback.erro_resolver_registro'), 'error');
         return;
+    } finally {
+        setButtonLoading(els.btnResolverConfirmar, false);
+        resolvendoRegistro = false;
     }
 
     closeModal('modal-controle-resolver');
@@ -215,30 +304,40 @@ async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promis
 
 async function excluirRegistro(els: ControleEls, estado: ControleEstado, row: HTMLElement | null): Promise<void> {
     if (!row) return;
+    if (excluindoRegistro) return;
     if (bloquearSeNaoAdmin()) return;
 
-    const detalhesHtml = renderDetalhesExclusao({
-        categoria: row.dataset.categoria || '',
-        modelo: row.dataset.modelo || '',
-        numero: row.dataset.numero || '',
-        descricao: row.dataset.descricao || ''
-    });
-
-    const confirmado = await confirmarExclusao({
-        titulo: 'Excluir registro',
-        mensagem: 'Esta ação não pode ser desfeita.',
-        detalhesHtml,
-        textoAtencao: 'Ao excluir este registro, todas as informações relacionadas serão removidas permanentemente do sistema.'
-    });
-
-    if (!confirmado) return;
-
-    if (row === estado.linhaSelecionada) limparSelecao(els, estado);
-
+    excluindoRegistro = true;
     try {
-        await removerRegistro(row.dataset.id ?? '');
-        showToast('Registro excluído com sucesso', 'success');
-    } catch (erro) {
-        showToast(traduzirErro(erro, 'feedback.erro_excluir_registro'), 'error');
+        const detalhesHtml = renderDetalhesExclusao({
+            categoria: row.dataset.categoria || '',
+            modelo: row.dataset.modelo || '',
+            numero: row.dataset.numero || '',
+            descricao: row.dataset.descricao || ''
+        });
+
+        const confirmado = await confirmarExclusao({
+            titulo: 'Excluir registro',
+            mensagem: 'Esta ação não pode ser desfeita.',
+            detalhesHtml,
+            textoAtencao: 'Ao excluir este registro, todas as informações relacionadas serão removidas permanentemente do sistema.'
+        });
+
+        if (!confirmado) return;
+
+        if (row === estado.linhaSelecionada) limparSelecao(els, estado);
+
+        setButtonLoading(els.btnDeletar, true);
+        try {
+            await removerRegistro(row.dataset.id ?? '');
+            showToast('Registro excluído com sucesso', 'success');
+        } catch (erro) {
+            showToast(traduzirErro(erro, 'feedback.erro_excluir_registro'), 'error');
+        } finally {
+            setButtonLoading(els.btnDeletar, false);
+            atualizarToolbar(els, estado);
+        }
+    } finally {
+        excluindoRegistro = false;
     }
 }

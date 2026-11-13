@@ -4,6 +4,7 @@ import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { renderStatusBadge } from '../../shared/components/statusBadge.js';
 import { renderPessoaProtegida } from '../../shared/components/restrictedPerson.js';
 import { t } from '../../core/state/i18nStore.js';
+import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
 import type { Equipamento, LoanUI, LoanItemUI, CategoriaResumoDados } from '../../types/index.js';
 
 const LIMITE_CHIPS_HISTORICO_PADRAO = 2;
@@ -192,6 +193,8 @@ export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
         </div>
 
         ${raw(obsHtml)}
+
+        ${raw(envolverAutoria(renderAutoriaEmprestimo(loan)))}
 
         ${raw(renderStatusBadge(loan.status))}
     `;

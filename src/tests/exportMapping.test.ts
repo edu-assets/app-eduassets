@@ -13,6 +13,7 @@ vi.mock('../core/state/loanStore.js', () => ({ getLoans: () => mocks.loans }));
 vi.mock('../core/state/ocorrenciasStore.js', () => ({
   getOcorrenciasPorTipo: (tipo: string) => mocks.ocorrencias.filter((o: any) => o.tipo === tipo)
 }));
+vi.mock('../core/state/authStore.js', () => ({ isAutenticado: () => false }));
 vi.mock('../core/services/csv.js', () => ({
   gerarLinhasCsv: mocks.gerarLinhasCsv,
   baixarArquivoCsv: mocks.baixarArquivoCsv

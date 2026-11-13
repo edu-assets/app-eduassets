@@ -1,7 +1,7 @@
 import { getEquipamentos, subscribe as subscribeEquipamentos } from '../../core/state/equipamentoStore.js';
 import { getResponsaveis, subscribe as subscribeResponsaveis } from '../../core/state/responsavelStore.js';
 import { criarDataAutoPicker } from '../../core/ui/index.js';
-import { attachEmprestimoEvents } from './events.js';
+import { attachEmprestimoEvents, atualizarLimiteQuantidade } from './events.js';
 import { renderItens, popularSelectEquipamentos, popularSelectResponsaveis } from './render.js';
 import type { LoanItemUI } from '../../types/index.js';
 
@@ -37,9 +37,12 @@ export async function initEmprestimo(): Promise<void> {
 
     const estado: { itens: LoanItemUI[] } = { itens: [] };
 
-    popularSelectEquipamentos(els.equipamentoSelect, getEquipamentos());
+    popularSelectEquipamentos(els.equipamentoSelect, getEquipamentos(), estado.itens);
     popularSelectResponsaveis(els.responsavelSelect, getResponsaveis());
-    subscribeEquipamentos((equipamentos) => popularSelectEquipamentos(els.equipamentoSelect, equipamentos));
+    subscribeEquipamentos((equipamentos) => {
+        popularSelectEquipamentos(els.equipamentoSelect, equipamentos, estado.itens);
+        atualizarLimiteQuantidade(els, estado);
+    });
     subscribeResponsaveis((responsaveis) => popularSelectResponsaveis(els.responsavelSelect, responsaveis));
 
     attachEmprestimoEvents(els, estado);

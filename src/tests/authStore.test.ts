@@ -196,4 +196,25 @@ describe('authStore cookie sessions', () => {
     await entrar('user@example.invalid', 'Synthetic-Password-01');
     expect(otherKeys.has('eduassets_logout_pendente')).toBe(false);
   });
+
+  it('keeps senhaAlteradaEm from the login response', async () => {
+    apiMocks.login.mockResolvedValueOnce({ user: { ...user, senhaAlteradaEm: '2026-01-02T03:04:05Z' } });
+    const { entrar, getUsuario } = await import('../core/state/authStore.js');
+    await entrar('user@example.invalid', 'Synthetic-Password-01');
+    expect(getUsuario()?.senhaAlteradaEm).toBe('2026-01-02T03:04:05Z');
+  });
+
+  it('atualizarUsuarioLocal replaces the profile without notifying subscribers', async () => {
+    const { entrar, subscribe, atualizarUsuarioLocal, getUsuario } = await import('../core/state/authStore.js');
+    await entrar('user@example.invalid', 'Synthetic-Password-01');
+    const listener = vi.fn();
+    subscribe(listener);
+
+    atualizarUsuarioLocal({ ...user, senhaAlteradaEm: '2026-05-05T00:00:00Z' });
+    expect(getUsuario()?.senhaAlteradaEm).toBe('2026-05-05T00:00:00Z');
+    expect(listener).not.toHaveBeenCalled();
+
+    atualizarUsuarioLocal({ ...user, id: 99, senhaAlteradaEm: 'x' });
+    expect(getUsuario()?.id).toBe(5);
+  });
 });

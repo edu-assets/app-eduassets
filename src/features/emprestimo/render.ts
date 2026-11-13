@@ -1,5 +1,6 @@
 import { renderItemRow, renderItensEmptyState } from './templates.js';
 import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
+import { calcularDisponivelEfetivo } from '../../core/utils/estoque.js';
 import { t } from '../../core/state/i18nStore.js';
 import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect.js';
 import type { LoanItemUI, Equipamento, Responsavel } from '../../types/index.js';
@@ -25,8 +26,27 @@ export function renderModalItens(els: RenderModalEls, itens: LoanItemUI[]): void
     els.modalItensLista.innerHTML = itens.map(renderItemRow).join('');
 }
 
-export function popularSelectEquipamentos(select: HTMLSelectElement, equipamentos: Equipamento[]): void {
-    const opcoes = equipamentos.map((eq) => ({ id: eq.id, label: `${eq.modelo} — ${eq.categoria?.nome ?? ''}` }));
+/** Unidades ainda disponíveis para este empréstimo (desconta o que já foi adicionado à lista). */
+export function disponivelRestante(equipamento: Equipamento | undefined, itens: LoanItemUI[]): number {
+    if (!equipamento) return 0;
+    const jaAdicionado = itens.find((item) => String(item.id) === String(equipamento.id))?.quantidade ?? 0;
+    return Math.max(0, calcularDisponivelEfetivo(equipamento) - jaAdicionado);
+}
+
+export function popularSelectEquipamentos(
+    select: HTMLSelectElement,
+    equipamentos: Equipamento[],
+    itens: LoanItemUI[] = []
+): void {
+    const opcoes = equipamentos.map((eq) => {
+        const restante = disponivelRestante(eq, itens);
+        const sufixo = t(restante === 1 ? 'emprestimo.disponivel_singular' : 'emprestimo.disponivel_plural').replace('{n}', String(restante));
+        return {
+            id: eq.id,
+            label: `${eq.modelo} — ${eq.categoria?.nome ?? ''} (${sufixo})`,
+            disabled: restante <= 0
+        };
+    });
     fillSelect(select, renderPlaceholderOption('Selecionar equipamento'), renderOpcoesSelect(opcoes));
 }
 

@@ -5,7 +5,8 @@ import {
     usuariosApi,
     ApiError
 } from '../../core/api/index.js';
-import type { Categoria, Equipamento, Responsavel, Usuario } from '../../types/index.js';
+import type { Categoria, Equipamento, Responsavel, Usuario, UsuarioUpdatePayload } from '../../types/index.js';
+import { atualizarEquipamentoPorId } from '../../core/state/equipamentoStore.js';
 import { t } from '../../core/state/i18nStore.js';
 
 export interface CampoOpcao {
@@ -18,6 +19,8 @@ export interface CampoCadastro {
     label: string;
     type: string;
     placeholder?: string;
+    /** i18n key of a hint shown under the field. */
+    hint?: string;
     options?: Array<CampoOpcao | string>;
     carregarOpcoes?: () => Promise<CampoOpcao[]>;
 }
@@ -91,7 +94,7 @@ const CADASTRO_CONFIG: Record<TipoCadastro, CadastroConfig<any>> = {
         formatarItem: (item: Usuario) => `${item.nome} — ${item.login} · ${item.nivelAcesso === 'ADMINISTRADOR' ? 'Administrador' : 'Editor'}`,
         campos: [
             { id: 'cad-nome-usuario', label: 'cadastros.campo_nome', type: 'text', placeholder: 'cadastros.placeholder_nome_completo' },
-            { id: 'cad-login-usuario', label: 'cadastros.campo_email_login', type: 'text', placeholder: 'cadastros.placeholder_email' },
+            { id: 'cad-login-usuario', label: 'cadastros.campo_email_login', type: 'email', placeholder: 'cadastros.placeholder_email', hint: 'cadastros.dica_email_login' },
             { id: 'cad-senha-usuario', label: 'cadastros.campo_senha', type: 'password', placeholder: 'cadastros.placeholder_senha' },
             {
                 id: 'cad-nivel-acesso',
@@ -198,4 +201,30 @@ export async function redefinirSenhaUsuario(usuarioId: number, senha: string): P
     } catch (erro) {
         throw new Error(erro instanceof ApiError ? erro.message : 'feedback.erro_redefinir_senha');
     }
+}
+
+/* ===== Edição de usuários e ajuste de estoque ===== */
+
+export async function atualizarUsuario(usuarioId: number, dados: UsuarioUpdatePayload): Promise<Usuario> {
+    try {
+        return await usuariosApi.atualizarUsuario(usuarioId, dados);
+    } catch (erro) {
+        throw new Error(erro instanceof ApiError ? erro.message : 'feedback.erro_atualizar_usuario');
+    }
+}
+
+/** Sends only the new total; the API adjusts the available quantity atomically. */
+export async function ajustarTotalEquipamento(
+    equipamentoId: number,
+    payload: { quantidadeTotal: number }
+): Promise<void> {
+    try {
+        await atualizarEquipamentoPorId(equipamentoId, payload);
+    } catch (erro) {
+        throw new Error(erro instanceof ApiError ? erro.message : 'feedback.erro_ajustar_total');
+    }
+}
+
+export function textoBuscaUsuario(usuario: Usuario): string {
+    return `${usuario.nome} ${usuario.login} ${usuario.nivelAcesso === 'ADMINISTRADOR' ? 'Administrador' : 'Editor'}${usuario.ativo === false ? ' Inativo' : ''}`;
 }

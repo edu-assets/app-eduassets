@@ -1,11 +1,15 @@
 import { openModal, closeModal } from './modal.js';
-import { traduzirTexto } from '../state/i18nStore.js';
+import { t, traduzirTexto } from '../state/i18nStore.js';
 
 interface ConfirmarExclusaoOpcoes {
     titulo?: string;
     mensagem?: string;
     detalhesHtml?: string;
-    textoAtencao?: string; 
+    textoAtencao?: string;
+    /** i18n key of the confirm button label (default: 'shell.excluir_registro'). */
+    chaveConfirmar?: string;
+    /** Material Symbols icon name for the confirm button (default: 'delete'). */
+    iconeConfirmar?: string;
 }
 
 let resolverAtual: ((valor: boolean) => void) | null = null;
@@ -34,7 +38,7 @@ export function initConfirm(): void {
 }
 
 export function confirmarExclusao(
-    { titulo = 'Confirmar exclusão', mensagem = 'Esta ação não pode ser desfeita.', detalhesHtml, textoAtencao }: ConfirmarExclusaoOpcoes = {}
+    { titulo = 'Confirmar exclusão', mensagem = 'Esta ação não pode ser desfeita.', detalhesHtml, textoAtencao, chaveConfirmar = 'shell.excluir_registro', iconeConfirmar = 'delete' }: ConfirmarExclusaoOpcoes = {}
 ): Promise<boolean> {
     const overlay = document.getElementById('modal-confirmar-exclusao');
     titulo = traduzirTexto(titulo);
@@ -49,7 +53,10 @@ export function confirmarExclusao(
     const calloutText = document.getElementById('confirmar-exclusao-callout-text');
     const btnConfirmar = document.getElementById('confirmar-exclusao-btn') as HTMLButtonElement | null;
 
-     if (btnConfirmar) btnConfirmar.disabled = false;
+    if (btnConfirmar) {
+        btnConfirmar.disabled = false;
+        definirRotuloConfirmar(btnConfirmar, chaveConfirmar, iconeConfirmar);
+    }
 
     if (tituloEl) tituloEl.textContent = titulo;
     if (mensagemEl) mensagemEl.textContent = mensagem;
@@ -88,4 +95,14 @@ export function confirmarExclusao(
             resolve(valor);
         };
     });
+}
+
+/** Sets the confirm button's label/icon; the i18n key is stored so language switches keep it. */
+export function definirRotuloConfirmar(botao: HTMLElement, chave: string, icone: string): void {
+    botao.dataset.i18nKey = chave;
+    const iconeEl = botao.querySelector<HTMLElement>('.material-symbols-outlined');
+    if (iconeEl) iconeEl.textContent = icone;
+    const texto = Array.from(botao.childNodes).find((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim());
+    if (texto) texto.textContent = ` ${t(chave)} `;
+    else botao.append(` ${t(chave)} `);
 }

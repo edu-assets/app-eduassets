@@ -13,6 +13,8 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `id` | `Int` | Não | Chave primária; `autoincrement()` |
 | `nome` | `String` | Não | `@unique` |
 | `equipamentos` | `Equipamento[]` | Não | Relação Prisma, 1:N |
+| `criadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
 
 ### Equipamento
 
@@ -29,6 +31,10 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `categoria` | `Categoria` | Não | Relação Prisma, N:1 |
 | `itensEmprestimo` | `ItemEmprestimo[]` | Não | Relação Prisma, 1:N |
 | `ocorrencias` | `Ocorrencia[]` | Não | Relação Prisma, 1:N |
+| `criadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
+| `atualizadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
 
 ### Responsavel
 
@@ -38,6 +44,8 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `nome` | `String` | Não | — |
 | `cargo` | `String` | Não | — |
 | `emprestimos` | `Emprestimo[]` | Não | Relação Prisma, 1:N |
+| `criadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
 
 `Responsavel` é uma entidade de domínio referenciada pelos empréstimos. O schema não lhe atribui nível de acesso ao sistema; o acesso é representado separadamente por `Usuario`.
 
@@ -55,7 +63,7 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `createdAt` | `DateTime` | Não | `@default(now())` |
 | `pushSubscriptions` | `PushSubscription[]` | Não | Relação Prisma, 1:N |
 
-`Usuario` não se relaciona com as entidades de domínio (equipamentos, empréstimos e ocorrências); a relação `pushSubscriptions` liga o usuário às inscrições de notificação push.
+`Usuario` é referenciado pelos campos de autoria das entidades de domínio (`criadoPorId`, `atualizadoPorId`, `devolvidoPorId`, `resolvidoPorId`), todos anuláveis; a relação `pushSubscriptions` liga o usuário às inscrições de notificação push.
 
 ### Emprestimo
 
@@ -71,6 +79,13 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `createdAt` | `DateTime` | Não | `@default(now())` |
 | `responsavel` | `Responsavel` | Não | Relação Prisma, N:1 |
 | `itens` | `ItemEmprestimo[]` | Não | Relação Prisma, 1:N |
+| `criadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoEm` | `DateTime` | Sim | Data da última alteração |
+| `devolvidoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
+| `atualizadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
+| `devolvidoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
 
 ### ItemEmprestimo
 
@@ -100,6 +115,13 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `medidasTomadas` | `String` | Sim | — |
 | `createdAt` | `DateTime` | Não | `@default(now())` |
 | `equipamento` | `Equipamento` | Não | Relação Prisma, N:1 |
+| `criadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `atualizadoEm` | `DateTime` | Sim | Data da última alteração |
+| `resolvidoPorId` | `Int` | Sim | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE SET NULL` |
+| `criadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
+| `atualizadoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
+| `resolvidoPor` | `Usuario` | Sim | Relação Prisma, N:1 |
 
 ### PushSubscription
 
@@ -140,7 +162,7 @@ Usuario 1───N PushSubscription
 Usuario (independente; sem relação com as entidades de domínio)
 ```
 
-As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.id`, `Emprestimo.responsavelId → Responsavel.id`, `ItemEmprestimo.emprestimoId → Emprestimo.id`, `ItemEmprestimo.equipamentoId → Equipamento.id` e `Ocorrencia.equipamentoId → Equipamento.id`. O schema Prisma não declara ações `onDelete`/`onUpdate`; entretanto, a migration inicial versionada cria as cinco FKs com `ON DELETE RESTRICT` e `ON UPDATE CASCADE`. A FK `PushSubscription.usuarioId → Usuario.id` é criada pela migration `20261113090000_push_subscriptions` com `ON DELETE CASCADE`. Para conhecer o banco realmente migrado, considere as migrations SQL em conjunto com o schema Prisma.
+As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.id`, `Emprestimo.responsavelId → Responsavel.id`, `ItemEmprestimo.emprestimoId → Emprestimo.id`, `ItemEmprestimo.equipamentoId → Equipamento.id` e `Ocorrencia.equipamentoId → Equipamento.id`. O schema Prisma não declara ações `onDelete`/`onUpdate`; entretanto, a migration inicial versionada cria as cinco FKs com `ON DELETE RESTRICT` e `ON UPDATE CASCADE`. Os campos de autoria (`criadoPorId`, `atualizadoPorId`, `devolvidoPorId`, `resolvidoPorId`) são FKs para `Usuario.id` com `ON DELETE SET NULL`, criadas pela migration aditiva `20261113150000_record_authorship`, que preenche os registros existentes a partir do `AuditLog`; registros sem linhas de auditoria permanecem com autor nulo. A FK `PushSubscription.usuarioId → Usuario.id` é criada pela migration `20261113090000_push_subscriptions` com `ON DELETE CASCADE`. Para conhecer o banco realmente migrado, considere as migrations SQL em conjunto com o schema Prisma.
 
 ## Padrões, chaves, unicidade e índices
 
@@ -174,6 +196,7 @@ As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.
 
 ### Usuários e RFID
 
+- `criarUsuario` e a edição de usuários exigem `login` em formato de e-mail (contas antigas com outro formato continuam entrando). A API impede desativar ou rebaixar a si mesmo e deixar o sistema sem administrador ativo.
 - `criarUsuario` rejeita `login` já existente, aplica hash bcrypt à senha informada (custo `12`) e armazena o resultado em `passwordHash`; a senha em texto puro não é um campo do modelo.
 - A listagem de usuários expõe `possuiCartaoRfid` como booleano derivado de `rfidTokenHash`, em vez de retornar o hash armazenado. O schema armazena apenas o hash, que é nulo quando não há cartão.
 - O provisionamento RFID exige que a bridge esteja habilitada e que o usuário exista; depois envia um token gerado à bridge local. Somente após resposta bem-sucedida da bridge o serviço grava `hashRfidToken(token)` em `rfidTokenHash`; o token gerado é retornado nessa operação. Bridge desabilitada, falhas e timeouts resultam em erros do serviço.

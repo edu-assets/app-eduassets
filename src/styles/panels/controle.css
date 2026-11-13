@@ -174,11 +174,24 @@
 
 .novo-registro-opcao {
     display: block;
+    width: 100%;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    text-align: left;
     padding: 10px 14px;
     font-size: 0.9rem;
     color: var(--text-primary);
     cursor: pointer;
     transition: background-color 0.2s ease;
+}
+
+.novo-registro-opcao:focus-visible,
+.registros-row-menu-opcao:focus-visible,
+.controle-tab-link:focus-visible,
+.dashboard-tab-link:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
 }
 
 .novo-registro-opcao:hover {
@@ -202,6 +215,9 @@
 }
 
 .controle-tab-link {
+    background: none;
+    border: 0;
+    font-family: inherit;
     padding: 10px 16px;
     font-size: 0.95rem;
     font-weight: 600;
@@ -476,6 +492,11 @@
 
 .registros-row-menu-opcao {
     display: block;
+    width: 100%;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    text-align: left;
     padding: 9px 14px;
     font-size: 0.85rem;
     color: var(--text-primary);
@@ -506,12 +527,6 @@
 .controle-paginacao-texto {
     font-size: 0.82rem;
     color: var(--text-muted);
-}
-
-.controle-paginacao-controles {
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
 .controle-pagina-btn {

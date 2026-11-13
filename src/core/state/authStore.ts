@@ -97,6 +97,12 @@ export async function iniciarSessao(): Promise<void> {
     notify();
 }
 
+/** Replaces the cached profile WITHOUT notifying subscribers (no session-wide resync). Ignored when the user id differs. */
+export function atualizarUsuarioLocal(atualizado: AuthUser): void {
+    if (!user || user.id !== atualizado.id) return;
+    user = atualizado;
+}
+
 export async function entrar(login: string, senha: string): Promise<void> {
     const resposta = await loginRequest(login, senha);
     // A fresh login replaces the session cookie, so the abandoned session can no longer be restored here.

@@ -49,6 +49,16 @@
     outline-offset: 2px;
 }
 
+.form-group [aria-invalid="true"] {
+    border-color: var(--error-color);
+}
+
+.field-error {
+    margin: 4px 0 0;
+    font-size: 0.8rem;
+    color: var(--error-color);
+}
+
 .form-row{
     display: flex;
     flex-direction: row;
