@@ -1,4 +1,5 @@
 import { renderUserMenuAutenticado, renderUserMenuConvidado } from './templates.js';
+import { applyGuestMode } from '../../core/auth/guestMode.js';
 import type { AuthUser } from '../../types/index.js';
 
 export interface AuthEls {
@@ -21,6 +22,7 @@ export function renderAuthStatus(els: AuthEls, autenticado: boolean, usuario: Au
     document.body.classList.toggle('guest-mode', !autenticado);
     document.body.classList.toggle('editor-mode', autenticado && usuario?.nivelAcesso === 'EDITOR');
 
+    applyGuestMode(!autenticado);
     renderHeroButton(els, autenticado);
 }
 

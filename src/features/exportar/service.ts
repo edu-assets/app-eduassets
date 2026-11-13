@@ -1,5 +1,5 @@
 import { showToast } from '../../core/ui/index.js';
-import { t } from '../../core/state/i18nStore.js';
+import { t, formatarDataHora } from '../../core/state/i18nStore.js';
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { listarTodasPaginasEmprestimos } from '../../core/api/emprestimos.js';
 import { mapEmprestimo } from '../../core/state/loanMapper.js';
@@ -80,8 +80,8 @@ function linhasEmprestimos(emprestimos: LoanUI[], comAutoria = false): Array<Arr
         loan.numero,
         loan.aluno,
         loan.responsavel,
-        loan.data,
-        loan.dataDevolucao || '',
+        formatarDataHora(loan.data),
+        formatarDataHora(loan.dataDevolucao),
         loan.status,
         ...(comAutoria ? [nomeAutor(loan.criadoPor), loan.status === 'devolvido' ? nomeAutor(loan.devolvidoPor) : ''] : [])
     ]);
@@ -140,7 +140,7 @@ function montarSecoesOcorrencias(equipamentoIds: string[], comAutoria = false): 
                 numero: ocorrencia.numero,
                 problema: PROBLEMA_LABELS[ocorrencia.problema] ?? ocorrencia.problema,
                 descricao: ocorrencia.descricao,
-                registradoEm: ocorrencia.registradoEm,
+                registradoEm: formatarDataHora(ocorrencia.registradoEm),
                 ...(comAutoria ? { criadaPor: nomeAutor(ocorrencia.criadoPor) } : {})
             }));
 

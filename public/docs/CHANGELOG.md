@@ -1,6 +1,16 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.5.0 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.5.1 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.5.1 — Modo convidado mais claro, alerta de estoque e datas no idioma escolhido — 13 de novembro de 2026
+
+Versão apenas de interface; a API e o site só alinham o número da versão.
+
+- **Modo convidado:** faixa **Modo convidado — somente leitura** com o botão **Entrar** (pode ser dispensada durante a sessão). Ações indisponíveis para convidados são anunciadas como indisponíveis, com a dica "Faça login para registrar alterações."; o painel **Novo empréstimo** mostra esse aviso antes do formulário.
+- **Estoque:** selo **Esgotado** quando não há nenhuma unidade disponível e **Estoque baixo** quando 10% ou menos do total (no mínimo 1 unidade) está disponível.
+- **Novo empréstimo:** o campo **Solicitante** sugere nomes já usados (somente para usuários logados).
+- **Idioma:** as datas seguem o idioma selecionado em listas, detalhes, exportações e PDF; os textos que ainda estavam fixos em português foram traduzidos.
+- **Acessibilidade:** ícones decorativos ficam ocultos para leitores de tela.
 
 ## v1.5.0 — Histórico com filtros, rotas por painel e sessão mais segura — 13 de novembro de 2026
 

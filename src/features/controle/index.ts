@@ -1,4 +1,5 @@
 import { subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
+import { subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
 import { attachControleEvents } from './events.js';
 import { subscribeLoadStatus } from '../../core/state/loadStatus.js';
 import { ligarTentarNovamente } from '../../shared/components/loadState.js';
@@ -52,6 +53,8 @@ export function initControle(): void {
 
     renderControle(els, estado);
     subscribeOcorrencias(() => renderControle(els, estado));
+    // Datas das linhas seguem o idioma: refaz ao trocá-lo.
+    subscribeI18n(() => renderControle(els, estado));
     subscribeLoadStatus((chave) => { if (chave === 'ocorrencias') renderControle(els, estado); });
     ligarTentarNovamente(registrosContainer, 'ocorrencias');
 }

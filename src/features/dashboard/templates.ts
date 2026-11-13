@@ -3,7 +3,7 @@ import { escapeHtml } from '../../core/utils/sanitize.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { renderStatusBadge } from '../../shared/components/statusBadge.js';
 import { renderPessoaProtegida } from '../../shared/components/restrictedPerson.js';
-import { t } from '../../core/state/i18nStore.js';
+import { t, formatarDataHora } from '../../core/state/i18nStore.js';
 import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
 import { renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
 import type { Equipamento, LoanUI, LoanItemUI, CategoriaResumoDados } from '../../types/index.js';
@@ -62,7 +62,19 @@ export function renderDashboardCategoriaForm(dados: CategoriaResumoDados): strin
     `;
 }
 
+/** Status de estoque exibido na linha: 'esgotado' (disponível 0), 'estoque-baixo' (≤10% do total) ou null. */
+export function statusEstoqueEquipamento(equipamento: Equipamento): 'esgotado' | 'estoque-baixo' | null {
+    const total = equipamento.quantidadeTotal;
+    const disponivel = equipamento.quantidadeDisponivel;
+    if (!(total > 0)) return null;
+    if (disponivel === 0) return 'esgotado';
+    if (disponivel > 0 && disponivel <= Math.max(1, Math.floor(total * 0.1))) return 'estoque-baixo';
+    return null;
+}
+
 function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
+    const status = statusEstoqueEquipamento(equipamento);
+    const badge = status ? renderStatusBadge(status) : '';
     return html`
         <div class="estoque-row" data-id="${equipamento.id}" data-equipamento-id="${equipamento.id}"
             role="button" tabindex="0">
@@ -71,7 +83,7 @@ function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
                 <span class="estoque-categoria">${equipamento.categoria?.nome ?? ''}</span>
             </span>
             <span data-col="total" data-label="${t('dashboard.total')}">${equipamento.quantidadeTotal}</span>
-            <span data-col="disponivel" data-label="${t('dashboard.disponivel')}">${equipamento.quantidadeDisponivel}</span>
+            <span data-col="disponivel" data-label="${t('dashboard.disponivel')}">${equipamento.quantidadeDisponivel}${raw(badge)}</span>
             <span data-col="quebrado" data-label="${t('dashboard.quebrado')}">${equipamento.quantidadeQuebrada}</span>
         </div>
     `;
@@ -143,8 +155,8 @@ export function renderDashboardHistoricoContent(loans: LoanUI[], limiteChips: nu
             <span class="historico-numero" data-col="numero">#${loan.numero}</span>
             <span data-col="solicitante" data-label="Solicitante">${raw(renderPessoaProtegida(loan.aluno))}</span>
             <span data-col="responsavel" data-label="Responsável">${raw(renderPessoaProtegida(loan.responsavel))}</span>
-            <span class="historico-data" data-col="retirada" data-label="Retirada">${loan.data}</span>
-            <span class="historico-data" data-col="devolucao" data-label="Devolução">${loan.dataDevolucao || '—'}</span>
+            <span class="historico-data" data-col="retirada" data-label="Retirada">${formatarDataHora(loan.data)}</span>
+            <span class="historico-data" data-col="devolucao" data-label="Devolução">${formatarDataHora(loan.dataDevolucao) || '—'}</span>
             <div class="historico-itens" data-col="itens" data-label="Itens">${raw(renderDashboardChipsItens(loan.itens, limiteChips))}</div>
             <span data-col="status" data-label="Status">${raw(renderStatusBadge(loan.status))}</span>
             <button type="button" class="btn btn-neutral btn-sm historico-detalhes-btn" data-id="${loan.id}">Detalhes</button>
@@ -183,8 +195,8 @@ export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
                     </svg>
                     <span class="info-value">${raw(renderPessoaProtegida(loan.aluno))}</span>
                 </div>
-                <span class="devolucao-detalhe-pessoa-data">Retirada em ${loan.data}</span>
-                <span class="devolucao-detalhe-pessoa-data">Devolução: ${loan.dataDevolucao || '—'}</span>
+                <span class="devolucao-detalhe-pessoa-data">Retirada em ${formatarDataHora(loan.data)}</span>
+                <span class="devolucao-detalhe-pessoa-data">Devolução: ${formatarDataHora(loan.dataDevolucao) || '—'}</span>
             </div>
         </div>
 

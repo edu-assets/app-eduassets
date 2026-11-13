@@ -1,6 +1,6 @@
 import { attr, html, raw } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
-import { t } from '../../core/state/i18nStore.js';
+import { t, formatarDataHora } from '../../core/state/i18nStore.js';
 import { renderAutoriaOcorrencia, envolverAutoria } from '../../shared/components/autoria.js';
 import type { OcorrenciaUI } from '../../types/index.js';
 
@@ -54,7 +54,7 @@ export function renderControleLinha(tipo: string, dados: OcorrenciaUI): string {
     const problemaInfo = PROBLEMA_ICONS[dados.problema] || PROBLEMA_ICONS.outro;
     const iconeLinha = ICONE_POR_TIPO[tipo] || 'chat_bubble';
     const ehResolvido = tipo === 'resolvidos';
-    const dataTexto = ehResolvido ? (dados.resolvidoEm || dados.registradoEm) : dados.registradoEm;
+    const dataTexto = formatarDataHora(ehResolvido ? (dados.resolvidoEm || dados.registradoEm) : dados.registradoEm);
 
     const colunaMedidas = ehResolvido
         ? html`<span data-col="medidas">${dados.medidas || '—'}</span>`

@@ -21,7 +21,7 @@ The current data model tracks quantities by **category/model**. It does not prov
 ### Log in and Guest Mode
 
 1. On the entry screen, enter **E-mail / Login** and **Password**; for limited read-only access, choose **Continue as guest**.
-2. Click **Sign in**. After sign-in, the user menu shows the account name and role.
+2. Click **Sign in**. After sign-in, the user menu shows the account name and role. In Guest Mode, a **Guest mode — read-only** banner with a **Sign in** button stays at the top (you can dismiss it for the session); unavailable actions are announced as such, with the hint "Sign in to save changes."
 3. To end the session, open the user menu and click **Log out**. The system requests revocation from the backend, removes this device's notification subscription (if any) and returns to the login screen.
 
 **Privacy and cookies:** the entry screen links to the **Terms of Use** and the **Privacy Policy**, which explains which data eduAssets processes, who it is shared with, how long it is kept and how to exercise your rights. On the first visit, a notice asks whether you accept **statistics cookies** (Google Analytics); choose **Accept** or **Decline**. Without consent, nothing from Google is loaded and the system works normally. To change your choice, open the Privacy Policy and click **Cookie preferences**.
@@ -54,9 +54,9 @@ On **Home**, use the shortcuts **New loan**, **Returns**, **Dashboard**, and **C
 
 ## 4. Register Loan
 
-The sidebar item is **New loan** and the panel title is **Register Loan**. It requires an **Editor** or **Administrator** session.
+The sidebar item is **New loan** and the panel title is **Register Loan**. It requires an **Editor** or **Administrator** session; guests see the notice "Sign in to save changes." before the form.
 
-1. Under **Loan Details**, fill in **Requester** and select the **Responsible** person.
+1. Under **Loan Details**, fill in **Requester** (for signed-in users the field suggests names already used) and select the **Responsible** person.
 2. Check **Date and Time**. It is filled automatically; click it to choose a different pickup date when needed.
 3. Under **Loan Items**, choose **Equipment**, enter **Qty.**, and click **Add**. Repeat for each model; items appear under **Added items**.
 4. Optionally fill in **Note**.
@@ -86,7 +86,7 @@ If **Return Date and Time** is untouched, the record uses the server time at the
 
 The **Dashboard** shows **Total equipment**, **Available**, **On Loan**, **Maintenance**, and **Broken** summary cards.
 
-- In **Stock**, review totals by category. Click a row for the category's read-only details.
+- In **Stock**, review totals by category; the **Out of stock** badge appears when no unit is available and **Low stock** when 10% or less of the total (at least 1 unit) is available. Click a row for the category's read-only details.
 - In **History**, review loan dates, items, and status. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Signed-in users also see authorship (who registered and who returned); Guests never receive this data. Stock details show who created and changed the equipment. On first load the Dashboard shows loading skeletons and "—" counters; if loading fails, an in-panel error with **Try again** appears. Click **Details** when available.
 - Use **Search by information...**. In **Stock**, it searches the category; in **History**, it searches number, requester, and responsible party.
 - **History filters:** History loads 50 loans at a time; use **Load more** and follow **Showing N loans** (guests too). The status chips (**All**, **Open**, **Returned**) and period chips (**Today**, **7 days**, **This month**, **All time**) combine with search, which for signed-in users runs on the server over the whole history. **Clear filters** returns to the full view.

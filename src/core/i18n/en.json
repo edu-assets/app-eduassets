@@ -1,4 +1,7 @@
 {
+  "convidado.banner": "Guest mode — read-only",
+  "convidado.aviso": "Sign in to save changes.",
+  "convidado.dispensar": "Dismiss notice",
   "auth.modo_convidado": "Guest",
   "auth.dado_restrito": "Not visible",
   "auth.informacao_restrita": "Information restricted in guest mode",
@@ -447,6 +450,8 @@
   "shell.clique_para_alterar": "(Click to change)",
   "controle.mostrando_registros": "Showing 1 to {total} of {total} records",
   "dashboard.aba_estoque": "Stock",
+  "dashboard.estoque_esgotado": "Out of stock",
+  "dashboard.estoque_baixo": "Low stock",
   "dashboard.aba_historico": "History",
   "dashboard.historico_carregar_mais": "Load more",
   "dashboard.historico_mostrando_um": "Showing 1 loan",
@@ -753,7 +758,7 @@
   "sessao.config_duracao_desc": "Before signing out, a warning lets you stay signed in.",
   "sessao.minutos_15": "15 minutes",
   "sessao.minutos_30": "30 minutes",
-  "sessao.minutos_60": "60 minutes",
+  "sessao.minutos_60": "60 minutes",
   "shell.nenhum_resultado_para": "No results for “{q}”",
   "shell.nenhum_resultado_filtros_atuais": "No results with the current filters",
   "shell.limpar_busca": "Clear search",

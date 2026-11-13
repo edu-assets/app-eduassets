@@ -1,9 +1,6 @@
 export { gerarIniciais } from '../../core/utils/iniciais.js';
-import { getIdioma } from '../../core/state/i18nStore.js';
+import { getLocale } from '../../core/state/i18nStore.js';
 
-function getLocale(): string {
-    return getIdioma() === 'en' ? 'en-US' : 'pt-BR';
-}
 
 export function formatarHora(date: Date): string {
     const hoje = new Date();

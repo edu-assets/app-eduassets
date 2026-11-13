@@ -1,4 +1,7 @@
 {
+  "convidado.banner": "Modo convidado — somente leitura",
+  "convidado.aviso": "Faça login para registrar alterações.",
+  "convidado.dispensar": "Dispensar aviso",
   "auth.modo_convidado": "Convidado",
   "auth.dado_restrito": "Não visível",
   "auth.informacao_restrita": "Informação restrita no modo convidado",
@@ -453,6 +456,8 @@
   "shell.nome_completo": "Nome completo",
   "shell.nivel_de_acesso": "Nível de acesso",
   "dashboard.aba_estoque": "Estoque",
+  "dashboard.estoque_esgotado": "Esgotado",
+  "dashboard.estoque_baixo": "Estoque baixo",
   "dashboard.aba_historico": "Histórico",
   "dashboard.historico_carregar_mais": "Carregar mais",
   "dashboard.historico_mostrando_um": "Mostrando 1 empréstimo",
@@ -753,7 +758,7 @@
   "sessao.config_duracao_desc": "Antes de encerrar, um aviso permite continuar conectado.",
   "sessao.minutos_15": "15 minutos",
   "sessao.minutos_30": "30 minutos",
-  "sessao.minutos_60": "60 minutos",
+  "sessao.minutos_60": "60 minutos",
   "shell.nenhum_resultado_para": "Nenhum resultado para “{q}”",
   "shell.nenhum_resultado_filtros_atuais": "Nenhum resultado com os filtros atuais",
   "shell.limpar_busca": "Limpar busca",

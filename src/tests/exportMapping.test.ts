@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../core/ui/index.js', () => ({ showToast: vi.fn() }));
-vi.mock('../core/state/i18nStore.js', () => ({ t: (k: string) => k }));
+vi.mock('../core/state/i18nStore.js', () => ({ t: (k: string) => k, formatarDataHora: (v: unknown) => (typeof v === 'string' ? v : ''), getLocale: () => 'pt-BR' }));
 vi.mock('../core/state/equipamentoStore.js', () => ({ getEquipamentos: () => mocks.equipamentos }));
 vi.mock('../core/api/emprestimos.js', () => ({
   listarTodasPaginasEmprestimos: async () => ({ items: mocks.loans, completo: true })

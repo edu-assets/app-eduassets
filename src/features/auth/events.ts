@@ -10,6 +10,7 @@ import { definirTema, getTemaResolvido, subscribe as subscribeTheme } from '../.
 import { isAdmin } from '../../core/auth/permissions.js';
 import { desativarDispositivoSilenciosamente } from '../../core/notifications/pushNotifications.js';
 import { EVENTO_SAIR_SOLICITADO, registrarLogoutExplicito } from '../../core/auth/sessionTimeout.js';
+import { EVENTO_ABRIR_LOGIN } from '../../core/auth/guestMode.js';
 import { restaurarRotaPosLogin } from '../../core/auth/rotaPosLogin.js';
 
 export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () => undefined): void {
@@ -92,6 +93,8 @@ export function attachAuthEvents(els: AuthEls, onInitialAccess: () => void = () 
         void sairExplicitamente();
     });
     attachEntryPreferences();
+    // "Entrar" do banner de convidado: mesmo caminho do botão do hero.
+    document.addEventListener(EVENTO_ABRIR_LOGIN, () => mostrarTelaLogin(els));
 
     subscribe(({ autenticado, usuario }) => renderAuthStatus(els, autenticado, usuario));
 }

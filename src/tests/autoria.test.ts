@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 vi.mock('../core/state/i18nStore.js', async () => {
     const ptDict = (await import('../core/i18n/pt.json')).default as Record<string, string>;
-    return { t: (k: string) => ptDict[k] ?? k, getIdioma: () => 'pt' };
+    return { t: (k: string) => ptDict[k] ?? k, getIdioma: () => 'pt', formatarDataHora: (v: unknown) => (typeof v === 'string' ? v : ''), getLocale: () => 'pt-BR' };
 });
 
 import { extrairAutoria, renderAutoriaEmprestimo, renderAutoriaOcorrencia, renderAutoriaEquipamento } from '../shared/components/autoria.js';

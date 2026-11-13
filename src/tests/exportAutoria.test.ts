@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../core/ui/index.js', () => ({ showToast: vi.fn() }));
-vi.mock('../core/state/i18nStore.js', () => ({ t: (k: string) => k }));
+vi.mock('../core/state/i18nStore.js', () => ({ t: (k: string) => k, formatarDataHora: (v: unknown) => (typeof v === 'string' ? v : ''), getLocale: () => 'pt-BR' }));
 vi.mock('../core/state/authStore.js', () => ({ isAutenticado: () => mocks.autenticado }));
 vi.mock('../core/state/equipamentoStore.js', () => ({
   getEquipamentos: () => [{ id: 1, modelo: 'M', categoria: { nome: 'A' }, quantidadeTotal: 1, quantidadeDisponivel: 1, quantidadeQuebrada: 0 }]

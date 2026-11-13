@@ -113,8 +113,8 @@ function mapOcorrencia(ocorrencia: Ocorrencia): OcorrenciaUI {
         numero: ocorrencia.numero ?? '',
         problema: ocorrencia.problema ?? '',
         descricao: ocorrencia.descricao ?? '',
-        registradoEm: new Date(ocorrencia.createdAt).toLocaleString('pt-BR'),
-        resolvidoEm: ocorrencia.resolvidoEm ? new Date(ocorrencia.resolvidoEm).toLocaleString('pt-BR') : '',
+        registradoEm: ocorrencia.createdAt,
+        resolvidoEm: ocorrencia.resolvidoEm ?? '',
         medidas: ocorrencia.medidasTomadas ?? '',
         ...extrairAutoria(ocorrencia)
     };

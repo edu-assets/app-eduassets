@@ -56,6 +56,19 @@ export function getIdioma(): Idioma {
     return idioma;
 }
 
+/** Locale BCP-47 do idioma atual (usado em toda formatação de data/hora). */
+export function getLocale(): string {
+    return idioma === 'en' ? 'en-US' : 'pt-BR';
+}
+
+/** Formata data/hora ISO (ou Date) no idioma atual; valor vazio => ''; inválido => devolve o texto original. */
+export function formatarDataHora(valor: string | Date | null | undefined): string {
+    if (!valor) return '';
+    const data = valor instanceof Date ? valor : new Date(valor);
+    if (Number.isNaN(data.getTime())) return typeof valor === 'string' ? valor : '';
+    return data.toLocaleString(getLocale());
+}
+
 export function definirIdioma(novoIdioma: Idioma): void {
     if (!ehIdiomaValido(novoIdioma) || novoIdioma === idioma) return;
     idioma = novoIdioma;
@@ -118,6 +131,7 @@ function traduzirElemento(raiz: Node | null): void {
             const pai = no.parentElement;
             if (!pai || ['SCRIPT', 'STYLE'].includes(pai.tagName)) return NodeFilter.FILTER_REJECT;
             if (pai.closest('[data-i18n-exclude]')) return NodeFilter.FILTER_REJECT;
+            if (pai.closest('.material-symbols-outlined')) return NodeFilter.FILTER_REJECT;
             return no.textContent?.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
         }
     });

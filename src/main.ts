@@ -2,6 +2,7 @@ import { initNavigation, initMobileNavigation } from './core/layout/index.js';
 import { initModals, initConfirm } from './core/ui/index.js';
 import { initTheme } from './core/state/themeStore.js';
 import { initI18n } from './core/state/i18nStore.js';
+import { initIconesDecorativos } from './shared/dom/a11yIcons.js';
 import { initSessionTimeout } from './core/auth/sessionTimeout.js';
 import { initDashboard } from './features/dashboard/index.js';
 import { initControle } from './features/controle/index.js';
@@ -25,6 +26,8 @@ import { capturarPainelDaUrlInicial } from './core/notifications/notificationRou
 document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     initI18n();
+    // Icones Material Symbols sao ligaturas: escondidos dos leitores de tela (inclusive os adicionados depois).
+    initIconesDecorativos();
     // The static HTML already carries the version (Vite plugin); this keeps the badge right if it was cached or edited.
     const badgeVersao = document.getElementById('sobre-versao');
     if (badgeVersao) badgeVersao.textContent = `v${APP_VERSION}`;

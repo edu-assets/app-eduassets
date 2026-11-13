@@ -1,6 +1,16 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.5.0**, released on November 13, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.5.1**, released on November 13, 2026; earlier entries remain historical.
+
+## v1.5.1 — Clearer guest mode, stock alerts and dates in the selected language — November 13, 2026
+
+Interface-only release; the API and the site only align the version number.
+
+- **Guest mode:** a **Guest mode — read-only** banner with a **Sign in** button (can be dismissed for the session). Actions unavailable to guests are announced as unavailable, with the hint "Sign in to save changes."; the **New loan** panel shows this notice before the form.
+- **Stock:** an **Out of stock** badge when no unit is available and **Low stock** when 10% or less of the total (at least 1 unit) is available.
+- **New loan:** the **Requester** field suggests names already used (signed-in users only).
+- **Language:** dates follow the selected language in lists, details, exports and PDF; the remaining fixed Portuguese texts were translated.
+- **Accessibility:** decorative icons are hidden from screen readers.
 
 ## v1.5.0 — Filtered history, per-panel routes and a safer session — November 13, 2026
 

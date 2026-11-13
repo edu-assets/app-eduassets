@@ -205,7 +205,10 @@ export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado
 
     subscribeHistorico(() => renderHistoricoAtual(els, estado));
     // "Mostrando N empréstimos" / "Carregar mais" são montados com t(): refaz ao trocar o idioma.
-    subscribeI18n(() => renderHistoricoAtual(els, estado));
+    subscribeI18n(() => {
+        renderHistoricoAtual(els, estado);
+        renderEstoqueAtual(els, estado);
+    });
 
     // Empréstimos abertos alimentam o total "Emprestados" do resumo.
     subscribeLoans(() => renderResumo(els, getEquipamentos()));

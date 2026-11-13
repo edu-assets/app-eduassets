@@ -1,5 +1,5 @@
 import type { AuthUser } from '../../types/index.js';
-import { getIdioma, t } from '../../core/state/i18nStore.js';
+import { getLocale, t } from '../../core/state/i18nStore.js';
 
 export interface SegurancaEls {
     email: HTMLElement | null;
@@ -34,7 +34,7 @@ export function renderInfoConta(els: SegurancaEls, usuario: AuthUser | null): vo
 function formatarDataHora(iso: string): string {
     const data = new Date(iso);
     if (Number.isNaN(data.getTime())) return t('shell.sem_registro');
-    const locale = getIdioma() === 'en' ? 'en-US' : 'pt-BR';
+    const locale = getLocale();
     return data.toLocaleString(locale, { dateStyle: 'short', timeStyle: 'short' });
 }
 

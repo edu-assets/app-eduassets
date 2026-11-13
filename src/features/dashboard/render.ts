@@ -176,7 +176,7 @@ export function exibirDetalheEstoque(els: DashboardEls, equipamento: Equipamento
 }
 
 export function abrirDetalheHistorico(els: DashboardEls, loan: LoanUI): void {
-    els.detalheTitulo.textContent = `Empréstimo #${loan.numero}`;
+    els.detalheTitulo.textContent = `${t('devolucao.emprestimo')} #${loan.numero}`;
     els.detalheBody.innerHTML = renderDashboardHistoricoDetalheBody(loan);
     abrirDetalhe(els);
 }

@@ -1,4 +1,5 @@
 import type { jsPDF as JsPDFInstance } from 'jspdf';
+import { formatarDataHora } from '../state/i18nStore.js';
 
 export interface PdfTabelaSecao {
     titulo: string;
@@ -45,7 +46,7 @@ export async function gerarBaixarPdf(
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
-    const geradoEm = new Date().toLocaleString('pt-BR');
+    const geradoEm = formatarDataHora(new Date());
     doc.text(`Gerado em ${geradoEm}`, MARGEM, 19);
 
     let cursorY = 32;

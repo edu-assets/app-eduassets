@@ -13,7 +13,7 @@ vi.mock('../core/state/authStore.js', () => ({
   atualizarUsuarioLocal: mocks.atualizarUsuarioLocal,
 }));
 vi.mock('../core/ui/index.js', () => ({ showToast: vi.fn() }));
-vi.mock('../core/state/i18nStore.js', () => ({ t: (k: string) => k, getIdioma: () => 'pt', traduzirErro: () => 'erro' }));
+vi.mock('../core/state/i18nStore.js', () => ({ formatarDataHora: (v: unknown) => (typeof v === 'string' ? v : ''), getLocale: () => 'pt-BR', t: (k: string) => k, getIdioma: () => 'pt', traduzirErro: () => 'erro' }));
 vi.mock('../core/auth/guestGate.js', () => ({ bloquearSeConvidado: () => false }));
 
 describe('Segurança: após trocar a senha', () => {

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 const abrirDetalhe = vi.fn();
 const loan = { id: 7, responsavel: 'Ana', aluno: 'Beto', itens: [], createdAt: new Date(), observacao: '' };
 
-vi.mock('../core/state/i18nStore.js', () => ({ getIdioma: () => 'pt', t: (k: string) => k, traduzirErro: () => '' }));
+vi.mock('../core/state/i18nStore.js', () => ({ formatarDataHora: (v: unknown) => (typeof v === 'string' ? v : ''), getLocale: () => 'pt-BR', getIdioma: () => 'pt', t: (k: string) => k, traduzirErro: () => '' }));
 vi.mock('../core/state/loanStore.js', () => ({ getLoansAbertos: () => [loan] }));
 vi.mock('../core/state/liveSync.js', () => ({ atualizarAgora: vi.fn() }));
 vi.mock('../core/ui/index.js', () => ({ showToast: vi.fn(), closeModal: vi.fn() }));

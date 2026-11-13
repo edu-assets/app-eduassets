@@ -7,7 +7,7 @@ const equipamentos = [
 ];
 
 vi.mock('../core/state/i18nStore.js', () => ({
-    getIdioma: () => 'pt',
+    getIdioma: () => 'pt', formatarDataHora: (v: unknown) => (typeof v === 'string' ? v : ''), getLocale: () => 'pt-BR',
     t: (key: string) => ({
         'emprestimo.disponivel_singular': '{n} disponível',
         'emprestimo.disponivel_plural': '{n} disponíveis',

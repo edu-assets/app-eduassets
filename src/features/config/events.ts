@@ -40,7 +40,7 @@ export function attachConfigEvents(): void {
             const ativo = switchEl.classList.toggle('active');
             switchEl.setAttribute('aria-checked', String(ativo));
             const label = switchEl.querySelector<HTMLElement>('.config-switch-label');
-            if (label) label.textContent = ativo ? 'Ativado' : 'Desativado';
+            if (label) label.textContent = ativo ? t('notif.ligado') : t('notif.desligado');
         });
     });
 }

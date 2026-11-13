@@ -20,3 +20,13 @@
     background-color: var(--success-bg);
     color: var(--success-color);
 }
+
+.status-badge--esgotado {
+    background-color: var(--error-bg);
+    color: var(--error-color);
+}
+
+.status-badge--estoque-baixo {
+    background-color: var(--warning-bg);
+    color: var(--warning-color);
+}

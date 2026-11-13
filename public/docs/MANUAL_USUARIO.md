@@ -21,7 +21,7 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 ### Login e Modo Convidado
 
 1. Na tela de entrada, preencha **E-mail / Login** e **Senha**; para leitura limitada, selecione **Continuar como convidado**.
-2. Clique em **Entrar**. Após o login, o menu mostra o nome e o papel da conta.
+2. Clique em **Entrar**. Após o login, o menu mostra o nome e o papel da conta. No Modo Convidado, uma faixa **Modo convidado — somente leitura** com o botão **Entrar** fica no topo (você pode dispensá-la durante a sessão); ações indisponíveis são anunciadas como tal, com a dica "Faça login para registrar alterações."
 3. Para encerrar a sessão, abra o menu do usuário e clique em **Sair**. O sistema solicita a revogação ao backend, remove a inscrição de notificações deste dispositivo (se houver) e retorna à tela de login.
 
 **Privacidade e cookies:** a tela de entrada tem links para os **Termos de Uso** e a **Política de Privacidade**, que explica quais dados o eduAssets trata, com quem os compartilha, por quanto tempo os guarda e como exercer seus direitos. Na primeira visita, um aviso pergunta se você aceita **cookies de estatísticas** (Google Analytics); escolha **Aceitar** ou **Recusar**. Sem aceite, nada do Google é carregado e o sistema funciona normalmente. Para mudar a escolha, abra a Política de Privacidade e clique em **Preferências de cookies**.
@@ -54,9 +54,9 @@ Em **Início**, use os atalhos **Novo empréstimo**, **Devoluções**, **Dashboa
 
 ## 4. Registrar Empréstimo
 
-O painel aparece no menu como **Novo empréstimo** e tem o título **Registrar Empréstimo**. Requer **Editor** ou **Administrador**.
+O painel aparece no menu como **Novo empréstimo** e tem o título **Registrar Empréstimo**. Requer **Editor** ou **Administrador**; convidados veem o aviso "Faça login para registrar alterações." antes do formulário.
 
-1. Em **Dados do Empréstimo**, preencha **Solicitante** e selecione o **Responsável**.
+1. Em **Dados do Empréstimo**, preencha **Solicitante** (para usuários logados, o campo sugere nomes já usados) e selecione o **Responsável**.
 2. Confira **Data e Hora**. O campo é preenchido automaticamente; clique nele se precisar selecionar outra data de retirada.
 3. Em **Itens do Empréstimo**, escolha **Equipamento**, informe **Qtd.** e clique em **Adicionar**. Repita para cada modelo; os itens aparecem em **Itens adicionados**.
 4. Se necessário, preencha **Observação (opcional)**.
@@ -86,7 +86,7 @@ Se **Data e Hora da Devolução** não for alterada, o registro usa a hora do se
 
 O **Dashboard** apresenta os cartões **Total de equipamentos**, **Disponíveis**, **Emprestados**, **Em Manutenção** e **Quebrados**.
 
-- Na aba **Estoque**, consulte os totais por categoria. Clique em uma linha para abrir os detalhes somente leitura da categoria.
+- Na aba **Estoque**, consulte os totais por categoria; o selo **Esgotado** aparece quando não há unidade disponível e **Estoque baixo** quando 10% ou menos do total (no mínimo 1 unidade) está disponível. Clique em uma linha para abrir os detalhes somente leitura da categoria.
 - Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível. Usuários autenticados também veem a autoria (quem registrou e quem devolveu); Convidados nunca recebem esses dados. Os detalhes do estoque mostram quem cadastrou e alterou o equipamento. Na primeira carga, o Dashboard exibe esqueletos de carregamento e contadores "—"; se a carga falhar, aparece um erro no painel com **Tentar novamente**.
 - Use o campo **Buscar por informações...**. Em **Estoque**, a busca considera a categoria; em **Histórico**, considera número, solicitante e responsável.
 - **Filtros do Histórico:** o Histórico carrega 50 empréstimos por vez; use **Carregar mais** e acompanhe **Mostrando N empréstimos** (vale também para Convidados). Os chips de status (**Todos**, **Abertos**, **Devolvidos**) e de período (**Hoje**, **7 dias**, **Este mês**, **Tudo**) combinam com a busca, que para usuários logados é feita no servidor sobre todo o histórico. **Limpar filtros** volta à visão completa.

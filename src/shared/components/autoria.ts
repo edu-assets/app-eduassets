@@ -1,5 +1,5 @@
 import { html, raw } from '../../core/utils/html.js';
-import { t } from '../../core/state/i18nStore.js';
+import { t, formatarDataHora } from '../../core/state/i18nStore.js';
 import type { Autor } from '../../types/index.js';
 import type { CampoAutor, ComAutoria } from '../../core/utils/autoria.js';
 export { extrairAutoria } from '../../core/utils/autoria.js';
@@ -9,9 +9,8 @@ export function temAutoria(obj: object, campo: CampoAutor): boolean {
 }
 
 export function formatarDataAutoria(iso: string | null | undefined): string {
-    if (!iso) return '';
-    const data = new Date(iso);
-    return Number.isNaN(data.getTime()) ? '' : data.toLocaleString('pt-BR');
+    if (!iso || Number.isNaN(new Date(iso).getTime())) return '';
+    return formatarDataHora(iso);
 }
 
 /** Linha "Rótulo: Nome" (ou "—" para autor nulo). Nome escapado pelo helper `html`. */

@@ -177,6 +177,7 @@ export function attachControleEvents(els: ControleEls, estado: ControleEstado): 
                 selecionarLinha(els, estado, row);
                 abrirResolverRegistro(els, estado, row);
             } else {
+                if (bloquearSeConvidado()) return;
                 selecionarLinha(els, estado, row);
                 abrirEdicaoRegistro(els, estado, row);
             }
