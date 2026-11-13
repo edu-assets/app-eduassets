@@ -227,6 +227,22 @@ curl -s https://api.eduassets.tech/auth/session-capabilities   # "passwordRecove
 
 Oracle Cloud blocks only outbound port 25; 465/587 work.
 
+### 5.3 Administrator push notifications (Web Push)
+
+Administrator push notifications use Web Push (Push API, service worker and VAPID keys) and are optional. In `.env.production`:
+
+```bash
+VAPID_PUBLIC_KEY=<VAPID public key>
+VAPID_PRIVATE_KEY=<VAPID private key>            # secret: never commit it or paste it in chats
+VAPID_SUBJECT=mailto:<administrator-contact>     # mailto: or https: URL
+```
+
+The three variables must be set together or not at all. Without them, the API works normally and reports `pushNotifications: false` in `GET /auth/session-capabilities`. An incomplete or invalid set disables push and writes a warning to the API log. Generate the key pair once, with `npx web-push generate-vapid-keys`, and never commit the private key. Changing either key invalidates every existing subscription: administrators must enable notifications again on each device.
+
+`docker-compose.production.yml` passes the three variables to the `api` container; after editing them, recreate the `api` service as described in section 5. No Nginx change is needed and the CSP did not change: the app (Cloudflare Pages) serves `/sw.js` (with `Cache-Control: no-cache`) and `/manifest.webmanifest`.
+
+Delivery happens after the operation is committed to the database and never delays or fails the original request.
+
 ## 6. Nginx
 
 Nginx accepts HTTPS connections on TCP port 443, according to the reviewed configuration bind, and forwards to the local API. Validate before reloading:
@@ -362,7 +378,7 @@ docker compose \
 
 Monitoring has two layers, both versioned in the API repository:
 
-- **External (GitHub Actions):** the [`uptime.yml`](https://github.com/edu-assets/api-eduassets/blob/main/.github/workflows/uptime.yml) workflow runs every 15 minutes and executes [`public-uptime-check.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/public-uptime-check.sh). It checks the API `/health` and `/ready` (`/ready` covers Neon availability), the app, the landing page, the documentation host, TLS validity for the four hosts (alert below 14 days) and the `security.txt` `Expires` field (alert below 30 days). A failed run turns red and GitHub emails the account that last changed the schedule. GitHub pauses schedules after 60 days without repository activity; re-enable it under **Actions** if that happens. The script can also be run by hand: `bash deploy/scripts/public-uptime-check.sh`.
+- **External (GitHub Actions):** the [`uptime.yml`](https://github.com/edu-assets/api-eduassets/blob/main/.github/workflows/uptime.yml) workflow runs every 15 minutes and executes [`public-uptime-check.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/public-uptime-check.sh). It checks the API `/health` and `/ready` (`/ready` covers Neon availability), the app, the landing page, the documentation host, TLS validity for the four hosts (alert below 14 days) and the `security.txt` `Expires` field (alert below 30 days). A failed run turns red and GitHub emails the account that last changed the schedule. GitHub pauses schedules after 60 days without repository activity; re-enable it under **Actions** if that happens. The script can also be run by hand: `bash deploy/scripts/public-uptime-check.sh`. GitHub runners come from datacenter IPs: Cloudflare protections that challenge that traffic (such as **Bot Fight Mode**, which allows no exceptions on the free plan) make the HTTP checks receive `403` while TLS and `security.txt` keep passing. After any Cloudflare bot-protection change, run the workflow manually and confirm it stays green.
 - **On the VM (systemd):** [`vm-health-check.sh`](https://github.com/edu-assets/api-eduassets/blob/main/deploy/scripts/vm-health-check.sh), triggered every 5 minutes by `eduassets-healthcheck.timer`, checks disk usage (`/` and `/var/lib/docker`, 85% limit), available memory, the API container health state and the age of the newest local backup (26 h limit). If the container stays `unhealthy` for 3 consecutive checks it is restarted — something `restart: unless-stopped` does not do on its own. Results go to the journal (`journalctl -u eduassets-healthcheck`); with `HEALTH_PING_URL` set, a dead-man-switch service (for example healthchecks.io) alerts on failures or when the VM stops reporting.
 
 Installation on the VM (once, as root, from the reviewed checkout):
@@ -378,6 +394,8 @@ systemctl start eduassets-healthcheck.service && journalctl -u eduassets-healthc
 ```
 
 On every run, `vm-health-check.sh` also reads the API request log (`docker logs` since the previous run, ignoring `/health` and `/ready` health-check traffic) and reports a problem when there were **at least 5 HTTP 5xx responses and they were at least 5%** of the requests in that interval (`ERROR_5XX_MIN_COUNT` and `ERROR_5XX_MAX_PERCENT` in `/etc/eduassets/healthcheck.env`). Requiring both avoids alerts for a single error during quiet periods. With `HEALTH_PING_URL`, the problem reaches the dead-man switch as `/fail`. The script also reports when the last automatic deployment (§5.1) failed.
+
+To confirm whether push is active, check `pushNotifications` in `GET /auth/session-capabilities`; an incomplete or invalid configuration appears as a warning in the `api` container logs.
 
 ## 11. Backup and recovery
 
@@ -410,7 +428,7 @@ Adjust `User=` in `eduassets-backup.service` if the account that owns `/etc/edua
 ```bash
 export AGE_IDENTITY="$HOME/.config/eduassets/age-identity.txt"   # mode 0600
 export RCLONE_SOURCE='r2:eduassets-postgres-backups/postgres'
-export EXPECTED_MIGRATION='20261028173000_user_management_audit'  # optional
+export EXPECTED_MIGRATION='20261112130000_password_reset_tokens'  # optional: the newest migration in backend/prisma/migrations
 bash deploy/scripts/verify-backup-restore.sh
 ```
 
@@ -445,8 +463,7 @@ A read-only external check over the internet returned `{"status":"ok"}` from `/h
 - `/etc/eduassets/backup.env` created (mode `0600`, owner `ubuntu`) with the password-free Neon *direct* URL and the destination `offsite:eduassets-postgres-backups/postgres`.
 - Manual and systemd-triggered backups completed successfully (`eduassets-20261112T122849Z.dump.age` and `eduassets-20261112T122938Z.dump.age`, 334393 bytes each); R2 now holds 3 objects. The first upload attempt to R2 returns HTTP 501 and `rclone`'s automatic retry completes the transfer, as on October 28.
 - `eduassets-backup.timer` (daily, 06:30 UTC) and `eduassets-healthcheck.timer` (every 5 minutes) enabled. First VM check: disk 24%, 473 MB memory available, API `healthy`, backup 0 h old — `VM health OK`.
-- Security: the `ubuntu` user's shell history contained a database URL with the password in plain text (from an earlier backup attempt); those lines were removed. **The `neondb_owner` role password must be treated as exposed and rotated** in Neon, updating `pgpass` and `.env.production` and recreating the `api` service.
-- Still pending: database password rotation, the first restore drill on the operator machine (§11.2), optional dead-man-switch pings and the Cloudflare dashboard settings (§15).
+- Still pending: the first restore drill on the operator machine (§11.2), optional dead-man-switch pings and the Cloudflare dashboard settings (§15).
 
 **Release 1.2.0 and email — November 12, 2026 (afternoon):**
 
@@ -454,7 +471,24 @@ A read-only external check over the internet returned `{"status":"ok"}` from `/h
 - Email configured with Brevo (§5.2): domain authenticated, branded subdomain `em`, the VM IP on the authorized-IP list and sender `nao-responda@eduassets.tech`. `/auth/session-capabilities` started reporting `passwordRecovery: true` and the test email reached `teste@eduassets.tech` (a Zoho Mail alias).
 - Commit `5167d9f` (professional email template: banner, request details, security notice, footer and Reply-To) was deployed by the timer after CI; `SUPPORT_EMAIL` and `PUBLIC_SITE_URL` were added to `.env.production` and the `api` service was recreated on image `eduassets-backend:5167d9f60c84` (`healthy`). A first attempt to recreate it without `EDUASSETS_IMAGE_TAG` failed without affecting the running container; the correct command is in §5.2.
 - The email button opened a "Your connection is not private" page: the tracking host `r.em.eduassets.tech` served Brevo's default certificate (`r.mailin.fr`, expired in 2024) while the branded-subdomain certificate had not been issued. Brevo issued the Let's Encrypt certificate for `r.em.eduassets.tech` at 14:02 UTC and the full flow started working. If it happens again, the fallback is removing the branded subdomain in Brevo (links go back to Brevo's default domain).
-- Still pending: database password rotation, the first restore drill (§11.2), optional dead-man-switch pings, the remaining Cloudflare dashboard settings (§15) and the VM reboot requested by Ubuntu (*System restart required*).
+- Still pending: the first restore drill (§11.2), optional dead-man-switch pings, the remaining Cloudflare dashboard settings (§15) and the VM reboot requested by Ubuntu (*System restart required*).
+
+**Monitoring, alerting and Cloudflare — 2026-11-12 (late afternoon):**
+
+- **Uptime:** the first manual run failed with HTTP `403` on the five HTTP checks (TLS and `security.txt` passed) because Bot Fight Mode was on and blocked GitHub's runners. With the mode turned off, the re-run passed (18:59 UTC); the following manual and scheduled runs (19:49, 20:08 and 20:28 UTC) passed as well.
+- **VM reboot** done. Afterwards `/ready` returned `{"status":"ready"}` and the 19:22 UTC health check recorded 25% disk, 625 MB available memory, API `healthy` and `VM health OK`.
+- **Dead-man switch (healthchecks.io):** checks `eduassets-health` (5-minute period, 10-minute grace) and `eduassets-backup` (1-day period, 2-hour grace), with email alerts. `HEALTH_PING_URL` and `BACKUP_PING_URL` set in `/etc/eduassets/healthcheck.env` and `/etc/eduassets/backup.env` (mode `0600`). The first `HEALTH_PING_URL` value pointed to another UUID and was corrected; since then, the health check's automatic pings (POST with the `ok` result) reach the dashboard. To check the UUID without printing the whole URL: `sudo bash -c 'set -a; . /etc/eduassets/healthcheck.env; echo "${HEALTH_PING_URL:0:28}..."'`. The backup check receives its first ping with the scheduled backup on 2026-11-13.
+- **R2 HTTP 501 diagnosed:** with `rclone copy -vv`, the first attempt returns `NotImplemented` (501) but the object is already stored; the retry finds the file with the same size and date and does not upload again. No data is lost. The cause was `rclone v1.60.1-DEV`, Ubuntu's 2022 package: it was replaced with the official rclone.org `.deb` (`sudo apt remove rclone` and `sudo dpkg -i rclone-current-linux-<architecture>.deb`; the configuration in `~/.config/rclone` was kept). With `rclone v1.76.0` at `/usr/bin/rclone`, the same test passed on the first attempt (`Copied (new)`, no error) at 20:41 UTC. The official `.deb` is not updated by `apt`; repeat the installation once or twice a year.
+- **Cloudflare dashboard (§15):** account MFA enabled, Bot Fight Mode tested and kept off, AI Labyrinth enabled and `security.txt` also configured in the dashboard.
+- **Database:** grants and RLS verified in Neon; the result is in the Data Model (section *Database grants and RLS (verified)*).
+- Still pending: confirm the first scheduled backup (2026-11-13, 06:30 UTC) and the backup check's first ping, the first restore drill (§11.2) and DMARC to `p=quarantine` (from December, §15).
+
+**Push notifications — 2026-11-12 (night):**
+
+- VAPID keys generated on the VM itself (disposable Node container) and written to `.env.production` without being displayed; a copy of the previous file was kept on the VM before the change.
+- API `9ef34e0` deployed by the automatic deployment after CI: encrypted backup `eduassets-20261112T211156Z.dump.age` uploaded to R2, migration `20261113090000_push_subscriptions` applied and API `healthy` on image `eduassets-backend:9ef34e080a4c`. `/auth/session-capabilities` now reports `pushNotifications: true`; `/notificacoes/push/config` requires an administrator session.
+- App `bb88a27` published on Cloudflare Pages with `/sw.js` and `/manifest.webmanifest`.
+- Pending: enable notifications on each administrator device (§5.3) and confirm a real notification triggered by an `EDITOR` account.
 
 ## 15. Cloudflare zone security
 
@@ -462,11 +496,11 @@ The Cloudflare Security Insights report of November 11, 2026 flagged the followi
 
 | Item | Status | Action |
 |---|---|---|
-| `security.txt` | Published at `https://eduassets.tech/.well-known/security.txt` (RFC 9116, valid until 2027-11-11; monitoring alerts 30 days before). | Optionally also enable **Security → Settings → Security.txt** to clear the dashboard insight. |
+| `security.txt` | Published at `https://eduassets.tech/.well-known/security.txt` (RFC 9116, valid until 2027-11-11; monitoring alerts 30 days before). Also configured under **Security → Settings → Security.txt** on 2026-11-12 with the same values. | When renewing `Expires`, update both the website file **and** the dashboard, keeping the values identical. |
 | DMARC | Published on 2026-11-12 (Brevo's setup assistant consolidated two conflicting `_dmarc` records, `p=none` and `p=quarantine`, which made the policy invalid): `v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com,mailto:dasilva-thiago@eduassets.tech; adkim=r; aspf=r`. SPF (`include:zohomail.com`) covers Zoho; for Brevo sends, alignment comes from the `brevo1`/`brevo2._domainkey` DKIM with `d=eduassets.tech`. | Watch the aggregate reports for a few weeks; with no legitimate failures, tighten to `p=quarantine`. Keep a single `_dmarc` record. |
-| Bot Fight Mode | Off. | Enable under **Security → Bots**. Then run the `Uptime` workflow manually: if the challenge blocks GitHub Actions, keep the mode only if monitoring keeps passing. |
-| AI Labyrinth | Off. | Enable under **Security → Bots**. |
-| Cloudflare account MFA | Off. | Enable two-factor authentication under **My Profile → Authentication** (high priority). |
+| Bot Fight Mode | Tested on 2026-11-12 and kept **off**: it blocked the `Uptime` workflow with HTTP `403` and allows no exceptions on the free plan. It could also block non-browser clients such as the RFID bridge (`rfid_admin_bridge.py`) when pointed at the public API. | Do not re-enable while monitoring relies on GitHub Actions. |
+| AI Labyrinth | Enabled on 2026-11-12; `Uptime` kept passing. | — |
+| Cloudflare account MFA | Enabled on 2026-11-12. The account signed in through GitHub and had no Cloudflare password; one was created through the **Forgot your password?** flow before enabling MFA. | Keep the recovery codes off the computer. |
 | Turnstile | No widget. | Optional; only needed if a public form is added. |
 
 These changes are made in the Cloudflare dashboard by the account owner; record the date of each one in this section.

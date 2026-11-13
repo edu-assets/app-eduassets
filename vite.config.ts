@@ -15,6 +15,7 @@ export default defineConfig({
       '/emprestimos': 'http://127.0.0.1:3000',
       '/ocorrencias': 'http://127.0.0.1:3000',
       '/notificacoes': 'http://127.0.0.1:3000',
+      '/sync': 'http://127.0.0.1:3000',
       '/health': 'http://127.0.0.1:3000',
       '/ready': 'http://127.0.0.1:3000',
       '/ws': {

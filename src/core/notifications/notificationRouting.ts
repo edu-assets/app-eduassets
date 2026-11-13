@@ -12,12 +12,18 @@ const PAINEIS_PERMITIDOS = new Set([
     'panel-controle'
 ]);
 
-// Short aliases accepted in the URL; loans, returns and incidents are all reviewed in "Controle".
+// Short aliases accepted in the URL: loans and returns are reviewed in the Dashboard (history tab),
+// incidents in "Controle". "#panel-controle" stays valid for notifications delivered before this mapping.
 const ALIAS: Record<string, string> = {
     controle: 'panel-controle',
-    emprestimos: 'panel-controle',
-    devolucoes: 'panel-controle',
-    ocorrencias: 'panel-controle'
+    ocorrencias: 'panel-controle',
+    emprestimos: 'panel-dashboard',
+    devolucoes: 'panel-dashboard'
+};
+
+// Panels opened from a notification that must also land on a specific inner tab.
+const ABA_POR_PAINEL: Record<string, string> = {
+    'panel-dashboard': 'historico'
 };
 
 let painelPendente: string | null = null;
@@ -46,9 +52,12 @@ export function capturarPainelDaUrlInicial(): void {
 /** Opens the pending panel once an administrator session is available. */
 export function aplicarPainelPendente(): void {
     if (!painelPendente || !isAdmin()) return;
-    const link = document.querySelector<HTMLElement>(`.nav-link[data-panel="${painelPendente}"]`);
+    const painel = painelPendente;
+    const link = document.querySelector<HTMLElement>(`.nav-link[data-panel="${painel}"]`);
     painelPendente = null;
     link?.click();
+    const aba = ABA_POR_PAINEL[painel];
+    if (link && aba) document.querySelector<HTMLElement>(`.dashboard-tab-link[data-tab="${aba}"]`)?.click();
 }
 
 export function abrirPainelDaNotificacao(url: unknown): void {

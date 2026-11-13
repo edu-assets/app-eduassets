@@ -30,7 +30,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
         version: '1.2.0',
-        updatedAt: '2026-11-12'
+        updatedAt: '2026-11-13'
     },
     {
         id: 'readme',
@@ -65,8 +65,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'schema',
         file: { pt: '/docs/MODELO_DE_DADOS.md', en: '/docs/DATA_MODEL.md' },
         category: 'tecnico',
-        version: '1.0.0',
-        updatedAt: '2026-10-27'
+        version: '1.2.0',
+        updatedAt: '2026-11-12'
     },
     {
         id: 'roadmap',
@@ -84,7 +84,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
         version: '1.2.0',
-        updatedAt: '2026-11-12'
+        updatedAt: '2026-11-13'
     },
     {
         id: 'api-reference',
@@ -93,7 +93,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         file: { pt: '/docs/REFERENCIA_API.md', en: '/docs/API_REFERENCE.md' },
         category: 'tecnico',
         version: '1.2.0',
-        updatedAt: '2026-11-12'
+        updatedAt: '2026-11-13'
     },
     {
         id: 'development',

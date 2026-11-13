@@ -61,8 +61,11 @@ export function atualizarQuantidadeComValidacao(
     return { ok: true, itens: atualizarQuantidadeItem(itensAtuais, id, quantidadeValida) };
 }
 
-export async function confirmarDevolucao(id: number, dataDevolucao: string): Promise<void> {
-    await returnLoan(id, dataDevolucao);
+/** Sem `dataDevolucao` (campo automático) o servidor usa o próprio horário. */
+export async function confirmarDevolucao(id: number, dataDevolucao?: string): Promise<Date | null> {
+    const devolvido = await returnLoan(id, dataDevolucao);
+    const gravada = devolvido?.dataDevolucao ? new Date(devolvido.dataDevolucao) : null;
+    return gravada && !Number.isNaN(gravada.getTime()) ? gravada : null;
 }
 
 export async function salvarItensEmprestimo(id: number, itens: LoanItemUI[]): Promise<void> {

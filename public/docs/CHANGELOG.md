@@ -2,6 +2,39 @@
 
 Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.2.0 oficial**, publicada em 12/11/2026; entradas anteriores permanecem como histórico.
 
+## Atualização automática e ajustes de data e hora — 12 de novembro de 2026
+
+Correções e ajustes, sem número de versão.
+
+- **Atualização automática:** os dados são atualizados sozinhos a cada 30 s com a tela aberta, ao voltar para o app ou a aba e, para administradores, ao receber uma notificação push. O estoque também se atualiza após empréstimos, devoluções e ocorrências.
+- **Correção no celular (empréstimo):** depois de alterar a data e a hora de um empréstimo, o formulário podia deixar de ser enviado (mensagem "Insira um valor válido...") até a página ser recarregada; o mesmo acontecia nas devoluções.
+- **Correção no celular (menu):** a barra lateral não rolava até o perfil do usuário.
+- **Data e hora:** os campos automáticos seguem o relógio do servidor; devoluções sem data alterada manualmente usam a hora do servidor.
+- **Validação:** o servidor recusa datas com mais de 5 minutos no futuro e devoluções anteriores à retirada do empréstimo.
+- **Notificações:** empréstimos e devoluções abrem o Dashboard (aba Histórico) em vez de Controle.
+- **Sessão:** as atualizações automáticas não mantêm ativa a sessão de um administrador ocioso.
+- **Documentação:** Manual do Usuário §3, §4, §5 e §10; Referência da API (nova seção *Sincronização de dados*, `POST /emprestimos` e `PATCH /emprestimos/:id/devolver`).
+
+## Notificações push para administradores — 12 de novembro de 2026
+
+Novo recurso, sem número de versão.
+
+- **Alertas do sistema:** quando outro usuário registra um empréstimo, uma devolução ou uma ocorrência, os administradores ativos recebem uma notificação no computador ou no celular, mesmo com o app fechado ou o celular bloqueado. A ativação é feita por dispositivo em **Configurações → Notificações**, com interruptores por tipo de evento e o som dentro do app. Contas Editor não recebem.
+- **Privacidade:** a notificação mostra apenas o solicitante (ou o tipo de ocorrência), os equipamentos por categoria e modelo e quem registrou; nunca mostra observações, descrições, problemas, medidas tomadas ou números de patrimônio. Os serviços de push (Google, Apple, Mozilla e Microsoft) veem apenas o endpoint do dispositivo e um payload criptografado.
+- **Operação:** novas variáveis opcionais `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` e `VAPID_SUBJECT` em `.env.production`; sem elas o recurso fica desativado e a API funciona normalmente. Nova tabela `PushSubscription` (migration `20261113090000_push_subscriptions`). Não houve alteração no Nginx nem na CSP.
+- **Documentação:** Hospedagem §5.3 e §10; Manual do Usuário §2, §10, §14 e §15; Referência da API (nova seção *Notificações push*); Modelo de Dados (entidade `PushSubscription` e regras de notificação).
+
+## Monitoramento, alertas e segurança da conta Cloudflare — 12 de novembro de 2026
+
+Operação, sem mudança de código nem de versão.
+
+- **Uptime ativo:** o Bot Fight Mode do Cloudflare bloqueava os runners do GitHub (HTTP 403); foi mantido desligado e o workflow passou a rodar verde a cada 15 minutos.
+- **Alertas por dead-man switch** (healthchecks.io) configurados para o health check da VM e para o backup diário.
+- **Cloudflare:** MFA da conta e AI Labyrinth ativados; `security.txt` configurado também no painel.
+- **Banco:** grants e RLS verificados no Neon e registrados no Modelo de Dados.
+- **Backup:** o HTTP 501 do R2 vinha do `rclone` 1.60 do Ubuntu, sem perda de dados; com o `rclone` oficial 1.76.0 na VM, o envio passa na primeira tentativa.
+- **Documentação:** Hospedagem §10, §11.2, §14 e §15; Modelo de Dados.
+
 ## Política de privacidade do app, consentimento de cookies e Google Analytics — 12 de novembro de 2026
 
 - **Política de Privacidade do app** em `app.eduassets.tech/#privacidade` (PT/EN), baseada nos dados e fornecedores documentados: responsável, dados tratados, modo convidado, bases legais da LGPD, fornecedores, retenção, cookies e armazenamento do navegador, segurança e direitos do titular. A tela de entrada passou a dizer "Ao continuar, você concorda com os Termos de Uso e declara ciência da Política de Privacidade", e o item 9 dos Termos de Uso aponta para ela.

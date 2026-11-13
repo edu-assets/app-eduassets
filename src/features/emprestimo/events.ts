@@ -5,7 +5,7 @@ import { renderItens, renderModalItens } from './render.js';
 import { adicionarItemComValidacao, registrarEmprestimo } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
 import type { LoanItemUI, LoanDraft } from '../../types/index.js';
-import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
+import { definirAgora, type FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { t } from '../../core/state/i18nStore.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 
@@ -104,7 +104,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             await registrarEmprestimo(dados);
             showToast('Empréstimo registrado com sucesso', 'success');
             els.form.reset();
-            els.picker.setDate(new Date(), false);
+            definirAgora(els.picker);
             els.dataInput.classList.add('input-auto');
             estado.itens = [];
             renderItens(els, estado.itens);

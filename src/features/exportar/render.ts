@@ -48,7 +48,18 @@ export function definirEstadoCarregando(els: ExportarEls, carregando: boolean): 
 }
 
 export function popularChecklistEquipamentos(els: ExportarEls, equipamentos: Equipamento[]): void {
+    // Preserva o que o usuário desmarcou: equipamentos novos entram marcados, os já listados mantêm a escolha.
+    const desmarcados = new Set(
+        Array.from(els.equipListaContainer.querySelectorAll<HTMLInputElement>('.exportar-equip-checkbox'))
+            .filter((cb) => !cb.checked)
+            .map((cb) => cb.value)
+    );
     els.equipListaContainer.innerHTML = equipamentos.map(renderEquipamentoChecklistItem).join('');
+    if (desmarcados.size) {
+        els.equipListaContainer.querySelectorAll<HTMLInputElement>('.exportar-equip-checkbox').forEach((cb) => {
+            if (desmarcados.has(cb.value)) cb.checked = false;
+        });
+    }
     atualizarContagemEquipamentos(els);
 }
 

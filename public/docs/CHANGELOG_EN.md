@@ -2,6 +2,39 @@
 
 This changelog preserves dated development and deployment records. The current product version is **official 1.2.0**, released on November 12, 2026; earlier entries remain historical.
 
+## Automatic refresh and date and time adjustments — November 12, 2026
+
+Fixes and adjustments, with no version number.
+
+- **Automatic refresh:** data refreshes by itself every 30 s while the screen is open, when you return to the app or tab and, for administrators, when a push notification arrives. Stock also refreshes after loans, returns and occurrences.
+- **Mobile fix (loans):** after changing the date and time of a loan, the form could no longer be submitted (the "Enter a valid value..." message) until the page was reloaded; the same affected returns.
+- **Mobile fix (menu):** the sidebar could not scroll down to the user profile.
+- **Date and time:** automatic date and time fields follow the server clock; returns without a manually changed date use the server time.
+- **Validation:** the server rejects dates more than 5 minutes in the future and returns earlier than the loan's checkout.
+- **Notifications:** loan and return notifications now open the Dashboard (History tab) instead of Control.
+- **Session:** automatic refreshes do not keep an idle administrator session alive.
+- **Documentation:** User Manual §3, §4, §5 and §10; API Reference (new *Data synchronization* section, `POST /emprestimos` and `PATCH /emprestimos/:id/devolver`).
+
+## Push notifications for administrators — November 12, 2026
+
+New feature, with no version number.
+
+- **System alerts:** when another user registers a loan, a return or an occurrence, active administrators receive a notification on the computer or phone, even with the app closed or the phone locked. Activation is per device under **Settings → Notifications**, with switches per event type and the in-app sound. Editor accounts do not receive them.
+- **Privacy:** the notification shows only the requester (or the occurrence type), the equipment by category and model, and who registered it; it never shows notes, descriptions, problem text, measures taken or patrimony numbers. Push services (Google, Apple, Mozilla and Microsoft) see only the device endpoint and an encrypted payload.
+- **Operations:** new optional variables `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT` in `.env.production`; without them the feature stays disabled and the API works normally. New `PushSubscription` table (migration `20261113090000_push_subscriptions`). No Nginx or CSP change was needed.
+- **Documentation:** Hosting §5.3 and §10; User Manual §2, §10, §14 and §15; API Reference (new *Push notifications* section); Data Model (`PushSubscription` entity and notification rules).
+
+## Monitoring, alerting and Cloudflare account security — November 12, 2026
+
+Operations only, with no code or version change.
+
+- **Uptime running:** Cloudflare's Bot Fight Mode blocked GitHub's runners (HTTP 403); it was kept off and the workflow now runs green every 15 minutes.
+- **Dead-man-switch alerts** (healthchecks.io) configured for the VM health check and the daily backup.
+- **Cloudflare:** account MFA and AI Labyrinth enabled; `security.txt` also configured in the dashboard.
+- **Database:** grants and RLS verified in Neon and recorded in the Data Model.
+- **Backup:** the R2 HTTP 501 came from Ubuntu's `rclone` 1.60, with no data loss; with the official `rclone` 1.76.0 on the VM, uploads succeed on the first attempt.
+- **Documentation:** Hosting §10, §11.2, §14 and §15; Data Model.
+
 ## App privacy policy, cookie consent and Google Analytics — November 12, 2026
 
 - **App Privacy Policy** at `app.eduassets.tech/#privacidade` (PT/EN), based on the documented data and providers: controller, data processed, guest mode, LGPD legal bases, providers, retention, cookies and browser storage, security and data-subject rights. The entry screen now says "By continuing, you agree to the Terms of Use and acknowledge the Privacy Policy", and item 9 of the Terms of Use points to it.

@@ -12,7 +12,7 @@ import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
 import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect.js';
 import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overlayPanel.js';
 import type { LoanItemUI, LoanUI, Equipamento } from '../../types/index.js';
-import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
+import { definirAgora, type FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { getLoansAbertos } from '../../core/state/loanStore.js';
 import { t } from '../../core/state/i18nStore.js';
 
@@ -213,7 +213,7 @@ export function abrirModalConfirmacao(els: ModalConfirmacaoEls, estado: Devoluca
     const loan = getLoansAbertos().find((l) => String(l.id) === String(id));
     preencherResumoConfirmacao(els, loan);
 
-    els.devolucaoPicker.setDate(new Date(), false);
+    definirAgora(els.devolucaoPicker);
     els.devolucaoDataInput.classList.add('input-auto');
     openModal('modal-confirmar-devolucao');
 }

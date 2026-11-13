@@ -103,13 +103,19 @@ function formatarMensagemErro(payload: ApiErrorPayload | null, status: number): 
     return detalhes ? `${mensagemBase}\n${detalhes}` : mensagemBase;
 }
 
-interface RequestOptions {
+/** Opções de leitura aceitas pelos carregadores de lista. */
+export interface OpcoesLeitura {
+    /** Requisição automática (polling/recarga): não conta como atividade do usuário no timeout do admin. */
+    passivo?: boolean;
+}
+
+interface RequestOptions extends OpcoesLeitura {
     method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     body?: unknown;
     authMode?: 'cookie';
 }
 
-async function request<T>(path: string, { method = 'GET', body, authMode }: RequestOptions = {}): Promise<T> {
+async function request<T>(path: string, { method = 'GET', body, authMode, passivo }: RequestOptions = {}): Promise<T> {
     const cookieSession = await supportsHttpOnlySession();
     if (authMode === 'cookie' && !cookieSession) {
         const payload = { erro: 'backend.geral.api_indisponivel' };
@@ -117,6 +123,7 @@ async function request<T>(path: string, { method = 'GET', body, authMode }: Requ
     }
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (authMode === 'cookie') headers['X-Auth-Mode'] = 'cookie';
+    if (passivo) headers['X-EduAssets-Atividade'] = 'passiva';
 
     let response: Response;
     try {
@@ -165,7 +172,7 @@ async function request<T>(path: string, { method = 'GET', body, authMode }: Requ
 }
 
 export const http = {
-    get: <T>(path: string): Promise<T> => request<T>(path),
+    get: <T>(path: string, options: Pick<RequestOptions, 'passivo'> = {}): Promise<T> => request<T>(path, options),
     post: <T>(path: string, body?: unknown, options: Pick<RequestOptions, 'authMode'> = {}): Promise<T> => request<T>(path, { ...options, method: 'POST', body }),
     put: <T>(path: string, body?: unknown, options: Pick<RequestOptions, 'authMode'> = {}): Promise<T> => request<T>(path, { ...options, method: 'PUT', body }),
     patch: <T>(path: string, body?: unknown, options: Pick<RequestOptions, 'authMode'> = {}): Promise<T> => request<T>(path, { ...options, method: 'PATCH', body }),

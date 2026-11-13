@@ -70,8 +70,9 @@
         position: fixed;
         top: 0;
         left: 0;
+        height: 100vh;
         height: 100dvh;
-        min-height: 100vh;
+        max-height: 100dvh;
         width: 280px;
         max-width: 85vw;
         overflow: hidden;

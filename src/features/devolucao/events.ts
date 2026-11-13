@@ -20,6 +20,8 @@ import {
     salvarItensEmprestimo
 } from './service.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
+import { dataDevolucaoParaEnvio } from './utils.js';
+import { atualizarAgora } from '../../core/state/liveSync.js';
 import type { LoanItemUI } from '../../types/index.js';
 import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
@@ -91,17 +93,25 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
 
         setButtonLoading(els.btnConfirmarDevolucao, true);
         try {
+            // Campo automático (não editado pelo usuário): o servidor registra o próprio horário.
+            const dataAutomatica = els.devolucaoDataInput.classList.contains('input-auto');
             const selecionada = els.devolucaoPicker.selectedDates[0];
-            if (!selecionada || Number.isNaN(selecionada.getTime())) {
+            if (!dataAutomatica && (!selecionada || Number.isNaN(selecionada.getTime()))) {
                 els.devolucaoDataInput.reportValidity();
                 return;
             }
-            await confirmarDevolucao(Number(estado.idPendente), selecionada.toISOString());
-            showToast(t('feedback.devolucao_registrada').replace('{data}', els.devolucaoDataInput.value), 'success');
+            const gravada = await confirmarDevolucao(Number(estado.idPendente), dataDevolucaoParaEnvio(dataAutomatica, selecionada));
+            // Mostra o horário que o servidor gravou (no modo automático pode diferir do exibido no campo).
+            const dataExibida = gravada
+                ? els.devolucaoPicker.formatDate(gravada, els.devolucaoPicker.config.dateFormat)
+                : els.devolucaoDataInput.value;
+            showToast(t('feedback.devolucao_registrada').replace('{data}', dataExibida), 'success');
             closeModal('modal-confirmar-devolucao');
             estado.idPendente = null;
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_registrar_devolucao'), 'error');
+            // Ex.: outra pessoa já devolveu este empréstimo: atualiza a lista em vez de esperar o próximo ciclo.
+            void atualizarAgora();
         } finally {
             setButtonLoading(els.btnConfirmarDevolucao, false);
         }

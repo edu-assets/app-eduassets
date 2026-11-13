@@ -53,8 +53,9 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `sessionVersion` | `Int` | Não | `@default(0)`; incrementado em logout/troca de senha para revogar JWTs anteriores |
 | `rfidTokenHash` | `String` | Sim | `@unique`; `null` quando não há cartão provisionado |
 | `createdAt` | `DateTime` | Não | `@default(now())` |
+| `pushSubscriptions` | `PushSubscription[]` | Não | Relação Prisma, 1:N |
 
-`Usuario` não possui campo de relação com os demais modelos no schema.
+`Usuario` não se relaciona com as entidades de domínio (equipamentos, empréstimos e ocorrências); a relação `pushSubscriptions` liga o usuário às inscrições de notificação push.
 
 ### Emprestimo
 
@@ -100,6 +101,25 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `createdAt` | `DateTime` | Não | `@default(now())` |
 | `equipamento` | `Equipamento` | Não | Relação Prisma, N:1 |
 
+### PushSubscription
+
+| Campo | Tipo | Nulo? | Padrão / constraint |
+|---|---|---:|---|
+| `id` | `Int` | Não | Chave primária; `autoincrement()` |
+| `usuarioId` | `Int` | Não | Escalar de chave estrangeira para `Usuario.id`; `ON DELETE CASCADE` |
+| `endpoint` | `String` | Não | `@unique` |
+| `p256dh` | `String` | Não | — |
+| `auth` | `String` | Não | — |
+| `notificarEmprestimo` | `Boolean` | Não | `@default(true)` |
+| `notificarDevolucao` | `Boolean` | Não | `@default(true)` |
+| `notificarOcorrencia` | `Boolean` | Não | `@default(true)` |
+| `createdAt` | `DateTime` | Não | `@default(now())` |
+| `updatedAt` | `DateTime` | Não | Comportamento Prisma `@updatedAt` |
+| `lastSuccessAt` | `DateTime` | Sim | — |
+| `usuario` | `Usuario` | Não | Relação Prisma, N:1 |
+
+Criada pela migration `20261113090000_push_subscriptions`, com índice em `usuarioId`. Não armazena endereço IP nem user agent.
+
 ## Enums
 
 | Enum | Valores |
@@ -116,10 +136,11 @@ Categoria 1───N Equipamento
 Responsavel 1───N Emprestimo
 Emprestimo 1───N ItemEmprestimo N───1 Equipamento
 Equipamento 1───N Ocorrencia
-Usuario (independente; sem relação direta com as entidades de domínio)
+Usuario 1───N PushSubscription
+Usuario (independente; sem relação com as entidades de domínio)
 ```
 
-As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.id`, `Emprestimo.responsavelId → Responsavel.id`, `ItemEmprestimo.emprestimoId → Emprestimo.id`, `ItemEmprestimo.equipamentoId → Equipamento.id` e `Ocorrencia.equipamentoId → Equipamento.id`. O schema Prisma não declara ações `onDelete`/`onUpdate`; entretanto, a migration inicial versionada cria as cinco FKs com `ON DELETE RESTRICT` e `ON UPDATE CASCADE`. Para conhecer o banco realmente migrado, considere as migrations SQL em conjunto com o schema Prisma.
+As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.id`, `Emprestimo.responsavelId → Responsavel.id`, `ItemEmprestimo.emprestimoId → Emprestimo.id`, `ItemEmprestimo.equipamentoId → Equipamento.id` e `Ocorrencia.equipamentoId → Equipamento.id`. O schema Prisma não declara ações `onDelete`/`onUpdate`; entretanto, a migration inicial versionada cria as cinco FKs com `ON DELETE RESTRICT` e `ON UPDATE CASCADE`. A FK `PushSubscription.usuarioId → Usuario.id` é criada pela migration `20261113090000_push_subscriptions` com `ON DELETE CASCADE`. Para conhecer o banco realmente migrado, considere as migrations SQL em conjunto com o schema Prisma.
 
 ## Padrões, chaves, unicidade e índices
 
@@ -127,8 +148,8 @@ As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.
 - `Equipamento.quantidadeQuebrada`, `Emprestimo.status` e `Ocorrencia.status` possuem padrões no schema (`0`, `ABERTO` e `ABERTO`, respectivamente).
 - `createdAt` de `Equipamento`, `Usuario`, `Emprestimo` e `Ocorrencia` usa `@default(now())`.
 - `Equipamento.updatedAt` usa `@updatedAt` do Prisma; não é declarado como campo nulo fornecido pelo usuário.
-- As declarações únicas são `Categoria.nome`, `Usuario.login` e `Usuario.rfidTokenHash` (nulo). Elas geram enforcement/índices de unicidade para esses campos.
-- Os índices secundários explícitos cobrem `Emprestimo.status`, `Ocorrencia.status`, quantidades disponível/quebrada do equipamento, `ItemEmprestimo.emprestimoId`, o composto `ItemEmprestimo(equipamentoId, emprestimoId)` e `Ocorrencia(equipamentoId, status, tipo)`.
+- As declarações únicas são `Categoria.nome`, `Usuario.login`, `Usuario.rfidTokenHash` (nulo) e `PushSubscription.endpoint`. Elas geram enforcement/índices de unicidade para esses campos.
+- Os índices secundários explícitos cobrem `Emprestimo.status`, `Ocorrencia.status`, quantidades disponível/quebrada do equipamento, `ItemEmprestimo.emprestimoId`, o composto `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)` e `PushSubscription.usuarioId`.
 - `ItemEmprestimo.emprestimoId` e `Ocorrencia.equipamentoId` agora têm índices explícitos para as consultas e referências usadas; o primeiro também integra índice composto para localizar empréstimos abertos por equipamento.
 
 ## Regras de negócio verificadas nos serviços do backend
@@ -158,10 +179,28 @@ As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.
 - O provisionamento RFID exige que a bridge esteja habilitada e que o usuário exista; depois envia um token gerado à bridge local. Somente após resposta bem-sucedida da bridge o serviço grava `hashRfidToken(token)` em `rfidTokenHash`; o token gerado é retornado nessa operação. Bridge desabilitada, falhas e timeouts resultam em erros do serviço.
 - Revogar um cartão RFID define `rfidTokenHash` como `null`.
 
+### Notificações push
+
+- Empréstimos, devoluções e ocorrências disparam notificações somente depois do commit da transação; o envio nunca atrasa nem faz falhar a operação original.
+- Destinatários: contas ativas com `nivelAcesso = ADMINISTRADOR` que têm inscrição com a preferência correspondente ativa (`notificarEmprestimo`, `notificarDevolucao` ou `notificarOcorrencia`), verificados no momento do envio. Contas `EDITOR` nunca recebem, e o usuário que registrou a operação não recebe a própria notificação.
+- Um pedido de ocorrência gera uma única notificação, mesmo com vários números de patrimônio.
+- `PUT` faz upsert da inscrição por `endpoint`; `DELETE` remove apenas a inscrição do próprio usuário. O logout remove a inscrição do dispositivo, e a troca ou a redefinição de senha remove todas as inscrições do usuário.
+- Resposta `404` ou `410` do serviço de push remove a inscrição afetada.
+
 ## Projeções públicas do Modo Convidado
 
 As respostas anônimas de `GET /equipamentos`, `/emprestimos` e `/ocorrencias` usam serializers allowlist explícitos no backend. Empréstimos ocultam solicitante, responsável e observação; ocorrências ocultam número de patrimônio, problema, descrição e medidas; equipamento expõe somente campos necessários ao painel (sem IDs/campos de auditoria). `GET /responsaveis` e `/usuarios` exigem autenticação. Isso reduz payloads da aplicação, mas não equivale a políticas RLS ou permissões do provedor de banco.
 
 ## Limites de constraints e auditoria
 
-As migrations `20261022090000_stock_checks_and_fk_indexes` adicionam respectivamente constraints `CHECK` para contagens/quantidades e `Usuario.sessionVersion`, padrão `0`. A versão de sessão é comparada em cada autenticação; logout/troca de senha incrementam o valor para revogar sessões anteriores. A migration de sessão preserva usuários existentes, mas exige novo login para JWTs emitidos antes dela. A migration `20260725225116_add_password_hash_to_usuario` adiciona `passwordHash` obrigatório sem valor padrão e, portanto, não pode ser aplicada a uma tabela `Usuario` já populada sem uma estratégia de backfill revisada. As checks ficam no SQL porque o schema Prisma 6 não oferece atributo `CHECK`. A migration de estoque falha em vez de reescrever linhas antigas que violem uma constraint; valide migrations em banco descartável/staging antes de produção. Checks entre tabelas para empréstimos/ocorrências abertos permanecem nos serviços transacionais. Não há `CHECK` para datas nem para consistência entre status e datas. Grants, RLS, PostgREST e outros controles externos não são representados aqui; **os grants/RLS reais do banco permanecem não verificados**.
+As migrations `20261022090000_stock_checks_and_fk_indexes` adicionam respectivamente constraints `CHECK` para contagens/quantidades e `Usuario.sessionVersion`, padrão `0`. A versão de sessão é comparada em cada autenticação; logout/troca de senha incrementam o valor para revogar sessões anteriores. A migration de sessão preserva usuários existentes, mas exige novo login para JWTs emitidos antes dela. A migration `20260725225116_add_password_hash_to_usuario` adiciona `passwordHash` obrigatório sem valor padrão e, portanto, não pode ser aplicada a uma tabela `Usuario` já populada sem uma estratégia de backfill revisada. As checks ficam no SQL porque o schema Prisma 6 não oferece atributo `CHECK`. A migration de estoque falha em vez de reescrever linhas antigas que violem uma constraint; valide migrations em banco descartável/staging antes de produção. Checks entre tabelas para empréstimos/ocorrências abertos permanecem nos serviços transacionais. Não há `CHECK` para datas nem para consistência entre status e datas. Grants, RLS, PostgREST e outros controles externos não são representados no schema Prisma; a verificação real está registrada abaixo.
+
+## Grants e RLS verificados no banco
+
+Verificação feita em 12/11/2026 no SQL Editor do Neon (branch principal, banco `neondb`), consultando `information_schema.role_table_grants` e `pg_class.relrowsecurity` no schema `public`:
+
+- **Grants:** somente o papel `neondb_owner` tem privilégios nas 10 tabelas (`AuditLog`, `Categoria`, `Emprestimo`, `Equipamento`, `ItemEmprestimo`, `Ocorrencia`, `PasswordResetToken`, `Responsavel`, `Usuario` e `_prisma_migrations`): `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `REFERENCES` e `TRIGGER`. Não há grants a `PUBLIC` nem a papéis de API de dados (`anonymous`, `authenticated`) ou a outros papéis.
+- **RLS:** desativado (`relrowsecurity = false`) em todas as tabelas. É o comportamento esperado: o banco não é exposto diretamente a clientes e a autorização é aplicada pela API.
+- **Consequência:** como só o `neondb_owner` tem acesso às tabelas, a API se conecta com o papel dono do schema, que também pode executar DDL (`DROP`, `ALTER`). Melhoria opcional de menor privilégio: criar um papel da aplicação restrito a `SELECT/INSERT/UPDATE/DELETE` e reservar o `neondb_owner` para as migrations.
+
+Repita a verificação depois de mudanças de papéis ou de habilitar recursos do Neon que criem papéis (como a Data API). A tabela `PushSubscription` foi criada depois desta verificação, pela migration aplicada com o mesmo papel dono do schema; inclua-a na próxima conferência.

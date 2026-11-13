@@ -1,10 +1,10 @@
-import { http } from './apiClient.js';
+import { http, type OpcoesLeitura } from './apiClient.js';
 import type { Emprestimo, EmprestimoCreatePayload, ItemEmprestimoPayload } from '../../types/index.js';
 
 type EmprestimoPage = { items: Emprestimo[]; nextCursor: number | null };
 
-export function listarEmprestimos(): Promise<Emprestimo[]> {
-    return http.get<Emprestimo[] | EmprestimoPage>('/emprestimos').then((response) =>
+export function listarEmprestimos(opcoes?: OpcoesLeitura): Promise<Emprestimo[]> {
+    return http.get<Emprestimo[] | EmprestimoPage>('/emprestimos', opcoes).then((response) =>
         Array.isArray(response) ? response : response.items
     );
 }
@@ -17,6 +17,7 @@ export function atualizarItensEmprestimo(id: number, itens: ItemEmprestimoPayloa
     return http.patch<Emprestimo>(`/emprestimos/${id}`, { itens });
 }
 
-export function devolverEmprestimo(id: number, dataDevolucao: string): Promise<Emprestimo> {
-    return http.patch<Emprestimo>(`/emprestimos/${id}/devolver`, { dataDevolucao });
+/** Sem `dataDevolucao` o servidor usa o próprio horário. */
+export function devolverEmprestimo(id: number, dataDevolucao?: string): Promise<Emprestimo> {
+    return http.patch<Emprestimo>(`/emprestimos/${id}/devolver`, dataDevolucao ? { dataDevolucao } : {});
 }

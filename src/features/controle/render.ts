@@ -182,6 +182,9 @@ function limparCamposModal(els: ControleEls): void {
         if (campo) campo.value = '';
     });
     if (els.campoProblema) els.campoProblema.value = '';
+    // fillSelect preserva a seleção anterior; um novo registro começa sem categoria/modelo.
+    els.campoCategoria.value = '';
+    els.campoModelo.value = '';
 }
 
 function alternarCampoMedidas(els: ControleEls, mostrar: boolean): void {

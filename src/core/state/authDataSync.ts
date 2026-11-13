@@ -8,6 +8,7 @@ import {
 } from './index.js';
 import { advanceSessionDataVersion, getSessionDataVersion } from './sessionDataVersion.js';
 import { createSessionDataCoordinator } from './sessionDataCoordinator.js';
+import { iniciarLiveSync } from './liveSync.js';
 import { showToast } from '../ui/index.js';
 import { t } from './i18nStore.js';
 
@@ -34,7 +35,10 @@ export async function initAuthDataSync(): Promise<void> {
             void synchronize(autenticado);
         });
     }
-    await synchronize(isAutenticado());
+    const cargaInicial = synchronize(isAutenticado());
+    // A sincronização ao vivo começa junto com a carga inicial: o cursor é obtido em paralelo, antes das listas.
+    iniciarLiveSync();
+    await cargaInicial;
 }
 
 async function synchronize(authenticated: boolean): Promise<void> {

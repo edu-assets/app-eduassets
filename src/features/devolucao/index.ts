@@ -1,4 +1,4 @@
-import { getEquipamentos } from '../../core/state/equipamentoStore.js';
+import { getEquipamentos, subscribe as subscribeEquipamentos } from '../../core/state/equipamentoStore.js';
 import { criarDataAutoPicker } from '../../core/ui/index.js';
 import { renderLista, popularSelectDetalheEquipamento } from './render.js';
 import { attachDevolucaoEvents } from './events.js';
@@ -62,5 +62,6 @@ export async function initDevolucao(): Promise<void> {
 
     renderLista(els, estado, getLoansAbertos());
     subscribe(() => renderLista(els, estado, getLoansAbertos()));
+    subscribeEquipamentos((equipamentos) => popularSelectDetalheEquipamento(els.detalheEquipamentoSelect, equipamentos));
     subscribeI18n(() => renderLista(els, estado, getLoansAbertos()));
 }

@@ -6,18 +6,26 @@ import {
     excluirOcorrencia
 } from '../api/ocorrencias.js';
 import type { Ocorrencia, OcorrenciaUI, OcorrenciaCreatePayload, OcorrenciaUpdatePayload } from '../../types/index.js';
+import type { OpcoesLeitura } from '../api/apiClient.js';
 import { getSessionDataVersion } from './sessionDataVersion.js';
+import { carregarEquipamentos } from './equipamentoStore.js';
+import { criarLeituraOrdenada, mesmoConteudo } from './leituraOrdenada.js';
 
 type OcorrenciaListener = (ocorrencias: OcorrenciaUI[]) => void;
 
 let ocorrencias: OcorrenciaUI[] = [];
 let listeners: OcorrenciaListener[] = [];
 
-export async function carregarOcorrencias(): Promise<OcorrenciaUI[]> {
+const leituras = criarLeituraOrdenada();
+
+export async function carregarOcorrencias(opcoes?: OpcoesLeitura): Promise<OcorrenciaUI[]> {
     const version = getSessionDataVersion();
-    const dados = await listarOcorrencias();
-    if (version !== getSessionDataVersion()) return ocorrencias;
-    ocorrencias = dados.map(mapOcorrencia);
+    const leitura = leituras.iniciar();
+    const dados = await listarOcorrencias(opcoes);
+    if (version !== getSessionDataVersion() || !leituras.podeAplicar(leitura)) return ocorrencias;
+    const novas = dados.map(mapOcorrencia);
+    if (mesmoConteudo(novas, ocorrencias)) return ocorrencias;
+    ocorrencias = novas;
     notify();
     return ocorrencias;
 }
@@ -37,22 +45,32 @@ export function getOcorrenciasPorTipo(tipo: string): OcorrenciaUI[] {
 
 export async function addOcorrencia(dados: OcorrenciaCreatePayload): Promise<void> {
     await criarOcorrencia(dados);
-    await carregarOcorrencias();
+    await recarregarAposMutacao();
 }
 
 export async function updateOcorrencia(id: number, dados: OcorrenciaUpdatePayload): Promise<void> {
     await atualizarOcorrencia(id, dados);
-    await carregarOcorrencias();
+    await recarregarAposMutacao();
 }
 
 export async function resolveOcorrencia(id: number, medidasTomadas: string): Promise<void> {
     await resolverOcorrencia(id, medidasTomadas);
-    await carregarOcorrencias();
+    await recarregarAposMutacao();
 }
 
 export async function deleteOcorrencia(id: number): Promise<void> {
     await excluirOcorrencia(id);
-    await carregarOcorrencias();
+    await recarregarAposMutacao();
+}
+
+// Criar, resolver e excluir ocorrências alteram quantidadeQuebrada/disponível dos equipamentos no servidor.
+async function recarregarAposMutacao(): Promise<void> {
+    // A operação já foi aplicada: uma falha ao recarregar as listas não deve parecer falha do registro
+    // (o usuário repetiria a ação); a sincronização ao vivo corrige em seguida.
+    const resultados = await Promise.allSettled([carregarOcorrencias(), carregarEquipamentos()]);
+    resultados.forEach((resultado) => {
+        if (resultado.status === 'rejected') console.warn('[eduAssets] Falha ao recarregar após a operação:', resultado.reason);
+    });
 }
 
 export function subscribe(callback: OcorrenciaListener): () => void {

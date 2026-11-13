@@ -1,8 +1,8 @@
-import { http } from './apiClient.js';
+import { http, type OpcoesLeitura } from './apiClient.js';
 import type { Equipamento, EquipamentoCreatePayload, EquipamentoUpdatePayload } from '../../types/index.js';
 
-export function listarEquipamentos(): Promise<Equipamento[]> {
-    return http.get<Equipamento[]>('/equipamentos');
+export function listarEquipamentos(opcoes?: OpcoesLeitura): Promise<Equipamento[]> {
+    return http.get<Equipamento[]>('/equipamentos', opcoes);
 }
 
 export function criarEquipamento(dados: EquipamentoCreatePayload): Promise<Equipamento> {

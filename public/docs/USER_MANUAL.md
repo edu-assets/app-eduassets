@@ -22,7 +22,7 @@ The current data model tracks quantities by **category/model**. It does not prov
 
 1. On the entry screen, enter **E-mail / Login** and **Password**; for limited read-only access, choose **Continue as guest**.
 2. Click **Sign in**. After sign-in, the user menu shows the account name and role.
-3. To end the session, open the user menu and click **Log out**. The system requests revocation from the backend and returns to the login screen.
+3. To end the session, open the user menu and click **Log out**. The system requests revocation from the backend, removes this device's notification subscription (if any) and returns to the login screen.
 
 **Privacy and cookies:** the entry screen links to the **Terms of Use** and the **Privacy Policy**, which explains which data eduAssets processes, who it is shared with, how long it is kept and how to exercise your rights. On the first visit, a notice asks whether you accept **statistics cookies** (Google Analytics); choose **Accept** or **Decline**. Without consent, nothing from Google is loaded and the system works normally. To change your choice, open the Privacy Policy and click **Cookie preferences**.
 
@@ -48,6 +48,8 @@ The flow works only when configuration, networking, the local bridge, dependenci
 
 On **Home**, use the shortcuts **New loan**, **Returns**, **Dashboard**, and **Control**. **Get started** opens the **Register Loan** panel. The page also offers **View documentation**.
 
+**Automatic updates:** the screen refreshes itself every 30 seconds while it is open, as soon as you return to the app or tab and, for administrators, immediately when a notification arrives. There is no need to reload the page.
+
 ## 4. Register Loan
 
 The sidebar item is **New loan** and the panel title is **Register Loan**. It requires an **Editor** or **Administrator** session.
@@ -60,6 +62,8 @@ The sidebar item is **New loan** and the panel title is **Register Loan**. It re
 
 At least one item is required. Both the UI and backend validate available quantity in a transaction; if stock is insufficient, the loan is not created. When successful, available quantity is reduced.
 
+While **Date and Time** is untouched, the field follows the server clock and the record uses the server time at the moment of saving. If you change the field, your chosen time is kept. Dates more than 5 minutes in the future are not accepted.
+
 ## 5. Returns
 
 1. Open **Returns**. The list shows loans whose status is open.
@@ -69,6 +73,8 @@ At least one item is required. Both the UI and backend validate available quanti
 5. Review the **Confirm Return** modal and click **Confirm Return**; **Cancel** closes it without completing the return.
 
 Items become available again after confirmation. **Return Date and Time** is filled automatically and can be edited; on confirmation the UI sends the selected offset-aware ISO timestamp, which the backend validates and persists. Older clients that omit the field continue to use server-current time.
+
+If **Return Date and Time** is untouched, the record uses the server time at the moment of confirmation. A return cannot be earlier than the loan's checkout, and dates more than 5 minutes in the future are not accepted.
 
 ## 6. Dashboard
 
@@ -139,10 +145,33 @@ In **Settings**:
 
 - **Appearance → Theme:** choose **Light**, **Dark**, or **System**.
 - **Language:** choose **Português** or **English**; the interface switches immediately.
-- **Notifications:** switch **Loan alerts** and **Return alerts** between **Enabled** and **Disabled**.
-- **Save Settings:** the button available to Administrators currently shows a visual confirmation but does not persist alerts in the backend. Theme and language are saved automatically as preferences in this browser.
+- **Notifications:** per-device activation, with switches for loans, returns and issues (see the subsection below).
+- **Save Settings:** the button available to Administrators shows a visual confirmation. Theme and language are saved automatically as preferences in this browser; notifications do not depend on this button.
 
-Theme and language are browser preferences. The notification interface is present, but the inspected code exposes no backend route for persisting alerts; do not treat the visual switch state as proof that a notification was delivered.
+Theme and language are browser preferences.
+
+### Push notifications for administrators
+
+Administrators receive a system notification, on the computer or the phone, whenever another user registers a **loan**, a **return** or an **issue**. The notification arrives even with the app closed or the phone locked. It is sent only to active **Administrator** accounts that enabled the feature on that device; **Editor** accounts never receive it, and the user who registered the operation does not get their own alert.
+
+To enable it:
+
+1. In **Settings**, find the **Notifications** card and click **Turn on notifications on this device**.
+2. Allow notifications in the browser prompt.
+3. Click **Send test notification** to confirm that it arrives.
+4. Use the switches for **loans**, **returns** and **issues** to choose what reaches this device. They apply immediately; you do not need to click **Save Settings**.
+
+To turn it off on this device, click **Turn off on this device**.
+
+- **Android:** Chrome works directly.
+- **iPhone and iPad:** require iOS 16.4 or later and the app installed on the home screen. In Safari, tap **Share → Add to Home Screen**, open the app from its icon, sign in as an administrator and then enable notifications.
+- **Blocked by the browser:** if notifications were blocked, allow them in the site settings (icon next to the address) and reload the page.
+
+**Content:** the title is **Novo empréstimo**, **Devolução registrada** or **Nova ocorrência** (Portuguese in this version). Loan and return notifications show the requester, the equipment and who registered the operation, for example: *João Silva · Notebook Dell ×2, Projetor Epson ×1 · por Ana Souza*. Issue notifications show the equipment, the type (**Observação**, **Manutenção** or **Quebrado**) and who registered it. Equipment appears as "Category Model", up to three items and then "e mais N" ("and N more"). A notification never shows notes, descriptions, problem text, measures taken or patrimony numbers, and one issue request produces a single notification even when it has several patrimony numbers. The notification can appear on the lock screen. Tapping a loan or return notification opens the **Dashboard** on the **History** tab; tapping an issue notification opens the **Control** panel.
+
+**Sound and alerts:** the system notification uses the device's default sound and vibration, because browsers do not allow a custom sound. With the app open and visible, it also shows a highlighted toast and plays its own short sound, which can be turned off with the **Sound inside the app** switch. On desktop the notification stays until dismissed; on Android it vibrates.
+
+**Subscriptions:** clicking **Log out** removes that device's subscription, so a shared computer stops receiving alerts; expiry by inactivity does not remove it. Changing the password, or having it reset by an administrator, removes all of the account's subscriptions: enable notifications again afterwards.
 
 ## 11. Account Security
 
@@ -173,6 +202,7 @@ Anyone preparing an installation should follow the README and provide local valu
 - **Deployment:** the official instance runs at `app.eduassets.tech` with the API at `api.eduassets.tech` (dated records in the [Hosting Guide](Hosting.md)). Daily encrypted backups with retention, external monitoring and a restore drill are described in the same guide; the operator records when each item is enabled on the VM.
 - **Password:** each user changes their own in **Security** and can recover it by email through **Forgot my password** (when the installation has email configured); administrators can also reset passwords in **Records → System Users**.
 - **UI security:** guestGate, permissions, and `data-requires-*` attributes guide the interface. Effective authorization is enforced by backend routes/controllers.
+- **Push notifications:** the text is shown in Portuguese in this version, and the sound is the device default because browsers do not allow a custom sound.
 - **Inventory granularity:** the system tracks quantities by model/category, not individual serial numbers.
 - **Data:** this manual contains no real data; use only accounts, people, equipment, and tokens authorized by your installation.
 
@@ -185,3 +215,5 @@ Anyone preparing an installation should follow the README and provide local valu
 **The RFID card does not work.** Check both flags, the shared secret, bridge process, loopback connection, reader, and card link. Use password login while troubleshooting.
 
 **The export is not generated.** Review the type, period, selected equipment, and format. The application does not create a file when no record matches the filters.
+
+**I do not receive push notifications.** Confirm that your account is an **Administrator** and that notifications are enabled on this device under **Settings → Notifications**; use **Send test notification**. On iPhone or iPad, the app must be installed on the home screen (iOS 16.4 or later). If the browser blocked the prompt, allow notifications in the site settings and reload the page.

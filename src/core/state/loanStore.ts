@@ -1,17 +1,25 @@
 import { listarEmprestimos, criarEmprestimo, atualizarItensEmprestimo, devolverEmprestimo } from '../api/emprestimos.js';
 import type { Emprestimo, LoanUI, LoanDraft, LoanUpdate } from '../../types/index.js';
+import type { OpcoesLeitura } from '../api/apiClient.js';
 import { getSessionDataVersion } from './sessionDataVersion.js';
+import { carregarEquipamentos } from './equipamentoStore.js';
+import { criarLeituraOrdenada, mesmoConteudo } from './leituraOrdenada.js';
 
 type LoanListener = (emprestimos: LoanUI[]) => void;
 
 let emprestimos: LoanUI[] = [];
 let listeners: LoanListener[] = [];
 
-export async function carregarEmprestimos(): Promise<LoanUI[]> {
+const leituras = criarLeituraOrdenada();
+
+export async function carregarEmprestimos(opcoes?: OpcoesLeitura): Promise<LoanUI[]> {
     const version = getSessionDataVersion();
-    const dados = await listarEmprestimos();
-    if (version !== getSessionDataVersion()) return emprestimos;
-    emprestimos = dados.map(mapEmprestimo);
+    const leitura = leituras.iniciar();
+    const dados = await listarEmprestimos(opcoes);
+    if (version !== getSessionDataVersion() || !leituras.podeAplicar(leitura)) return emprestimos;
+    const novos = dados.map(mapEmprestimo);
+    if (mesmoConteudo(novos, emprestimos)) return emprestimos;
+    emprestimos = novos;
     notify();
     return emprestimos;
 }
@@ -37,12 +45,15 @@ export async function addLoan(loan: LoanDraft): Promise<void> {
         observacao: loan.observacao || undefined,
         itens: loan.itens.map((item) => ({ equipamentoId: Number(item.id), quantidade: item.quantidade }))
     });
-    await carregarEmprestimos();
+    await recarregarAposMutacao();
 }
 
-export async function returnLoan(id: number, dataDevolucao: string): Promise<void> {
-    await devolverEmprestimo(id, dataDevolucao);
-    await carregarEmprestimos();
+/** Sem `dataDevolucao` o servidor registra a devolução com o próprio horário. */
+/** Retorna o empréstimo devolvido (com a data gravada pelo servidor). */
+export async function returnLoan(id: number, dataDevolucao?: string): Promise<Emprestimo> {
+    const devolvido = await devolverEmprestimo(id, dataDevolucao);
+    await recarregarAposMutacao();
+    return devolvido;
 }
 
 export async function updateLoan(id: number, updates: LoanUpdate): Promise<void> {
@@ -53,7 +64,17 @@ export async function updateLoan(id: number, updates: LoanUpdate): Promise<void>
             quantidade: item.quantidade
         })));
     }
-    await carregarEmprestimos();
+    await recarregarAposMutacao();
+}
+
+// Empréstimo, devolução e edição de itens alteram as quantidades dos equipamentos no servidor.
+async function recarregarAposMutacao(): Promise<void> {
+    // A operação já foi aplicada: uma falha ao recarregar as listas não deve parecer falha do registro
+    // (o usuário repetiria a ação e duplicaria o registro); a sincronização ao vivo corrige em seguida.
+    const resultados = await Promise.allSettled([carregarEmprestimos(), carregarEquipamentos()]);
+    resultados.forEach((resultado) => {
+        if (resultado.status === 'rejected') console.warn('[eduAssets] Falha ao recarregar após a operação:', resultado.reason);
+    });
 }
 
 export function subscribe(callback: LoanListener): () => void {

@@ -4,6 +4,7 @@ import { t } from '../state/i18nStore.js';
 import { tocarAlerta } from './alertSound.js';
 import { abrirPainelDaNotificacao } from './notificationRouting.js';
 import { sincronizar } from './pushNotifications.js';
+import { atualizarAgora } from '../state/liveSync.js';
 
 export const MSG_NOTIFICACAO = 'eduassets:notificacao';
 export const MSG_ABRIR = 'eduassets:abrir';
@@ -36,6 +37,8 @@ export function tratarMensagemServiceWorker(data: unknown): boolean {
     }
 
     if (mensagem.type !== MSG_NOTIFICACAO) return false;
+    // Os dados mudaram no servidor: atualiza sempre, mesmo sem toast (aba oculta ou usuário não admin).
+    void atualizarAgora();
     if (!isAdmin()) return false;
     if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return false;
 

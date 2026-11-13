@@ -23,7 +23,7 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `GET` | `/` | Public | Basic status response. |
 | `GET` | `/health` | Public | Process liveness. |
 | `GET` | `/ready` | Public | Readiness with a bounded PostgreSQL check. |
-| `GET` | `/auth/session-capabilities` | Public | Reports whether the server supports browser cookie sessions (`cookieSession`) and whether email password recovery is configured (`passwordRecovery`). |
+| `GET` | `/auth/session-capabilities` | Public | Reports whether the server supports browser cookie sessions (`cookieSession`), whether email password recovery is configured (`passwordRecovery`) and whether push notifications are available (`pushNotifications`). |
 | `POST` | `/auth/login` | Public; rate limited, with Origin validation when cookie mode is requested | Authenticates `login` and `password`; sets the cookie and returns the profile in cookie mode. |
 | `GET` | `/auth/me` | Authenticated session | Returns the current session profile. |
 | `POST` | `/auth/logout` | Authenticated session | Revokes the user's session version and clears the cookie. Returns `204`. |
@@ -44,9 +44,9 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `GET` | `/equipamentos` | Public/guest or authenticated. |
 | `POST`, `PATCH` | `/equipamentos`, `/equipamentos/:id` | Administrator. |
 | `GET` | `/emprestimos` | Public/guest or authenticated. Without a session, accepts `limit` (default 50, maximum 100) and a positive `cursor`; returns `{ items, nextCursor, limit }` in descending ID order with a reduced public projection. |
-| `POST` | `/emprestimos` | Authenticated user (editor or administrator). |
+| `POST` | `/emprestimos` | Authenticated user (editor or administrator). `dataRetirada` more than 5 minutes in the future returns `400` `backend.emprestimos.data_retirada_futura`. |
 | `PATCH` | `/emprestimos/:id` | Authenticated user; updates loan items. |
-| `PATCH` | `/emprestimos/:id/devolver` | Authenticated user; records a return. |
+| `PATCH` | `/emprestimos/:id/devolver` | Authenticated user; records a return. `dataDevolucao` is optional (omitted = server time). More than 5 minutes in the future returns `400` `backend.emprestimos.data_devolucao_futura`; earlier than the checkout, compared at minute precision, returns `400` `backend.emprestimos.data_devolucao_anterior`. |
 | `GET` | `/ocorrencias` | Public/guest or authenticated; reduced public projection. |
 | `POST`, `PATCH` | `/ocorrencias`, `/ocorrencias/:id` | Authenticated user. |
 | `PATCH` | `/ocorrencias/:id/resolver` | Authenticated user. |
@@ -57,6 +57,37 @@ The API middleware still accepts `Authorization: Bearer <JWT>` for legacy non-br
 | `PATCH` | `/usuarios/:id` | Administrator; updates name, login, access level or the `ativo` status. |
 | `POST` | `/usuarios/:id/password-reset` | Administrator; body `{ "senha": "..." }` following the strong policy (12+ characters, uppercase, lowercase, digit, symbol, max. 72 bytes). Stores the new hash, increments `sessionVersion` (ending the user's sessions) and records `PASSWORD_RESET` in the audit log in the same transaction. Returns `204`. Used by the **Reset password** action in **Records → System Users**. |
 | `POST`, `DELETE` | `/usuarios/:id/rfid-token` | Administrator; provisions or revokes an RFID token. |
+
+## Data synchronization
+
+| Method | Path | Access | Purpose |
+|---|---|---|---|
+| `GET` | `/sync/estado?desde=<int optional>` | Authenticated user (editor or administrator). | Lightweight change feed the app uses to refresh data automatically. |
+
+Response `200`: `{ "serverTime": "<ISO 8601>", "cursor": "<string>", "entidades": ["Emprestimo", "Equipamento", ...] }`.
+
+- `cursor` marks a position in the change history (it stays a few seconds behind the newest change so transactions committed out of order are not missed); send it back as `desde` on the next call. `entidades` lists the kinds of records changed since `desde` — only `Categoria`, `Emprestimo`, `Equipamento`, `Ocorrencia` and `Responsavel` (empty on the first call without `desde`). A recent change may be reported by two consecutive calls.
+- Only entity names are returned, never record contents or who changed them. `serverTime` is the server clock, used by the app for automatic date and time fields.
+- This endpoint never renews the administrator's 30-minute idle timeout.
+- Errors: `400` `backend.validacao.dados_invalidos` for an invalid `desde` or an unknown parameter; `401` when not authenticated or the session expired; `429` `backend.seguranca.muitas_requisicoes` (own limit of 900 requests per 15 min per IP, separate from the global limit).
+- Optional header `X-EduAssets-Atividade: passiva`: on any authenticated request it keeps all checks but does not count as administrator activity (used by automatic background refreshes). It can only shorten a session, never extend it.
+
+## Push notifications
+
+Enrollment of administrator devices for Web Push notifications (Push API + service worker + VAPID). Every route requires `requireAdmin`; `PUT`, `DELETE` and `POST /teste` are limited to 30 requests per 15 minutes per user. Availability is reported by `pushNotifications` in `GET /auth/session-capabilities`.
+
+| Method | Path | Access | Purpose |
+|---|---|---|---|
+| `GET` | `/notificacoes/push/config` | Administrator | Returns `{ habilitado: boolean, chavePublica: string \| null }`. |
+| `PUT` | `/notificacoes/push/inscricao` | Administrator; rate limited | Body `{ inscricao: { endpoint, keys: { p256dh, auth } }, preferencias: { emprestimo, devolucao, ocorrencia } }`. Upserts by `endpoint` and returns `200` with `{ preferencias }`. An endpoint previously linked to another user moves to the current user. |
+| `DELETE` | `/notificacoes/push/inscricao` | Administrator; rate limited | Body `{ endpoint }`. Removes only the caller's own subscription. Returns `204`. |
+| `POST` | `/notificacoes/push/teste` | Administrator; rate limited | Sends a test only to the caller's own devices. Returns `202`. |
+
+- `endpoint` must be `https`, without credentials or a port, and its host must be on the push-service allowlist: `fcm.googleapis.com`, `*.push.apple.com`, `*.push.services.mozilla.com` and `*.notify.windows.com`. The check is repeated at send time (SSRF protection).
+- `PUT` and `POST /teste` respond `503` with `{ erro: 'backend.notificacoes.push_indisponivel' }` when push is not configured. Other error keys: `backend.notificacoes.endpoint_invalido`, `backend.notificacoes.chave_invalida`, `backend.notificacoes.preferencias_invalidas` and `backend.notificacoes.muitas_requisicoes`.
+- Payload received by the service worker: `{ v: 1, tipo: 'EMPRESTIMO_CRIADO' | 'DEVOLUCAO_REGISTRADA' | 'OCORRENCIA_REGISTRADA' | 'TESTE', titulo, corpo, url, tag, criadoEm }`.
+- Delivery happens after the operation is committed and never delays or fails the original request. TTL is 1 hour and urgency `high`. A `404` or `410` response from the push service removes the subscription.
+- Notification click targets: loan and return open `/#panel-dashboard` (History tab); occurrence opens `/#panel-controle`; test opens `/#panel-inicio`.
 
 ## Validation and rules
 

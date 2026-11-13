@@ -5,7 +5,8 @@ const mocks = vi.hoisted(() => ({
     showToast: vi.fn(),
     tocarAlerta: vi.fn(() => true),
     abrirPainelDaNotificacao: vi.fn(),
-    sincronizar: vi.fn(async () => undefined)
+    sincronizar: vi.fn(async () => undefined),
+    atualizarAgora: vi.fn(async () => undefined)
 }));
 
 vi.mock('../core/auth/permissions.js', () => ({ isAdmin: mocks.isAdmin }));
@@ -14,6 +15,7 @@ vi.mock('../core/state/i18nStore.js', () => ({ t: (key: string) => key }));
 vi.mock('../core/notifications/alertSound.js', () => ({ tocarAlerta: mocks.tocarAlerta }));
 vi.mock('../core/notifications/notificationRouting.js', () => ({ abrirPainelDaNotificacao: mocks.abrirPainelDaNotificacao }));
 vi.mock('../core/notifications/pushNotifications.js', () => ({ sincronizar: mocks.sincronizar }));
+vi.mock('../core/state/liveSync.js', () => ({ atualizarAgora: mocks.atualizarAgora }));
 
 import { tratarMensagemServiceWorker } from '../core/notifications/inAppAlerts.js';
 
@@ -43,6 +45,32 @@ describe('service worker message handling', () => {
         expect(mocks.showToast).toHaveBeenCalledTimes(1);
         expect(mocks.showToast).toHaveBeenCalledWith('Novo empréstimo\nAna Souza · Notebook ×2', 'info');
         expect(mocks.tocarAlerta).toHaveBeenCalledTimes(1);
+    });
+
+    it('refreshes the data on every push, before the admin/visibility checks', () => {
+        tratarMensagemServiceWorker(mensagem);
+        expect(mocks.atualizarAgora).toHaveBeenCalledTimes(1);
+    });
+
+    it('refreshes the data even in a hidden tab or for a non-administrator, without toast or sound', () => {
+        vi.stubGlobal('document', { visibilityState: 'hidden' });
+        expect(tratarMensagemServiceWorker(mensagem)).toBe(false);
+        expect(mocks.atualizarAgora).toHaveBeenCalledTimes(1);
+        expect(mocks.showToast).not.toHaveBeenCalled();
+        expect(mocks.tocarAlerta).not.toHaveBeenCalled();
+
+        vi.unstubAllGlobals();
+        mocks.isAdmin.mockReturnValue(false);
+        expect(tratarMensagemServiceWorker(mensagem)).toBe(false);
+        expect(mocks.atualizarAgora).toHaveBeenCalledTimes(2);
+        expect(mocks.showToast).not.toHaveBeenCalled();
+    });
+
+    it('does not refresh for messages that are not push notifications', () => {
+        tratarMensagemServiceWorker({ type: 'eduassets:abrir', url: '/#panel-controle' });
+        tratarMensagemServiceWorker({ type: 'eduassets:push-resync' });
+        tratarMensagemServiceWorker(null);
+        expect(mocks.atualizarAgora).not.toHaveBeenCalled();
     });
 
     it('falls back to a generic title when the payload has none', () => {

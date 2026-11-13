@@ -1,8 +1,8 @@
-import { http } from './apiClient.js';
+import { http, type OpcoesLeitura } from './apiClient.js';
 import type { Ocorrencia, OcorrenciaCreatePayload, OcorrenciaUpdatePayload } from '../../types/index.js';
 
-export function listarOcorrencias(): Promise<Ocorrencia[]> {
-    return http.get<Ocorrencia[]>('/ocorrencias');
+export function listarOcorrencias(opcoes?: OpcoesLeitura): Promise<Ocorrencia[]> {
+    return http.get<Ocorrencia[]>('/ocorrencias', opcoes);
 }
 
 export function criarOcorrencia(dados: OcorrenciaCreatePayload): Promise<Ocorrencia[]> {

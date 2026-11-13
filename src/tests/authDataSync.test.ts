@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   loadResponsible: vi.fn(() => Promise.resolve([])),
   checkReady: vi.fn(() => Promise.resolve()),
   showToast: vi.fn(),
+  startLiveSync: vi.fn(),
 }));
 
 vi.mock('../core/state/authStore.js', () => ({
@@ -35,6 +36,7 @@ vi.mock('../core/state/index.js', () => ({
 }));
 
 vi.mock('../core/ui/index.js', () => ({ showToast: mocks.showToast }));
+vi.mock('../core/state/liveSync.js', () => ({ iniciarLiveSync: mocks.startLiveSync }));
 vi.mock('../core/state/i18nStore.js', () => ({ t: (key: string) => key }));
 vi.mock('../core/api/apiClient.js', () => ({ http: { get: mocks.checkReady } }));
 
@@ -56,6 +58,12 @@ describe('auth-driven data synchronization', () => {
     expect(mocks.checkReady).toHaveBeenCalledTimes(1);
     expect(mocks.loadResponsible).not.toHaveBeenCalled();
     expect(mocks.clearResponsible).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts live sync together with the initial load, once', async () => {
+    const { initAuthDataSync } = await import('../core/state/authDataSync.js');
+    await initAuthDataSync();
+    expect(mocks.startLiveSync).toHaveBeenCalledTimes(1);
   });
 
   it('Editor/Admin login reloads authorized stores without a browser refresh, and logout clears them immediately', async () => {
