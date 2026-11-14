@@ -1,7 +1,5 @@
 # Referência da API — eduAssets
 
-> Esta referência descreve os routers e middlewares presentes no código. O contrato exato dos corpos JSON é definido pelos schemas Zod em `backend/src/schemas/`; nenhuma rota substitui as regras de autorização implementadas no backend.
-
 ## Base e transporte
 
 A API Express é publicada na raiz do host configurado. Não existe prefixo `/api` na montagem atual. Em desenvolvimento, o proxy do Vite encaminha as rotas para `http://127.0.0.1:3000`. Para builds de produção, `VITE_API_BASE_URL` deve conter a origem da API, sem acrescentar um prefixo que não esteja configurado no servidor.

@@ -1,7 +1,5 @@
 # Manual do Usuário — eduAssets
 
-> **Escopo:** este manual descreve a interface e os fluxos confirmados no código atual do eduAssets. Use nomes exatamente como aparecem na UI; não há credenciais, registros ou outros dados reais neste documento.
-
 ## 1. Visão geral
 
 O eduAssets organiza o inventário e o empréstimo de equipamentos escolares. A interface cobre **Novo empréstimo**, **Devoluções**, **Dashboard**, **Controle**, **Cadastros**, **Exportar**, **Configurações**, **Segurança** e **Meu Perfil**.

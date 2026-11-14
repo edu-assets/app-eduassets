@@ -1,7 +1,5 @@
 # Architecture — eduAssets
 
-> This document describes the architecture currently implemented in the source tree. It does not describe a deployed production topology, and it does not infer modules or database features that are not present in the code.
-
 ## System boundary and topology
 
 The application has a browser frontend, an HTTP API, a PostgreSQL database accessed through Prisma, and an optional RFID path:

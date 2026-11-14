@@ -1,7 +1,5 @@
 # User Manual — eduAssets
 
-> **Scope:** this manual describes the interface and workflows confirmed in the current eduAssets code. Use the UI names shown below; this document contains no credentials, records, or other real data.
-
 ## 1. Overview
 
 eduAssets manages school-equipment inventory and loans. The interface covers **New loan**, **Returns**, **Dashboard**, **Control**, **Records**, **Export**, **Settings**, **Security**, and **My Profile**.

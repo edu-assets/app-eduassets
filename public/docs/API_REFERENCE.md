@@ -1,7 +1,5 @@
 # eduAssets API Reference
 
-> This reference describes the routers and middleware currently present in source. Exact JSON request bodies are defined by the Zod schemas in `backend/src/schemas/`; this document does not replace server-side authorization.
-
 ## Base URL and transport
 
 The Express API is mounted at the host root; there is no `/api` prefix in the current route mounting. In development, Vite proxies requests to `http://127.0.0.1:3000`. Production frontend builds require `VITE_API_BASE_URL` to contain the API origin, without adding a prefix that the server does not mount.

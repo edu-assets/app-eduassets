@@ -1,7 +1,5 @@
 # Modelo de Dados — eduAssets
 
-> **Fonte e escopo:** este documento é derivado de `backend/prisma/schema.prisma`. O comportamento de negócio só é incluído quando verificado em `emprestimo.service.ts`, `estoque.service.ts`, `ocorrencia.service.ts`, `usuario.service.ts` e `equipamento.service.ts`.
-
 O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo quando o tipo do schema termina em `?`; os campos de relação abaixo são relações do Prisma, não colunas persistidas.
 
 ## Entidades e campos

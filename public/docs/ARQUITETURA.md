@@ -1,7 +1,5 @@
 # Arquitetura — eduAssets
 
-> Este documento descreve a arquitetura atualmente implementada no código-fonte. Não descreve uma topologia de produção implantada e não infere módulos ou recursos de banco que não estejam presentes no código.
-
 ## Fronteira do sistema e topologia
 
 A aplicação tem um frontend no navegador, uma API HTTP, um banco PostgreSQL acessado pelo Prisma e um caminho RFID opcional:
