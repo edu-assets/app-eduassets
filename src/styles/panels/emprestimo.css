@@ -250,8 +250,30 @@
 }
 
 #panel-emprestimo .form-group.col-md {
-    flex: 0 0 200px;
+    flex: 0 0 236px;
     min-width: 0;
+}
+
+/* "Data e Hora (Clique para alterar)" fica numa linha só, para o campo alinhar com Solicitante e
+   Responsável; se faltar espaço, a dica é abreviada em vez de empurrar o campo para baixo. */
+#panel-emprestimo label[for="data-emprestimo"] {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+#panel-emprestimo label[for="data-emprestimo"] > span:first-child {
+    flex-shrink: 0;
+}
+
+#panel-emprestimo label[for="data-emprestimo"] .form-label-optional {
+    display: block;
+    min-width: 0;
+    margin-left: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #panel-emprestimo .form-group.col-md input {
