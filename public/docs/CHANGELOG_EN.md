@@ -1,6 +1,19 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.5.2**, released on November 13, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.5.3**, released on November 17, 2026; earlier entries remain historical.
+
+## v1.5.3 — Interface refinements and themed form messages — November 17, 2026
+
+Interface-only release; the API and the site only align the version number.
+
+- **Form messages:** the browser's bubble ("Please fill out this field") was replaced by app-styled messages right below the field, with an icon and the field highlighted, in every form (login, password recovery, new loan, return, Control, Records, Export and Security). The cursor moves to the first field to fix and the message disappears as soon as the field is valid. Rules that used to appear as floating notices (choosing equipment before **Add**, a loan with no items, return date, measures taken, no equipment selected in **Export**, weak password or mismatched confirmation) now appear on the related field.
+- **Loading buttons:** keep exactly the same size; the indicator is shown over the label and repeated clicks are ignored. **Generate/Revoke RFID card**, **Change password** and **Load more** (History) now use the same indicator.
+- **Light/dark theme:** "Registered by" on **Returns** cards is now shown as subtle metadata (it was white and bold in the dark theme). **Control** problem badges, **About** tiles, the quantity field in the return details, documentation icons and text now follow the theme; hard-coded colors were replaced by theme colors.
+- **Line breaks:** buttons, badges, tabs, filters, table headers and short labels no longer wrap; long names are truncated with an ellipsis (the full name shows on hover) and dates only wrap between date and time.
+- **Control:** the search field now filters the lists (it previously had no effect).
+- **Password recovery:** server error messages (e.g. invalid or expired link) are shown again.
+- **Language:** text that was still hard-coded in Portuguese (loan success notices, "Select equipment", empty item list, "Details" and "Picked up on" in the Dashboard) follows the selected language.
+- **Documentation:** User Manual §1 (forms and actions).
 
 ## v1.5.2 — Fixes for push notifications, on-screen notices, Records and cards — November 13, 2026
 

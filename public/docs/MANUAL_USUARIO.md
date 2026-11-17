@@ -6,6 +6,8 @@ O eduAssets organiza o inventário e o empréstimo de equipamentos escolares. A 
 
 O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rastreamento individual por número de série; o campo **Número** em Controle é uma identificação informada pelo operador para a ocorrência.
 
+**Formulários e ações:** campos obrigatórios vazios ou preenchidos em formato inválido ficam destacados, com o aviso logo abaixo do próprio campo (no lugar do balão do navegador); o cursor vai para o primeiro campo a corrigir e o aviso some assim que o campo fica correto. Enquanto uma ação é processada, o botão mostra um indicador de carregamento, mantém o tamanho e não aceita cliques repetidos.
+
 ## 2. Acesso, papéis e limites de segurança
 
 | Papel | O que pode fazer na operação | O que é restrito |
