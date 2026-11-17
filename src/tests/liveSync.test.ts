@@ -62,6 +62,18 @@ function cursorInicial(servidor: string): string {
     return String(Math.max(0, Number(servidor) - liveSync.MARGEM_CURSOR_INICIAL));
 }
 
+function entrada(tipo = 'keydown'): void {
+    document.dispatchEvent(new Event(tipo, { bubbles: true }));
+}
+
+/** Avança o tempo simulando entrada do usuário a cada minuto (a aba nunca fica inativa). */
+async function avancarComUsuarioAtivo(ms: number): Promise<void> {
+    for (let restante = ms; restante > 0; restante -= 60_000) {
+        await vi.advanceTimersByTimeAsync(Math.min(60_000, restante));
+        entrada();
+    }
+}
+
 /** Inicia o liveSync e deixa a primeira consulta (que obtém o cursor) terminar. */
 async function iniciar(): Promise<void> {
     liveSync.iniciarLiveSync();
@@ -247,7 +259,10 @@ describe('liveSync', () => {
         mocks.obterEstadoSync.mockResolvedValue(estado([]));
         await vi.advanceTimersByTimeAsync(120_000);
         expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(5);
-        await vi.advanceTimersByTimeAsync(30_000);
+        // sucesso: sai do recuo de erro e passa ao intervalo sem mudancas (1o passo apos o inicial: 60 s)
+        await vi.advanceTimersByTimeAsync(59_000);
+        expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(5);
+        await vi.advanceTimersByTimeAsync(1_000);
         expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(6);
     });
 
@@ -312,14 +327,56 @@ describe('liveSync', () => {
         expect(mocks.carregarResponsaveis).toHaveBeenCalledTimes(2);
     });
 
-    it('atualizarAgora funciona com a aba oculta (push)', async () => {
+    it('push com a aba oculta nao busca nada: a atualizacao roda uma vez ao voltar a aba', async () => {
         await iniciar();
         definirVisibilidade('hidden');
         mocks.obterEstadoSync.mockClear();
         mocks.obterEstadoSync.mockResolvedValue(estado(['Emprestimo'], '30'));
 
         await liveSync.atualizarAgora();
+        await liveSync.atualizarAgora();
+        await vi.advanceTimersByTimeAsync(5 * 60_000);
+        expect(mocks.obterEstadoSync).not.toHaveBeenCalled();
+        expect(mocks.carregarEmprestimos).not.toHaveBeenCalled();
 
+        definirVisibilidade('visible');
+        await vi.advanceTimersByTimeAsync(0);
+        expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+        expect(mocks.carregarEmprestimos).toHaveBeenCalledTimes(1);
+
+        // nao fica nada pendente: uma nova volta imediata nao repete
+        definirVisibilidade('hidden');
+        definirVisibilidade('visible');
+        await vi.advanceTimersByTimeAsync(0);
+        expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+    });
+
+    it('push com entidades e aba oculta: os stores pedidos sao mesclados e recarregados ao voltar', async () => {
+        await iniciar();
+        definirVisibilidade('hidden');
+        mocks.obterEstadoSync.mockClear();
+
+        await liveSync.atualizarAgora(['Ocorrencia']);
+        await liveSync.atualizarAgora(['Responsavel']);
+        expect(mocks.carregarOcorrencias).not.toHaveBeenCalled();
+        expect(mocks.carregarResponsaveis).not.toHaveBeenCalled();
+
+        definirVisibilidade('visible');
+        await vi.advanceTimersByTimeAsync(0);
+        expect(mocks.carregarOcorrencias).toHaveBeenCalledTimes(1);
+        expect(mocks.carregarResponsaveis).toHaveBeenCalledTimes(1);
+        expect(mocks.carregarEquipamentos).toHaveBeenCalledTimes(1);
+    });
+
+    it('push com a aba oculta roda ao voltar mesmo logo apos uma consulta (sem o limite de gatilho)', async () => {
+        await iniciar();
+        definirVisibilidade('hidden');
+        mocks.obterEstadoSync.mockClear();
+        mocks.obterEstadoSync.mockResolvedValue(estado(['Emprestimo'], '30'));
+        await liveSync.atualizarAgora();
+
+        definirVisibilidade('visible'); // a ultima consulta foi ha < 5 s
+        await vi.advanceTimersByTimeAsync(0);
         expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
         expect(mocks.carregarEmprestimos).toHaveBeenCalledTimes(1);
     });
@@ -349,13 +406,174 @@ describe('liveSync', () => {
         expect(mocks.obterEstadoSync).toHaveBeenLastCalledWith('7');
     });
 
-    it('recarga completa silenciosa de seguranca a cada 5 min', async () => {
+    it('recarga completa silenciosa de seguranca so aos 60 min (nao aos 5 min)', async () => {
         await iniciar();
-        await vi.advanceTimersByTimeAsync(4 * 60_000);
+        await avancarComUsuarioAtivo(5 * 60_000 + 60_000);
         todosOsLoaders().forEach((loader) => expect(loader).not.toHaveBeenCalled());
 
-        await vi.advanceTimersByTimeAsync(60_000 + 30_000);
+        await avancarComUsuarioAtivo(53 * 60_000);
+        todosOsLoaders().forEach((loader) => expect(loader).not.toHaveBeenCalled());
+
+        await avancarComUsuarioAtivo(2 * 60_000 + 60_000);
         todosOsLoaders().forEach((loader) => expect(loader).toHaveBeenCalledTimes(1));
+    });
+
+    describe('pausa por inatividade e recuo sem mudancas', () => {
+        const esperas = async (...passos: number[]) => {
+            for (const passo of passos) {
+                mocks.obterEstadoSync.mockClear();
+                await vi.advanceTimersByTimeAsync(passo - 1_000);
+                expect(mocks.obterEstadoSync).not.toHaveBeenCalled();
+                await vi.advanceTimersByTimeAsync(1_000);
+                expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+            }
+        };
+
+        it('sem entrada do usuario por 10 min o polling para e nao faz mais requisicoes', async () => {
+            await iniciar();
+            mocks.obterEstadoSync.mockClear();
+
+            await vi.advanceTimersByTimeAsync(liveSync.INATIVIDADE_PAUSA_MS);
+            const ate = mocks.obterEstadoSync.mock.calls.length;
+            expect(ate).toBeGreaterThan(0);
+
+            mocks.obterEstadoSync.mockClear();
+            await vi.advanceTimersByTimeAsync(3 * 60 * 60_000);
+            expect(mocks.obterEstadoSync).not.toHaveBeenCalled();
+            todosOsLoaders().forEach((loader) => expect(loader).not.toHaveBeenCalled());
+            expect(vi.getTimerCount()).toBe(0);
+        });
+
+        it('entrada do usuario retoma com consulta imediata e o polling volta a rodar', async () => {
+            await iniciar();
+            await vi.advanceTimersByTimeAsync(liveSync.INATIVIDADE_PAUSA_MS + 60_000);
+            mocks.obterEstadoSync.mockClear();
+
+            entrada('pointerdown');
+            await vi.advanceTimersByTimeAsync(0);
+            expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+
+            // volta a 30 s depois da retomada
+            await vi.advanceTimersByTimeAsync(30_000);
+            expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(2);
+        });
+
+        it.each(['pointerdown', 'keydown', 'wheel', 'touchstart', 'pointermove'])('%s conta como entrada', async (tipo) => {
+            await iniciar();
+            await vi.advanceTimersByTimeAsync(liveSync.INATIVIDADE_PAUSA_MS + 60_000);
+            mocks.obterEstadoSync.mockClear();
+
+            entrada(tipo);
+            await vi.advanceTimersByTimeAsync(0);
+            expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+        });
+
+        it('a retomada respeita o intervalo minimo entre gatilhos e o single-flight', async () => {
+            await iniciar();
+            await vi.advanceTimersByTimeAsync(liveSync.INATIVIDADE_PAUSA_MS + 60_000);
+            mocks.obterEstadoSync.mockClear();
+            const primeira = deferred<ReturnType<typeof estado>>();
+            mocks.obterEstadoSync.mockReturnValueOnce(primeira.promise);
+
+            entrada('keydown');
+            entrada('keydown');
+            entrada('wheel');
+            await vi.advanceTimersByTimeAsync(0);
+            expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1); // uma em curso, as demais nao disparam outra
+
+            primeira.resolve(estado([]));
+            await vi.advanceTimersByTimeAsync(0);
+            expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+        });
+
+        it('pointermove e limitado: movimentos seguidos nao reiniciam a contagem a cada evento', async () => {
+            await iniciar();
+            await vi.advanceTimersByTimeAsync(liveSync.INATIVIDADE_PAUSA_MS - 2_000);
+            entrada('pointermove');
+            await vi.advanceTimersByTimeAsync(1_000);
+            entrada('pointermove'); // dentro de 5 s do ultimo: ignorado
+            await vi.advanceTimersByTimeAsync(0);
+            mocks.obterEstadoSync.mockClear();
+
+            // a pausa conta do primeiro movimento registrado (ha 1 s): so falta ~10 min
+            await vi.advanceTimersByTimeAsync(liveSync.INATIVIDADE_PAUSA_MS);
+            mocks.obterEstadoSync.mockClear();
+            await vi.advanceTimersByTimeAsync(60 * 60_000);
+            expect(mocks.obterEstadoSync).not.toHaveBeenCalled();
+        });
+
+        it('entrada reinicia a contagem: usuario ativo nunca pausa', async () => {
+            await iniciar();
+            await avancarComUsuarioAtivo(30 * 60_000);
+            mocks.obterEstadoSync.mockClear();
+            await vi.advanceTimersByTimeAsync(30_000);
+            expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+        });
+
+        it('voltar para a aba depois da pausa retoma; online durante a pausa nao', async () => {
+            await iniciar();
+            await vi.advanceTimersByTimeAsync(liveSync.INATIVIDADE_PAUSA_MS + 60_000);
+            mocks.obterEstadoSync.mockClear();
+
+            window.dispatchEvent(new Event('online'));
+            await vi.advanceTimersByTimeAsync(0);
+            expect(mocks.obterEstadoSync).not.toHaveBeenCalled();
+
+            window.dispatchEvent(new Event('focus'));
+            await vi.advanceTimersByTimeAsync(0);
+            expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+        });
+
+        it('consultas sem mudancas recuam 30 -> 60 -> 120 -> 300 s (teto)', async () => {
+            await iniciar();
+            await esperas(30_000, 60_000, 120_000, 300_000);
+        });
+
+        it('volta a 30 s quando uma consulta traz mudancas', async () => {
+            await iniciar();
+            await esperas(30_000, 60_000);
+
+            mocks.obterEstadoSync.mockResolvedValueOnce(estado(['Equipamento'], '10'));
+            await esperas(120_000); // esta ja estava agendada com o passo de 120 s
+            expect(mocks.carregarEquipamentos).toHaveBeenCalledTimes(1);
+            await esperas(30_000, 60_000);
+        });
+
+        it('entrada do usuario devolve o intervalo a 30 s sem adiar a consulta', async () => {
+            await iniciar();
+            await esperas(30_000, 60_000, 120_000);
+            // proxima consulta em 300 s; 10 s depois o usuario mexe na pagina
+            await vi.advanceTimersByTimeAsync(10_000);
+            mocks.obterEstadoSync.mockClear();
+            entrada('keydown');
+            await vi.advanceTimersByTimeAsync(19_000);
+            expect(mocks.obterEstadoSync).not.toHaveBeenCalled();
+            // 30 s contados da ultima consulta (nao da entrada)
+            await vi.advanceTimersByTimeAsync(1_000);
+            expect(mocks.obterEstadoSync).toHaveBeenCalledTimes(1);
+            await esperas(60_000);
+        });
+
+        it('voltar para a aba e atualizarAgora tambem devolvem o intervalo a 30 s', async () => {
+            await iniciar();
+            await esperas(30_000, 60_000);
+            definirVisibilidade('hidden');
+            definirVisibilidade('visible');
+            await vi.advanceTimersByTimeAsync(0);
+            await esperas(30_000);
+
+            await esperas(60_000);
+            await liveSync.atualizarAgora();
+            await esperas(30_000);
+        });
+
+        it('falha usa o recuo de erro, nao o intervalo sem mudancas', async () => {
+            await iniciar();
+            await esperas(30_000, 60_000, 120_000);
+            mocks.obterEstadoSync.mockRejectedValueOnce(erroApi(503));
+            await esperas(300_000);
+            await esperas(60_000); // recuo de erro: 60 s
+        });
     });
 
     it('para o polling no logout e volta a consultar (com novo cursor) no proximo login', async () => {
