@@ -78,7 +78,7 @@ Consolidates everything released since 1.2.0; details are in the dated entries b
 - **Privacy and cookies:** app Privacy Policy, cookie consent and Google Analytics only after acceptance.
 - **Recovery email:** new professional template and delivery through Brevo.
 - **Operations:** active monitoring, dead-man-switch alerts, MFA and protections on the Cloudflare account, and the official `rclone` in backups.
-- **Single version source:** the version shown in the app (About badge) comes from the app's `package.json` at build time. `npm run version:set -- <x.y.z> [--date YYYY-MM-DD]` updates the version in every repository (app, API, site, documentation READMEs and package files) and `npm run version:set -- --check` verifies they agree. The portfolio site also reads its version from its `package.json`.
+- **Single version source:** the version shown in the app (About badge) comes from the app's `package.json` at build time. `npm run version:set -- <x.y.z> [--date YYYY-MM-DD]` updates the version in every repository (app, API, site, documentation READMEs and package files) and `npm run version:set -- --check` verifies they agree. The presentation site also reads its version from its `package.json`.
 - **Documentation:** User Manual §10 (banner, permission prompt and system notifications) and Development (new *Versioning*).
 
 ## Automatic refresh and date and time adjustments — November 12, 2026
@@ -180,7 +180,7 @@ API update after the 1.2.0 release, with no version or database change.
 - Cookie-mode RFID login exchanges a one-time code that expires in 30 seconds for a browser session; legacy channels may still use the JWT event.
 - The `#login` entry route prevents the protected app from flashing during bootstrap; direct `#app` access waits for session/Guest authorization.
 - Theme/language controls in Settings were aligned with the login screen; PT/EN UI copy now describes explicit save behavior.
-- The About page and documentation modal now render cards from the same registry. Bilingual API/development guides and deployment/hosting guides are registered. The `site-eduassets` portfolio now reads Markdown from `docs.eduassets.tech` in an accessible dialog with search, table of contents, internal links, and sanitization; the reader supports PT-BR/EN.
+- The About page and documentation modal now render cards from the same registry. Bilingual API/development guides and deployment/hosting guides are registered. The `site-eduassets` site now reads Markdown from `docs.eduassets.tech` in an accessible dialog with search, table of contents, internal links, and sanitization; the reader supports PT-BR/EN.
 - READMEs, manuals, architecture, data model, hosting, roadmap, and changelogs were reconciled with source/recorded CI; release instructions now distinguish schema-free updates from backup-and-migrate releases.
 
 ## Deployment and hosting documentation — October 23, 2026

@@ -78,7 +78,7 @@ Consolida tudo o que foi publicado desde a 1.2.0; os detalhes estão nas entrada
 - **Privacidade e cookies:** Política de Privacidade do app, consentimento de cookies e Google Analytics somente após aceite.
 - **E-mail de recuperação:** novo modelo profissional e envio pelo Brevo.
 - **Operação:** monitoramento ativo, alertas por dead-man switch, MFA e proteções na conta Cloudflare e `rclone` oficial nos backups.
-- **Versão única:** a versão exibida no app (selo em Sobre) vem do `package.json` do app em tempo de build. `npm run version:set -- <x.y.z> [--date AAAA-MM-DD]` atualiza a versão em todos os repositórios (app, API, site, READMEs da documentação e arquivos de pacote) e `npm run version:set -- --check` verifica se estão de acordo. O site do portfólio também lê a versão do seu `package.json`.
+- **Versão única:** a versão exibida no app (selo em Sobre) vem do `package.json` do app em tempo de build. `npm run version:set -- <x.y.z> [--date AAAA-MM-DD]` atualiza a versão em todos os repositórios (app, API, site, READMEs da documentação e arquivos de pacote) e `npm run version:set -- --check` verifica se estão de acordo. O site de apresentação também lê a versão do seu `package.json`.
 - **Documentação:** Manual do Usuário §10 (banner, permissão e notificações do sistema) e Desenvolvimento (novo *Versionamento*).
 
 ## Atualização automática e ajustes de data e hora — 12 de novembro de 2026
@@ -180,7 +180,7 @@ Atualização da API após a publicação da 1.2.0, sem mudança de versão nem 
 - O login por RFID no modo cookie troca código de uso único com validade de 30 segundos por sessão; canais legados ainda podem usar o evento com JWT.
 - A entrada por hash `#login` evita o flash do app protegido durante o bootstrap; acesso direto a `#app` aguarda autenticação/autorização de convidado.
 - Os seletores de tema/idioma do painel Configurações foram alinhados ao login; as mensagens PT/EN da UI também refletem o salvamento explícito.
-- A Central Sobre e o modal passaram a usar o mesmo registry para gerar automaticamente todos os cards. Foram acrescentados os guias bilíngues de API e desenvolvimento e registrados os guias de implantação e hospedagem. O portfolio `site-eduassets` passou a ler Markdown de `docs.eduassets.tech` em diálogo acessível com busca, sumário, links internos e sanitização; o leitor permanece em PT-BR/EN.
+- A Central Sobre e o modal passaram a usar o mesmo registry para gerar automaticamente todos os cards. Foram acrescentados os guias bilíngues de API e desenvolvimento e registrados os guias de implantação e hospedagem. O site `site-eduassets` passou a ler Markdown de `docs.eduassets.tech` em diálogo acessível com busca, sumário, links internos e sanitização; o leitor permanece em PT-BR/EN.
 - READMEs, manuais, arquitetura, dados, hospedagem, roadmap e changelogs foram reconciliados com o código/CI registrado; instruções de migration agora separam atualização sem schema do procedimento de release com backup e migrate.
 
 ## Implantação e documentação de hospedagem — 23 de outubro de 2026
