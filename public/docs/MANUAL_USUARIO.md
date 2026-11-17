@@ -48,7 +48,7 @@ O fluxo só funciona quando a configuração, a rede, a ponte local, as dependê
 
 Em **Início**, use os atalhos **Novo empréstimo**, **Devoluções**, **Dashboard** e **Controle**. O botão **Começar** abre o painel **Registrar Empréstimo**. A tela também oferece **Ver documentação**.
 
-**Atualização automática:** a tela se atualiza sozinha a cada 30 segundos enquanto está aberta, assim que você volta para o app ou para a aba e, para administradores, imediatamente quando chega uma notificação. Não é preciso recarregar a página.
+**Atualização automática:** a tela se atualiza sozinha enquanto está aberta (a cada 30 segundos quando há mudanças, com intervalos maiores, até 5 minutos, quando nada muda), assim que você volta para o app ou para a aba e, para administradores, quando chega uma notificação. Depois de 10 minutos sem uso (sem mouse, teclado ou toque), a atualização pausa para economizar recursos e volta na hora em que você mexe na tela. Não é preciso recarregar a página.
 
 ## 4. Registrar Empréstimo
 

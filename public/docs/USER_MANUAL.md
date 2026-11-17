@@ -48,7 +48,7 @@ The flow works only when configuration, networking, the local bridge, dependenci
 
 On **Home**, use the shortcuts **New loan**, **Returns**, **Dashboard**, and **Control**. **Get started** opens the **Register Loan** panel. The page also offers **View documentation**.
 
-**Automatic updates:** the screen refreshes itself every 30 seconds while it is open, as soon as you return to the app or tab and, for administrators, immediately when a notification arrives. There is no need to reload the page.
+**Automatic updates:** the screen refreshes itself while it is open (every 30 seconds when there are changes, with longer intervals, up to 5 minutes, when nothing changes), as soon as you return to the app or tab and, for administrators, when a notification arrives. After 10 minutes without use (no mouse, keyboard or touch), updates pause to save resources and resume as soon as you interact with the screen. There is no need to reload the page.
 
 ## 4. Register Loan
 
