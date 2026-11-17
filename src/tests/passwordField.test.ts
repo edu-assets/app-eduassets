@@ -95,7 +95,8 @@ describe('formulário de troca de senha', () => {
         const g = await montar();
         preencher(g, 'NovaSenha#2026x', 'NovaSenha#2026x', 'NovaSenha#2026x');
         enviar(g);
-        expect(g('e').textContent).toBe('validation.seguranca.nova_igual_atual');
+        // Erros de regra aparecem inline, abaixo do campo (fieldErrors), não no parágrafo geral.
+        expect(document.getElementById('n-field-error')?.textContent).toContain('validation.seguranca.nova_igual_atual');
         expect(apiMocks.alterarSenha).not.toHaveBeenCalled();
     });
 
@@ -103,10 +104,10 @@ describe('formulário de troca de senha', () => {
         const g = await montar();
         preencher(g, 'x', 'fraca', 'fraca');
         enviar(g);
-        expect(g('e').textContent).toBe('validation.cadastros.senha_fraca');
+        expect(document.getElementById('n-field-error')?.textContent).toContain('validation.cadastros.senha_fraca');
         preencher(g, 'x', 'NovaSenha#2026x', 'Outra');
         enviar(g);
-        expect(g('e').textContent).toBe('validation.seguranca.confirmacao_incorreta');
+        expect(document.getElementById('c-field-error')?.textContent).toContain('validation.seguranca.confirmacao_incorreta');
         expect(apiMocks.alterarSenha).not.toHaveBeenCalled();
     });
 });

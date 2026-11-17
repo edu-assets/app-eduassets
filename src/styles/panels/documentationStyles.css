@@ -204,7 +204,11 @@
 .doc-content a { color: var(--primary-color); }
 .doc-content hr { border: none; border-top: 1px solid var(--border-color); margin: 24px 0; }
 .doc-content blockquote { border-left: 3px solid var(--border-color); padding-left: 14px; color: var(--text-muted); margin-bottom: 12px; }
-.doc-content code { background-color: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+.doc-content code { background-color: var(--surface-2); color: var(--text-primary); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; overflow-wrap: anywhere; }
+.doc-content h4 { font-family: var(--font-heading); font-size: 0.95rem; margin: 16px 0 6px; color: var(--text-primary); }
+.doc-content strong, .doc-content b { font-weight: 700; color: var(--text-primary); font-size: inherit; }
+.doc-content li { color: var(--text-secondary); }
+.doc-content a:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; border-radius: 2px; }
 
 .doc-image {
     max-width: 100%;
@@ -257,7 +261,8 @@
 /* ===== Tables ===== */
 .doc-table-wrap { overflow-x: auto; margin-bottom: 16px; -webkit-overflow-scrolling: touch; }
 .doc-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-.doc-table th, .doc-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); text-align: left; }
+.doc-table th, .doc-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-color); text-align: left; color: var(--text-secondary); }
+.doc-table th { white-space: nowrap; }
 .doc-table thead th { background-color: var(--surface-2); position: sticky; top: 0; font-weight: 700; color: var(--text-primary); }
 .doc-table tbody tr:nth-child(even) { background-color: var(--surface-2); }
 

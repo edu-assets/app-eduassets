@@ -35,6 +35,19 @@
     padding-top: 0;
     padding-bottom: 8px;
     margin-bottom: 8px;
+    /* Mesma escala dos cabeçalhos de tabela do Controle. */
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+}
+
+.devolucao-tabela-header > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .devolucao-item {
@@ -113,6 +126,24 @@
     text-transform: uppercase;
 }
 
+/* "Registrado por" no card: metadado discreto de uma linha, com reticências. */
+.devolucao-textos-resp .autoria-bloco {
+    max-width: 100%;
+    min-width: 0;
+    margin-top: 2px;
+}
+
+.devolucao-textos-resp .autoria-linha {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.devolucao-textos-resp .autoria-nome {
+    font-weight: 400;
+}
+
 .devolucao-col-equip {
     display: flex;
     align-items: flex-start;
@@ -138,9 +169,11 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    max-width: 100%;
     font-size: 0.88rem;
     color: var(--text-primary);
-    white-space: nowrap;
+    /* Só quebra no espaço entre data e hora (evita invadir a coluna de ações). */
+    white-space: normal;
 }
 
 .info-data-relativa {
@@ -149,7 +182,15 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    max-width: 100%;
+    min-width: 0;
     white-space: nowrap;
+}
+
+.info-data-texto {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .seta-svg {
@@ -164,14 +205,19 @@
     color: var(--text-primary);
     font-weight: 500;
     display: inline-block;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
+/* primary-color (não primary-dark): o azul 600 perde contraste no tema escuro. */
 .info-resp {
     font-size: 1rem;
-    color: var(--primary-dark);
+    color: var(--primary-color);
     display: inline-block;
     text-transform: uppercase;
     font-weight: 700;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .devolucao-col-acao {
@@ -225,6 +271,15 @@
     font-family: var(--font-heading);
 }
 
+/* Realces claros do estado vazio só fazem sentido no tema claro. */
+html[data-theme="dark"] .devolucao-vazia-texto {
+    text-shadow: none;
+}
+
+html[data-theme="dark"] .devolucao-vazia-logo {
+    filter: none;
+}
+
 .devolucao-vazia-sub {
     font-size: 0.9rem;
     color: var(--slate-400);
@@ -240,7 +295,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--slate-100);
+    background-color: var(--surface-2);
     color: var(--text-secondary);
 }
 
@@ -294,7 +349,7 @@
 .devolucao-item-icon-pill[data-eq="eq1"] {
     background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
     border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
-    color: var(--primary-dark);
+    color: var(--primary-color);
 }
 
 .devolucao-item-icon-pill[data-eq="eq2"] {
@@ -310,9 +365,9 @@
 }
 
 .devolucao-item-icon-pill[data-eq="eq4"] {
-    background-color: #fff9db;
-    border-color: #fab005;
-    color: #f59f00;
+    background-color: color-mix(in srgb, var(--warning-color) 8%, transparent);
+    border-color: color-mix(in srgb, var(--warning-color) 30%, transparent);
+    color: var(--warning-color);
 }
 
 .devolucao-item-icon-pill[data-eq="eq5"] {
@@ -428,6 +483,12 @@
 .devolucao-detalhe-fechar:hover {
     background-color: var(--hover-light);
     color: var(--text-primary);
+}
+
+.devolucao-detalhe-fechar:focus-visible,
+.devolucao-detalhe-editar-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .devolucao-detalhe-fechar .material-symbols-outlined {
@@ -568,6 +629,7 @@
 
 .detalhe-item-status {
     flex-shrink: 0;
+    white-space: nowrap;
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -619,9 +681,12 @@
 }
 
 .detalhe-item-qtd {
+    flex: 0 0 auto;
     width: 48px;
     padding: 4px;
-    border: 1.5px solid var(--border-color);
+    background-color: var(--input-bg);
+    font-family: inherit;
+    border: 1.5px solid var(--input-border);
     border-radius: 4px;
     text-align: center;
     font-weight: 700;
@@ -631,6 +696,11 @@
 .item-emprestimo-remover.detalhe-item-remover {
     position: static;
     margin-left: auto;
+}
+
+.detalhe-emprestimo-item-edit .detalhe-item-nome {
+    font-size: 0.92rem;
+    color: var(--text-primary);
 }
 
 /* RESPONSIVINESS */
@@ -1001,7 +1071,7 @@
 
 .devolucao-ordem-opcao.is-active {
     background-color: var(--primary-color);
-    color: #fff;
+    color: var(--text-on-primary);
 }
 
 .devolucao-ordem-opcao:focus-visible {

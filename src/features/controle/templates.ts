@@ -57,7 +57,7 @@ export function renderControleLinha(tipo: string, dados: OcorrenciaUI): string {
     const dataTexto = formatarDataHora(ehResolvido ? (dados.resolvidoEm || dados.registradoEm) : dados.registradoEm);
 
     const colunaMedidas = ehResolvido
-        ? html`<span data-col="medidas">${dados.medidas || '—'}</span>`
+        ? html`<span data-col="medidas" data-label="${t('shell.medidas_tomadas')}">${dados.medidas || '—'}</span>`
         : '';
 
     return html`
@@ -107,7 +107,7 @@ export function renderDetalhesExclusao(dados: DetalhesExclusaoDados): string {
                     <div class="modal-summary-sub">Nº ${dados.numero}</div>
                 </div>
             </div>
-            <p class="controle-resolver-descricao" style="margin: 0; padding-top: 8px;">${dados.descricao}</p>
+            <p class="controle-resolver-descricao">${dados.descricao}</p>
         </div>
     `;
 }

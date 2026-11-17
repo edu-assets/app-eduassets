@@ -1,3 +1,4 @@
+import { sinalizarErroCampo } from '../../shared/forms/fieldErrors.js';
 import { aoTrocarSessao } from '../../core/state/sessionChange.js';
 import { closeModal, showToast, confirmarExclusao } from '../../core/ui/index.js';
 import {
@@ -212,7 +213,11 @@ function attachResetSenhaModalEvents(els: CadastrosEls): void {
 
         const erroValidacao = validarNovaSenha(modal.novaSenha.value, modal.confirmarSenha.value);
         if (erroValidacao) {
-            showToast(t(erroValidacao), 'warning');
+            // Aviso inline no campo relacionado (sem toast), como nos demais formulários.
+            const alvo = !modal.novaSenha.value || erroValidacao === 'validation.cadastros.senha_fraca'
+                ? modal.novaSenha
+                : modal.confirmarSenha;
+            sinalizarErroCampo(alvo, t(erroValidacao));
             return;
         }
 
@@ -260,7 +265,7 @@ function attachRfidModalEvents(els: CadastrosEls): void {
         });
         if (!confirmado) return;
 
-        rfidModal.btnRevogar.disabled = true;
+        setButtonLoading(rfidModal.btnRevogar, true);
         try {
             await revogarCartaoRfid(usuario.id);
             if (usuarioRfidAtual?.id === usuario.id) exibirCartaoRevogado(rfidModal);
@@ -269,7 +274,7 @@ function attachRfidModalEvents(els: CadastrosEls): void {
         } catch (erro) {
             showToast(traduzirErro(erro, 'feedback.erro_revogar_cartao'), 'error');
         } finally {
-            rfidModal.btnRevogar.disabled = false;
+            setButtonLoading(rfidModal.btnRevogar, false);
         }
     });
 }
@@ -280,10 +285,9 @@ async function gerarOuRegerarToken(els: CadastrosEls, botaoClicado: HTMLButtonEl
     // Captured: Voltar/closing the sheet during the await clears usuarioRfidAtual.
     const usuario = usuarioRfidAtual;
 
-    const textoOriginal = botaoClicado.innerHTML;
     rfidModal.btnGerar.disabled = true;
     rfidModal.btnRegerar.disabled = true;
-    botaoClicado.innerHTML = '<span class="material-symbols-outlined">progress_activity</span> Iniciando hardware...';
+    setButtonLoading(botaoClicado, true);
 
     try {
         await gerarCartaoRfid(usuario.id);
@@ -293,9 +297,9 @@ async function gerarOuRegerarToken(els: CadastrosEls, botaoClicado: HTMLButtonEl
     } catch (erro) {
         showToast(traduzirErro(erro, 'feedback.erro_gerar_token'), 'error');
     } finally {
+        setButtonLoading(botaoClicado, false);
         rfidModal.btnGerar.disabled = false;
         rfidModal.btnRegerar.disabled = false;
-        botaoClicado.innerHTML = textoOriginal;
     }
 }
 

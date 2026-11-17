@@ -6,6 +6,7 @@ import { showToast } from '../../core/ui/index.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 import { validarNovaSenha } from '../cadastros/service.js';
 import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
+import { sinalizarErroCampo } from '../../shared/forms/fieldErrors.js';
 
 const TOKEN_HASH_PATTERN = /^#redefinir-senha=([A-Za-z0-9_-]{43})$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -100,8 +101,8 @@ export function initPasswordRecovery(tokenInicial: string | null): PasswordRecov
         if (btnEnviar.disabled) return;
         const valor = email.value.trim();
         if (!EMAIL_PATTERN.test(valor)) {
-            recuperarErro.textContent = t('auth.informe_email_valido');
-            email.focus();
+            // Erro do campo: aviso inline tematizado (some ao editar)
+            sinalizarErroCampo(email, t('auth.informe_email_valido'));
             return;
         }
         recuperarErro.textContent = '';
@@ -122,7 +123,10 @@ export function initPasswordRecovery(tokenInicial: string | null): PasswordRecov
         }
         const problema = validarNovaSenha(nova.value, confirmar.value);
         if (problema) {
-            redefinirErro.textContent = t(problema);
+            // Erro específico de campo: aviso inline abaixo do campo afetado
+            const alvo = !nova.value ? nova : !confirmar.value ? confirmar
+                : problema === 'validation.seguranca.confirmacao_incorreta' ? confirmar : nova;
+            sinalizarErroCampo(alvo, t(problema));
             return;
         }
         setButtonLoading(btnSalvar, true);

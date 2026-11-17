@@ -6,7 +6,7 @@ import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect
 import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
 import { t } from '../../core/state/i18nStore.js';
 import { sincronizarAbasAria } from '../../shared/dom/tabs.js';
-import { limparErrosModal } from './validacao.js';
+import { limparErrosModal, limparErroCampo } from './validacao.js';
 import { getLoadStatus } from '../../core/state/loadStatus.js';
 import { aplicarEstadoCarga, renderSkeletonLinhas, semDadosProntos, CONTADOR_INDISPONIVEL } from '../../shared/components/loadState.js';
 
@@ -198,6 +198,11 @@ function limparCamposModal(els: ControleEls): void {
     els.campoModelo.value = '';
 }
 
+/** Limpa os avisos dos campos de medidas (erro de regra de negócio, fora da lista de obrigatórios do modal). */
+function limparErrosMedidas(els: ControleEls): void {
+    [els.campoMedidas, els.resolverMedidas].forEach((campo) => { if (campo) limparErroCampo(campo); });
+}
+
 function alternarCampoMedidas(els: ControleEls, mostrar: boolean): void {
     if (els.linhaMedidas) els.linhaMedidas.style.display = mostrar ? 'block' : 'none';
 }
@@ -226,6 +231,7 @@ export function abrirNovoRegistro(els: ControleEls, estado: ControleEstado, tipo
     popularSelectModelos(els, null);
     limparCamposModal(els);
     limparErrosModal(els);
+    limparErrosMedidas(els);
     alternarCampoMedidas(els, false);
 
     openModal('modal-controle-novo');
@@ -255,6 +261,7 @@ export function abrirEdicaoRegistro(els: ControleEls, estado: ControleEstado, ro
     els.campoProblema.value = row.dataset.problema || '';
     els.campoDescricao.value = row.dataset.descricao || '';
     limparErrosModal(els);
+    limparErrosMedidas(els);
 
     const ehResolvido = tipo === 'resolvidos';
     alternarCampoMedidas(els, ehResolvido);
@@ -282,6 +289,7 @@ export function abrirResolverRegistro(els: ControleEls, estado: ControleEstado, 
     if (els.resolverMedidas) {
         els.resolverMedidas.value = '';
     }
+    limparErrosMedidas(els);
 
     openModal('modal-controle-resolver');
 }

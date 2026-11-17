@@ -275,6 +275,11 @@
 .sobre-tech-icon[data-tech="docker"] { background-color: #E5F0FE; color: #2496ED; }
 .sobre-tech-icon[data-tech="nginx"] { background-color: #E5F8EB; color: #009639; }
 
+/* Tema escuro: fundo pastel claro estoura; usa mistura da cor da marca com a superfície */
+html[data-theme="dark"] .sobre-tech-icon[data-tech]:not([data-tech="express"]):not([data-tech="prisma"]) {
+    background-color: color-mix(in srgb, currentColor 18%, var(--surface-white));
+}
+
 .sobre-tech-label {
     display: block;
     color: var(--text-secondary);
@@ -330,6 +335,7 @@
     font-size: 0.75rem;
     font-weight: 700;
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 /* ===== Footer: Contato e links ===== */

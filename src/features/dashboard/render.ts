@@ -17,6 +17,7 @@ import type { HistoricoEstado } from '../../core/state/loanStore.js';
 import { renderBarraFiltros, haFiltrosAtivos } from './filtros.js';
 import { renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
 import { html } from '../../core/utils/html.js';
+import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 
 const LIMITE_CHIPS_HISTORICO = 2;
 
@@ -122,10 +123,10 @@ function renderPaginacaoHistorico(els: DashboardEls, visiveis: number, historico
     if (els.historicoContagem) els.historicoContagem.textContent = textoContagemHistorico(visiveis);
     if (els.btnCarregarMais) {
         els.btnCarregarMais.hidden = !temMais;
-        els.btnCarregarMais.disabled = historico.carregando;
-        els.btnCarregarMais.textContent = t('dashboard.historico_carregar_mais');
-        if (historico.carregando) els.btnCarregarMais.setAttribute('aria-busy', 'true');
-        else els.btnCarregarMais.removeAttribute('aria-busy');
+        // O rótulo fica em `.btn-label` (criado por setButtonLoading); trocar o textContent do botão apagaria o spinner.
+        const rotulo = els.btnCarregarMais.querySelector<HTMLElement>(':scope > .btn-label') ?? els.btnCarregarMais;
+        rotulo.textContent = t('dashboard.historico_carregar_mais');
+        setButtonLoading(els.btnCarregarMais, historico.carregando);
     }
 }
 

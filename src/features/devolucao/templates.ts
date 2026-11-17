@@ -4,7 +4,8 @@ import { gerarIniciais, formatarHora } from './utils.js';
 import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
 import { renderPessoaProtegida, renderIniciaisProtegidas } from '../../shared/components/restrictedPerson.js';
 import { t } from '../../core/state/i18nStore.js';
-import { renderAutoriaCriador } from '../../shared/components/autoria.js';
+import { isAcessoConvidadoAutorizado } from '../../core/state/authStore.js';
+import { renderAutoriaCriador, envolverAutoria } from '../../shared/components/autoria.js';
 import type { LoanItemUI, LoanUI } from '../../types/index.js';
 
 const LIMITE_ICONES_CARD = 3;
@@ -41,13 +42,18 @@ export function renderDevolucaoTabelaHeader(): string {
     `;
 }
 
+/** `title` com o texto completo quando a célula corta com reticências; omitido para convidados (dado restrito). */
+function tituloSeVisivel(valor: string): string {
+    return isAcessoConvidadoAutorizado() ? '' : html` title="${valor}"`;
+}
+
 export function renderDevolucaoCard(loan: LoanUI): string {
     const temObservacao = loan.observacao ? html`
         <span class="info-data-relativa">
             <span class="icon-badge icon-badge--sm icon-badge--neutral">
                 <span class="material-symbols-outlined">sticky_note_2</span>
             </span>
-            ${t('devolucao.com_observacao')}
+            <span class="info-data-texto">${t('devolucao.com_observacao')}</span>
         </span>
     ` : '';
 
@@ -56,9 +62,9 @@ export function renderDevolucaoCard(loan: LoanUI): string {
             <div class="devolucao-col-resp">
                 <div class="devolucao-avatar">${raw(renderIniciaisProtegidas(gerarIniciais(loan.responsavel)))}</div>
                 <div class="devolucao-textos-resp">
-                    <span class="info-resp-nome">${raw(renderPessoaProtegida(loan.responsavel))}</span>
-                    <span class="info-aluno-nome">${raw(renderPessoaProtegida(loan.aluno))}</span>
-                    ${raw(renderAutoriaCriador(loan, 'autoria.registrado_por'))}
+                    <span class="info-resp-nome"${raw(tituloSeVisivel(loan.responsavel))}>${raw(renderPessoaProtegida(loan.responsavel))}</span>
+                    <span class="info-aluno-nome"${raw(tituloSeVisivel(loan.aluno))}>${raw(renderPessoaProtegida(loan.aluno))}</span>
+                    ${raw(envolverAutoria(renderAutoriaCriador(loan, 'autoria.registrado_por')))}
                 </div>
             </div>
             <div class="devolucao-col-equip">
@@ -110,7 +116,7 @@ export function renderDetalheItensView(itens: LoanItemUI[]): string {
             <span class="icon-badge icon-badge--sm icon-badge--primary">
                 <span class="material-symbols-outlined">${getEquipamentoIcon(item.id)}</span>
             </span>
-            <span class="detalhe-item-nome">${item.quantidade}x ${item.nome}</span>
+            <span class="detalhe-item-nome" title="${item.quantidade}x ${item.nome}">${item.quantidade}x ${item.nome}</span>
             <span class="detalhe-item-status">${t('devolucao.pendente')}</span>
         </li>
     `).join('');
@@ -120,8 +126,8 @@ export function renderDetalheItensEdit(itens: LoanItemUI[]): string {
     return itens.map((item) => html`
         <li class="detalhe-emprestimo-item-edit">
             <input type="number" min="1" class="detalhe-item-qtd" value="${item.quantidade}" data-id="${item.id}">
-            <span>${item.nome}</span>
-            <button type="button" class="item-emprestimo-remover detalhe-item-remover" data-id="${item.id}" aria-label="${t('devolucao.remover')}">
+            <span class="detalhe-item-nome" title="${item.nome}">${item.nome}</span>
+            <button type="button" class="item-emprestimo-remover detalhe-item-remover" data-id="${item.id}" aria-label="${t('devolucao.remover')}: ${item.nome}" title="${t('devolucao.remover')}">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </li>

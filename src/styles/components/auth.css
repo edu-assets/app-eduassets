@@ -184,7 +184,14 @@
 .login-erro {
     color: var(--error-color);
     font-size: 0.82rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
     display: none;
+}
+
+/* Recuperação/redefinição escrevem só o texto (sem style inline): mostrar quando houver mensagem */
+.login-erro:not(:empty) {
+    display: block;
 }
 
 /* Initial sign-in screen */
@@ -596,9 +603,9 @@ body.editor-mode [data-requires-admin] {
     gap: 8px 12px;
     margin: 0 0 12px;
     padding: 8px 12px;
-    border: 1px solid var(--border-color, #cbd5e1);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    background: var(--surface-2, #f1f5f9);
+    background: var(--surface-2);
     font-size: 0.9rem;
 }
 
