@@ -8,7 +8,7 @@ Official version 1.2.0 extends the 1.0.x scope with administrator password reset
 
 The browser uses secure cookie-only sessions; if support cannot be confirmed, login fails closed and no JWT is persisted in `localStorage`. The backend validates Origin on authenticated mutations and may retain Bearer compatibility for legacy non-browser clients. Browser RFID login exchanges a one-time code for a session cookie. Guest Mode receives minimized server-side data projections; effective permissions are enforced by the API.
 
-The product includes canonical bilingual documentation, an in-app reader, and a separate portfolio site. RFID remains optional and public deployment templates keep it disabled by default.
+The product includes canonical bilingual documentation, an in-app reader, and a separate presentation site. RFID remains optional and public deployment templates keep it disabled by default.
 
 ## Operations and architecture
 
