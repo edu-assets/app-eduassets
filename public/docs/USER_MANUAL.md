@@ -6,6 +6,8 @@ eduAssets manages school-equipment inventory and loans. The interface covers **N
 
 The current data model tracks quantities by **category/model**. It does not provide per-serial-number tracking; the **Number** field in Control is an operator-supplied identifier for an issue record.
 
+**Forms and actions:** required fields left empty or filled in an invalid format are highlighted, with the message right below the field (instead of the browser's bubble); the cursor moves to the first field to fix and the message disappears as soon as the field is valid. While an action is processed, its button shows a loading indicator, keeps its size and ignores repeated clicks.
+
 ## 2. Access levels and security boundaries
 
 | Role | Operational capabilities | Restricted actions |

@@ -29,8 +29,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'auto_stories',
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
-        version: '1.5.2',
-        updatedAt: '2026-11-16'
+        version: '1.5.3',
+        updatedAt: '2026-11-17'
     },
     {
         id: 'readme',
@@ -83,8 +83,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: '1.5.2',
-        updatedAt: '2026-11-13'
+        version: '1.5.3',
+        updatedAt: '2026-11-17'
     },
     {
         id: 'api-reference',

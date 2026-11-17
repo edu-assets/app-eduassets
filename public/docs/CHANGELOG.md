@@ -1,6 +1,19 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.5.2 oficial**, publicada em 13/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.5.3 oficial**, publicada em 17/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.5.3 — Refinamentos de interface e avisos de formulário no tema — 17 de novembro de 2026
+
+Versão apenas de interface; a API e o site só alinham o número da versão.
+
+- **Avisos de formulário:** o balão do navegador ("Preencha este campo") foi substituído por avisos no estilo do app, logo abaixo do campo, com ícone e destaque no próprio campo, em todos os formulários (login, recuperação de senha, novo empréstimo, devolução, Controle, Cadastros, Exportar e Segurança). O cursor vai para o primeiro campo a corrigir e o aviso some assim que o campo fica correto. Regras que antes apareciam como aviso flutuante (escolher um equipamento antes de **Adicionar**, empréstimo sem itens, data de devolução, medidas tomadas, nenhum equipamento selecionado em **Exportar**, senha fraca ou confirmação diferente) agora aparecem no campo correspondente.
+- **Botões em carregamento:** mantêm exatamente o mesmo tamanho; o indicador aparece sobre o rótulo, e cliques repetidos são ignorados. **Gerar/Revogar cartão RFID**, **Alterar senha** e **Carregar mais** (Histórico) passaram a usar o mesmo indicador.
+- **Tema claro/escuro:** "Registrado por" nos cartões de **Devoluções** agora aparece como metadado discreto (antes ficava em branco e negrito no tema escuro). Selos de problema do **Controle**, blocos da tela **Sobre**, campo de quantidade no detalhe da devolução, ícones e textos da documentação passaram a seguir o tema; cores fixas foram trocadas pelas cores do tema.
+- **Quebras de linha:** botões, selos, abas, filtros, cabeçalhos de tabela e rótulos curtos não quebram mais linha; nomes longos são abreviados com reticências (o nome completo aparece ao passar o mouse) e datas só quebram entre a data e a hora.
+- **Controle:** o campo de busca passou a filtrar as listas (antes não tinha efeito).
+- **Recuperação de senha:** mensagens de erro do servidor (ex.: link inválido ou expirado) voltaram a aparecer.
+- **Idioma:** textos que ainda estavam fixos em português (avisos de sucesso do empréstimo, "Selecionar equipamento", lista de itens vazia, "Detalhes" e "Retirada em" no Dashboard) seguem o idioma escolhido.
+- **Documentação:** Manual do Usuário §1 (formulários e ações).
 
 ## v1.5.2 — Correções em notificações push, avisos na tela, Cadastros e cartões — 13 de novembro de 2026
 
