@@ -75,10 +75,9 @@
 .registrar-emprestimo .material-symbols-outlined {
     font-size: 1.2rem;
     vertical-align: middle;
-    margin-right: 6px;
 }
 
-.registrar-emprestimo:hover {
+.registrar-emprestimo:hover:not(:disabled) {
     background-color: var(--hover-primary);
     transform: translateY(-2px);
 }
@@ -87,11 +86,11 @@
     visibility: hidden;
 }
 
-.form-group .col-md .data-emprestimo,
 .form-label-optional {
     display: inline-flex;
     align-items: center;
-    font-size: 0.70rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
 }
 
 /* itens adicionados */
@@ -209,6 +208,12 @@
     color: var(--error-color);
 }
 
+.item-emprestimo-remover:focus-visible,
+.itens-emprestimo-mais:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
 .item-emprestimo-remover .material-symbols-outlined {
     font-size: 13px;
     width: 13px;
@@ -260,8 +265,14 @@
     justify-content: flex-end;
 }
 
+/* O rótulo "Ação" fica invisível (visibility: hidden), mas ocupa a altura do rótulo dos campos vizinhos:
+   o botão alinha pelo topo do select mesmo quando um aviso de erro aumenta a altura da linha. */
 #panel-emprestimo .form-group-align-btn label {
-    display: none;
+    display: block;
+}
+
+#panel-emprestimo .form-row:has(#equipamento) {
+    align-items: flex-start;
 }
 
 #panel-emprestimo .form-group-align-btn .btn {
@@ -468,7 +479,7 @@
         display: grid;
         grid-template-columns: minmax(0, 1fr) 84px auto;
         gap: 12px;
-        align-items: end;
+        align-items: start;
     }
 
     #panel-emprestimo .form-section:nth-child(2) .form-group-align-btn .btn {
@@ -535,7 +546,11 @@
         display: grid;
         grid-template-columns: 1fr 84px;
         gap: 10px;
-        align-items: flex-end;
+        align-items: flex-start;
+    }
+
+    #panel-emprestimo .form-group-align-btn label {
+        display: none;
     }
 
     #panel-emprestimo .form-row:has(#data-emprestimo) .col-md {
@@ -630,13 +645,11 @@
     display: block;
     margin-top: 4px;
     font-size: 0.8125rem;
-    color: var(--danger-color, #dc2626);
+    color: var(--error-color);
 }
 
 .form-error[hidden] {
     display: none;
 }
 
-.form-group input[aria-invalid="true"] {
-    border-color: var(--danger-color, #dc2626);
-}
+/* O estado inválido dos campos (borda/anel em --error-color) vem de forms.css. */

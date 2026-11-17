@@ -1,6 +1,7 @@
 import { closeModal, showToast, confirmarExclusao } from '../../core/ui/index.js';
 import {
     ativarAba,
+    renderControle,
     fecharTodosMenus,
     selecionarLinha,
     limparSelecao,
@@ -16,11 +17,13 @@ import { renderDetalhesExclusao } from './templates.js';
 import { bloquearSeConvidado, bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 import type { ControleRegistroDados } from '../../types/index.js';
-import { traduzirErro } from '../../core/state/i18nStore.js';
+import { t, traduzirErro } from '../../core/state/i18nStore.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 import { attachTablistKeyboard } from '../../shared/dom/tabs.js';
 import { abrirDocumentacao } from '../sobre/index.js';
 import { attachLimpezaErros, validarModal } from './validacao.js';
+import { sinalizarErroCampo } from '../../shared/forms/fieldErrors.js';
+import { aoTrocarSessao } from '../../core/state/sessionChange.js';
 
 const SELETOR_ITEM_MENU = '[role="menuitem"]:not(:disabled)';
 
@@ -88,6 +91,20 @@ export function attachControleEvents(els: ControleEls, estado: ControleEstado): 
     if (tablist) attachTablistKeyboard(tablist, '.controle-tab-link');
     attachTecladoMenus(els);
     attachLimpezaErros(els);
+
+    // A busca filtra as quatro listas no cliente (filtrarOcorrencias); some ao trocar de sessão (PC compartilhado).
+    if (els.inputBusca) {
+        const inputBusca = els.inputBusca;
+        inputBusca.addEventListener('input', () => {
+            estado.termoBusca = inputBusca.value;
+            renderControle(els, estado);
+        });
+        aoTrocarSessao(() => {
+            inputBusca.value = '';
+            estado.termoBusca = '';
+            renderControle(els, estado);
+        });
+    }
     document.getElementById('controle-btn-saiba-mais')?.addEventListener('click', () => abrirDocumentacao('manual-usuario'));
 
     document.querySelectorAll<HTMLElement>('.controle-tab-link').forEach((tabLink) => {
@@ -233,9 +250,8 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
 
     if (!validarModal(els)) return;
 
-    if (estado.tipoAtual === 'resolvidos' && !els.campoMedidas?.value.trim()) {
-        showToast('Descreva as medidas tomadas antes de salvar', 'warning');
-        els.campoMedidas?.focus();
+    if (estado.tipoAtual === 'resolvidos' && els.campoMedidas && !els.campoMedidas.value.trim()) {
+        sinalizarErroCampo(els.campoMedidas, t('feedback.descreva_medidas_salvar'));
         return;
     }
 
@@ -281,8 +297,7 @@ async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promis
 
     const medidas = els.resolverMedidas?.value.trim();
     if (!medidas) {
-        showToast('Descreva as medidas tomadas antes de confirmar', 'warning');
-        els.resolverMedidas?.focus();
+        if (els.resolverMedidas) sinalizarErroCampo(els.resolverMedidas, t('feedback.descreva_medidas_confirmar'));
         return;
     }
 

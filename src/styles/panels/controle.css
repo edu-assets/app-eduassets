@@ -20,6 +20,8 @@
     align-items: center;
     gap: 16px;
     text-align: left;
+    font-family: inherit;
+    color: var(--text-primary);
     background-color: var(--surface-white);
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -33,6 +35,11 @@
 .controle-resumo-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-md);
+}
+
+.controle-resumo-card:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .controle-resumo-card-info {
@@ -89,6 +96,7 @@
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-primary);
+    overflow-wrap: break-word;
 }
 
 .controle-resumo-numero {
@@ -102,6 +110,7 @@
 .controle-resumo-sub {
     font-size: 0.8rem;
     color: var(--text-muted);
+    overflow-wrap: break-word;
 }
 
 .controle-resumo-chevron {
@@ -123,10 +132,16 @@
 
 .controle-registros-header-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 20px;
-    gap: 20px;
+    gap: 12px 20px;
+}
+
+.controle-registros-header-row > div:first-child {
+    flex: 1 1 240px;
+    min-width: 0;
 }
 
 .controle-registros-header-row h4 {
@@ -147,6 +162,11 @@
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
+}
+
+.controle-registros-toolbar .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 /* Dropdown "+Novo" */
@@ -179,6 +199,7 @@
     background: none;
     font-family: inherit;
     text-align: left;
+    white-space: nowrap;
     padding: 10px 14px;
     font-size: 0.9rem;
     color: var(--text-primary);
@@ -202,9 +223,10 @@
 /* ===== Tabs + busca/filtros ===== */
 .controle-tabs-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 0 20px;
     margin-bottom: 16px;
     border-bottom: 1px solid var(--border-color);
 }
@@ -212,6 +234,10 @@
 .controle-tabs {
     display: flex;
     gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
 }
 
 .controle-tab-link {
@@ -223,7 +249,13 @@
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
     border-bottom: 2px solid transparent;
+}
+
+.controle-tab-link:hover {
+    color: var(--text-primary);
 }
 
 .controle-tab-link.active {
@@ -261,8 +293,12 @@
     font-size: 0.85rem;
     border: 1.5px solid var(--border-color);
     border-radius: 6px;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     background-color: var(--surface-2);
+}
+
+.controle-busca-wrap input::placeholder {
+    color: var(--text-muted);
     font-style: italic;
 }
 
@@ -303,6 +339,20 @@
     border-bottom: 1px solid var(--border-color);
 }
 
+/* Cabeçalhos curtos: uma linha só, com reticências se a coluna ficar estreita. */
+.registros-header > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Células de texto livre quebram dentro da coluna em vez de empurrar o grid. */
+.registros-row > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 .registros-row {
     border-bottom: 1px solid var(--border-color);
     font-size: 0.9rem;
@@ -313,6 +363,10 @@
     position: relative;
     z-index: 0;
     transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.registros-row:has(.registros-row-menu.active) {
+    z-index: 5;
 }
 
 .registros-row:hover {
@@ -344,6 +398,7 @@
 .registros-numero {
     color: var(--primary-color);
     font-weight: 600;
+    overflow-wrap: anywhere;
 }
 
 .registros-data {
@@ -361,6 +416,8 @@
     border-radius: 20px;
     font-size: 0.78rem;
     font-weight: 600;
+    white-space: nowrap;
+    max-width: 100%;
     border: 1px solid transparent;
     transition: all 0.2s ease;
 }
@@ -392,8 +449,7 @@
 .registros-row[data-problema="bateria"] .controle-problema-badge {
     background-color: color-mix(in srgb, var(--warning-color) 8%, transparent);
     border-color: color-mix(in srgb, var(--warning-color) 35%, transparent);
-    color: #d97706;
-    /* Tom de alerta visível sobre fundo claro */
+    color: var(--warning-color);
 }
 
 /* Carcaça - Vermelho / Error */
@@ -419,16 +475,24 @@
 
 /* Touch - Rosa / Magenta */
 .registros-row[data-problema="touch"] .controle-problema-badge {
-    background-color: #fdf2f8;
-    border-color: #fbcfe8;
-    color: #db2777;
+    background-color: color-mix(in srgb, #db2777 8%, transparent);
+    border-color: color-mix(in srgb, #db2777 25%, transparent);
+    color: #be185d;
+}
+
+html[data-theme="dark"] .registros-row[data-problema="touch"] .controle-problema-badge {
+    color: #f472b6;
 }
 
 /* Botão - Violeta Intenso */
 .registros-row[data-problema="botao"] .controle-problema-badge {
-    background-color: #f5f3ff;
-    border-color: #ddd6fe;
+    background-color: color-mix(in srgb, #7c3aed 8%, transparent);
+    border-color: color-mix(in srgb, #7c3aed 25%, transparent);
     color: #6d28d9;
+}
+
+html[data-theme="dark"] .registros-row[data-problema="botao"] .controle-problema-badge {
+    color: #a78bfa;
 }
 
 /* Outro / Padrão - Cinza Neutro Muted */
@@ -497,6 +561,7 @@
     background: none;
     font-family: inherit;
     text-align: left;
+    white-space: nowrap;
     padding: 9px 14px;
     font-size: 0.85rem;
     color: var(--text-primary);
@@ -589,6 +654,10 @@
     flex-shrink: 0;
 }
 
+.controle-dica-bar .btn {
+    flex-shrink: 0;
+}
+
 .controle-empty-state {
     display: flex;
     min-height: 220px;
@@ -599,14 +668,10 @@
     color: var(--text-muted);
 }
 
-.controle-empty-state .material-symbols-outlined {
-    font-size: 40px;
-    color: var(--text-muted);
-}
-
 .controle-empty-state p {
     margin: 0;
     font-size: 0.95rem;
+    text-align: center;
 }
 
 .controle-resolver-resumo {
@@ -623,6 +688,12 @@
     color: var(--text-secondary);
     line-height: 1.5;
     margin-top: 8px;
+    overflow-wrap: anywhere;
+}
+
+.modal-summary-panel .controle-resolver-descricao {
+    margin: 0;
+    padding-top: 8px;
 }
 
 #modal-controle-novo .modal-box {
@@ -921,7 +992,7 @@
         column-gap: 6px;
         position: relative;
         padding: 12px 14px;
-        background-color: var(--surface-white, #ffffff);
+        background-color: var(--surface-white);
         border: 1.5px solid color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
         border-left: 4px solid var(--primary-color);
         border-radius: 8px;
@@ -1010,7 +1081,7 @@
     }
 
     .registros-row-resolvidos [data-col="medidas"]::before {
-        content: "Medidas tomadas";
+        content: attr(data-label);
         display: block;
         font-size: 0.7rem;
         font-weight: 700;

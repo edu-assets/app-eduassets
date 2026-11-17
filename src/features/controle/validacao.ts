@@ -1,5 +1,8 @@
 import { t } from '../../core/state/i18nStore.js';
+import { limparErroCampo, mostrarErroCampo } from '../../shared/forms/fieldErrors.js';
 import type { ControleEls } from './render.js';
+
+export { limparErroCampo };
 
 type CampoModal = HTMLSelectElement | HTMLInputElement;
 
@@ -14,27 +17,6 @@ function camposObrigatorios(els: ControleEls): Array<[CampoModal, string]> {
     ];
 }
 
-function idErro(campo: HTMLElement): string {
-    return `${campo.id}-erro`;
-}
-
-export function limparErroCampo(campo: HTMLElement): void {
-    campo.removeAttribute('aria-invalid');
-    campo.removeAttribute('aria-describedby');
-    document.getElementById(idErro(campo))?.remove();
-}
-
-function mostrarErroCampo(campo: HTMLElement, chave: string): void {
-    limparErroCampo(campo);
-    const erro = document.createElement('p');
-    erro.id = idErro(campo);
-    erro.className = 'field-error';
-    erro.textContent = t(chave);
-    campo.insertAdjacentElement('afterend', erro);
-    campo.setAttribute('aria-invalid', 'true');
-    campo.setAttribute('aria-describedby', erro.id);
-}
-
 export function limparErrosModal(els: ControleEls): void {
     camposObrigatorios(els).forEach(([campo]) => limparErroCampo(campo));
 }
@@ -47,7 +29,7 @@ export function validarModal(els: ControleEls): boolean {
             limparErroCampo(campo);
             continue;
         }
-        mostrarErroCampo(campo, chave);
+        mostrarErroCampo(campo, t(chave));
         primeiro ??= campo;
     }
     primeiro?.focus();

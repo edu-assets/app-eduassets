@@ -212,6 +212,8 @@ html[data-theme="dark"] .config-theme-toggle .theme-toggle__sun {
     font: inherit;
     font-size: 0.82rem;
     font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
     cursor: pointer;
     transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
@@ -337,6 +339,7 @@ html[data-theme="dark"] .config-system-toggle.active {
     color: var(--text-muted);
     min-width: 52px;
     text-align: left;
+    white-space: nowrap;
 }
 
 .config-switch.active .config-switch-label {

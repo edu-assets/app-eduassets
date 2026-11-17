@@ -1,3 +1,7 @@
+/**
+ * Estado de carregamento de um botão sem alterar seu tamanho: o conteúdo é movido para `.btn-label`
+ * e fica invisível (mas ocupando espaço) enquanto um spinner centralizado é sobreposto (ver buttons.css).
+ */
 export function setButtonLoading(button: HTMLButtonElement | null | undefined, loading: boolean): void {
     if (!button) return;
 
@@ -5,6 +9,11 @@ export function setButtonLoading(button: HTMLButtonElement | null | undefined, l
     if (!label) {
         label = document.createElement('span');
         label.className = 'btn-label';
+        // O texto passa a ser filho do label: a chave de tradução vai junto, para retraduzir ao trocar de idioma.
+        if (button.dataset.i18nKey) {
+            label.dataset.i18nKey = button.dataset.i18nKey;
+            delete button.dataset.i18nKey;
+        }
         while (button.firstChild) {
             label.appendChild(button.firstChild);
         }
@@ -20,12 +29,14 @@ export function setButtonLoading(button: HTMLButtonElement | null | undefined, l
             spinner.setAttribute('aria-hidden', 'true');
             button.insertBefore(spinner, label);
         }
+        button.classList.add('is-loading');
         button.disabled = true;
         button.setAttribute('aria-busy', 'true');
         return;
     }
 
     spinnerExistente?.remove();
+    button.classList.remove('is-loading');
     button.disabled = false;
     button.removeAttribute('aria-busy');
 }

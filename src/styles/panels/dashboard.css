@@ -5,6 +5,10 @@
     gap: 20px;
 }
 
+.dashboard-header-row .btn-group {
+    flex-shrink: 0;
+}
+
 .dashboard-container {
     width: 100%;
     max-width: 1300px;
@@ -114,7 +118,8 @@
 /* Tabs internas: Estoque | Histórico */
 .dashboard-tabs {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 0 8px;
     margin-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
     align-items: flex-end;
@@ -143,7 +148,12 @@
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
+    white-space: nowrap;
     border-bottom: 2px solid transparent;
+}
+
+.dashboard-tab-link:hover {
+    color: var(--text-primary);
 }
 
 .dashboard-tab-link .material-symbols-outlined {
@@ -181,6 +191,34 @@
     color: var(--text-muted);
     font-weight: 600;
     border-bottom: 1px solid var(--border-color);
+}
+
+/* Cabeçalhos curtos: uma linha só, com reticências se a coluna ficar estreita. */
+.estoque-header > span,
+.historico-header > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Coluna "Disponível": número + selo de estoque lado a lado, sem quebrar o selo. */
+.estoque-row [data-col="disponivel"],
+.estoque-row [data-col="total"],
+.estoque-row [data-col="quebrado"] {
+    min-width: 0;
+}
+
+.estoque-row [data-col="disponivel"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.estoque-row .status-badge,
+.historico-row .status-badge {
+    white-space: nowrap;
 }
 
 .estoque-row {
@@ -252,6 +290,20 @@
     color: var(--text-primary);
 }
 
+/* Nomes longos quebram dentro da coluna em vez de empurrar o grid. */
+.historico-row > [data-col] {
+    min-width: 0;
+}
+
+.historico-row [data-col="solicitante"],
+.historico-row [data-col="responsavel"] {
+    overflow-wrap: anywhere;
+}
+
+.historico-numero {
+    white-space: nowrap;
+}
+
 .historico-row:hover {
     background-color: var(--hover-light);
 }
@@ -274,6 +326,10 @@
 .historico-paginacao-texto {
     font-size: 0.82rem;
     color: var(--text-muted);
+}
+
+.historico-paginacao .btn {
+    flex-shrink: 0;
 }
 
 .historico-numero {
@@ -300,6 +356,7 @@
 .historico-item-chip {
     display: inline-flex;
     align-items: center;
+    white-space: nowrap;
     gap: 3px;
     padding: 3px 7px;
     background-color: var(--surface-2);
@@ -613,7 +670,7 @@
     }
 
     .devolucao-detalhe-fechar:hover {
-        background-color: var(--hover-light, #f1f5f9);
+        background-color: var(--hover-light);
         color: var(--text-primary);
     }
 
@@ -818,7 +875,7 @@
         flex-direction: column;
         align-items: stretch;
         padding: 16px;
-        background-color: var(--surface-white, #ffffff);
+        background-color: var(--surface-white);
         border: 1.5px solid color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
         border-left: 4px solid var(--primary-color);
         border-radius: 8px;
@@ -857,6 +914,7 @@
         font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.02em;
+        margin-right: auto;
     }
 
     /*
@@ -886,7 +944,7 @@
         row-gap: 6px;
         min-height: 0;
         padding: 12px 14px;
-        background-color: var(--surface-white, #ffffff);
+        background-color: var(--surface-white);
         border: 1.5px solid color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
         border-left: 4px solid var(--primary-color);
         border-radius: 8px;
@@ -1197,6 +1255,7 @@
     font-weight: 600;
     color: var(--text-muted);
     margin-right: 2px;
+    white-space: nowrap;
 }
 
 .historico-filtro-chip {
@@ -1208,6 +1267,12 @@
     font-size: 0.8rem;
     cursor: pointer;
     font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.historico-filtros-limpar {
+    flex-shrink: 0;
 }
 
 .historico-filtro-chip:hover {
@@ -1216,13 +1281,13 @@
 
 .historico-filtro-chip.active,
 .historico-filtro-chip[aria-pressed="true"] {
-    background-color: var(--primary, #2563eb);
-    border-color: var(--primary, #2563eb);
-    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-on-primary);
 }
 
 .historico-filtro-chip:focus-visible {
-    outline: 2px solid var(--primary, #2563eb);
+    outline: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
 
@@ -1234,4 +1299,16 @@
     padding: 32px 16px;
     text-align: center;
     width: 100%;
+    color: var(--text-muted);
+}
+
+.estado-vazio-resultados p {
+    margin: 0;
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+}
+
+/* Selo de status no rodapé do detalhe do empréstimo (drawer). */
+.dashboard-detalhe-status {
+    margin-top: 14px;
 }

@@ -307,7 +307,7 @@
 }
 
 .form-group select[aria-invalid="true"] {
-    border-color: var(--danger-color, #dc2626);
+    border-color: var(--error-color);
 }
 
 .form-hint {
@@ -351,6 +351,8 @@
     font-size: 0.68rem;
     font-weight: 600;
     line-height: 1.5;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .cadastro-badge .material-symbols-outlined {
@@ -364,8 +366,8 @@
 }
 
 .cadastro-badge--aviso {
-    background-color: color-mix(in srgb, var(--warning-color, #d97706) 14%, transparent);
-    color: var(--warning-color, #b45309);
+    background-color: color-mix(in srgb, var(--warning-color) 14%, transparent);
+    color: var(--warning-color);
 }
 
 .cadastro-usuario-row--inativo .cadastro-usuario-nome,
@@ -393,7 +395,10 @@
     display: block;
     margin-top: 2px;
     font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.4;
     color: var(--text-muted);
+    overflow-wrap: anywhere;
 }
 
 .cadastro-modal-item--autoria {

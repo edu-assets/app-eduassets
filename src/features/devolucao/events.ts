@@ -25,6 +25,7 @@ import { atualizarAgora } from '../../core/state/liveSync.js';
 import type { LoanItemUI } from '../../types/index.js';
 import type { FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
+import { limparErroCampo, sinalizarErroCampo } from '../../shared/forms/fieldErrors.js';
 
 interface DevolucaoEstado {
     idPendente: string | number | null;
@@ -92,15 +93,17 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         if (bloquearSeConvidado()) return;
         if (!estado.idPendente) return;
 
+        // Campo automático (não editado pelo usuário): o servidor registra o próprio horário.
+        const dataAutomatica = els.devolucaoDataInput.classList.contains('input-auto');
+        const selecionada = els.devolucaoPicker.selectedDates[0];
+        if (!dataAutomatica && (!selecionada || Number.isNaN(selecionada.getTime()))) {
+            // Input do flatpickr é readonly (fora da validação nativa): erro inline próprio.
+            sinalizarErroCampo(els.devolucaoDataInput, t('devolucao.erro_data_obrigatoria'));
+            return;
+        }
+
         setButtonLoading(els.btnConfirmarDevolucao, true);
         try {
-            // Campo automático (não editado pelo usuário): o servidor registra o próprio horário.
-            const dataAutomatica = els.devolucaoDataInput.classList.contains('input-auto');
-            const selecionada = els.devolucaoPicker.selectedDates[0];
-            if (!dataAutomatica && (!selecionada || Number.isNaN(selecionada.getTime()))) {
-                els.devolucaoDataInput.reportValidity();
-                return;
-            }
             const gravada = await confirmarDevolucao(Number(estado.idPendente), dataDevolucaoParaEnvio(dataAutomatica, selecionada));
             // Mostra o horário que o servidor gravou (no modo automático pode diferir do exibido no campo).
             const dataExibida = gravada
@@ -149,13 +152,14 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
 
     els.btnDetalheEditar.addEventListener('click', () => {
         if (bloquearSeConvidado()) return;
+        limparErroCampo(els.detalheEquipamentoSelect);
         setModoEdicao(els, estado, true);
         renderDetalheItens(els, estado.itensEditando, true);
     });
 
     els.btnDetalheAdicionarItem.addEventListener('click', () => {
         if (!els.detalheEquipamentoSelect.value) {
-            els.detalheEquipamentoSelect.reportValidity();
+            sinalizarErroCampo(els.detalheEquipamentoSelect, t('devolucao.erro_selecione_equipamento'));
             return;
         }
 
@@ -176,6 +180,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
 
         estado.itensEditando = resultado.itens;
         renderDetalheItens(els, estado.itensEditando, true);
+        limparErroCampo(els.detalheEquipamentoSelect);
         els.detalheEquipamentoSelect.value = '';
         els.detalheQuantidadeInput.value = '1';
     });
@@ -217,7 +222,7 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
         try {
             await salvarItensEmprestimo(estado.idDetalheAberto, estado.itensEditando);
             estado.itensOriginais = estado.itensEditando.map((item) => ({ ...item }));
-            showToast('Empréstimo atualizado com sucesso', 'success');
+            showToast(t('feedback.emprestimo_atualizado'), 'success');
             setModoEdicao(els, estado, false);
             renderDetalheItens(els, estado.itensEditando, false);
         } catch (erro) {

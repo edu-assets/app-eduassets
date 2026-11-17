@@ -9,6 +9,7 @@ import type { LoanItemUI, LoanDraft } from '../../types/index.js';
 import { definirAgora, type FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { t } from '../../core/state/i18nStore.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
+import { limparErroCampo, sinalizarErroCampo } from '../../shared/forms/fieldErrors.js';
 
 interface EmprestimoEventosEls {
     form: HTMLFormElement;
@@ -92,7 +93,8 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
 
     els.btnAdicionar.addEventListener('click', () => {
         if (!els.equipamentoSelect.value) {
-            els.equipamentoSelect.reportValidity();
+            // O select não é `required` (a lista é que precisa de itens): erro inline próprio, sem balão nativo.
+            sinalizarErroCampo(els.equipamentoSelect, t('emprestimo.erro_selecione_equipamento'));
             return;
         }
 
@@ -110,6 +112,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
 
         estado.itens = resultado.itens;
         renderItens(els, estado.itens);
+        limparErroCampo(els.equipamentoSelect);
         els.equipamentoSelect.value = '';
         els.quantidadeInput.value = '1';
         sincronizarDisponibilidade(els, estado);
@@ -151,6 +154,12 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             return;
         }
 
+        // Regra de negócio (ao menos um item): aviso inline no campo de equipamento, não um toast.
+        if (!estado.itens.length) {
+            sinalizarErroCampo(els.equipamentoSelect, t('validation.emprestimo.sem_itens'));
+            return;
+        }
+
         const dataFoiEditadaManualmente = !els.dataInput.classList.contains('input-auto');
         const dataSelecionada = els.picker.selectedDates[0];
 
@@ -166,7 +175,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
 
         try {
             await registrarEmprestimo(dados);
-            showToast('Empréstimo registrado com sucesso', 'success');
+            showToast(t('feedback.emprestimo_registrado'), 'success');
             els.form.reset();
             definirAgora(els.picker);
             els.dataInput.classList.add('input-auto');

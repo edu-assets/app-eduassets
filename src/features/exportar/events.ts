@@ -1,4 +1,5 @@
 import { showToast } from '../../core/ui/index.js';
+import { limparErroCampo, sinalizarErroCampo } from '../../shared/forms/fieldErrors.js';
 import { exportarDados } from './service.js';
 import {
     definirEstadoCarregando,
@@ -10,7 +11,7 @@ import {
 } from './render.js';
 import type { ExportarEls } from './render.js';
 import type { FiltrosExportacao } from '../../types/index.js';
-import { traduzirErro } from '../../core/state/i18nStore.js';
+import { t, traduzirErro } from '../../core/state/i18nStore.js';
 
 export function attachExportarEvents(els: ExportarEls): void {
     els.tipoCards.forEach((card) => {
@@ -37,12 +38,14 @@ export function attachExportarEvents(els: ExportarEls): void {
         els.equipListaContainer.querySelectorAll<HTMLInputElement>('.exportar-equip-checkbox').forEach((cb) => {
             cb.checked = marcar;
         });
+        limparErroCampo(els.equipListaContainer);
         atualizarContagemEquipamentos(els);
     });
 
     els.equipListaContainer.addEventListener('change', (e) => {
         const target = e.target as HTMLElement;
         if (!target.classList.contains('exportar-equip-checkbox')) return;
+        limparErroCampo(els.equipListaContainer);
         atualizarContagemEquipamentos(els);
     });
 
@@ -54,7 +57,9 @@ export function attachExportarEvents(els: ExportarEls): void {
             : [];
 
         if (els.tipoDadosInput.value === 'equipamentos' && !equipamentoIds.length) {
-            showToast('Selecione ao menos um equipamento para exportar.', 'warning');
+            // Aviso inline abaixo da lista (sem toast); some ao alterar a seleção.
+            sinalizarErroCampo(els.equipListaContainer, t('feedback.selecione_equipamento_exportar'), false);
+            els.equipListaContainer.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
             return;
         }
 

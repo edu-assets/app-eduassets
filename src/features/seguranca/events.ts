@@ -1,3 +1,5 @@
+import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
+import { sinalizarErroCampo } from '../../shared/forms/fieldErrors.js';
 import { showToast } from '../../core/ui/index.js';
 import { t, traduzirErro } from '../../core/state/i18nStore.js';
 import { bloquearSeConvidado } from '../../core/auth/guestGate.js';
@@ -34,10 +36,14 @@ export function attachSegurancaEvents(els: SegurancaEls, estado: SegurancaEstado
         mostrarErro(els, '');
         const problema = validarTrocaSenha(els.inputAtual.value, els.inputNova.value, els.inputConfirmar.value);
         if (problema) {
-            mostrarErro(els, t(problema));
+            // Aviso inline no campo relacionado à regra violada.
+            const vazio = [els.inputAtual, els.inputNova, els.inputConfirmar].find((i) => !i.value);
+            const alvo = vazio
+                ?? (problema === 'validation.seguranca.confirmacao_incorreta' ? els.inputConfirmar : els.inputNova);
+            sinalizarErroCampo(alvo, t(problema));
             return;
         }
-        els.btnSalvar.disabled = true;
+        setButtonLoading(els.btnSalvar, true);
 
         try {
             await trocarSenha(els.inputAtual.value, els.inputNova.value, els.inputConfirmar.value);
@@ -47,7 +53,7 @@ export function attachSegurancaEvents(els: SegurancaEls, estado: SegurancaEstado
         } catch (erro) {
             mostrarErro(els, traduzirErro(erro, 'feedback.erro_alterar_senha'));
         } finally {
-            els.btnSalvar.disabled = false;
+            setButtonLoading(els.btnSalvar, false);
         }
     });
 }

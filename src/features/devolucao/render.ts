@@ -17,6 +17,7 @@ import { definirAgora, type FlatpickrInstance } from '../../core/ui/datepicker.j
 import { getLoansAbertos } from '../../core/state/loanStore.js';
 import { t } from '../../core/state/i18nStore.js';
 import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
+import { limparErroCampo } from '../../shared/forms/fieldErrors.js';
 import { getLoadStatus } from '../../core/state/loadStatus.js';
 import { aplicarEstadoCarga, renderSkeletonLinhas } from '../../shared/components/loadState.js';
 
@@ -232,6 +233,7 @@ export function abrirModalConfirmacao(els: ModalConfirmacaoEls, estado: Devoluca
 
     definirAgora(els.devolucaoPicker);
     els.devolucaoDataInput.classList.add('input-auto');
+    limparErroCampo(els.devolucaoDataInput);
     openModal('modal-confirmar-devolucao');
 }
 

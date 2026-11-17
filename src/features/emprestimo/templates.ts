@@ -27,10 +27,10 @@ export function renderItensEmptyState(): string {
     return renderEmptyState({
         containerClass: 'itens-emprestimo-empty',
         icon: 'inventory_2',
-        titulo: 'Nenhum item adicionado ainda.',
+        titulo: t('emprestimo.nenhum_item_adicionado_ainda'),
         tituloTag: 'span',
         tituloClass: 'itens-emprestimo-empty-titulo',
-        subtitulo: 'Adicione equipamentos acima para criar a lista.',
+        subtitulo: t('emprestimo.adicione_equipamentos_acima_para_criar_a'),
         subtituloTag: 'span',
         subtituloClass: 'itens-emprestimo-empty-sub'
     });

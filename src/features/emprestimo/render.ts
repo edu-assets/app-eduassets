@@ -47,7 +47,7 @@ export function popularSelectEquipamentos(
             disabled: restante <= 0
         };
     });
-    fillSelect(select, renderPlaceholderOption('Selecionar equipamento'), renderOpcoesSelect(opcoes));
+    fillSelect(select, renderPlaceholderOption(t('shell.selecionar_equipamento')), renderOpcoesSelect(opcoes));
 }
 
 export function popularSelectResponsaveis(select: HTMLSelectElement, responsaveis: Responsavel[]): void {

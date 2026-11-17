@@ -128,7 +128,7 @@ describe('controle: acessibilidade e anti duplo clique', () => {
         num.value = 'x';
         num.dispatchEvent(new Event('input', { bubbles: true }));
         expect(num.hasAttribute('aria-invalid')).toBe(false);
-        expect(document.getElementById('num-erro')).toBeNull();
+        expect(document.getElementById('num-field-error')).toBeNull();
     });
 
     it('tabs: arrows, Home and End move focus and selection (roving tabindex)', () => {

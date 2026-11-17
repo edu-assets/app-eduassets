@@ -30,6 +30,14 @@
     white-space: nowrap;
 }
 
+/* setButtonLoading envolve o conteúdo em .btn-label: ícone e texto mantêm o mesmo espaçamento. */
+.btn-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: inherit;
+}
+
 /* Ações textuais customizadas: o rótulo é uma unidade de leitura. */
 .seguranca-toggle-btn,
 .config-system-toggle,
@@ -96,21 +104,39 @@
     filter: brightness(1.1);
 }
 
-/* loading */
-.btn[aria-busy="true"] {
-    opacity: 0.85;
+/* loading: o spinner fica sobreposto ao rótulo (invisível, mas ocupando espaço),
+   então o botão mantém largura e altura exatas ao entrar e sair do carregamento. */
+/* :where() = especificidade zero: um `position` definido no componente prevalece. */
+:where(.btn, .is-loading) {
+    position: relative;
+}
+
+.is-loading,
+.is-loading:disabled {
+    opacity: 1;
+    cursor: progress;
+}
+
+.is-loading > :not(.btn-spinner) {
+    visibility: hidden;
 }
 
 .btn-spinner {
     display: inline-block;
     width: 14px;
     height: 14px;
-    margin-right: 7px;
-    vertical-align: -2px;
+    flex-shrink: 0;
     border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
     border-top-color: currentColor;
     border-radius: 50%;
     animation: btn-spinner-rotate 0.6s linear infinite;
+}
+
+.is-loading > .btn-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -7px 0 0 -7px;
 }
 
 @keyframes btn-spinner-rotate {

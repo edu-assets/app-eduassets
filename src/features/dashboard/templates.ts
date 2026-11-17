@@ -5,7 +5,7 @@ import { renderStatusBadge } from '../../shared/components/statusBadge.js';
 import { renderPessoaProtegida } from '../../shared/components/restrictedPerson.js';
 import { t, formatarDataHora } from '../../core/state/i18nStore.js';
 import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
-import { renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
+import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
 import type { Equipamento, LoanUI, LoanItemUI, CategoriaResumoDados } from '../../types/index.js';
 
 const LIMITE_CHIPS_HISTORICO_PADRAO = 2;
@@ -104,7 +104,11 @@ export function renderDashboardEstoqueContent(equipamentos: Equipamento[], termo
         ? equipamentos.map(renderDashboardEstoqueLinha).join('')
         : termoBusca.trim()
             ? renderEmptyStateSemResultados({ consulta: termoBusca, containerClass: 'estado-vazio-resultados', limpar: 'busca' })
-            : html`<div class="dashboard-andamento-vazio" style="display:flex;"><p>${t('dashboard.nenhum_equipamento_cadastrado')}</p></div>`;
+            : renderEmptyState({
+                containerClass: 'estado-vazio-resultados',
+                icon: 'inventory_2',
+                titulo: t('dashboard.nenhum_equipamento_cadastrado')
+            });
 
     return header + linhas;
 }
@@ -162,13 +166,13 @@ export function renderDashboardHistoricoContent(loans: LoanUI[], limiteChips: nu
     return loans.map((loan) => html`
         <div class="historico-row" data-id="${loan.id}">
             <span class="historico-numero" data-col="numero">#${loan.numero}</span>
-            <span data-col="solicitante" data-label="Solicitante">${raw(renderPessoaProtegida(loan.aluno))}</span>
-            <span data-col="responsavel" data-label="Responsável">${raw(renderPessoaProtegida(loan.responsavel))}</span>
-            <span class="historico-data" data-col="retirada" data-label="Retirada">${formatarDataHora(loan.data)}</span>
-            <span class="historico-data" data-col="devolucao" data-label="Devolução">${formatarDataHora(loan.dataDevolucao) || '—'}</span>
+            <span data-col="solicitante" data-label="${t('shell.solicitante')}">${raw(renderPessoaProtegida(loan.aluno))}</span>
+            <span data-col="responsavel" data-label="${t('devolucao.responsavel')}">${raw(renderPessoaProtegida(loan.responsavel))}</span>
+            <span class="historico-data" data-col="retirada" data-label="${t('shell.retirada')}">${formatarDataHora(loan.data)}</span>
+            <span class="historico-data" data-col="devolucao" data-label="${t('shell.devolucao')}">${formatarDataHora(loan.dataDevolucao) || '—'}</span>
             <div class="historico-itens" data-col="itens" data-label="Itens">${raw(renderDashboardChipsItens(loan.itens, limiteChips))}</div>
-            <span data-col="status" data-label="Status">${raw(renderStatusBadge(loan.status))}</span>
-            <button type="button" class="btn btn-neutral btn-sm historico-detalhes-btn" data-id="${loan.id}">Detalhes</button>
+            <span data-col="status" data-label="${t('shell.status')}">${raw(renderStatusBadge(loan.status))}</span>
+            <button type="button" class="btn btn-neutral btn-sm historico-detalhes-btn" data-id="${loan.id}">${t('dashboard.detalhes')}</button>
         </div>
     `).join('');
 }
@@ -204,8 +208,8 @@ export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
                     </svg>
                     <span class="info-value">${raw(renderPessoaProtegida(loan.aluno))}</span>
                 </div>
-                <span class="devolucao-detalhe-pessoa-data">Retirada em ${formatarDataHora(loan.data)}</span>
-                <span class="devolucao-detalhe-pessoa-data">Devolução: ${formatarDataHora(loan.dataDevolucao) || '—'}</span>
+                <span class="devolucao-detalhe-pessoa-data">${t('dashboard.retirada_em')} ${formatarDataHora(loan.data)}</span>
+                <span class="devolucao-detalhe-pessoa-data">${t('shell.devolucao')}: ${formatarDataHora(loan.dataDevolucao) || '—'}</span>
             </div>
         </div>
 
@@ -221,6 +225,6 @@ export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
 
         ${raw(envolverAutoria(renderAutoriaEmprestimo(loan)))}
 
-        ${raw(renderStatusBadge(loan.status))}
+        <div class="dashboard-detalhe-status">${raw(renderStatusBadge(loan.status))}</div>
     `;
 }

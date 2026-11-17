@@ -654,7 +654,7 @@
                                         <div class="controle-busca-wrap">
                                             <span class="material-symbols-outlined">search</span>
                                             <input type="text" placeholder="Buscar por informações..."
-                                                id="dashboard-busca">
+                                                aria-label="Buscar por informações..." id="dashboard-busca">
                                         </div>
                                     </div>
                                 </div>
@@ -746,7 +746,7 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="controle-modal-numero">Número</label>
-                                        <input type="text" id="controle-modal-numero" placeholder="Ex: NB-014" required>
+                                        <input type="text" id="controle-modal-numero" placeholder="Ex: NB-014" maxlength="50" required>
                                     </div>
                                     <div class="form-group">
                                         <label for="controle-modal-problema">Problema</label>
@@ -768,7 +768,7 @@
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="controle-modal-descricao">Descrição</label>
-                                        <textarea id="controle-modal-descricao" rows="3"
+                                        <textarea id="controle-modal-descricao" rows="3" maxlength="2000"
                                             placeholder="Descreva o ocorrido..."></textarea>
                                     </div>
                                 </div>
@@ -776,7 +776,7 @@
                                 <div class="form-row" id="controle-modal-medidas-row" style="display:none;">
                                     <div class="form-group">
                                         <label for="controle-modal-medidas">Medidas tomadas</label>
-                                        <textarea id="controle-modal-medidas" rows="3"
+                                        <textarea id="controle-modal-medidas" rows="3" maxlength="2000"
                                             placeholder="Descreva a resolução aplicada..."></textarea>
                                     </div>
                                 </div>
@@ -818,13 +818,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <p class="controle-resolver-descricao" id="controle-resolver-descricao"
-                                        style="margin: 0; padding-top: 8px;"></p>
+                                    <p class="controle-resolver-descricao" id="controle-resolver-descricao"></p>
                                 </div>
 
                                 <div class="form-group" style="margin-bottom: 0;">
                                     <label for="controle-resolver-medidas">Medidas tomadas</label>
-                                    <textarea id="controle-resolver-medidas" rows="4"
+                                    <textarea id="controle-resolver-medidas" rows="4" maxlength="2000"
                                         placeholder="Descreva a resolução aplicada para este registro..."></textarea>
                                 </div>
 
@@ -949,7 +948,7 @@
                                 <div class="controle-tabs-ferramentas">
                                     <div class="controle-busca-wrap">
                                         <span class="material-symbols-outlined">search</span>
-                                        <input type="text" placeholder="Buscar registros..." id="controle-busca">
+                                        <input type="text" placeholder="Buscar registros..." aria-label="Buscar registros..." id="controle-busca">
                                     </div>
                                 </div>
                             </div>

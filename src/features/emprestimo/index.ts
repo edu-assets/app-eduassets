@@ -4,6 +4,7 @@ import { criarDataAutoPicker } from '../../core/ui/index.js';
 import { attachEmprestimoEvents, atualizarLimiteQuantidade } from './events.js';
 import { iniciarSugestoesSolicitante } from './solicitantes.js';
 import { renderItens, popularSelectEquipamentos, popularSelectResponsaveis } from './render.js';
+import { subscribe as subscribeI18n } from '../../core/state/i18nStore.js';
 import type { LoanItemUI } from '../../types/index.js';
 
 export async function initEmprestimo(): Promise<void> {
@@ -50,4 +51,11 @@ export async function initEmprestimo(): Promise<void> {
     iniciarSugestoesSolicitante();
 
     renderItens(els, estado.itens);
+
+    // Placeholders dos selects e estado vazio da lista são gerados por JS: refazê-los ao trocar de idioma.
+    subscribeI18n(() => {
+        popularSelectEquipamentos(els.equipamentoSelect, getEquipamentos(), estado.itens);
+        popularSelectResponsaveis(els.responsavelSelect, getResponsaveis());
+        renderItens(els, estado.itens);
+    });
 }
