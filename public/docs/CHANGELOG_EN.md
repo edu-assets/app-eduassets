@@ -1,6 +1,16 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.6.0**, released on November 18, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.6.1**, released on November 18, 2026; earlier entries remain historical.
+
+## v1.6.1 — More legible favicon and visual kit — November 18, 2026
+
+Interface release; the API only aligns the version number.
+
+- **Favicon and app icon:** a new drawing for small sizes (bolder shapes, without details that became noise at 16 px) with a double outline — a white halo and a navy edge — that separates the icon from light and dark tabs and from the desktop. The SVG favicon follows the browser theme (lighter blues in dark mode); ICO and PNG files (16 to 512 px) were rebuilt for the app and the site. The browser may take a while to replace the cached icon.
+- **Visual kit:** 54 SVG pieces in `app/public/assets/kit` (symbol and app icons, 14 illustrations, 16 equipment icons, avatars and background patterns), with a usage guide in `README.md`.
+- **Illustrations in the app:** **Returns** with nothing open, searches with no results, **Control** with no records, empty stock in the **Dashboard**, data loading errors and the 404 page now use the kit illustrations.
+- **Equipment icons:** the **Dashboard** stock list and **Records → Equipment** show the category icon next to each model (laptop, tablet, charger, headphones, projector and others; categories without a match show no icon).
+- **Documentation:** Architecture (visual kit in `shared/`).
 
 ## v1.6.0 — Home with an operations summary — November 18, 2026
 
