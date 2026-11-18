@@ -1,5 +1,5 @@
-import { html } from '../../core/utils/html.js';
-import { gerarIniciais } from '../../core/utils/iniciais.js';
+import { html, raw } from '../../core/utils/html.js';
+import { AVATAR_CONVIDADO, renderAvatarUsuario } from '../../shared/components/kitVisual.js';
 import { t } from '../../core/state/i18nStore.js';
 import type { AuthUser } from '../../types/index.js';
 
@@ -9,7 +9,7 @@ export function renderUserMenuAutenticado(usuario: AuthUser): string {
     return html`
         <button type="button" class="user-menu-trigger" id="user-menu-trigger"
             aria-expanded="false" aria-haspopup="true" aria-controls="user-menu-dropdown">
-            <span class="user-menu-avatar">${gerarIniciais(usuario.nome)}</span>
+            ${raw(renderAvatarUsuario(usuario.id, 'user-menu-avatar user-menu-avatar--img'))}
             <span class="user-menu-info">
                 <span class="user-menu-name">${usuario.nome}</span>
                 <span class="user-menu-role">${nivelLabel}</span>
@@ -41,9 +41,7 @@ export function renderUserMenuAutenticado(usuario: AuthUser): string {
 
 export function renderUserMenuConvidado(): string {
     return html`
-        <span class="user-menu-avatar user-menu-avatar-guest">
-            <span class="material-symbols-outlined">person</span>
-        </span>
+        <img src="${AVATAR_CONVIDADO}" alt="" class="user-menu-avatar user-menu-avatar--img" width="40" height="40">
         <span class="user-menu-info">
             <span class="user-menu-name">${t('auth.modo_convidado')}</span>
         </span>

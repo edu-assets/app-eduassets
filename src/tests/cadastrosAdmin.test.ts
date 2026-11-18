@@ -173,10 +173,10 @@ describe('renderItemRegistroUsuario', () => {
 describe('autoria nas listas', () => {
     const base: Usuario = { id: 1, nome: 'Ana', login: 'ana@escola.com', nivelAcesso: 'EDITOR', createdAt: '', possuiCartaoRfid: false };
 
-    it('partesAutoria omits absent fields and maps null to a dash', async () => {
+    it('partesAutoria omits absent fields and null authors (original records)', async () => {
         const { partesAutoria } = await import('../features/cadastros/logic.js');
         expect(partesAutoria({}, 'a', 'b')).toEqual([]);
-        expect(partesAutoria({ criadoPor: null }, 'a', 'b')).toEqual([{ chave: 'a', nome: '—' }]);
+        expect(partesAutoria({ criadoPor: null }, 'a', 'b')).toEqual([]);
         expect(partesAutoria({ criadoPor: { id: 1, nome: 'X' }, atualizadoPor: null }, 'a', 'b'))
             .toEqual([{ chave: 'a', nome: 'X' }]);
         expect(partesAutoria({ criadoPor: { id: 1, nome: 'X' }, atualizadoPor: { id: 2, nome: 'Y' } }, 'a', 'b'))

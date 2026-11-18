@@ -818,5 +818,6 @@
   "inicio.resumo_modelo_baixo": "{modelo} low on stock",
   "inicio.resumo_tudo_certo": "All good",
   "inicio.resumo_indisponivel": "Unavailable right now",
-  "inicio.acao_emprestimo_curto": "Loan"
+  "inicio.acao_emprestimo_curto": "Loan",
+  "cadastros.disponiveis_de_total": "{disp} of {total} available"
 }

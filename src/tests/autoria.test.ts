@@ -50,10 +50,11 @@ describe('emprestimos', () => {
         expect(html).toContain('&lt;b&gt;Zé&lt;/b&gt;');
         expect(html).not.toContain('<b>Zé</b>');
     });
-    it('autor nulo mostra traco', () => {
+    it('autor nulo (registro original): a linha de autoria some, sem traço', () => {
         const html = renderDevolucaoCard(L({ criadoPor: null }));
-        expect(html).toContain('Registrado por');
-        expect(html).toContain('autoria-nome">—<');
+        expect(html).not.toContain('Registrado por');
+        expect(html).not.toContain('autoria-nome">—<');
+        expect(html).not.toContain('autoria-bloco');
     });
     it('convidado: sem linhas de autoria', () => {
         expect(renderDevolucaoCard(L({}))).not.toContain('Registrado por');

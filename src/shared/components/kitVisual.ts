@@ -64,6 +64,20 @@ export function caminhoIconeEquipamento(categoria: string | null | undefined): s
     return achado ? `${BASE}/equipamentos/${achado[1]}.svg` : null;
 }
 
+/** Avatar estável por usuário: o mesmo id sempre cai na mesma pessoa do kit (8 variações). */
+export function caminhoAvatarUsuario(id: number | null | undefined): string {
+    const n = Number.isFinite(Number(id)) ? (Math.abs(Math.trunc(Number(id))) % 8) + 1 : 1;
+    const nomes = ['azul', 'violeta', 'verde', 'laranja', 'ciano', 'rosa', 'indigo', 'ardosia'];
+    return `${BASE}/avatares/pessoa-${String(n).padStart(2, '0')}-${nomes[n - 1]}.svg`;
+}
+
+export const AVATAR_CONVIDADO = `${BASE}/avatares/papel-convidado.svg`;
+
+/** `<img>` do avatar; decorativo porque o nome da pessoa sempre aparece ao lado. */
+export function renderAvatarUsuario(id: number | null | undefined, classe: string): string {
+    return html`<img src="${caminhoAvatarUsuario(id)}" alt="" class="${classe}" width="40" height="40" decoding="async">`;
+}
+
 /** `<img>` decorativo do ícone da categoria, ou '' quando a categoria não tem ícone correspondente. */
 export function renderIconeEquipamento(categoria: string | null | undefined, classe: string): string {
     const src = caminhoIconeEquipamento(categoria);

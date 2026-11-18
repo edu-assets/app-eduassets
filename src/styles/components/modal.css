@@ -259,6 +259,10 @@
     font-size: 0.85rem;
 }
 
+.modal-summary-person > div {
+    min-width: 0;
+}
+
 .modal-summary-title {
     font-size: 0.95rem;
     font-weight: 700;

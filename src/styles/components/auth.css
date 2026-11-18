@@ -32,6 +32,13 @@
     font-weight: 700;
 }
 
+/* Avatar do kit visual (img): sem fundo nem iniciais. */
+.user-menu-avatar--img {
+    display: block;
+    background: none;
+    object-fit: cover;
+}
+
 .user-menu-avatar-guest {
     background-color: rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.7);

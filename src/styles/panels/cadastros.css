@@ -669,6 +669,8 @@
    action stays above the on-screen keyboard; dvh fallback, never 100vh.
    ===================================================================== */
 .modal-box--md.cadastro-sheet {
+    /* Mais largo que o modal médio padrão (640px): nomes, e-mails e ações cabem sem quebrar. */
+    max-width: 760px;
     --sheet-gutter: 32px;
     display: flex;
     flex-direction: column;
@@ -879,5 +881,168 @@
     .cadastro-modal-busca {
         min-height: 44px;
         font-size: 1rem;
+    }
+}
+
+
+/* =====================================================================
+   Registros das listas de Cadastros (usuários, equipamentos, categorias,
+   responsáveis): mesma estrutura em todos —
+   [avatar/ícone] | título + selos / linha secundária / autoria | ações.
+   Usuários (4 ações) levam as ações para a linha de baixo: o e-mail usa a
+   largura toda e nunca quebra. Fica no fim do arquivo para prevalecer sobre
+   as regras antigas de .cadastro-usuario-row / .cadastro-modal-item.
+   ===================================================================== */
+.cadastro-modal-list .cadastro-registro {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.cadastro-modal-list .cadastro-registro:last-child {
+    border-bottom: none;
+}
+
+.cadastro-modal-list .cadastro-registro--acoes-abaixo {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+}
+
+.cadastro-registro-midia {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+img.cadastro-registro-midia {
+    display: block;
+    border-radius: 50%;
+}
+
+/* Ícone duotom de equipamento: sem círculo, um pouco menor que a caixa. */
+img.cadastro-registro-midia.cadastro-item-icone {
+    width: 34px;
+    height: 34px;
+    border-radius: 0;
+    justify-self: center;
+}
+
+.cadastro-registro-midia.icon-badge {
+    border-radius: 10px;
+}
+
+.cadastro-modal-list .cadastro-registro-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.cadastro-registro-titulo-linha {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    min-width: 0;
+}
+
+.cadastro-modal-list .cadastro-registro-titulo {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.cadastro-registro-sub {
+    font-size: 0.82rem;
+    line-height: 1.35;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+/* E-mail/login: uma linha; o texto inteiro fica no title. */
+.cadastro-modal-list .cadastro-registro-email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.cadastro-registro .cadastro-autoria {
+    margin-top: 2px;
+    font-size: 0.75rem;
+}
+
+.cadastro-modal-list .cadastro-registro-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    min-width: 0;
+    padding-left: 0;
+}
+
+.cadastro-modal-list .cadastro-registro--acoes-abaixo .cadastro-registro-acoes {
+    grid-column: 2;
+    justify-content: flex-start;
+}
+
+.cadastro-badge--admin {
+    background-color: var(--primary-bg);
+    color: var(--primary-color);
+}
+
+.cadastro-badge--editor {
+    background-color: var(--secondary-bg);
+    color: var(--secondary-color);
+}
+
+.cadastro-usuario-row--inativo .cadastro-registro-titulo,
+.cadastro-usuario-row--inativo .cadastro-registro-midia {
+    opacity: 0.6;
+}
+
+/* Avatar do kit dentro dos painéis Cartão RFID / Redefinir senha. */
+.avatar-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.modal-summary-avatar:has(.avatar-img) {
+    background: none;
+}
+
+#rfid-modal-login,
+#reset-senha-login {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .cadastro-modal-list .cadastro-registro,
+    .cadastro-modal-list .cadastro-registro--acoes-abaixo {
+        grid-template-columns: 36px minmax(0, 1fr);
+        align-items: start;
+        gap: 10px 12px;
+        padding: 12px;
+    }
+
+    .cadastro-registro-midia {
+        width: 36px;
+        height: 36px;
+    }
+
+    .cadastro-modal-list .cadastro-registro-acoes {
+        grid-column: 2;
+        justify-content: flex-start;
     }
 }

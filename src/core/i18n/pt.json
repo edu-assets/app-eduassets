@@ -818,5 +818,6 @@
   "inicio.resumo_modelo_baixo": "{modelo} com estoque baixo",
   "inicio.resumo_tudo_certo": "Tudo certo",
   "inicio.resumo_indisponivel": "Indisponível no momento",
-  "inicio.acao_emprestimo_curto": "Empréstimo"
+  "inicio.acao_emprestimo_curto": "Empréstimo",
+  "cadastros.disponiveis_de_total": "{disp} de {total} disponíveis"
 }
