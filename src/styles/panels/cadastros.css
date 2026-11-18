@@ -406,6 +406,12 @@
     flex-direction: column;
 }
 
+.cadastro-item-icone {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+}
+
 .cadastro-item-texto {
     flex: 1 1 12rem;
     min-width: 0;

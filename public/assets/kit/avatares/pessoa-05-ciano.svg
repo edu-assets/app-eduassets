@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Avatar 5"><title>Avatar 5</title><defs><clipPath id="av5"><circle cx="64" cy="64" r="64"/></clipPath></defs>
+<g clip-path="url(#av5)"><rect width="128" height="128" fill="#0E8FC0"/>
+<path d="M22 128 C 22 100, 40 86, 64 86 C 88 86, 106 100, 106 128 Z" fill="#D5F2FC"/>
+<path d="M50 86 a14 10 0 0 0 28 0" fill="#0E8FC0" fill-opacity="0.35"/>
+<circle cx="64" cy="56" r="22" fill="#D5F2FC"/>
+<path d="M40 48 a24 24 0 0 1 48 0 Z M84 46 h18 a3 3 0 0 1 0 6 H84 Z" fill="#07425A"/></g></svg>

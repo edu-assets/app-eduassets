@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Fundo com brilho azul"><title>Fundo com brilho azul</title><defs>
+<radialGradient id="g1" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#2563EB" stop-opacity="0.75"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></radialGradient>
+<radialGradient id="g2" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#8FB0F8" stop-opacity="0.35"/><stop offset="1" stop-color="#8FB0F8" stop-opacity="0"/></radialGradient>
+<radialGradient id="g3" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#7C3AED" stop-opacity="0.35"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/></radialGradient>
+<linearGradient id="bgv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050B1C"/><stop offset="0.7" stop-color="#071433"/><stop offset="1" stop-color="#112C6B"/></linearGradient></defs>
+<rect width="1600" height="900" fill="url(#bgv)"/>
+<ellipse cx="800" cy="470" rx="560" ry="300" fill="url(#g1)"/>
+<ellipse cx="520" cy="560" rx="300" ry="170" fill="url(#g2)"/>
+<ellipse cx="1110" cy="400" rx="320" ry="190" fill="url(#g3)"/>
+</svg>

@@ -17,22 +17,12 @@
     gap: 6px;
 }
 
-.notfound-icon-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background-color: var(--primary-bg);
-    color: var(--primary-color);
-    margin-bottom: 12px;
-}
-
-.notfound-icon-wrap .material-symbols-outlined {
-    font-size: 36px;
-    width: 36px;
-    height: 36px;
+.notfound-ilustracao {
+    display: block;
+    width: 220px;
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 4px;
 }
 
 .notfound-code {
@@ -181,15 +171,8 @@
         margin-top: 12px;
         gap: 16px;
     }
-    .notfound-icon-wrap {
-        width: 48px;
-        height: 48px;
-        margin-bottom: 8px;
-    }
-    .notfound-icon-wrap .material-symbols-outlined {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
+    .notfound-ilustracao {
+        width: 150px;
     }
     .notfound-code {
         font-size: 3.5rem;

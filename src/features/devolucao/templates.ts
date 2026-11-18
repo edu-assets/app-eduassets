@@ -2,6 +2,7 @@ import { html, raw } from '../../core/utils/html.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { gerarIniciais, formatarHora } from './utils.js';
 import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
+import { caminhoIlustracao } from '../../shared/components/kitVisual.js';
 import { renderPessoaProtegida, renderIniciaisProtegidas } from '../../shared/components/restrictedPerson.js';
 import { t } from '../../core/state/i18nStore.js';
 import { isAcessoConvidadoAutorizado } from '../../core/state/authStore.js';
@@ -13,8 +14,8 @@ const LIMITE_ICONES_CARD = 3;
 export function renderDevolucaoEmptyState(): string {
     return renderEmptyState({
         containerClass: 'devolucao-vazia',
-        imageSrc: '/assets/logos/eduAssets_logo-empty-state.webp',
-        imageClass: 'devolucao-vazia-logo',
+        imageSrc: caminhoIlustracao('tudoDevolvido'),
+        imageClass: 'estado-ilustracao',
         titulo: t('devolucao.emprestimos_aparecerao_aqui'),
         tituloClass: 'devolucao-vazia-texto',
         subtitulo: t('devolucao.registre_um_novo_emprestimo_para_comecar'),

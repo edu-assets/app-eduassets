@@ -1,5 +1,6 @@
 import { html, raw } from '../../core/utils/html.js';
 import { t } from '../../core/state/i18nStore.js';
+import { renderIlustracao } from './kitVisual.js';
 
 type TagOuNulo = string | null;
 
@@ -97,7 +98,7 @@ export function renderEmptyStateSemResultados({
     const rotulo = limpar === 'filtros' ? t('shell.limpar_filtros') : t('shell.limpar_busca');
     return html`
         <div class="${containerClass}" data-estado-vazio="sem-resultados">
-            <span class="icon-badge icon-badge--lg icon-badge--neutral"><span class="material-symbols-outlined">search_off</span></span>
+            ${raw(renderIlustracao('buscaSemResultados', true))}
             <p class="${tituloClass}">${titulo}</p>
             <button type="button" class="${botaoClass}" data-limpar-busca>${rotulo}</button>
         </div>

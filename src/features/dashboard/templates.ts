@@ -6,6 +6,7 @@ import { renderPessoaProtegida } from '../../shared/components/restrictedPerson.
 import { t, formatarDataHora } from '../../core/state/i18nStore.js';
 import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
 import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
+import { caminhoIlustracao, renderIconeEquipamento } from '../../shared/components/kitVisual.js';
 import type { Equipamento, LoanUI, LoanItemUI, CategoriaResumoDados } from '../../types/index.js';
 
 const LIMITE_CHIPS_HISTORICO_PADRAO = 2;
@@ -79,8 +80,11 @@ function renderDashboardEstoqueLinha(equipamento: Equipamento): string {
         <div class="estoque-row" data-id="${equipamento.id}" data-equipamento-id="${equipamento.id}"
             role="button" tabindex="0">
             <span data-col="categoria">
-                <span class="estoque-modelo">${equipamento.modelo}</span>
-                <span class="estoque-categoria">${equipamento.categoria?.nome ?? ''}</span>
+                ${raw(renderIconeEquipamento(equipamento.categoria?.nome, 'estoque-icone'))}
+                <span class="estoque-textos">
+                    <span class="estoque-modelo">${equipamento.modelo}</span>
+                    <span class="estoque-categoria">${equipamento.categoria?.nome ?? ''}</span>
+                </span>
             </span>
             <span data-col="total" data-label="${t('dashboard.total')}">${equipamento.quantidadeTotal}</span>
             <span data-col="disponivel" data-label="${t('dashboard.disponivel')}">${equipamento.quantidadeDisponivel}${raw(badge)}</span>
@@ -106,7 +110,8 @@ export function renderDashboardEstoqueContent(equipamentos: Equipamento[], termo
             ? renderEmptyStateSemResultados({ consulta: termoBusca, containerClass: 'estado-vazio-resultados', limpar: 'busca' })
             : renderEmptyState({
                 containerClass: 'estado-vazio-resultados',
-                icon: 'inventory_2',
+                imageSrc: caminhoIlustracao('semEquipamentos'),
+                imageClass: 'estado-ilustracao estado-ilustracao--sm',
                 titulo: t('dashboard.nenhum_equipamento_cadastrado')
             });
 

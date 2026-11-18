@@ -252,15 +252,6 @@
     width: 100%;
 }
 
-.devolucao-vazia-logo {
-    width: 340px;
-    height: auto;
-    opacity: 0.5;
-    filter: drop-shadow(1px 1px 0 rgba(255, 255, 255, 0.6)) drop-shadow(-1px -1px 1px rgba(5, 11, 28, 0.12));
-    border-radius: 8px;
-    border: 0.75px solid var(--border-color);
-}
-
 .devolucao-vazia-texto {
     font-size: 1.1rem;
     font-weight: 700;
@@ -274,10 +265,6 @@
 /* Realces claros do estado vazio só fazem sentido no tema claro. */
 html[data-theme="dark"] .devolucao-vazia-texto {
     text-shadow: none;
-}
-
-html[data-theme="dark"] .devolucao-vazia-logo {
-    filter: none;
 }
 
 .devolucao-vazia-sub {
@@ -867,10 +854,6 @@ html[data-theme="dark"] .devolucao-vazia-logo {
     .devolver-btn {
         width: 100%;
         padding: 10px 16px;
-    }
-
-    .devolucao-vazia-logo {
-        width: 220px;
     }
 
     .devolucao-detalhe-painel.mobile-aberto {
