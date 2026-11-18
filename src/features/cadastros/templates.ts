@@ -1,5 +1,6 @@
 import { html, raw } from '../../core/utils/html.js';
 import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
+import { renderIconeEquipamento } from '../../shared/components/kitVisual.js';
 import { gerarIniciais } from '../../core/utils/iniciais.js';
 import { t } from '../../core/state/i18nStore.js';
 import { loginPareceEmail, partesAutoria } from './logic.js';
@@ -182,6 +183,7 @@ export function renderFormAjusteTotal(eq: Equipamento): string {
 export function renderItemRegistroEquipamento(eq: Equipamento): string {
     return html`
         <div class="cadastro-modal-item cadastro-modal-item--acao">
+            ${raw(renderIconeEquipamento(eq.categoria?.nome, 'cadastro-item-icone'))}
             <span class="cadastro-item-texto">${textoEquipamento(eq)}${raw(renderAutoria(eq, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}</span>
             <span class="cadastro-item-acoes">${raw(renderBotaoAcaoTexto('data-ajustar-total-id', eq.id, 'tune', t('cadastros.ajustar_total')))}</span>
         </div>

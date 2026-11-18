@@ -1,4 +1,5 @@
-import { html } from '../../core/utils/html.js';
+import { html, raw } from '../../core/utils/html.js';
+import { renderIlustracao } from './kitVisual.js';
 import { t } from '../../core/state/i18nStore.js';
 import { tentarNovamente } from '../../core/state/loadStatus.js';
 import type { ChaveCarga, EstadoCarga } from '../../core/state/loadStatus.js';
@@ -12,7 +13,7 @@ export function renderSkeletonLinhas(quantidade = 4, classe = ''): string {
 export function renderErroCarga(): string {
     return html`
         <div class="load-error" role="alert">
-            <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+            ${raw(renderIlustracao('erroConexao', true))}
             <p class="load-error-texto">${t('loadstate.erro_carregar')}</p>
             <button type="button" class="btn btn-neutral load-error-retry" data-load-retry>${t('loadstate.tentar_novamente')}</button>
         </div>

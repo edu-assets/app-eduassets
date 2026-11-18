@@ -1,5 +1,6 @@
 import { attr, html, raw } from '../../core/utils/html.js';
 import { renderEmptyState } from '../../shared/components/emptyState.js';
+import { caminhoIlustracao } from '../../shared/components/kitVisual.js';
 import { t, formatarDataHora } from '../../core/state/i18nStore.js';
 import { renderAutoriaOcorrencia, envolverAutoria } from '../../shared/components/autoria.js';
 import type { OcorrenciaUI } from '../../types/index.js';
@@ -85,7 +86,8 @@ export function renderControleLinha(tipo: string, dados: OcorrenciaUI): string {
 export function renderControleEmptyState(): string {
     return renderEmptyState({
         containerClass: 'controle-empty-state',
-        icon: 'inbox',
+        imageSrc: caminhoIlustracao('semOcorrencias'),
+        imageClass: 'estado-ilustracao estado-ilustracao--sm',
         titulo: t('controle.nenhum_registro_encontrado')
     });
 }

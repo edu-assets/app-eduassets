@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Sistema eduAssets"><title>Sistema eduAssets</title><defs><linearGradient id="psg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#143789"/><stop offset="1" stop-color="#050B1C"/></linearGradient></defs><circle cx="64" cy="64" r="64" fill="url(#psg)"/><g transform="translate(22 20) scale(0.164)">
+<defs>
+  <linearGradient id="pst" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FB0F8"/><stop offset="1" stop-color="#2563EB"/></linearGradient>
+  <linearGradient id="pss" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#DBE7FD"/></linearGradient>
+  <mask id="psm"><rect width="512" height="512" fill="#fff"/><rect x="110" y="318" width="292" height="22" rx="8" fill="#000"/></mask>
+</defs>
+<path d="M388 112 C 290 124, 168 176, 92 236 L 104 252 L 30 286 L 62 214 L 74 228 C 156 160, 280 110, 388 112 Z" fill="#33447A" fill-opacity="1.0"/>
+<mask id="psg"><rect width="512" height="512" fill="#fff"/><path d="M36 372 C 168 356, 300 300, 394 196 L 370 176 L 470 118 L 444 230 L 422 212 C 326 326, 178 398, 44 404 Z" fill="#000" stroke="#000" stroke-width="20" stroke-linejoin="round"/></mask>
+<g mask="url(#psg)">
+<rect x="116" y="100" width="280" height="200" rx="26" fill="url(#pst)"/>
+<rect x="226" y="134" width="60" height="22" rx="11" fill="#112C6B" fill-opacity="0.9"/>
+<rect x="80" y="298" width="352" height="62" rx="16" fill="#B8CFFB" mask="url(#psm)"/>
+</g>
+<path d="M36 372 C 168 356, 300 300, 394 196 L 370 176 L 470 118 L 444 230 L 422 212 C 326 326, 178 398, 44 404 Z" fill="url(#pss)"/>
+</g></svg>
