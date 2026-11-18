@@ -159,9 +159,211 @@
     display: none;
 }
 
+/* ===== Disposição: hero no topo; ações rápidas + dica presas à borda inferior =====
+   O painel ocupa no mínimo a altura da área de conteúdo (.main-content é o contêiner de rolagem);
+   o espaço livre fica entre o hero (e o resumo) e as ações. Em telas baixas tudo apenas empilha.
+   Escopo em `.active`: ver o aviso sobre especificidade na media query de telas baixas abaixo. */
+#panel-inicio.active {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+/* ===== Resumo de operações (features/inicio/resumo.ts) =====
+   Fica centralizado no espaço livre: ele e as ações rápidas têm margin-top: auto, que divide a sobra.
+   Todo card tem a mesma estrutura: rótulo + ícone / valor / linha de status. */
+.inicio-resumo {
+    margin-top: auto;
+    padding-top: 32px;
+}
+
+.inicio-resumo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.inicio-resumo-titulo {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.inicio-resumo-atualizado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.inicio-resumo-atualizado::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--success-color);
+}
+
+.inicio-resumo-atualizado[hidden] {
+    display: none;
+}
+
+.inicio-resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.inicio-resumo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: 20px 22px 16px;
+    background-color: var(--surface-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.inicio-resumo-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+}
+
+.inicio-resumo-card:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.inicio-resumo-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+}
+
+.inicio-resumo-rotulo {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+.inicio-resumo-icone {
+    flex-shrink: 0;
+    border-radius: 10px;
+}
+
+.inicio-resumo-valor {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+
+.inicio-resumo-numero {
+    flex-shrink: 0;
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+}
+
+.inicio-resumo-unidade {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-secondary);
+}
+
+.inicio-resumo-status {
+    --ponto: var(--slate-400);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.inicio-resumo-status[data-estado="info"] { --ponto: var(--primary-color); }
+.inicio-resumo-status[data-estado="ok"] { --ponto: var(--success-color); }
+.inicio-resumo-status[data-estado="alerta"] { --ponto: var(--warning-color); }
+.inicio-resumo-status[data-estado="erro"] { --ponto: var(--error-color); }
+
+.inicio-resumo-ponto {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--ponto);
+}
+
+.inicio-resumo-detalhe {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 1.3em;
+    overflow: hidden;
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
+.inicio-resumo-chevron {
+    flex-shrink: 0;
+    font-size: 18px !important;
+    width: 18px;
+    height: 18px;
+    color: var(--text-secondary);
+}
+
+/* Carga inicial: o número vira um bloco de esqueleto (mesma animação de load-state.css). */
+.inicio-resumo-card.is-carregando .inicio-resumo-numero {
+    min-width: 2.5ch;
+    border-radius: 6px;
+    color: transparent;
+    background: linear-gradient(90deg, var(--border-color) 25%, var(--bg-light-alt) 50%, var(--border-color) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .inicio-resumo-card.is-carregando .inicio-resumo-numero { animation: none; }
+    .inicio-resumo-card:hover { transform: none; }
+}
+
+/* Rótulo curto de ação: só no celular (ver max-width: 640px). */
+.inicio-rotulo-curto {
+    display: none;
+}
+
 /* ===== Ações rápidas ===== */
 .inicio-acoes {
-    margin-top: 28px;
+    margin-top: auto;
+    padding-top: 28px;
 }
 
 .inicio-acoes-titulo {
@@ -328,6 +530,10 @@
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .inicio-resumo-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .inicio-dica-bar {
         flex-wrap: wrap;
     }
@@ -348,29 +554,162 @@
         max-width: 100%;
     }
 
-    .inicio-acoes-grid {
-        grid-template-columns: 1fr;
-        width: fit-content;
-        margin: 0 auto;
+    /* Resumo 2×2 compacto: preserva altura no celular. */
+    .inicio-resumo {
+        padding-top: 20px;
     }
 
+    .inicio-resumo-header {
+        margin-bottom: 10px;
+    }
+
+    .inicio-resumo-grid {
+        gap: 10px;
+    }
+
+    .inicio-resumo-card {
+        gap: 8px;
+        padding: 12px 14px;
+    }
+
+    .inicio-resumo-rotulo {
+        font-size: 0.69rem;
+    }
+
+    .inicio-resumo-icone {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+    }
+
+    .inicio-resumo-icone .material-symbols-outlined {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .inicio-resumo-valor {
+        gap: 6px;
+    }
+
+    .inicio-resumo-numero {
+        font-size: 1.6rem;
+    }
+
+    .inicio-resumo-unidade {
+        font-size: 0.75rem;
+    }
+
+    .inicio-resumo-status {
+        gap: 6px;
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .inicio-resumo-ponto {
+        width: 7px;
+        height: 7px;
+    }
+
+    .inicio-resumo-detalhe {
+        font-size: 0.75rem;
+    }
+
+    .inicio-resumo-chevron {
+        display: none;
+    }
+
+    /* Ações rápidas 2×2: só ícone e título curto. */
+    .inicio-acoes {
+        padding-top: 20px;
+    }
+
+    .inicio-acoes-titulo {
+        margin-bottom: 10px;
+    }
+
+    .inicio-acoes-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .inicio-acao-card {
+        align-items: center;
+        gap: 10px;
+        min-height: 56px;
+        padding: 10px 12px;
+    }
+
+    .inicio-acao-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+    }
+
+    .inicio-acao-icon .material-symbols-outlined {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+    }
+
+    .inicio-acao-texto .inicio-acao-titulo {
+        overflow: hidden;
+        font-size: 0.85rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .inicio-acao-desc,
+    .inicio-acao-chevron,
+    .inicio-rotulo-longo {
+        display: none;
+    }
+
+    .inicio-rotulo-curto {
+        display: inline;
+    }
+
+    /* Dica compacta: título e botão na mesma linha, texto embaixo. */
     .inicio-dica-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "icone titulo botao"
+            "texto texto texto";
+        align-items: center;
+        column-gap: 8px;
+        row-gap: 6px;
+        margin-top: 14px;
+        padding: 12px 14px;
+    }
+
+    .inicio-dica-info,
+    .inicio-dica-info > div {
+        display: contents;
+    }
+
+    .inicio-dica-info > .icon-badge {
+        grid-area: icone;
+    }
+
+    .inicio-dica-info strong {
+        grid-area: titulo;
+        margin: 0;
     }
 
     .inicio-dica-bar p {
-        font-size: 0.82rem;
-        margin-top: 12px;
-    }
-
-    .inicio-dica-info {
-        gap: 8px;
+        grid-area: texto;
+        margin: 0;
+        font-size: 0.8rem;
+        line-height: 1.45;
     }
 
     .inicio-info-buttons {
-        margin-top: 6px;
+        grid-area: botao;
+    }
+
+    .inicio-info-buttons .btn {
+        white-space: nowrap;
     }
 }
 
@@ -385,11 +724,11 @@
        Início visible even when it's not the active panel, breaking
        the SPA navigation (other panels render stacked underneath it). */
     #panel-inicio.active {
-        display: flex;
-        flex-direction: column;
-        min-height: calc(100vh - 80px);
-        justify-content: center;
         gap: 18px;
+    }
+
+    .inicio-resumo {
+        padding-top: 0;
     }
 
     .inicio-hero-card {
@@ -435,7 +774,8 @@
     }
 
     .inicio-acoes {
-        margin-top: 0;
+        margin-top: auto;
+        padding-top: 0;
     }
 
     .inicio-acoes-titulo {
