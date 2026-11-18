@@ -48,7 +48,8 @@ The frontend source is maintained in the separate `edu-assets/app-eduassets` rep
 The observed frontend layers are:
 
 - **`core/`**: infrastructure such as the API client/configuration, token and domain stores, authentication/session behavior, layout, UI, HTML utilities, and RFID listening.
-- **`features/`**: screen-level modules (authentication, dashboard, loans/returns, equipment and registration control, export, configuration, security, profile, and documentation) composed by `main.ts`.
+- **`features/`**: screen-level modules (home, authentication, dashboard, loans/returns, equipment and registration control, export, configuration, security, profile, and documentation) composed by `main.ts`. The Home **Operations now** summary (`features/inicio/resumo.ts`) is computed on the client from the equipment, loan, and incident stores that are already loaded, with no extra API request.
+- **`shared/`**: components and DOM helpers reused by features, including inline form messages (`shared/forms/fieldErrors.ts`, installed at boot: it intercepts the `invalid` event and replaces the browser's native bubble with a themed message below the field) and button loading state (`shared/dom/buttonLoading.ts`, which overlays the indicator without changing the button's size).
 - The entrypoint does not use a framework bootstrap or a global state library. Domain state is exposed through stores with `get...`, loading/mutation functions, and `subscribe` functions for equipment, loans, occurrences, responsible people, theme, and i18n.
 
 ### State and API flow

@@ -1,6 +1,17 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.5.3 oficial**, publicada em 17/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.6.0 oficial**, publicada em 18/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.6.0 — Início com resumo de operações — 18 de novembro de 2026
+
+Versão de interface; a API e o site só alinham o número da versão.
+
+- **Início — Operações agora:** novo resumo com quatro indicadores que abrem o painel correspondente: **Em aberto** (empréstimos não devolvidos e horário do mais antigo, abre **Devoluções**), **Disponíveis** (unidades disponíveis do total, emprestadas e porcentagem livre, abre o **Dashboard**), **Ocorrências** (abertas, separadas em manutenção, quebrados e observações, abre **Controle**) e **Estoque** (modelos **Esgotados** ou com **Estoque baixo**, pelas regras do Dashboard, ou **Tudo certo**). Um ponto colorido indica a situação (verde, laranja ou vermelho) e **Atualizado às** mostra a última atualização. Os números vêm dos dados que o app já mantém atualizados: nenhuma consulta nova ao servidor.
+- **Início — disposição:** **Ações rápidas** e **Dica sobre uso** ficam presas à borda inferior da tela em todos os tamanhos; o resumo fica centralizado no espaço entre o topo e as ações. Em telas baixas os blocos apenas se empilham.
+- **Início no celular:** resumo e ações rápidas em grade 2×2 (a primeira ação aparece como **Empréstimo**, sem as descrições) e a dica com título e **Ver documentação** na mesma linha, ocupando menos altura.
+- **Novo empréstimo:** **Data e Hora** voltou a ficar alinhado com **Solicitante** e **Responsável** (a dica "(Clique para alterar)" não quebra mais a linha).
+- **Textos institucionais:** revisados os textos da tela de login, dos **Termos de Uso** (finalidade) e da **Política de Privacidade** (responsável pelos dados), e o destaque do site passou a mostrar apenas a versão.
+- **Documentação:** Manual do Usuário §3 (Início); Arquitetura (camadas `features/` e `shared/`).
 
 ## v1.5.3 — Refinamentos de interface e avisos de formulário no tema — 17 de novembro de 2026
 

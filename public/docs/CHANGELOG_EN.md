@@ -1,6 +1,17 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.5.3**, released on November 17, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.6.0**, released on November 18, 2026; earlier entries remain historical.
+
+## v1.6.0 — Home with an operations summary — November 18, 2026
+
+Interface release; the API and the site only align the version number.
+
+- **Home — Operations now:** a new summary with four indicators that open the related panel: **Open** (loans not yet returned and the time of the oldest one, opens **Returns**), **Available** (available units out of the total, units on loan and free percentage, opens the **Dashboard**), **Incidents** (open ones, split into maintenance, broken and notes, opens **Control**) and **Stock** (models **Out of stock** or **Low stock**, using the Dashboard rules, or **All good**). A colored dot shows the status (green, orange or red) and **Updated at** shows the last refresh. The numbers come from data the app already keeps up to date: no new server requests.
+- **Home — layout:** **Quick actions** and **Usage tip** stay pinned to the bottom of the screen at every size; the summary is centered in the space between the top and the actions. On short screens the blocks simply stack.
+- **Home on mobile:** summary and quick actions in a 2×2 grid (the first action shows as **Loan**, without descriptions) and the tip with its title and **View documentation** on the same line, taking less height.
+- **New loan:** **Date and Time** lines up with **Requester** and **Responsible** again (the "(Click to change)" hint no longer wraps).
+- **Institutional text:** the login screen, the **Terms of Use** (purpose) and the **Privacy Policy** (data controller) texts were revised, and the site's hero now shows only the version.
+- **Documentation:** User Manual §3 (Home); Architecture (`features/` and `shared/` layers).
 
 ## v1.5.3 — Interface refinements and themed form messages — November 17, 2026
 
