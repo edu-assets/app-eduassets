@@ -1,5 +1,5 @@
 import { openModal } from '../../core/ui/index.js';
-import { gerarIniciais } from '../../core/utils/iniciais.js';
+import { renderAvatarUsuario } from '../../shared/components/kitVisual.js';
 import { aprimorarCampoSenha } from '../../shared/components/passwordField.js';
 import {
     renderCampo,
@@ -174,7 +174,7 @@ function mostrarEstadoRfid(els: RfidModalEls, estado: EstadoRfid): void {
 
 /** Fills the RFID panel; it is shown inside the Cadastros sheet (detail view), not as a stacked modal. */
 export function prepararPainelRfid(els: RfidModalEls, usuario: Usuario): void {
-    els.avatar.textContent = gerarIniciais(usuario.nome);
+    els.avatar.innerHTML = renderAvatarUsuario(usuario.id, 'avatar-img');
     els.nome.textContent = usuario.nome;
     els.login.textContent = usuario.login;
 
@@ -204,7 +204,7 @@ export interface ResetSenhaModalEls {
 
 /** Fills the reset-password form; it is shown inside the Cadastros sheet (detail view), not as a stacked modal. */
 export function prepararResetSenha(els: ResetSenhaModalEls, usuario: Usuario): void {
-    els.avatar.textContent = gerarIniciais(usuario.nome);
+    els.avatar.innerHTML = renderAvatarUsuario(usuario.id, 'avatar-img');
     els.nome.textContent = usuario.nome;
     els.login.textContent = usuario.login;
     limparResetSenha(els);

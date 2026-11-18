@@ -8,6 +8,7 @@ Assets vetoriais (SVG, 54 arquivos) derivados da identidade do eduAssets: símbo
 - **Erro de carga:** `erro-conexao`; **página 404:** `pagina-nao-encontrada`.
 - **Ícones de equipamento:** ao lado de cada modelo no estoque do Dashboard e em Cadastros → Equipamentos, escolhidos pelo nome da categoria (`src/shared/components/kitVisual.ts`).
 - **Favicon:** `favicon.svg` é a base dos ícones do app e do site.
+- **Avatares:** menu do usuário, lista de usuários em Cadastros e painéis Cartão RFID / Redefinir senha (`pessoa-0N` estável por id); `papel-convidado` no modo convidado.
 
 ## Como usar
 

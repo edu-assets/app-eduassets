@@ -29,3 +29,13 @@ describe('kit visual', () => {
         expect(renderIconeEquipamento('Tablet', 'estoque-icone')).toContain('class="estoque-icone"');
     });
 });
+
+describe('avatares do kit', () => {
+    it('mesmo id, mesmo avatar; 8 variações em ciclo', async () => {
+        const { caminhoAvatarUsuario } = await import('../shared/components/kitVisual.js');
+        expect(caminhoAvatarUsuario(1)).toBe('/assets/kit/avatares/pessoa-02-violeta.svg');
+        expect(caminhoAvatarUsuario(9)).toBe(caminhoAvatarUsuario(1));
+        expect(caminhoAvatarUsuario(8)).toBe('/assets/kit/avatares/pessoa-01-azul.svg');
+        expect(caminhoAvatarUsuario(null)).toBe('/assets/kit/avatares/pessoa-01-azul.svg');
+    });
+});

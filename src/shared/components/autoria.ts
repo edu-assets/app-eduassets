@@ -20,13 +20,14 @@ export function renderAutoriaLinha(chaveRotulo: string, autor: Autor | null | un
     return html`<span class="autoria-linha"><span class="autoria-rotulo">${t(chaveRotulo)}</span> <span class="autoria-nome">${autor?.nome ?? '—'}</span>${raw(dataHtml)}</span>`;
 }
 
-/** Linhas de autoria na ordem dada; ignora campos ausentes; `atualizadoPor` só aparece quando não nulo (registro já editado). */
+/** Linhas de autoria na ordem dada. Campo ausente (convidado) ou nulo (registro original, sem autor registrado) não
+ * vira linha: "Criado por —" não informa nada. `atualizadoPor` nulo = registro nunca editado. */
 export function renderAutoriaBloco(
     obj: ComAutoria,
     linhas: LinhaAutoria[]
 ): string {
     return linhas
-        .filter(({ campo }) => temAutoria(obj, campo) && !(campo === 'atualizadoPor' && obj.atualizadoPor == null))
+        .filter(({ campo }) => temAutoria(obj, campo) && obj[campo] != null)
         .map(({ campo, chave, comData }) => renderAutoriaLinha(chave, obj[campo], comData ? obj.atualizadoEm : null))
         .join('');
 }

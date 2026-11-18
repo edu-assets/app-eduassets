@@ -153,7 +153,8 @@ export interface PartesAutoria {
 /** Absent fields are omitted; a null creator becomes '—'; the updater line shows only on edited records. */
 export function partesAutoria(item: ItemComAutoria, chaveCriado: string, chaveAtualizado?: string): PartesAutoria[] {
     const partes: PartesAutoria[] = [];
-    if (item.criadoPor !== undefined) partes.push({ chave: chaveCriado, nome: item.criadoPor?.nome ?? '—' });
-    if (chaveAtualizado && item.atualizadoPor != null) partes.push({ chave: chaveAtualizado, nome: item.atualizadoPor?.nome ?? '—' });
+    // Autor nulo = registro original (sem autor registrado): a linha some em vez de mostrar "—".
+    if (item.criadoPor) partes.push({ chave: chaveCriado, nome: item.criadoPor.nome });
+    if (chaveAtualizado && item.atualizadoPor) partes.push({ chave: chaveAtualizado, nome: item.atualizadoPor.nome });
     return partes;
 }

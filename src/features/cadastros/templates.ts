@@ -1,7 +1,6 @@
 import { html, raw } from '../../core/utils/html.js';
 import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
-import { renderIconeEquipamento } from '../../shared/components/kitVisual.js';
-import { gerarIniciais } from '../../core/utils/iniciais.js';
+import { renderAvatarUsuario, renderIconeEquipamento } from '../../shared/components/kitVisual.js';
 import { t } from '../../core/state/i18nStore.js';
 import { loginPareceEmail, partesAutoria } from './logic.js';
 import type { ItemComAutoria } from './logic.js';
@@ -134,7 +133,8 @@ export function renderItemRegistroUsuario(usuario: Usuario, opcoes: OpcoesItemUs
     const badgeEmail = loginPareceEmail(usuario.login)
         ? ''
         : html`<span class="cadastro-badge cadastro-badge--aviso"><span class="material-symbols-outlined" aria-hidden="true">warning</span>${t('cadastros.sem_email_valido')}</span>`;
-    const badges = badgeInativo || badgeEmail ? html`<span class="cadastro-badges">${raw(badgeInativo)}${raw(badgeEmail)}</span>` : '';
+    const papel = usuario.nivelAcesso === 'ADMINISTRADOR' ? 'admin' : 'editor';
+    const badgePapel = html`<span class="cadastro-badge cadastro-badge--${papel}">${t(NIVEL_LABEL[usuario.nivelAcesso] ?? usuario.nivelAcesso)}</span>`;
 
     const botaoStatus = ehProprio
         ? ''
@@ -142,16 +142,19 @@ export function renderItemRegistroUsuario(usuario: Usuario, opcoes: OpcoesItemUs
             ? renderBotaoAcaoTexto('data-desativar-usuario-id', usuario.id, 'person_off', t('cadastros.desativar'))
             : renderBotaoAcaoTexto('data-reativar-usuario-id', usuario.id, 'person_check', t('cadastros.reativar'));
 
+    // E-mail numa linha só (title com o texto inteiro); ações numa linha própria, abaixo do texto.
     return html`
-        <div class="cadastro-usuario-row${raw(ativo ? '' : ' cadastro-usuario-row--inativo')}">
-            <span class="cadastro-usuario-avatar">${gerarIniciais(usuario.nome)}</span>
-            <div class="cadastro-usuario-info">
-                <span class="cadastro-usuario-nome">${usuario.nome}</span>
-                <span class="cadastro-usuario-meta">${usuario.login} · ${t(NIVEL_LABEL[usuario.nivelAcesso] ?? usuario.nivelAcesso)}</span>
-                ${raw(badges)}
+        <div class="cadastro-registro cadastro-registro--acoes-abaixo cadastro-usuario-row${raw(ativo ? '' : ' cadastro-usuario-row--inativo')}">
+            ${raw(renderAvatarUsuario(usuario.id, 'cadastro-registro-midia cadastro-usuario-avatar'))}
+            <div class="cadastro-registro-info cadastro-usuario-info">
+                <span class="cadastro-registro-titulo-linha">
+                    <span class="cadastro-registro-titulo cadastro-usuario-nome">${usuario.nome}</span>
+                    ${raw(badgePapel)}${raw(badgeInativo)}${raw(badgeEmail)}
+                </span>
+                <span class="cadastro-registro-sub cadastro-registro-email" title="${usuario.login}">${usuario.login}</span>
                 ${raw(renderAutoria(usuario, 'cadastros.criado_por', 'autoria.atualizado_por'))}
             </div>
-            <div class="cadastro-usuario-acoes">
+            <div class="cadastro-registro-acoes cadastro-usuario-acoes">
                 ${raw(renderBotaoAcaoTexto('data-editar-usuario-id', usuario.id, 'edit', t('cadastros.editar')))}
                 ${raw(botaoStatus)}
                 <button type="button" class="cadastro-usuario-acao" data-reset-senha-usuario-id="${usuario.id}"
@@ -162,6 +165,11 @@ export function renderItemRegistroUsuario(usuario: Usuario, opcoes: OpcoesItemUs
             </div>
         </div>
     `;
+}
+
+/** Ícone neutro para registros sem imagem própria (categoria, responsável, equipamento sem ícone de categoria). */
+function renderMidiaIcone(icone: string): string {
+    return html`<span class="cadastro-registro-midia icon-badge icon-badge--md icon-badge--neutral"><span class="material-symbols-outlined" aria-hidden="true">${icone}</span></span>`;
 }
 
 export function textoEquipamento(eq: Equipamento): string {
@@ -181,11 +189,19 @@ export function renderFormAjusteTotal(eq: Equipamento): string {
 }
 
 export function renderItemRegistroEquipamento(eq: Equipamento): string {
+    const icone = renderIconeEquipamento(eq.categoria?.nome, 'cadastro-registro-midia cadastro-item-icone') || renderMidiaIcone('devices_other');
+    const disponiveis = t('cadastros.disponiveis_de_total')
+        .replace('{disp}', String(eq.quantidadeDisponivel)).replace('{total}', String(eq.quantidadeTotal));
+    const sub = eq.categoria?.nome ? `${eq.categoria.nome} · ${disponiveis}` : disponiveis;
     return html`
-        <div class="cadastro-modal-item cadastro-modal-item--acao">
-            ${raw(renderIconeEquipamento(eq.categoria?.nome, 'cadastro-item-icone'))}
-            <span class="cadastro-item-texto">${textoEquipamento(eq)}${raw(renderAutoria(eq, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}</span>
-            <span class="cadastro-item-acoes">${raw(renderBotaoAcaoTexto('data-ajustar-total-id', eq.id, 'tune', t('cadastros.ajustar_total')))}</span>
+        <div class="cadastro-registro cadastro-modal-item cadastro-modal-item--acao">
+            ${raw(icone)}
+            <div class="cadastro-registro-info cadastro-item-texto">
+                <span class="cadastro-registro-titulo">${eq.modelo}</span>
+                <span class="cadastro-registro-sub">${sub}</span>
+                ${raw(renderAutoria(eq, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}
+            </div>
+            <span class="cadastro-registro-acoes cadastro-item-acoes">${raw(renderBotaoAcaoTexto('data-ajustar-total-id', eq.id, 'tune', t('cadastros.ajustar_total')))}</span>
         </div>
     `;
 }
@@ -218,9 +234,13 @@ export function renderFormRenomearCategoria(c: Categoria): string {
 
 export function renderItemRegistroCategoria(c: Categoria): string {
     return html`
-        <div class="cadastro-modal-item cadastro-modal-item--acao">
-            <span class="cadastro-item-texto">${c.nome}${raw(renderAutoria(c, 'autoria.cadastrado_por'))}</span>
-            <span class="cadastro-item-acoes">${raw(renderBotaoAcaoTexto('data-renomear-categoria-id', c.id, 'edit', t('cadastros.renomear')))}</span>
+        <div class="cadastro-registro cadastro-modal-item cadastro-modal-item--acao">
+            ${raw(renderMidiaIcone('category'))}
+            <div class="cadastro-registro-info cadastro-item-texto">
+                <span class="cadastro-registro-titulo">${c.nome}</span>
+                ${raw(renderAutoria(c, 'autoria.cadastrado_por'))}
+            </div>
+            <span class="cadastro-registro-acoes cadastro-item-acoes">${raw(renderBotaoAcaoTexto('data-renomear-categoria-id', c.id, 'edit', t('cadastros.renomear')))}</span>
         </div>
     `;
 }
@@ -249,9 +269,14 @@ export function renderItemRegistroResponsavel(r: Responsavel): string {
         ? renderBotaoAcaoTexto('data-desativar-responsavel-id', r.id, 'person_off', t('cadastros.desativar'))
         : renderBotaoAcaoTexto('data-reativar-responsavel-id', r.id, 'person_check', t('cadastros.reativar'));
     return html`
-        <div class="cadastro-modal-item cadastro-modal-item--acao${raw(ativo ? '' : ' cadastro-usuario-row--inativo')}">
-            <span class="cadastro-item-texto">${r.nome} — ${r.cargo} ${raw(badge)}${raw(renderAutoria(r, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}</span>
-            <span class="cadastro-item-acoes">
+        <div class="cadastro-registro cadastro-modal-item cadastro-modal-item--acao${raw(ativo ? '' : ' cadastro-usuario-row--inativo')}">
+            ${raw(renderMidiaIcone('badge'))}
+            <div class="cadastro-registro-info cadastro-item-texto">
+                <span class="cadastro-registro-titulo-linha"><span class="cadastro-registro-titulo">${r.nome}</span>${raw(badge)}</span>
+                <span class="cadastro-registro-sub">${r.cargo}</span>
+                ${raw(renderAutoria(r, 'autoria.cadastrado_por', 'autoria.atualizado_por'))}
+            </div>
+            <span class="cadastro-registro-acoes cadastro-item-acoes">
                 ${raw(renderBotaoAcaoTexto('data-editar-responsavel-id', r.id, 'edit', t('cadastros.editar')))}
                 ${raw(botaoStatus)}
             </span>
