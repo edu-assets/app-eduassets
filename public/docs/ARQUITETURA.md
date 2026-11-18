@@ -44,12 +44,12 @@ O código-fonte do frontend é mantido separadamente no repositório `edu-assets
 3. Uma falha em uma carga inicial mostra um toast de erro; as demais inicializações continuam de forma independente, para que uma falha de feature não interrompa todas as outras.
 4. Inicializa navegação, helpers de UI, timeout de sessão administrativa, módulos de feature, listener RFID, telas de perfil/segurança/configuração e documentação.
 5. A navegação usa rotas por hash (`#app/<painel>`, definidas em `core/layout/appRoutes.ts` e aplicadas por `core/layout/navigation.ts`): recarregar mantém o painel, voltar/avançar funcionam, o título do documento acompanha o painel e painéis exclusivos de administrador redirecionam. Após novo login, o app retorna ao painel anterior.
-5. A navegação usa rotas por hash (`#app/<painel>`, definidas em `core/layout/appRoutes.ts` e aplicadas por `core/layout/navigation.ts`): recarregar mantém o painel, voltar/avançar funcionam, o título do documento acompanha o painel e painéis exclusivos de administrador redirecionam. Após novo login, o app retorna ao painel anterior.
 
 As camadas observadas do frontend são:
 
 - **`core/`**: infraestrutura como cliente/configuração da API, stores de token e domínio, autenticação/timeout de sessão, layout, UI, utilitários HTML e listener RFID.
-- **`features/`**: módulos de tela (autenticação, dashboard, empréstimos/devoluções, controle de equipamentos e cadastros, exportação, configuração, segurança, perfil e documentação) compostos por `main.ts`.
+- **`features/`**: módulos de tela (início, autenticação, dashboard, empréstimos/devoluções, controle de equipamentos e cadastros, exportação, configuração, segurança, perfil e documentação) compostos por `main.ts`. O resumo **Operações agora** do Início (`features/inicio/resumo.ts`) é calculado no cliente a partir dos stores de equipamentos, empréstimos e ocorrências já carregados, sem consulta adicional à API.
+- **`shared/`**: componentes e helpers de DOM reutilizados pelas features, entre eles os avisos de formulário inline (`shared/forms/fieldErrors.ts`, instalado no boot: intercepta o evento `invalid` e substitui o balão nativo do navegador por uma mensagem tematizada abaixo do campo) e o estado de carregamento de botões (`shared/dom/buttonLoading.ts`, que sobrepõe o indicador sem alterar o tamanho do botão).
 - O ponto de entrada não inicializa framework nem biblioteca global de estado. O estado de domínio é exposto por stores com funções `get...`, carga/mutação e `subscribe` para equipamentos, empréstimos, ocorrências, responsáveis, tema e i18n.
 
 ### Estado e fluxo da API

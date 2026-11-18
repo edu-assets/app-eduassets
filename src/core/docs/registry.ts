@@ -29,8 +29,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'auto_stories',
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
-        version: '1.5.3',
-        updatedAt: '2026-11-17'
+        version: '1.6.0',
+        updatedAt: '2026-11-18'
     },
     {
         id: 'readme',
@@ -47,8 +47,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'account_tree',
         file: { pt: '/docs/ARQUITETURA.md', en: '/docs/ARCHITECTURE.md' },
         category: 'tecnico',
-        version: '1.5.2',
-        updatedAt: '2026-11-14'
+        version: '1.6.0',
+        updatedAt: '2026-11-18'
     },
     {
         id: 'hosting',
@@ -83,8 +83,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: '1.5.3',
-        updatedAt: '2026-11-17'
+        version: '1.6.0',
+        updatedAt: '2026-11-18'
     },
     {
         id: 'api-reference',

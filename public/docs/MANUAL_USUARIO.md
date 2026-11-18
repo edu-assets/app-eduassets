@@ -48,7 +48,16 @@ O fluxo só funciona quando a configuração, a rede, a ponte local, as dependê
 
 ## 3. Início
 
-Em **Início**, use os atalhos **Novo empréstimo**, **Devoluções**, **Dashboard** e **Controle**. O botão **Começar** abre o painel **Registrar Empréstimo**. A tela também oferece **Ver documentação**.
+Em **Início**, use os atalhos **Novo empréstimo**, **Devoluções**, **Dashboard** e **Controle** (no celular, **Empréstimo**, **Devoluções**, **Dashboard** e **Controle**, em grade 2×2). O botão **Começar** abre o painel **Registrar Empréstimo**. A tela também oferece **Ver documentação**.
+
+**Operações agora:** um resumo com quatro indicadores, cada um abre o painel correspondente:
+
+- **Em aberto:** empréstimos ainda não devolvidos e o horário do mais antigo (abre **Devoluções**).
+- **Disponíveis:** unidades disponíveis do total, quantas estão emprestadas e a porcentagem livre (abre o **Dashboard**).
+- **Ocorrências:** ocorrências abertas, separadas em manutenção, quebrados e observações (abre **Controle**).
+- **Estoque:** modelos **Esgotados** ou com **Estoque baixo**, pelas mesmas regras do **Dashboard**; mostra **Tudo certo** quando não há nenhum (abre o **Dashboard**).
+
+O ponto colorido de cada indicador mostra a situação: verde quando está tudo em ordem, laranja quando pede atenção e vermelho para modelos esgotados. **Atualizado às** indica a última atualização dos números, que acompanham a atualização automática abaixo.
 
 **Atualização automática:** a tela se atualiza sozinha enquanto está aberta (a cada 30 segundos quando há mudanças, com intervalos maiores, até 5 minutos, quando nada muda), assim que você volta para o app ou para a aba e, para administradores, quando chega uma notificação. Depois de 10 minutos sem uso (sem mouse, teclado ou toque), a atualização pausa para economizar recursos e volta na hora em que você mexe na tela. Não é preciso recarregar a página.
 

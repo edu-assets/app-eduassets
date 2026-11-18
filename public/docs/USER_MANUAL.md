@@ -48,7 +48,16 @@ The flow works only when configuration, networking, the local bridge, dependenci
 
 ## 3. Home
 
-On **Home**, use the shortcuts **New loan**, **Returns**, **Dashboard**, and **Control**. **Get started** opens the **Register Loan** panel. The page also offers **View documentation**.
+On **Home**, use the shortcuts **New loan**, **Returns**, **Dashboard**, and **Control** (on mobile, **Loan**, **Returns**, **Dashboard**, and **Control**, in a 2×2 grid). **Get started** opens the **Register Loan** panel. The page also offers **View documentation**.
+
+**Operations now:** a summary with four indicators; each one opens the related panel:
+
+- **Open:** loans not yet returned and the time of the oldest one (opens **Returns**).
+- **Available:** available units out of the total, how many are on loan, and the free percentage (opens the **Dashboard**).
+- **Incidents:** open incidents, split into maintenance, broken, and notes (opens **Control**).
+- **Stock:** models that are **Out of stock** or **Low stock**, using the same rules as the **Dashboard**; shows **All good** when there are none (opens the **Dashboard**).
+
+The colored dot on each indicator shows its status: green when everything is in order, orange when it needs attention, and red for out-of-stock models. **Updated at** shows when the numbers were last refreshed; they follow the automatic updates below.
 
 **Automatic updates:** the screen refreshes itself while it is open (every 30 seconds when there are changes, with longer intervals, up to 5 minutes, when nothing changes), as soon as you return to the app or tab and, for administrators, when a notification arrives. After 10 minutes without use (no mouse, keyboard or touch), updates pause to save resources and resume as soon as you interact with the screen. There is no need to reload the page.
 
