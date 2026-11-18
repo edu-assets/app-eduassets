@@ -18,6 +18,7 @@ import { initSeguranca } from './features/seguranca/index.js';
 import { initPerfil } from './features/perfil/index.js';
 import { initRfidListener } from './core/rfid/rfidListener.js';
 import { initDocumentation } from './features/sobre/index.js';
+import { initResumoOperacoes } from './features/inicio/resumo.js';
 import { initAnalyticsConsent } from './core/analytics/analyticsConsent.js';
 import { initNotificacoes } from './core/notifications/index.js';
 import { APP_VERSION } from './core/version.js';
@@ -50,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         initConfirm,
         initSessionTimeout,
         initDashboard,
+        initResumoOperacoes,
         initControle,
         initCadastros,
         initEmprestimo,

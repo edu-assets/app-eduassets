@@ -192,6 +192,83 @@
                         </div>
                     </div>
 
+                    <section class="inicio-resumo" aria-labelledby="inicio-resumo-titulo" aria-busy="true">
+                        <div class="inicio-resumo-header">
+                            <h3 class="inicio-resumo-titulo" id="inicio-resumo-titulo" data-i18n-key="inicio.resumo_titulo">Operações agora</h3>
+                            <span class="inicio-resumo-atualizado" id="inicio-resumo-atualizado" data-i18n-exclude hidden></span>
+                        </div>
+                        <div class="inicio-resumo-grid">
+                            <a href="#" class="inicio-resumo-card nav-link" data-panel="panel-devolucao" data-resumo="abertos">
+                                <span class="inicio-resumo-topo">
+                                    <span class="inicio-resumo-rotulo" data-i18n-key="inicio.resumo_em_aberto">Em aberto</span>
+                                    <span class="icon-badge icon-badge--md icon-badge--success inicio-resumo-icone">
+                                        <span class="material-symbols-outlined">assignment_return</span>
+                                    </span>
+                                </span>
+                                <span class="inicio-resumo-valor" data-i18n-exclude>
+                                    <span class="inicio-resumo-numero" data-resumo-numero>—</span>
+                                    <span class="inicio-resumo-unidade" data-resumo-unidade></span>
+                                </span>
+                                <span class="inicio-resumo-status" data-estado="neutro">
+                                    <span class="inicio-resumo-ponto" aria-hidden="true"></span>
+                                    <span class="inicio-resumo-detalhe" data-resumo-detalhe data-i18n-exclude></span>
+                                    <span class="material-symbols-outlined inicio-resumo-chevron">chevron_right</span>
+                                </span>
+                            </a>
+                            <a href="#" class="inicio-resumo-card nav-link" data-panel="panel-dashboard" data-resumo="disponiveis">
+                                <span class="inicio-resumo-topo">
+                                    <span class="inicio-resumo-rotulo" data-i18n-key="inicio.resumo_disponiveis">Disponíveis</span>
+                                    <span class="icon-badge icon-badge--md icon-badge--primary inicio-resumo-icone">
+                                        <span class="material-symbols-outlined">inventory_2</span>
+                                    </span>
+                                </span>
+                                <span class="inicio-resumo-valor" data-i18n-exclude>
+                                    <span class="inicio-resumo-numero" data-resumo-numero>—</span>
+                                    <span class="inicio-resumo-unidade" data-resumo-unidade></span>
+                                </span>
+                                <span class="inicio-resumo-status" data-estado="neutro">
+                                    <span class="inicio-resumo-ponto" aria-hidden="true"></span>
+                                    <span class="inicio-resumo-detalhe" data-resumo-detalhe data-i18n-exclude></span>
+                                    <span class="material-symbols-outlined inicio-resumo-chevron">chevron_right</span>
+                                </span>
+                            </a>
+                            <a href="#" class="inicio-resumo-card nav-link" data-panel="panel-controle" data-resumo="ocorrencias">
+                                <span class="inicio-resumo-topo">
+                                    <span class="inicio-resumo-rotulo" data-i18n-key="inicio.resumo_ocorrencias">Ocorrências</span>
+                                    <span class="icon-badge icon-badge--md icon-badge--warning inicio-resumo-icone">
+                                        <span class="material-symbols-outlined">build</span>
+                                    </span>
+                                </span>
+                                <span class="inicio-resumo-valor" data-i18n-exclude>
+                                    <span class="inicio-resumo-numero" data-resumo-numero>—</span>
+                                    <span class="inicio-resumo-unidade" data-resumo-unidade></span>
+                                </span>
+                                <span class="inicio-resumo-status" data-estado="neutro">
+                                    <span class="inicio-resumo-ponto" aria-hidden="true"></span>
+                                    <span class="inicio-resumo-detalhe" data-resumo-detalhe data-i18n-exclude></span>
+                                    <span class="material-symbols-outlined inicio-resumo-chevron">chevron_right</span>
+                                </span>
+                            </a>
+                            <a href="#" class="inicio-resumo-card nav-link" data-panel="panel-dashboard" data-resumo="estoque">
+                                <span class="inicio-resumo-topo">
+                                    <span class="inicio-resumo-rotulo" data-i18n-key="inicio.resumo_estoque">Estoque</span>
+                                    <span class="icon-badge icon-badge--md icon-badge--neutral inicio-resumo-icone">
+                                        <span class="material-symbols-outlined">warning</span>
+                                    </span>
+                                </span>
+                                <span class="inicio-resumo-valor" data-i18n-exclude>
+                                    <span class="inicio-resumo-numero" data-resumo-numero>—</span>
+                                    <span class="inicio-resumo-unidade" data-resumo-unidade></span>
+                                </span>
+                                <span class="inicio-resumo-status" data-estado="neutro">
+                                    <span class="inicio-resumo-ponto" aria-hidden="true"></span>
+                                    <span class="inicio-resumo-detalhe" data-resumo-detalhe data-i18n-exclude></span>
+                                    <span class="material-symbols-outlined inicio-resumo-chevron">chevron_right</span>
+                                </span>
+                            </a>
+                        </div>
+                    </section>
+
                     <div class="inicio-acoes">
                         <h3 class="inicio-acoes-titulo">Ações rápidas</h3>
 
@@ -201,7 +278,7 @@
                                     <span class="material-symbols-outlined">open_in_new</span>
                                 </span>
                                 <div class="inicio-acao-texto">
-                                    <span class="inicio-acao-titulo">Novo empréstimo</span>
+                                    <span class="inicio-acao-titulo"><span class="inicio-rotulo-longo">Novo empréstimo</span><span class="inicio-rotulo-curto" data-i18n-key="inicio.acao_emprestimo_curto">Empréstimo</span></span>
                                     <span class="inicio-acao-desc">Registrar um novo empréstimo de equipamento</span>
                                 </div>
                                 <span class="material-symbols-outlined inicio-acao-chevron">chevron_right</span>
