@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><style>
+.t1{stop-color:#3B74F0}.t2{stop-color:#143789}.b{fill:#143789}.s1{stop-color:#1D4ED8}.s2{stop-color:#3B82F6}
+@media (prefers-color-scheme: dark){.t1{stop-color:#7FA4F7}.t2{stop-color:#2563EB}.b{fill:#2563EB}.s1{stop-color:#5C8AF4}.s2{stop-color:#B8CFFB}}
+</style>
+<defs>
+<path id="tela" d="M150 104 h220 a32 32 0 0 1 32 32 v150 a32 32 0 0 1 -32 32 h-220 a32 32 0 0 1 -32 -32 v-150 a32 32 0 0 1 32 -32 Z"/><path id="base" d="M104 312 h312 a20 20 0 0 1 20 20 v24 a20 20 0 0 1 -20 20 h-312 a20 20 0 0 1 -20 -20 v-24 a20 20 0 0 1 20 -20 Z"/><path id="seta" d="M66 392 C 190 384, 304 326, 382 234 L 352 208 L 462 124 L 446 260 L 418 236 C 336 344, 196 428, 74 438 Z"/><path id="fantasma" d="M370 120 C 278 132, 176 176, 108 230 L 120 246 L 54 274 L 82 212 L 94 226 C 168 166, 270 120, 370 120 Z"/>
+<linearGradient id="gt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="t1"/><stop offset="1" class="t2"/></linearGradient>
+<linearGradient id="gs" x1="0" y1="1" x2="1" y2="0"><stop offset="0" class="s1"/><stop offset="1" class="s2"/></linearGradient>
+<mask id="corte"><rect width="512" height="512" fill="#fff"/><path d="M66 392 C 190 384, 304 326, 382 234 L 352 208 L 462 124 L 446 260 L 418 236 C 336 344, 196 428, 74 438 Z" fill="#000" stroke="#000" stroke-width="26" stroke-linejoin="round"/></mask>
+</defs>
+<g fill="#0B1B44" stroke="#0B1B44" stroke-width="62" stroke-linejoin="round"><use href="#tela"/><use href="#base"/><use href="#seta"/></g>
+<g fill="#FFFFFF" stroke="#FFFFFF" stroke-width="36" stroke-linejoin="round"><use href="#tela"/><use href="#base"/><use href="#seta"/></g>
+
+<g mask="url(#corte)"><use href="#tela" fill="url(#gt)"/><path d="M232 134 h48 a11 11 0 0 1 0 22 h-48 a11 11 0 0 1 0 -22 Z" fill="#FFFFFF" fill-opacity="0.9"/><use href="#base" class="b"/></g>
+<use href="#seta" fill="url(#gs)"/>
+</svg>
