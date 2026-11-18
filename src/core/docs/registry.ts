@@ -47,7 +47,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'account_tree',
         file: { pt: '/docs/ARQUITETURA.md', en: '/docs/ARCHITECTURE.md' },
         category: 'tecnico',
-        version: '1.6.0',
+        version: '1.6.1',
         updatedAt: '2026-11-18'
     },
     {
@@ -83,7 +83,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: '1.6.0',
+        version: '1.6.1',
         updatedAt: '2026-11-18'
     },
     {
