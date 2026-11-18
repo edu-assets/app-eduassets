@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.6.1 oficial**, publicada em 18/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.6.2 oficial**, publicada em 18/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.6.2 — Avatares, autoria sem traço e Cadastros mais legível — 18 de novembro de 2026
+
+Versão de interface; a API e o site só alinham o número da versão.
+
+- **Avatares:** o menu do usuário mostra o avatar do kit visual no lugar das iniciais. Cada usuário tem sempre o mesmo avatar (pelo id), repetido na lista de usuários de **Cadastros** e nas telas **Cartão RFID** e **Redefinir senha**; o Modo Convidado usa o avatar de convidado.
+- **Autoria:** registros que já existiam antes de a autoria ser registrada não mostram mais "Criado por —", "Cadastrado por —", "Registrado por —" e equivalentes: a linha some em listas, cartões e detalhes. As exportações (CSV, Excel e PDF) mantêm "—" na coluna.
+- **Cadastros:** a janela ficou mais larga (760 px). Usuários, equipamentos, categorias e responsáveis seguem o mesmo formato: avatar ou ícone, nome em destaque com selos (**Administrador**, **Editor**, **Inativo**, e-mail inválido), uma linha secundária (e-mail; categoria e "8 de 10 disponíveis"; cargo), a autoria em letra menor e as ações. Na lista de usuários, o e-mail fica sempre em uma linha (com reticências e o texto inteiro ao passar o mouse quando não cabe) e as ações vão para a linha de baixo; os e-mails nas telas **Cartão RFID** e **Redefinir senha** também não quebram mais.
+- **Documentação:** Manual do Usuário §2 (menu do usuário), §6 (autoria) e §8 (Cadastros); Arquitetura (avatares e regra de autoria).
 
 ## v1.6.1 — Favicon mais legível e kit visual — 18 de novembro de 2026
 
