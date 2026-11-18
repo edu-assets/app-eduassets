@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.6.1**, released on November 18, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.6.2**, released on November 18, 2026; earlier entries remain historical.
+
+## v1.6.2 — Avatars, authorship without dashes and a more legible Records window — November 18, 2026
+
+Interface release; the API and the site only align the version number.
+
+- **Avatars:** the user menu shows a visual-kit avatar instead of initials. Each user always gets the same avatar (by id), repeated in the **Records** user list and in the **RFID Card** and **Reset password** views; Guest Mode uses the guest avatar.
+- **Authorship:** records that existed before authorship was recorded no longer show "Created by —", "Registered by —" and similar: the line disappears from lists, cards and details. Exports (CSV, Excel and PDF) keep "—" in the column.
+- **Records:** the window is wider (760 px). Users, equipment, categories and responsible parties share one layout: avatar or icon, name in emphasis with badges (**Administrator**, **Editor**, **Inactive**, invalid email), a secondary line (email; category and "8 of 10 available"; role), authorship in smaller type and the actions. In the user list the email always stays on one line (with an ellipsis and the full text on hover when it does not fit) and the actions move to the line below; emails in the **RFID Card** and **Reset password** views no longer wrap either.
+- **Documentation:** User Manual §2 (user menu), §6 (authorship) and §8 (Records); Architecture (avatars and the authorship rule).
 
 ## v1.6.1 — More legible favicon and visual kit — November 18, 2026
 
