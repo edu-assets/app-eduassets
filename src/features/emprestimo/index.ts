@@ -1,7 +1,7 @@
 import { getEquipamentos, subscribe as subscribeEquipamentos } from '../../core/state/equipamentoStore.js';
 import { getResponsaveis, subscribe as subscribeResponsaveis } from '../../core/state/responsavelStore.js';
-import { criarDataAutoPicker, criarDataHoraPicker } from '../../core/ui/index.js';
-import { attachEmprestimoEvents, atualizarLimiteQuantidade, atualizarRotuloSubmit, devolucaoPrevistaPadrao, sincronizarJanela } from './events.js';
+import { criarDataAutoPicker } from '../../core/ui/index.js';
+import { attachEmprestimoEvents, atualizarLimiteQuantidade, atualizarRotuloSubmit } from './events.js';
 import { agora } from '../../core/time/serverClock.js';
 import { inicioMaximoAgendamento } from '../../core/utils/estoque.js';
 import { iniciarSugestoesSolicitante } from './solicitantes.js';
@@ -23,34 +23,15 @@ export async function initEmprestimo(): Promise<void> {
         return;
     }
 
-    const previstaInput = document.getElementById('devolucao-prevista-emprestimo') as HTMLInputElement | null;
-    if (!previstaInput) {
-        console.error('[eduAssets] initEmprestimo: campo "Devolução prevista" não encontrado.');
-        return;
-    }
-
-    // Os pickers disparam estes ganchos; `attachEmprestimoEvents` os liga depois de montar `els`.
-    const ganchos: { retiradaMudou?: () => void; previstaMudou?: () => void } = {};
+    // O picker dispara este gancho; `attachEmprestimoEvents` o liga depois de montar `els`.
+    const ganchos: { retiradaMudou?: () => void } = {};
     const picker = await criarDataAutoPicker(dataInput, {
         maxDate: () => inicioMaximoAgendamento(agora()),
         aoMudar: () => ganchos.retiradaMudou?.()
     });
-    const inicioPadrao = new Date(agora());
-    inicioPadrao.setSeconds(0, 0);
-    previstaInput.classList.add('input-auto');
-    const previstaPicker = await criarDataHoraPicker(previstaInput, {
-        defaultDate: devolucaoPrevistaPadrao(inicioPadrao, false, agora()),
-        minDate: () => (dataInput.classList.contains('input-auto') ? undefined : picker.selectedDates[0]),
-        aoMudar: () => {
-            previstaInput.classList.remove('input-auto');
-            ganchos.previstaMudou?.();
-        }
-    });
 
     const els = {
         form,
-        previstaInput,
-        previstaPicker,
         ganchos,
         dataInput,
         equipamentoSelect: document.getElementById('equipamento') as HTMLSelectElement,
@@ -77,7 +58,6 @@ export async function initEmprestimo(): Promise<void> {
     subscribeResponsaveis((responsaveis) => popularSelectResponsaveis(els.responsavelSelect, responsaveis));
 
     attachEmprestimoEvents(els, estado);
-    sincronizarJanela(els);
     atualizarRotuloSubmit(els);
     iniciarSugestoesSolicitante();
 

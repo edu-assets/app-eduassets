@@ -9,7 +9,7 @@ import type { LoanItemUI, LoanDraft } from '../../types/index.js';
 import { definirAgora, fimDoDia, type FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { formatarDataHora, t } from '../../core/state/i18nStore.js';
 import { agora } from '../../core/time/serverClock.js';
-import { DURACAO_MAXIMA_AGENDAMENTO_MS, ehAgendamento } from '../../core/utils/estoque.js';
+import { ehAgendamento } from '../../core/utils/estoque.js';
 import { setButtonLoading } from '../../shared/dom/buttonLoading.js';
 import { limparErroCampo, sinalizarErroCampo } from '../../shared/forms/fieldErrors.js';
 
@@ -27,11 +27,8 @@ interface EmprestimoEventosEls {
     observacaoInput: HTMLTextAreaElement;
     btnSubmit: HTMLButtonElement;
     picker: FlatpickrInstance;
-    /** Campo "Devolução prevista" (flatpickr). */
-    previstaInput: HTMLInputElement;
-    previstaPicker: FlatpickrInstance;
-    /** Preenchido por `attachEmprestimoEvents`: o index liga os pickers a estas funções. */
-    ganchos?: { retiradaMudou?: () => void; previstaMudou?: () => void };
+    /** Preenchido por `attachEmprestimoEvents`: o index liga o picker a esta função. */
+    ganchos?: { retiradaMudou?: () => void };
 }
 
 interface EmprestimoEventosEstado {
@@ -59,15 +56,9 @@ function definirAviso(aviso: HTMLElement | null, texto: string): void {
     aviso.hidden = !texto;
 }
 
-/* ===== Janela (retirada / devolução prevista) e rótulo do botão ===== */
+/* ===== Retirada e rótulo do botão ===== */
 
 const UMA_HORA_MS = 3_600_000;
-
-function noMinuto(data: Date): Date {
-    const d = new Date(data);
-    d.setSeconds(0, 0);
-    return d;
-}
 
 /** Retirada escolhida pelo usuário; null enquanto o campo é automático ("agora"). */
 function retiradaEditada(els: Pick<EmprestimoEventosEls, 'dataInput' | 'picker'>): Date | null {
@@ -75,35 +66,10 @@ function retiradaEditada(els: Pick<EmprestimoEventosEls, 'dataInput' | 'picker'>
     return els.picker.selectedDates[0] ?? null;
 }
 
-/** Padrão da devolução prevista: início + 1 h para agendamentos; fim do dia local para retirada imediata. */
-export function devolucaoPrevistaPadrao(inicio: Date, agendando: boolean, referencia: Date): Date {
-    if (agendando) return new Date(inicio.getTime() + UMA_HORA_MS);
+/** Devolução prevista de um empréstimo imediato (sem campo no formulário): fim do dia local. */
+export function devolucaoPrevistaImediata(referencia: Date): Date {
     const fimDia = fimDoDia(referencia);
-    return fimDia.getTime() > inicio.getTime() ? fimDia : new Date(inicio.getTime() + UMA_HORA_MS);
-}
-
-/**
- * Mantém "Devolução prevista" coerente com a retirada: enquanto não foi editada acompanha o padrão; editada, só é
- * refeita se ficou antes da retirada (ou além de 15 dias de um agendamento).
- */
-export function sincronizarJanela(els: Pick<EmprestimoEventosEls, 'dataInput' | 'picker' | 'previstaInput' | 'previstaPicker'>): void {
-    const referencia = agora();
-    const editada = retiradaEditada(els);
-    const inicio = noMinuto(editada ?? referencia);
-    const agendando = editada !== null && ehAgendamento(editada, referencia);
-    const padrao = devolucaoPrevistaPadrao(inicio, agendando, referencia);
-
-    els.previstaPicker.set('minDate', editada ?? undefined);
-    els.previstaPicker.set('maxDate', agendando ? new Date(inicio.getTime() + DURACAO_MAXIMA_AGENDAMENTO_MS) : undefined);
-
-    const automatica = els.previstaInput.classList.contains('input-auto');
-    const atual = els.previstaPicker.selectedDates[0];
-    const invalida = !atual || atual.getTime() < inicio.getTime()
-        || (agendando && atual.getTime() - inicio.getTime() > DURACAO_MAXIMA_AGENDAMENTO_MS);
-    if (automatica || invalida) {
-        els.previstaPicker.setDate(padrao, false);
-        els.previstaInput.classList.add('input-auto');
-    }
+    return fimDia.getTime() > referencia.getTime() ? fimDia : new Date(referencia.getTime() + UMA_HORA_MS);
 }
 
 /** Botão do envio: "Agendar" quando a retirada está a mais de 5 min no futuro; senão "Registrar Empréstimo". */
@@ -163,14 +129,7 @@ function sincronizarDisponibilidade(els: EmprestimoEventosEls, estado: Emprestim
 }
 
 export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: EmprestimoEventosEstado): void {
-    const aoMudarRetirada = (): void => {
-        sincronizarJanela(els);
-        atualizarRotuloSubmit(els);
-    };
-    if (els.ganchos) {
-        els.ganchos.retiradaMudou = aoMudarRetirada;
-        els.ganchos.previstaMudou = () => limparErroCampo(els.previstaInput);
-    }
+    if (els.ganchos) els.ganchos.retiradaMudou = () => atualizarRotuloSubmit(els);
 
     els.equipamentoSelect.addEventListener('change', () => atualizarLimiteQuantidade(els, estado));
     els.quantidadeInput.addEventListener('input', () => atualizarLimiteQuantidade(els, estado));
@@ -178,7 +137,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
     els.form.addEventListener('reset', () => setTimeout(() => {
         atualizarContador(els);
         sincronizarDisponibilidade(els, estado);
-        if (els.previstaPicker) aoMudarRetirada();
+        atualizarRotuloSubmit(els);
     }, 0));
     atualizarContador(els);
 
@@ -254,29 +213,15 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
 
         const referencia = agora();
         const editada = retiradaEditada(els);
-        const agendando = editada !== null && ehAgendamento(editada, referencia);
-        const inicio = editada ?? referencia;
+        const inicioFuturo = editada !== null && ehAgendamento(editada, referencia) ? editada : null;
 
-        // Devolução prevista automática acompanha o padrão no momento do envio (o dia pode ter virado).
-        const previstaAutomatica = els.previstaInput.classList.contains('input-auto');
-        const prevista = (!previstaAutomatica && els.previstaPicker.selectedDates[0])
-            || devolucaoPrevistaPadrao(noMinuto(inicio), agendando, referencia);
-
-        if (prevista.getTime() < noMinuto(inicio).getTime()) {
-            sinalizarErroCampo(els.previstaInput, t('emprestimo.devolucao_prevista_antes_retirada'));
-            return;
-        }
-        if (agendando && prevista.getTime() - inicio.getTime() > DURACAO_MAXIMA_AGENDAMENTO_MS) {
-            sinalizarErroCampo(els.previstaInput, t('agendamento.erro_fim_muito_longo'));
-            return;
-        }
-
+        // Retirada imediata leva só a devolução prevista (fim do dia): o servidor a usa na disponibilidade futura.
         const dados: LoanDraft = {
             aluno: els.solicitanteInput.value,
             responsavelId: els.responsavelSelect.value,
             itens: estado.itens,
             dataRetiradaISO: editada ? editada.toISOString() : undefined,
-            dataPrevistaDevolucaoISO: prevista.toISOString(),
+            dataPrevistaDevolucaoISO: devolucaoPrevistaImediata(referencia).toISOString(),
             observacao: els.observacaoInput.value
         };
 
@@ -290,7 +235,7 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
             }
         };
 
-        const desfecho = await registrarComFluxo({ dados, inicio, fim: prevista, agendando }, enviar);
+        const desfecho = await registrarComFluxo({ dados, inicioFuturo }, enviar);
 
         if (desfecho.tipo === 'cancelado') return;
         if (desfecho.tipo === 'erro') {
@@ -307,8 +252,6 @@ export function attachEmprestimoEvents(els: EmprestimoEventosEls, estado: Empres
         els.form.reset();
         definirAgora(els.picker);
         els.dataInput.classList.add('input-auto');
-        els.previstaInput.classList.add('input-auto');
-        sincronizarJanela(els);
         atualizarRotuloSubmit(els);
         estado.itens = [];
         renderItens(els, estado.itens);

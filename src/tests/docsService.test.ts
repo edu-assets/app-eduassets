@@ -9,7 +9,7 @@ vi.mock('../core/docs/markdownRenderer.js', () => ({
     renderizarMarkdown: async (markdown: string) => ({ html: `<p>${markdown}</p>`, headings: [] }),
 }));
 
-const PINNED_DOCS_BASE_URL = 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/4cf3c3cf3d65c7b3ad55b0b564c40a5fedf11d0e/public';
+const PINNED_DOCS_BASE_URL = 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/371feec5c92d17ae2be0a1386903df0ce97d3b84/public';
 
 describe('documentation Markdown source', () => {
     beforeEach(() => {

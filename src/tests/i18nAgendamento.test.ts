@@ -3,9 +3,9 @@ import pt from '../core/i18n/pt.json';
 import en from '../core/i18n/en.json';
 
 const CHAVES = [
-    'emprestimo.agendar', 'emprestimo.devolucao_prevista', 'emprestimo.devolucao_prevista_antes_retirada',
+    'emprestimo.agendar', 'emprestimo.devolucao_prevista',
     'emprestimo.aviso_disponivel_agora_singular', 'emprestimo.aviso_disponivel_agora_plural', 'emprestimo.aviso_nenhuma_disponivel_agora',
-    'feedback.agendamento_registrado', 'agendamento.confirmar_titulo', 'agendamento.indisponivel_titulo', 'agendamento.sim', 'agendamento.nao',
+    'feedback.agendamento_registrado', 'agendamento.confirmar_titulo', 'agendamento.indisponivel_titulo', 'agendamento.sim', 'agendamento.nao', 'agendamento.aviso',
     'devolucao.aba_em_andamento', 'devolucao.aba_agendamentos', 'devolucao.aba_em_andamento_n', 'devolucao.aba_agendamentos_n',
     'devolucao.badge_hoje', 'devolucao.badge_atrasado', 'devolucao.badge_expirado', 'devolucao.badge_agendado',
     'devolucao.confirmar_retirada', 'devolucao.excluir_agendamento', 'devolucao.confirmar_retirada_titulo', 'devolucao.excluir_agendamento_titulo',

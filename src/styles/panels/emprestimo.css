@@ -256,8 +256,7 @@
 
 /* "Data e Hora (Clique para alterar)" fica numa linha só, para o campo alinhar com Solicitante e
    Responsável; se faltar espaço, a dica é abreviada em vez de empurrar o campo para baixo. */
-#panel-emprestimo label[for="data-emprestimo"],
-#panel-emprestimo label[for="devolucao-prevista-emprestimo"] {
+#panel-emprestimo label[for="data-emprestimo"] {
     display: flex;
     align-items: baseline;
     gap: 4px;
@@ -265,13 +264,11 @@
     white-space: nowrap;
 }
 
-#panel-emprestimo label[for="data-emprestimo"] > span:first-child,
-#panel-emprestimo label[for="devolucao-prevista-emprestimo"] > span:first-child {
+#panel-emprestimo label[for="data-emprestimo"] > span:first-child {
     flex-shrink: 0;
 }
 
-#panel-emprestimo label[for="data-emprestimo"] .form-label-optional,
-#panel-emprestimo label[for="devolucao-prevista-emprestimo"] .form-label-optional {
+#panel-emprestimo label[for="data-emprestimo"] .form-label-optional {
     display: block;
     min-width: 0;
     margin-left: 0;
@@ -496,9 +493,8 @@
         gap: 14px;
     }
 
-    /* Data e Hora e Devolução prevista dividem a segunda linha. */
     #panel-emprestimo .form-section:first-child .form-group.col-md {
-        grid-column: auto;
+        grid-column: 1 / -1;
     }
 
     #panel-emprestimo .form-section:nth-child(2) .form-row {

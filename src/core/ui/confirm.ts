@@ -158,7 +158,10 @@ export function confirmarAcao<T>(opcoes: ConfirmarAcaoOpcoes<T>): Promise<boolea
     if (btnCancelar) definirRotuloConfirmar(btnCancelar, opcoes.rotuloCancelar ?? 'shell.cancelar', '');
 
     if (tituloEl) tituloEl.textContent = titulo;
-    if (mensagemEl) mensagemEl.textContent = mensagem;
+    if (mensagemEl) {
+        mensagemEl.textContent = mensagem;
+        mensagemEl.hidden = !mensagem;
+    }
 
     if (detalhesEl) {
         if (opcoes.detalhesHtml) {

@@ -6,12 +6,16 @@ vi.hoisted(() => localStorage.setItem('eduassets_lang', 'pt'));
 const mocks = vi.hoisted(() => ({
     equipamentos: [] as unknown[],
     loans: [] as unknown[],
+    addLoan: vi.fn(),
+    showToast: vi.fn(),
     confirmarAcao: vi.fn(),
     criarDataHoraPicker: vi.fn()
 }));
 
 vi.mock('../core/state/equipamentoStore.js', () => ({ getEquipamentos: () => mocks.equipamentos, subscribe: () => () => undefined }));
-vi.mock('../core/state/loanStore.js', () => ({ getLoansAtivos: () => mocks.loans, addLoan: vi.fn() }));
+vi.mock('../core/state/loanStore.js', () => ({ getLoansAtivos: () => mocks.loans, addLoan: mocks.addLoan }));
+vi.mock('../core/auth/guestGate.js', () => ({ bloquearSeConvidado: () => false }));
+vi.mock('../core/ui/index.js', () => ({ showToast: mocks.showToast, openModal: vi.fn() }));
 vi.mock('../core/state/ocorrenciasStore.js', () => ({ getOcorrenciasPorTipo: () => [] }));
 vi.mock('../core/ui/confirm.js', () => ({ confirmarAcao: mocks.confirmarAcao }));
 vi.mock('../core/ui/datepicker.js', async (importOriginal) => ({
@@ -20,9 +24,10 @@ vi.mock('../core/ui/datepicker.js', async (importOriginal) => ({
 }));
 
 import { ApiError } from '../core/api/apiClient.js';
-import { registrarComFluxo, solicitarNovaJanela, verificarDisponibilidade } from '../features/emprestimo/agendamento.js';
+import { registrarComFluxo, solicitarAgendamento, verificarDisponibilidade } from '../features/emprestimo/agendamento.js';
 import { adicionarItemComValidacao } from '../features/emprestimo/service.js';
-import { atualizarRotuloSubmit } from '../features/emprestimo/events.js';
+import { atualizarRotuloSubmit, attachEmprestimoEvents, devolucaoPrevistaImediata } from '../features/emprestimo/events.js';
+import indexHtml from '../../index.html?raw';
 import type { LoanDraft } from '../types/index.js';
 
 const AGORA = new Date(2026, 10, 23, 9, 0, 0, 0);
@@ -151,81 +156,134 @@ describe('verificarDisponibilidade', () => {
     });
 });
 
-describe('modal 1: agendamento futuro', () => {
-    const inicio = em(24);
-    const fim = em(25);
-    const entrada = () => ({
-        dados: rascunho(2, { dataRetiradaISO: inicio.toISOString(), dataPrevistaDevolucaoISO: fim.toISOString() }),
-        inicio, fim, agendando: true
+/** Entrada de retirada imediata: devolução prevista = fim do dia, sem retirada. */
+const imediata = (quantidade = 3) => ({
+    dados: rascunho(quantidade, { dataPrevistaDevolucaoISO: FIM_DO_DIA.toISOString() }),
+    inicioFuturo: null
+});
+
+/** Simula o modal: abre (aoAbrir, criando os dois pickers) e devolve a janela dada (null = cancelou). */
+function simularModal(janela: { inicio: Date; fim: Date } | null) {
+    mocks.confirmarAcao.mockImplementationOnce(async (opcoes) => {
+        const container = document.createElement('div');
+        container.innerHTML = opcoes.conteudo.html;
+        opcoes.conteudo.aoAbrir(container);
+        await vi.waitFor(() => expect(mocks.criarDataHoraPicker).toHaveBeenCalledTimes(2));
+        return janela;
+    });
+}
+
+describe('formulário sem "Devolução prevista"', () => {
+    it('o painel de empréstimo não tem o campo', () => {
+        expect(indexHtml).not.toContain('devolucao-prevista-emprestimo');
     });
 
-    it('Sim envia o agendamento', async () => {
-        mocks.confirmarAcao.mockResolvedValue(true);
+    it('devolução prevista imediata = 23:59 do dia local', () => {
+        expect(devolucaoPrevistaImediata(AGORA).getTime()).toBe(FIM_DO_DIA.getTime());
+    });
+
+    it('envio imediato leva o fim do dia como prevista, sem modal', async () => {
+        document.body.innerHTML = `<form id="f"><input id="data" class="input-auto"><select id="eq"><option value="1" selected>Notebook</option></select>
+            <input id="qtd" value="1"><button type="button" id="add"></button><div id="lista"></div><div id="lista-modal"></div>
+            <select id="resp"><option value="1" selected>R</option></select><input id="sol" value="Ana"><textarea id="obs"></textarea>
+            <button class="registrar-emprestimo" type="submit"><span class="material-symbols-outlined">check</span>Registrar Empréstimo</button></form>`;
+        const g = (id: string) => document.getElementById(id) as HTMLElement;
+        mocks.addLoan.mockResolvedValue({});
+        const estado = { itens: [{ id: '1', nome: 'Notebook', quantidade: 2 }] };
+        attachEmprestimoEvents({
+            form: g('f') as HTMLFormElement, dataInput: g('data') as HTMLInputElement, equipamentoSelect: g('eq') as HTMLSelectElement,
+            quantidadeInput: g('qtd') as HTMLInputElement, btnAdicionar: g('add') as HTMLButtonElement, itensList: g('lista'), itensCount: null,
+            modalItensLista: g('lista-modal'), responsavelSelect: g('resp') as HTMLSelectElement, solicitanteInput: g('sol') as HTMLInputElement,
+            observacaoInput: g('obs') as HTMLTextAreaElement, btnSubmit: document.querySelector('.registrar-emprestimo') as HTMLButtonElement,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            picker: { selectedDates: [], setDate: vi.fn() } as any
+        }, estado);
+        g('f').dispatchEvent(new Event('submit', { cancelable: true }));
+        await vi.waitFor(() => expect(mocks.addLoan).toHaveBeenCalledTimes(1));
+        const enviado = mocks.addLoan.mock.calls[0][0] as LoanDraft;
+        expect(enviado.dataPrevistaDevolucaoISO).toBe(FIM_DO_DIA.toISOString());
+        expect(enviado.dataRetiradaISO).toBeUndefined();
+        expect(mocks.confirmarAcao).not.toHaveBeenCalled();
+    });
+
+    it('registrarComFluxo imediato com estoque: envia direto, sem modal', async () => {
+        const enviar = vi.fn(async () => undefined);
+        const r = await registrarComFluxo(imediata(2), enviar);
+        expect(mocks.confirmarAcao).not.toHaveBeenCalled();
+        expect(enviar).toHaveBeenCalledWith(expect.objectContaining({ dataPrevistaDevolucaoISO: FIM_DO_DIA.toISOString() }));
+        expect(r.tipo === 'registrado' && r.agendado).toBe(false);
+    });
+});
+
+describe('modal único: retirada futura', () => {
+    const inicio = em(24);
+    const entrada = () => ({ dados: rascunho(2, { dataRetiradaISO: inicio.toISOString(), dataPrevistaDevolucaoISO: FIM_DO_DIA.toISOString() }), inicioFuturo: inicio });
+
+    it('abre com o início escolhido, fim = início + 1 h, aviso e itens; confirmar agenda na janela do modal', async () => {
+        const escolhida = { inicio: em(25), fim: em(27) };
+        simularModal(escolhida);
         const enviar = vi.fn(async () => undefined);
         const r = await registrarComFluxo(entrada(), enviar);
 
         const opcoes = mocks.confirmarAcao.mock.calls[0][0];
         expect(opcoes.titulo).toBe('Gostaria de agendar o uso desses equipamentos?');
-        expect(opcoes.variante).toBe('info');
-        expect(opcoes.detalhesHtml).toContain('2x Notebook');
-        expect(opcoes.detalhesHtml).toContain('modal-summary-panel');
+        expect(opcoes.rotuloConfirmar).toBe('emprestimo.agendar');
+        expect(opcoes.conteudo.html).toContain('modal-callout-info');
+        expect(opcoes.conteudo.html).toContain('Os equipamentos ficarão reservados para este horário.');
+        expect(opcoes.conteudo.html).toContain('2x Notebook');
+        const [pInicio, pFim] = mocks.criarDataHoraPicker.mock.calls.map((c) => c[1].defaultDate as Date);
+        expect(pInicio.getTime()).toBe(inicio.getTime());
+        expect(pFim.getTime()).toBe(inicio.getTime() + H);
+
         expect(enviar).toHaveBeenCalledTimes(1);
-        expect(enviar).toHaveBeenCalledWith(expect.objectContaining({ dataRetiradaISO: inicio.toISOString(), dataPrevistaDevolucaoISO: fim.toISOString() }));
-        expect(r).toEqual({ tipo: 'registrado', agendado: true, inicio });
+        expect(enviar).toHaveBeenCalledWith(expect.objectContaining({ dataRetiradaISO: escolhida.inicio.toISOString(), dataPrevistaDevolucaoISO: escolhida.fim.toISOString() }));
+        expect(r).toEqual({ tipo: 'registrado', agendado: true, inicio: escolhida.inicio });
     });
 
-    it('Não volta ao formulário sem enviar nada', async () => {
-        mocks.confirmarAcao.mockResolvedValue(false);
+    it('cancelar volta ao formulário sem enviar nada', async () => {
+        simularModal(null);
         const enviar = vi.fn();
-        const r = await registrarComFluxo(entrada(), enviar);
-        expect(r).toEqual({ tipo: 'cancelado' });
+        expect(await registrarComFluxo(entrada(), enviar)).toEqual({ tipo: 'cancelado' });
         expect(enviar).not.toHaveBeenCalled();
+    });
+
+    it('sem unidades na janela: o mesmo modal, com o título de estoque', async () => {
+        mocks.equipamentos = [equipamento(1, 'Notebook', 5, 1)];
+        mocks.loans = [emprestimoAberto(1, 4, 30)];
+        simularModal(null);
+        await registrarComFluxo({ dados: rascunho(3, { dataRetiradaISO: em(1).toISOString() }), inicioFuturo: em(1) }, vi.fn());
+        expect(mocks.confirmarAcao).toHaveBeenCalledTimes(1);
+        expect(mocks.confirmarAcao.mock.calls[0][0].titulo).toContain('não está disponível');
     });
 });
 
-describe('modal 2: indisponível agora', () => {
+describe('modal único: indisponível agora', () => {
     // 4 de 5 notebooks estão fora até daqui a 3 h; o pedido de 3 não cabe agora, mas cabe na capacidade.
     beforeEach(() => {
         mocks.equipamentos = [equipamento(1, 'Notebook', 5, 1)];
         mocks.loans = [emprestimoAberto(1, 4, 3)];
     });
-    const imediata = (quantidade = 3) => ({
-        dados: rascunho(quantidade, { dataPrevistaDevolucaoISO: FIM_DO_DIA.toISOString() }),
-        inicio: AGORA, fim: FIM_DO_DIA, agendando: false
-    });
 
-    /** Simula o modal: abre (aoAbrir) e devolve a janela dada. */
-    function simularModal2(janela: { inicio: Date; fim: Date } | null) {
-        mocks.confirmarAcao.mockImplementationOnce(async (opcoes) => {
-            const container = document.createElement('div');
-            container.innerHTML = opcoes.conteudo.html;
-            opcoes.conteudo.aoAbrir(container);
-            await vi.waitFor(() => expect(mocks.criarDataHoraPicker).toHaveBeenCalledTimes(2));
-            return janela;
-        });
-    }
-
-    it('pela checagem do cliente: abre o modal 2 com a sugestão e agenda na janela escolhida', async () => {
+    it('pela checagem do cliente: título de estoque, início sugerido, fim +1 h, agenda na janela escolhida', async () => {
         const escolhida = { inicio: em(3), fim: em(4) };
-        simularModal2(escolhida);
+        simularModal(escolhida);
         const enviar = vi.fn(async () => undefined);
         const r = await registrarComFluxo(imediata(), enviar);
 
         const opcoes = mocks.confirmarAcao.mock.calls[0][0];
         expect(opcoes.titulo).toBe('O número de equipamentos solicitado não está disponível. Gostaria de realizar um agendamento?');
         expect(opcoes.variante).toBe('warning');
-        // Pré-preenchimento: o próximo horário livre (quando os 4 notebooks voltam, +3 h).
-        expect(mocks.criarDataHoraPicker).toHaveBeenCalledTimes(2);
+        expect(opcoes.conteudo.html).toContain('modal-callout-info');
         expect(mocks.criarDataHoraPicker.mock.calls[0][1].defaultDate.getTime()).toBe(em(3).getTime());
-
+        expect(mocks.criarDataHoraPicker.mock.calls[1][1].defaultDate.getTime()).toBe(em(4).getTime());
         expect(enviar).toHaveBeenCalledWith(expect.objectContaining({
             dataRetiradaISO: escolhida.inicio.toISOString(), dataPrevistaDevolucaoISO: escolhida.fim.toISOString()
         }));
         expect(r).toEqual({ tipo: 'registrado', agendado: true, inicio: escolhida.inicio });
     });
 
-    it('cancelar o modal 2 não envia nada', async () => {
-        simularModal2(null);
+    it('cancelar não envia nada', async () => {
+        simularModal(null);
         const enviar = vi.fn();
         expect(await registrarComFluxo(imediata(), enviar)).toEqual({ tipo: 'cancelado' });
         expect(enviar).not.toHaveBeenCalled();
@@ -240,7 +298,7 @@ describe('modal 2: indisponível agora', () => {
         expect(enviar).not.toHaveBeenCalled();
     });
 
-    it('pelo servidor: EstoqueInsuficiente agendavel abre o modal 2 com proximoHorarioLivre e reenvia', async () => {
+    it('pelo servidor: EstoqueInsuficiente agendavel abre o mesmo modal com proximoHorarioLivre e reenvia', async () => {
         mocks.equipamentos = [equipamento(1, 'Notebook', 5, 5)]; // o cliente achava que estava livre
         mocks.loans = [];
         const sugerido = em(5);
@@ -249,10 +307,11 @@ describe('modal 2: indisponível agora', () => {
         });
         const enviar = vi.fn().mockRejectedValueOnce(recusa).mockResolvedValueOnce(undefined);
         const escolhida = { inicio: sugerido, fim: new Date(sugerido.getTime() + H) };
-        simularModal2(escolhida);
+        simularModal(escolhida);
 
         const r = await registrarComFluxo(imediata(2), enviar);
 
+        expect(mocks.confirmarAcao.mock.calls[0][0].titulo).toContain('não está disponível');
         expect(enviar).toHaveBeenCalledTimes(2);
         expect(mocks.criarDataHoraPicker.mock.calls[0][1].defaultDate.getTime()).toBe(sugerido.getTime());
         expect(enviar.mock.calls[1][0]).toMatchObject({ dataRetiradaISO: escolhida.inicio.toISOString() });
@@ -263,10 +322,10 @@ describe('modal 2: indisponível agora', () => {
         mocks.equipamentos = [equipamento(1, 'Notebook', 5, 5)];
         mocks.loans = [];
         const recusa = new ApiError('x', 400, { itens: [], agendavel: true, proximoHorarioLivre: null });
-        const enviar = vi.fn().mockRejectedValueOnce(recusa);
-        simularModal2(null);
-        await registrarComFluxo(imediata(2), enviar);
+        simularModal(null);
+        await registrarComFluxo(imediata(2), vi.fn().mockRejectedValueOnce(recusa));
         expect(mocks.criarDataHoraPicker.mock.calls[0][1].defaultDate).toBeNull();
+        expect(mocks.criarDataHoraPicker.mock.calls[1][1].defaultDate).toBeNull();
     });
 
     it('servidor recusa sem agendavel: vira erro, sem modal', async () => {
@@ -279,20 +338,10 @@ describe('modal 2: indisponível agora', () => {
         expect(r.tipo).toBe('erro');
         expect(mocks.confirmarAcao).not.toHaveBeenCalled();
     });
-
-    it('agendamento futuro sem unidades na janela vai direto ao modal 2 (não ao modal 1)', async () => {
-        // O agendamento começa em 1 h, enquanto os 4 notebooks só voltam em 3 h.
-        simularModal2(null);
-        const inicio = em(1);
-        await registrarComFluxo({
-            dados: rascunho(3, { dataRetiradaISO: inicio.toISOString() }), inicio, fim: em(2), agendando: true
-        }, vi.fn());
-        expect(mocks.confirmarAcao.mock.calls[0][0].titulo).toContain('não está disponível');
-    });
 });
 
-describe('validação do modal 2', () => {
-    it('exige início entre agora+5min e agora+15d e fim depois do início', async () => {
+describe('validação do modal de agendamento', () => {
+    it('exige início entre agora+5min e agora+15d e fim depois do início; erros mantêm o modal aberto', async () => {
         document.body.innerHTML = '<div id="c"></div>';
         mocks.criarDataHoraPicker.mockReset();
         let validar!: (c: HTMLElement) => boolean;
@@ -309,9 +358,8 @@ describe('validação do modal 2', () => {
             pickers.push(p);
             return p;
         });
-        void solicitarNovaJanela({ inicio: null, fim: null });
+        void solicitarAgendamento('indisponivel', null, rascunho(1).itens);
         await vi.waitFor(() => expect(pickers).toHaveLength(2));
-        // Aguarda o fim da criação dos dois pickers (atribuição às variáveis internas).
         await Promise.resolve();
         await Promise.resolve();
         const c = document.getElementById('c') as HTMLElement;
@@ -334,6 +382,10 @@ describe('validação do modal 2', () => {
         pFim.selectedDates = [em(2)];
         expect(validar(c)).toBe(false);
         expect(document.getElementById('agendamento-fim-field-error')?.textContent).toContain('depois do início');
+
+        pFim.selectedDates = [em(2 + 24 * 15 + 1)];
+        expect(validar(c)).toBe(false);
+        expect(document.getElementById('agendamento-fim-field-error')?.textContent).toContain('15 dias');
 
         pFim.selectedDates = [em(3)];
         expect(validar(c)).toBe(true);
