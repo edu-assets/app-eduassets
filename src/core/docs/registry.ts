@@ -74,8 +74,8 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'route',
         file: { pt: '/docs/ROADMAP.md', en: '/docs/ROADMAP_EN.md' },
         category: 'geral',
-        version: '1.5.3',
-        updatedAt: '2026-11-17'
+        version: '1.7.0',
+        updatedAt: '2026-11-23'
     },
     {
         id: 'changelog',

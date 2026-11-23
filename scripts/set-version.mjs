@@ -10,6 +10,7 @@
  *   app   package.json + package-lock.json ("version" and packages[""].version), README.md / README_PT.md status line
  *   api   package.json + package-lock.json, README.md / README_PT.md status line      (../api)
  *   docs  README.md ("released YYYY-MM-DD") / README_PT.md ("publicada em DD/MM/YYYY") (../docs)
+ *         public/docs/ROADMAP.md / ROADMAP_EN.md status line (also the copies in app/public/docs)
  *   site  package.json + package-lock.json, README.md "Release status" line           (../site)
  *         The landing page reads site/package.json at build time, so nothing else is edited there.
  *
@@ -47,6 +48,24 @@ const readmeStatus = (name, prefix, suffix) => ({
 const ISO = '\\d{4}-\\d{2}-\\d{2}';
 const BR = '\\d{2}/\\d{2}/\\d{4}';
 
+/** Roadmap status line, the only place the roadmaps name the current version (body text stays version-free). */
+const ROADMAP_PT = {
+    file: 'public/docs/ROADMAP.md',
+    patterns: [{
+        name: 'ROADMAP status (versão + data)',
+        re: new RegExp(`(?<pre>> \\*\\*Versão oficial )(?<ver>${SEMVER})(?<mid>, publicada em )(?<date>${BR})(?<post>\\.\\*\\*)`),
+        dateFormat: 'br'
+    }]
+};
+const ROADMAP_EN = {
+    file: 'public/docs/ROADMAP_EN.md',
+    patterns: [{
+        name: 'ROADMAP_EN status (version + date)',
+        re: new RegExp(`(?<pre>> \\*\\*Official version )(?<ver>${SEMVER})(?<mid>, released )(?<date>${ISO})(?<post>\\.\\*\\*)`),
+        dateFormat: 'iso'
+    }]
+};
+
 /** Every location, per repository. `dir` is relative to the workspace root. */
 const REPOS = [
     {
@@ -56,7 +75,10 @@ const REPOS = [
             { file: 'package.json', patterns: [PACKAGE_VERSION] },
             { file: 'package-lock.json', patterns: [PACKAGE_VERSION, LOCK_ROOT_VERSION] },
             { file: 'README.md', patterns: [readmeStatus('README status line', '\\*\\*Status: Official version ', '\\.\\*\\*')] },
-            { file: 'README_PT.md', patterns: [readmeStatus('README_PT status line', '\\*\\*Status: Versão oficial ', '\\.\\*\\*')] }
+            { file: 'README_PT.md', patterns: [readmeStatus('README_PT status line', '\\*\\*Status: Versão oficial ', '\\.\\*\\*')] },
+            // In-app copy of the docs (public/docs), kept identical to docs-eduassets.
+            ROADMAP_PT,
+            ROADMAP_EN
         ]
     },
     {
@@ -88,7 +110,9 @@ const REPOS = [
                     re: new RegExp(`(?<pre>\\*\\*Status do produto:\\*\\* versão oficial )(?<ver>${SEMVER})(?<mid>, publicada em )(?<date>${BR})(?<post>)`),
                     dateFormat: 'br'
                 }]
-            }
+            },
+            ROADMAP_PT,
+            ROADMAP_EN
         ]
     },
     {
