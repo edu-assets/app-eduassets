@@ -54,8 +54,9 @@ describe('exportacao com autoria', () => {
     mocks.autenticado = false;
     await exportarDados({ ...base, tipoDados: 'devolucoes' });
     const m = mocks.gerarLinhasCsv.mock.calls[0][0];
-    expect(m[0]).toEqual(['Numero', 'Solicitante', 'Responsavel', 'Retirada', 'Devolucao', 'Status']);
-    expect(m[1]).toHaveLength(6);
+    expect(m[0].slice(0, 6)).toEqual(['Numero', 'Solicitante', 'Responsavel', 'Retirada', 'Devolucao', 'Status']);
+    expect(m[0].slice(6)).toEqual(['exportar.coluna_agendado_para', 'exportar.coluna_devolucao_prevista']);
+    expect(m[1]).toHaveLength(8);
   });
 
   it('ocorrencias: Criada por apenas autenticado', async () => {

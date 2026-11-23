@@ -22,6 +22,11 @@ vi.mock('../core/services/pdf.js', () => ({ gerarBaixarPdf: vi.fn() }));
 import { ApiError } from '../core/api/apiClient.js';
 import {
     listarEmprestimosAbertos,
+    listarEmprestimosAtivos,
+    confirmarRetiradaEmprestimo,
+    excluirEmprestimoAgendado,
+    filtrarLocalmente,
+    normalizarFiltros,
     listarPaginaEmprestimos,
     listarTodasPaginasEmprestimos,
     limiteDiaLocal,
@@ -29,7 +34,7 @@ import {
 } from '../core/api/emprestimos.js';
 import { exportarDados } from '../features/exportar/service.js';
 
-function emprestimo(id: number, status: 'ABERTO' | 'DEVOLVIDO' = 'ABERTO', extra: Partial<Emprestimo> = {}): Emprestimo {
+function emprestimo(id: number, status: 'ABERTO' | 'DEVOLVIDO' | 'AGENDADO' = 'ABERTO', extra: Partial<Emprestimo> = {}): Emprestimo {
     const data = new Date(Date.UTC(2026, 10, 1, 12) + id * 60_000).toISOString();
     return {
         id, solicitanteNome: 'Convidado', responsavelId: 1, status, dataRetirada: data,
@@ -183,7 +188,8 @@ describe('exportação de empréstimos', () => {
 
         expect(Object.fromEntries(query(0))).toEqual({ paginado: '1', limit: '100' });
         const matriz = mocks.gerarLinhasCsv.mock.calls[0][0];
-        expect(matriz[0]).toEqual(['Numero', 'Solicitante', 'Responsavel', 'Retirada', 'Devolucao', 'Status']);
+        expect(matriz[0].slice(0, 6)).toEqual(['Numero', 'Solicitante', 'Responsavel', 'Retirada', 'Devolucao', 'Status']);
+        expect(matriz[0]).toHaveLength(8);
         expect(matriz).toHaveLength(3);
     });
 
@@ -191,5 +197,41 @@ describe('exportação de empréstimos', () => {
         mocks.get.mockResolvedValueOnce({ items: [], nextCursor: null, limit: 100 });
         await expect(exportarDados({ ...base, dataInicial: '2020-01-01', dataFinal: '2020-01-02' }))
             .rejects.toThrow('Nenhum registro encontrado');
+    });
+});
+
+describe('empréstimos ativos e agendamentos (API)', () => {
+    it('autenticado: ativos vêm de status=ATIVO sem paginação, filtrando devolvidos', async () => {
+        mocks.autenticado = true;
+        mocks.get.mockResolvedValueOnce([emprestimo(3, 'ABERTO'), emprestimo(2, 'AGENDADO'), emprestimo(1, 'DEVOLVIDO')]);
+        const ativos = await listarEmprestimosAtivos(true);
+        expect(mocks.get).toHaveBeenCalledWith('/emprestimos?status=ATIVO', undefined);
+        expect(ativos.map((e) => e.id)).toEqual([3, 2]);
+    });
+
+    it('convidado: percorre as páginas de status=ATIVO', async () => {
+        mocks.get.mockResolvedValueOnce({ items: [emprestimo(5, 'AGENDADO')], nextCursor: null, limit: 100 });
+        const ativos = await listarEmprestimosAtivos(false);
+        expect(Object.fromEntries(query(0))).toEqual({ paginado: '1', limit: '100', status: 'ATIVO' });
+        expect(ativos.map((e) => e.id)).toEqual([5]);
+    });
+
+    it('os filtros aceitam AGENDADO e ATIVO; o filtro local ATIVO exclui só devolvidos', () => {
+        expect(normalizarFiltros({ status: 'AGENDADO' })).toEqual({ status: 'AGENDADO' });
+        expect(normalizarFiltros({ status: 'ATIVO' })).toEqual({ status: 'ATIVO' });
+        const lista = [emprestimo(1, 'ABERTO'), emprestimo(2, 'AGENDADO'), emprestimo(3, 'DEVOLVIDO')];
+        expect(filtrarLocalmente(lista, { status: 'ATIVO' }, true).map((e) => e.id)).toEqual([1, 2]);
+        expect(filtrarLocalmente(lista, { status: 'AGENDADO' }, true).map((e) => e.id)).toEqual([2]);
+    });
+
+    it('confirmar retirada e excluir usam os endpoints novos', async () => {
+        const patch = vi.fn().mockResolvedValue(emprestimo(1));
+        const del = vi.fn().mockResolvedValue(undefined);
+        const { http } = await import('../core/api/apiClient.js');
+        Object.assign(http, { patch, delete: del });
+        await confirmarRetiradaEmprestimo(7);
+        await excluirEmprestimoAgendado(7);
+        expect(patch).toHaveBeenCalledWith('/emprestimos/7/confirmar-retirada');
+        expect(del).toHaveBeenCalledWith('/emprestimos/7');
     });
 });

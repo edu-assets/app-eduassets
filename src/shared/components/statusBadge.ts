@@ -7,6 +7,7 @@ interface StatusInfo {
 }
 
 const STATUS_MAP: Record<string, StatusInfo> = {
+    agendado: { texto: 'shared.statusBadge.agendado', modificador: 'agendado' },
     aberto: { texto: 'shared.statusBadge.aberto', modificador: 'aberto' },
     devolvido: { texto: 'shared.statusBadge.devolvido', modificador: 'devolvido' },
     esgotado: { texto: 'dashboard.estoque_esgotado', modificador: 'esgotado' },

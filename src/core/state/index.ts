@@ -1,6 +1,7 @@
 export { carregarEquipamentos, limparEquipamentos, getEquipamentos, subscribe as subscribeEquipamentos, atualizarEquipamentoPorId } from './equipamentoStore.js';
 export {
-    carregarEmprestimos, carregarAbertos, limparEmprestimos, getLoansAbertos, addLoan, returnLoan, updateLoan, subscribe as subscribeLoans,
+    carregarEmprestimos, carregarAbertos, limparEmprestimos, getLoansAbertos, getAgendamentos, getLoansAtivos, addLoan, returnLoan, updateLoan,
+    confirmarRetirada, excluirAgendamento, subscribe as subscribeLoans,
     getHistorico, getFiltrosHistorico, temMaisHistorico, carregarMaisHistorico, recarregarHistorico, definirFiltrosHistorico,
     limparFiltrosHistorico, subscribeHistorico
 } from './loanStore.js';

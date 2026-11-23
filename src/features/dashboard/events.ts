@@ -165,7 +165,7 @@ export function attachDashboardEvents(els: DashboardEls, estado: DashboardEstado
             }
             const valor = alvo.dataset.filtroValor ?? '';
             if (alvo.dataset.filtroGrupo === 'status') {
-                void definirFiltrosHistorico({ status: valor === 'ABERTO' || valor === 'DEVOLVIDO' ? valor : undefined });
+                void definirFiltrosHistorico({ status: valor === 'ABERTO' || valor === 'DEVOLVIDO' || valor === 'AGENDADO' ? valor : undefined });
             } else if (alvo.dataset.filtroGrupo === 'periodo') {
                 void definirFiltrosHistorico(intervaloDoPeriodo(valor as PeriodoHistorico));
             }

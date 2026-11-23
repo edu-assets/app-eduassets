@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
     autenticado: true,
     usuario: { id: 1 } as { id: number } | null,
     listarPaginaEmprestimos: vi.fn(),
-    listarEmprestimosAbertos: vi.fn()
+    listarEmprestimosAtivos: vi.fn()
 }));
 
 vi.mock('../core/state/authStore.js', () => ({
@@ -18,7 +18,7 @@ vi.mock('../core/state/authStore.js', () => ({
 vi.mock('../core/state/equipamentoStore.js', () => ({ carregarEquipamentos: vi.fn(async () => []) }));
 vi.mock('../core/api/emprestimos.js', async (importOriginal) => ({
     ...(await importOriginal<typeof import('../core/api/emprestimos.js')>()),
-    listarEmprestimosAbertos: mocks.listarEmprestimosAbertos,
+    listarEmprestimosAtivos: mocks.listarEmprestimosAtivos,
     listarPaginaEmprestimos: mocks.listarPaginaEmprestimos
 }));
 
@@ -34,7 +34,7 @@ beforeEach(() => {
     mocks.autenticado = true;
     mocks.usuario = { id: 1 };
     mocks.listarPaginaEmprestimos.mockReset().mockResolvedValue({ items: [], nextCursor: null, limit: 0 });
-    mocks.listarEmprestimosAbertos.mockReset().mockResolvedValue([]);
+    mocks.listarEmprestimosAtivos.mockReset().mockResolvedValue([]);
 });
 
 describe('privacidade entre sessões', () => {

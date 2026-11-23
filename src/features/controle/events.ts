@@ -14,6 +14,8 @@ import {
 import type { ControleEls, ControleEstado } from './render.js';
 import { adicionarRegistro, editarRegistro, removerRegistro, resolverRegistro } from './service.js';
 import { renderDetalhesExclusao } from './templates.js';
+import { avisarAgendamentosAfetados } from './agendamentosAfetados.js';
+import type { AgendamentoAfetado } from '../../types/index.js';
 import { bloquearSeConvidado, bloquearSeNaoAdmin } from '../../core/auth/guestGate.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
 import type { ControleRegistroDados } from '../../types/index.js';
@@ -269,12 +271,13 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
 
     salvandoModal = true;
     setButtonLoading(els.btnModalSalvar, true);
+    let afetados: AgendamentoAfetado[] = [];
     try {
         if (estado.idEditando) {
             await editarRegistro(estado.idEditando, estado.tipoAtual, dados);
             showToast('Registro atualizado com sucesso', 'success');
         } else {
-            await adicionarRegistro(estado.tipoAtual, dados);
+            afetados = (await adicionarRegistro(estado.tipoAtual, dados)) ?? [];
             showToast('Registro criado com sucesso', 'success');
         }
     } catch (erro) {
@@ -288,6 +291,7 @@ async function salvarModal(els: ControleEls, estado: ControleEstado): Promise<vo
     closeModal('modal-controle-novo');
     estado.idEditando = null;
     estado.linhaEditando = null;
+    await avisarAgendamentosAfetados(afetados);
 }
 
 async function salvarResolucao(els: ControleEls, estado: ControleEstado): Promise<void> {

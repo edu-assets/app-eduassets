@@ -5,12 +5,13 @@ import type { Equipamento, LoanUI, OcorrenciaUI } from '../types/index.js';
 const dados = vi.hoisted(() => ({
     equipamentos: [] as Equipamento[],
     abertos: [] as LoanUI[],
+    agendados: [] as LoanUI[],
     ocorrencias: [] as OcorrenciaUI[],
     status: { equipamentos: 'pronto', emprestimos: 'pronto', ocorrencias: 'pronto' } as Record<string, string>
 }));
 
 vi.mock('../core/state/equipamentoStore.js', () => ({ getEquipamentos: () => dados.equipamentos, subscribe: vi.fn() }));
-vi.mock('../core/state/loanStore.js', () => ({ getLoansAbertos: () => dados.abertos, subscribe: vi.fn() }));
+vi.mock('../core/state/loanStore.js', () => ({ getLoansAbertos: () => dados.abertos, getAgendamentos: () => dados.agendados, subscribe: vi.fn() }));
 vi.mock('../core/state/ocorrenciasStore.js', () => ({ getOcorrencias: () => dados.ocorrencias, subscribe: vi.fn() }));
 vi.mock('../core/state/loadStatus.js', () => ({
     getLoadStatus: (chave: string) => ({ status: dados.status[chave] }),
@@ -97,6 +98,45 @@ describe('resumo de operações do Início', () => {
         expect(texto('estoque', '[data-resumo-numero]')).toBe('2');
         expect(document.querySelector('.inicio-resumo')!.getAttribute('aria-busy')).toBe('true');
         expect(document.getElementById('inicio-resumo-atualizado')!.hidden).toBe(true);
+    });
+
+    describe('agendamentos de hoje', () => {
+        const agendado = (id: number, quando: Date): LoanUI =>
+            ({ ...loan(id, '09:00', [[1, 1]]), status: 'agendado', dataAgendada: quando.toISOString(), data: quando.toISOString() } as LoanUI);
+        const hoje = new Date(2026, 10, 23, 12, 0);
+
+        it('conta só os que começam no dia local de hoje, sem mexer no total de abertos', () => {
+            const r = calcularResumoOperacoes(dados.equipamentos, dados.abertos, dados.ocorrencias, [
+                agendado(10, new Date(2026, 10, 23, 8, 0)),
+                agendado(11, new Date(2026, 10, 23, 23, 30)),
+                agendado(12, new Date(2026, 10, 24, 9, 0))
+            ], hoje);
+            expect(r.abertos.total).toBe(2);
+            expect(r.abertos.agendadosHoje).toBe(2);
+        });
+
+        it('acrescenta "{n} agendamentos hoje" ao detalhe, mantendo o texto do mais antigo', () => {
+            const r = calcularResumoOperacoes(dados.equipamentos, dados.abertos, dados.ocorrencias,
+                [agendado(10, new Date(2026, 10, 23, 8, 0)), agendado(11, new Date(2026, 10, 23, 9, 0))], hoje);
+            const { abertos } = textosIndicadores(r);
+            expect(abertos.numero).toBe('2');
+            expect(abertos.detalhe).toBe('Mais antigo às 08:10 · 2 agendamentos hoje');
+        });
+
+        it('singular, sem abertos e sem agendamentos hoje', () => {
+            const um = textosIndicadores(calcularResumoOperacoes([], [], [], [agendado(10, new Date(2026, 10, 23, 8, 0))], hoje));
+            expect(um.abertos.detalhe).toBe('Nenhum empréstimo em aberto · 1 agendamento hoje');
+            const nenhum = textosIndicadores(calcularResumoOperacoes([], [], [], [agendado(10, new Date(2026, 10, 25, 8, 0))], hoje));
+            expect(nenhum.abertos.detalhe).toBe('Nenhum empréstimo em aberto');
+        });
+
+        it('o card lê os agendamentos do store', () => {
+            dados.agendados = [agendado(10, new Date())];
+            renderResumoOperacoes();
+            expect(texto('abertos', '[data-resumo-numero]')).toBe('2');
+            expect(texto('abertos', '[data-resumo-detalhe]')).toBe('Mais antigo às 08:10 · 1 agendamento hoje');
+            dados.agendados = [];
+        });
     });
 
     it('textos seguem o idioma escolhido', () => {

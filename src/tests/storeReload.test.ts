@@ -21,7 +21,7 @@ vi.mock('../core/api/equipamentos.js', () => ({
 vi.mock('../core/state/authStore.js', () => ({ isAutenticado: () => true }));
 // `listarEmprestimos` = leitura dos empréstimos abertos (uma por recarga).
 vi.mock('../core/api/emprestimos.js', () => ({
-    listarEmprestimosAbertos: mocks.listarEmprestimos,
+    listarEmprestimosAtivos: mocks.listarEmprestimos,
     listarPaginaEmprestimos: mocks.listarPaginaEmprestimos,
     normalizarFiltros: (f: object) => f,
     LIMITE_PAGINA_PADRAO: 50,

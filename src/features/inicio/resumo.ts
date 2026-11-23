@@ -1,6 +1,7 @@
 import { getEquipamentos, subscribe as subscribeEquipamentos } from '../../core/state/equipamentoStore.js';
-import { getLoansAbertos, subscribe as subscribeEmprestimos } from '../../core/state/loanStore.js';
+import { getLoansAbertos, getAgendamentos, subscribe as subscribeEmprestimos } from '../../core/state/loanStore.js';
 import { getOcorrencias, subscribe as subscribeOcorrencias } from '../../core/state/ocorrenciasStore.js';
+import { agora } from '../../core/time/serverClock.js';
 import { getLoadStatus, subscribeLoadStatus, type ChaveCarga } from '../../core/state/loadStatus.js';
 import { getLocale, subscribe as subscribeI18n, t } from '../../core/state/i18nStore.js';
 import { statusEstoqueEquipamento } from '../dashboard/templates.js';
@@ -15,7 +16,8 @@ import type { Equipamento, LoanUI, OcorrenciaUI } from '../../types/index.js';
 export type EstadoIndicador = 'neutro' | 'info' | 'ok' | 'alerta' | 'erro';
 
 export interface ResumoOperacoes {
-    abertos: { total: number; maisAntigo: Date | null };
+    /** `agendadosHoje`: agendamentos (AGENDADO) cujo início cai no dia local de hoje; não entram em `total`. */
+    abertos: { total: number; maisAntigo: Date | null; agendadosHoje: number };
     estoque: { disponivel: number; total: number; emprestado: number };
     ocorrencias: { abertas: number; manutencao: number; quebrado: number; observacao: number };
     alertas: { esgotados: Equipamento[]; baixos: Equipamento[] };
@@ -24,8 +26,14 @@ export interface ResumoOperacoes {
 export function calcularResumoOperacoes(
     equipamentos: Equipamento[],
     loansAbertos: LoanUI[],
-    ocorrencias: OcorrenciaUI[]
+    ocorrencias: OcorrenciaUI[],
+    agendamentos: LoanUI[] = [],
+    referencia: Date = agora()
 ): ResumoOperacoes {
+    const agendadosHoje = agendamentos.filter((loan) => {
+        const inicio = new Date(loan.dataAgendada ?? loan.data);
+        return !Number.isNaN(inicio.getTime()) && inicio.toDateString() === referencia.toDateString();
+    }).length;
     let maisAntigo: Date | null = null;
     let emprestado = 0;
     loansAbertos.forEach((loan) => {
@@ -50,7 +58,7 @@ export function calcularResumoOperacoes(
     });
 
     return {
-        abertos: { total: loansAbertos.length, maisAntigo },
+        abertos: { total: loansAbertos.length, maisAntigo, agendadosHoje },
         estoque: { disponivel, total, emprestado },
         ocorrencias: {
             abertas: abertas.length,
@@ -96,9 +104,14 @@ export function textosIndicadores(r: ResumoOperacoes): Record<'abertos' | 'dispo
         abertos: {
             numero: String(abertos.total),
             unidade: plural(abertos.total, 'inicio.resumo_emprestimo', 'inicio.resumo_emprestimos'),
-            detalhe: abertos.total > 0 && abertos.maisAntigo
-                ? t('inicio.resumo_mais_antigo').replace('{hora}', formatarHoraCurta(abertos.maisAntigo))
-                : t('inicio.resumo_nenhum_aberto'),
+            detalhe: [
+                abertos.total > 0 && abertos.maisAntigo
+                    ? t('inicio.resumo_mais_antigo').replace('{hora}', formatarHoraCurta(abertos.maisAntigo))
+                    : t('inicio.resumo_nenhum_aberto'),
+                abertos.agendadosHoje > 0
+                    ? comN(abertos.agendadosHoje === 1 ? 'inicio.resumo_agendamento_hoje' : 'inicio.resumo_agendamentos_hoje', abertos.agendadosHoje)
+                    : ''
+            ].filter(Boolean).join(' · '),
             estado: abertos.total > 0 ? 'neutro' : 'ok'
         },
         disponiveis: {
@@ -176,7 +189,7 @@ export function renderResumoOperacoes(raiz: ParentNode = document): void {
     if (!secao) return;
 
     const estadoCarga = (chave: ChaveCarga) => getLoadStatus(chave).status;
-    const textos = textosIndicadores(calcularResumoOperacoes(getEquipamentos(), getLoansAbertos(), getOcorrencias()));
+    const textos = textosIndicadores(calcularResumoOperacoes(getEquipamentos(), getLoansAbertos(), getOcorrencias(), getAgendamentos()));
 
     let todosProntos = true;
     secao.querySelectorAll<HTMLElement>('.inicio-resumo-card[data-resumo]').forEach((card) => {

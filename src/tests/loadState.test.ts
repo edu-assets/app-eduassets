@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // Carga de empréstimos = abertos (completo) + primeira página do histórico; `listarEmprestimos` simula os abertos.
 const listarEmprestimos = vi.fn();
 vi.mock('../core/api/emprestimos.js', () => ({
-    listarEmprestimosAbertos: (...args: unknown[]) => listarEmprestimos(...args),
+    listarEmprestimosAtivos: (...args: unknown[]) => listarEmprestimos(...args),
     listarPaginaEmprestimos: vi.fn(async () => ({ items: [], nextCursor: null, limit: 50 })),
     normalizarFiltros: (f: object) => f,
     LIMITE_PAGINA_PADRAO: 50,

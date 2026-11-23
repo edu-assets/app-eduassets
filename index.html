@@ -396,6 +396,16 @@
                                             <input type="text" id="data-emprestimo" name="data-emprestimo"
                                                 class="input-auto" required>
                                         </div>
+
+                                        <div class="form-group col-md">
+                                            <label for="devolucao-prevista-emprestimo"><span
+                                                    data-i18n-key="emprestimo.devolucao_prevista">Devolução prevista</span>
+                                                <span class="form-label-optional"
+                                                    data-i18n-key="shell.clique_para_alterar">(Clique para
+                                                    alterar)</span></label>
+                                            <input type="text" id="devolucao-prevista-emprestimo"
+                                                name="devolucao-prevista-emprestimo" class="input-auto" required>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -414,8 +424,9 @@
                                         <div class="form-group col-sm">
                                             <label for="quantidade">Qtd.</label>
                                             <input type="number" id="quantidade" name="quantidade" min="1" value="1"
-                                                aria-describedby="quantidade-erro">
+                                                aria-describedby="quantidade-erro quantidade-aviso">
                                             <span class="form-error" id="quantidade-erro" role="alert" hidden></span>
+                                            <span class="form-aviso" id="quantidade-aviso" role="status" hidden></span>
                                         </div>
 
                                         <div class="form-group form-group-align-btn">
@@ -547,6 +558,17 @@
                     <div class="devolucao-layout">
 
                         <div class="devolucao-lista-wrap">
+                            <div class="controle-tabs-row devolucao-abas-row">
+                                <div class="controle-tabs" id="devolucao-abas" role="tablist" aria-label="Devoluções"
+                                    data-i18n-aria-label="shell.devolucoes">
+                                    <button type="button" role="tab" class="controle-tab-link active" id="devolucao-tab-andamento"
+                                        aria-selected="true" aria-controls="lista-devolucoes-items" tabindex="0"
+                                        data-tab="andamento" data-i18n-exclude>Em andamento</button>
+                                    <button type="button" role="tab" class="controle-tab-link" id="devolucao-tab-agendamentos"
+                                        aria-selected="false" aria-controls="lista-devolucoes-items" tabindex="-1"
+                                        data-tab="agendamentos" data-i18n-exclude>Agendamentos</button>
+                                </div>
+                            </div>
                             <div id="lista-devolucoes-items"></div>
                         </div>
 
@@ -565,7 +587,7 @@
                                 style="display:none;">
 
                                 <div class="devolucao-detalhe-header">
-                                    <h3>Detalhes do Empréstimo</h3>
+                                    <h3 id="devolucao-detalhe-titulo">Detalhes do Empréstimo</h3>
                                     <button type="button" class="devolucao-detalhe-fechar" id="btn-detalhe-fechar"
                                         aria-label="Fechar">
                                         <span class="material-symbols-outlined">close</span>
@@ -635,6 +657,18 @@
                                     <button class="btn btn-primary btn-block" id="btn-confirmar-devolucao-painel"
                                         data-i18n-key="shell.confirmar_devolucao" data-requires-auth>
                                         <span class="material-symbols-outlined">check</span> Confirmar Devolução
+                                    </button>
+                                    <p class="devolucao-detalhe-pessoa-data detalhe-agendamento-hint"
+                                        id="detalhe-agendamento-hint" data-i18n-exclude></p>
+                                    <button class="btn btn-primary btn-block detalhe-agendamento-acao"
+                                        id="btn-detalhe-confirmar-retirada" data-requires-auth
+                                        data-i18n-key="devolucao.confirmar_retirada">
+                                        <span class="material-symbols-outlined">how_to_reg</span> Confirmar retirada
+                                    </button>
+                                    <button class="btn btn-neutral btn-block detalhe-agendamento-acao"
+                                        id="btn-detalhe-excluir-agendamento" data-requires-auth
+                                        data-i18n-key="devolucao.excluir_agendamento">
+                                        <span class="material-symbols-outlined">event_busy</span> Excluir agendamento
                                     </button>
                                     <button class="btn btn-neutral btn-block" data-i18n-key="shell.cancelar"
                                         id="btn-detalhe-cancelar">Cancelar</button>
@@ -2594,12 +2628,13 @@
             <button type="button" class="cookie-consent__btn cookie-consent__btn--primary" data-consent-choice="granted" data-i18n-key="consent.accept">Aceitar</button>
         </div>
     </div>
-    <!-- Modal de confirmar exclusão -->
+    <!-- Modal de confirmação genérico (core/ui/confirm.ts: confirmarAcao / confirmarExclusao).
+         O id mantém o nome histórico "exclusão"; ícone, variante, rótulos e campos são definidos em cada chamada. -->
     <div class="modal-overlay" id="modal-confirmar-exclusao">
         <div class="modal-box modal-box--md">
             <div class="modal-header">
-                <!-- Ícone vermelho em destaque -->
-                <span class="modal-header-icon modal-header-icon-error">
+                <!-- Ícone em destaque (a variante error/warning/info troca a classe modal-header-icon-*) -->
+                <span class="modal-header-icon modal-header-icon-error" id="confirmar-exclusao-icone">
                     <span class="material-symbols-outlined">delete</span>
                 </span>
                 <div class="modal-header-titles">
@@ -2611,6 +2646,8 @@
             <div class="modal-body">
                 <!-- Container para injetar os detalhes do item dinamicamente -->
                 <div id="confirmar-exclusao-detalhes" style="display: none;"></div>
+                <!-- Campos próprios de cada confirmação (ex.: janela de um agendamento) -->
+                <div id="confirmar-exclusao-conteudo" style="display: none;"></div>
 
                 <div class="modal-callout modal-callout-error" id="confirmar-exclusao-callout" style="display: none;">
                     <span class="icon-badge icon-badge--sm icon-badge--warning">

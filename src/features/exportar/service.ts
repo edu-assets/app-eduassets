@@ -47,7 +47,23 @@ export function filtrarEquipamentosPorIds(equipamentos: Equipamento[], idsSeleci
 /* ===== 3. formatting: main table ===== */
 
 const CABECALHO_EQUIPAMENTOS = ['Categoria', 'Modelo', 'Total', 'Disponivel', 'Em Manutencao', 'Quebrado'];
-const CABECALHO_EMPRESTIMOS = ['Numero', 'Solicitante', 'Responsavel', 'Retirada', 'Devolucao', 'Status'];
+const CABECALHO_EMPRESTIMOS_BASE = ['Numero', 'Solicitante', 'Responsavel', 'Retirada', 'Devolucao', 'Status'];
+
+/** Colunas de agendamento vêm depois das originais (e antes da autoria), traduzidas no idioma atual. */
+function cabecalhoEmprestimos(): string[] {
+    return [...CABECALHO_EMPRESTIMOS_BASE, t('exportar.coluna_agendado_para'), t('exportar.coluna_devolucao_prevista')];
+}
+
+const STATUS_EXPORT: Record<string, string> = {
+    agendado: 'shared.statusBadge.agendado',
+    aberto: 'shared.statusBadge.aberto',
+    devolvido: 'shared.statusBadge.devolvido'
+};
+
+function textoStatus(status: string): string {
+    const chave = STATUS_EXPORT[status];
+    return chave ? t(chave) : status;
+}
 
 function linhasEquipamentos(equipamentos: Equipamento[]): Array<Array<string | number>> {
     const manutencaoPorEquipamento = contarManutencaoPorEquipamentoLocal();
@@ -82,7 +98,9 @@ function linhasEmprestimos(emprestimos: LoanUI[], comAutoria = false): Array<Arr
         loan.responsavel,
         formatarDataHora(loan.data),
         formatarDataHora(loan.dataDevolucao),
-        loan.status,
+        textoStatus(loan.status),
+        formatarDataHora(loan.dataAgendada),
+        formatarDataHora(loan.dataPrevistaDevolucao),
         ...(comAutoria ? [nomeAutor(loan.criadoPor), loan.status === 'devolvido' ? nomeAutor(loan.devolvidoPor) : ''] : [])
     ]);
 }
@@ -209,7 +227,7 @@ export async function exportarDados(filtros: FiltrosExportacao): Promise<void> {
         secoes = montarSecoesOcorrencias(filtros.equipamentoIds, comAutoria);
     } else if (filtros.tipoDados === 'devolucoes') {
         const emprestimosFiltrados = await prepararDadosEmprestimos(filtros.dataInicial, filtros.dataFinal);
-        cabecalho = comAutoria ? [...CABECALHO_EMPRESTIMOS, ...CABECALHO_AUTORIA_EMPRESTIMOS] : CABECALHO_EMPRESTIMOS;
+        cabecalho = comAutoria ? [...cabecalhoEmprestimos(), ...CABECALHO_AUTORIA_EMPRESTIMOS] : cabecalhoEmprestimos();
         linhas = linhasEmprestimos(emprestimosFiltrados, comAutoria);
         prefixoArquivo = 'emprestimos';
         titulo = 'Relatório de Empréstimos e Devoluções';

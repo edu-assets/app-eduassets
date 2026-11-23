@@ -5,12 +5,13 @@ import {
     resolverOcorrencia,
     excluirOcorrencia
 } from '../api/ocorrencias.js';
-import type { Ocorrencia, OcorrenciaUI, OcorrenciaCreatePayload, OcorrenciaUpdatePayload } from '../../types/index.js';
+import type { AgendamentoAfetado, Ocorrencia, OcorrenciaUI, OcorrenciaCreatePayload, OcorrenciaUpdatePayload } from '../../types/index.js';
 import type { OpcoesLeitura } from '../api/apiClient.js';
 import { iniciarCarga, concluirCarga, falharCarga, reiniciarCarga, registrarCarregador } from './loadStatus.js';
 import { getSessionDataVersion } from './sessionDataVersion.js';
 import { carregarEquipamentos } from './equipamentoStore.js';
 import { extrairAutoria } from '../utils/autoria.js';
+import { extrairAgendamentosAfetados } from '../utils/agendamentosAfetados.js';
 import { criarLeituraOrdenada, mesmoConteudo } from './leituraOrdenada.js';
 
 type OcorrenciaListener = (ocorrencias: OcorrenciaUI[]) => void;
@@ -59,9 +60,11 @@ export function getOcorrenciasPorTipo(tipo: string): OcorrenciaUI[] {
     return ocorrencias.filter((ocorrencia) => ocorrencia.tipo === tipo);
 }
 
-export async function addOcorrencia(dados: OcorrenciaCreatePayload): Promise<void> {
-    await criarOcorrencia(dados);
+/** Devolve os agendamentos que a ocorrência deixou sem unidades suficientes (vazio se nenhum / API antiga). */
+export async function addOcorrencia(dados: OcorrenciaCreatePayload): Promise<AgendamentoAfetado[]> {
+    const resposta = await criarOcorrencia(dados);
     await recarregarAposMutacao();
+    return extrairAgendamentosAfetados(resposta);
 }
 
 export async function updateOcorrencia(id: number, dados: OcorrenciaUpdatePayload): Promise<void> {

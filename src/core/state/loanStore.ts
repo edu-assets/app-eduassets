@@ -1,10 +1,12 @@
 import {
-    listarEmprestimosAbertos,
+    listarEmprestimosAtivos,
     listarPaginaEmprestimos,
     normalizarFiltros,
     criarEmprestimo,
     atualizarItensEmprestimo,
     devolverEmprestimo,
+    confirmarRetiradaEmprestimo,
+    excluirEmprestimoAgendado,
     LIMITE_PAGINA_PADRAO,
     LIMITE_PAGINA_MAXIMO,
     MAX_PAGINAS
@@ -24,12 +26,14 @@ export { mapEmprestimo } from './loanMapper.js';
 /**
  * Estado dos empréstimos, em duas partes:
  *
- * - `abertos`: TODOS os empréstimos em aberto (Devoluções, contagem de itens emprestados no estoque).
- *   Autenticado: `GET /emprestimos?status=ABERTO` (array completo). Convidado: percorre as páginas de status=ABERTO.
+ * - `ativos`: TODOS os empréstimos não devolvidos: ABERTO (Devoluções, contagem de itens emprestados no estoque) e
+ *   AGENDADO (reservas futuras; não alteram `quantidadeDisponivel`). Autenticado: `GET /emprestimos?status=ATIVO`
+ *   (array completo). Convidado: percorre as páginas de status=ATIVO. `getLoansAbertos()` devolve só os ABERTO e
+ *   `getAgendamentos()` só os AGENDADO.
  * - `historico`: lista paginada do Dashboard › Histórico (`paginado=1`, ordem dataRetirada desc), com filtros
  *   (status/de/ate/q) e "Carregar mais".
  *
- * Sincronização ao vivo / recarga após operação (`carregarEmprestimos`): recarrega `abertos` inteiro e ATUALIZA o
+ * Sincronização ao vivo / recarga após operação (`carregarEmprestimos`): recarrega `ativos` inteiro e ATUALIZA o
  * histórico desde o início, buscando de novo a MESMA quantidade de itens já carregada (mínimo 50, em páginas de até
  * 100; a última pede só o que falta). Assim quem já clicou em "Carregar mais" não perde as páginas extras nem vê a
  * lista "pular" de volta para 50 itens; um empréstimo novo entra no topo e o último item passa para o próximo
@@ -54,12 +58,12 @@ export interface HistoricoEstado {
 type LoanListener = (abertos: LoanUI[]) => void;
 type HistoricoListener = (historico: HistoricoEstado) => void;
 
-let abertos: LoanUI[] = [];
+let ativos: LoanUI[] = [];
 let historico: HistoricoEstado = { items: [], nextCursor: null, filtros: {}, carregando: false, erro: null };
 let listeners: LoanListener[] = [];
 let listenersHistorico: HistoricoListener[] = [];
 
-const leiturasAbertos = criarLeituraOrdenada();
+const leiturasAtivos = criarLeituraOrdenada();
 /** Muda sempre que o histórico é descartado (troca de filtros ou de sessão): operações enfileiradas antes são ignoradas. */
 let geracaoHistorico = 0;
 let filaHistorico: Promise<unknown> = Promise.resolve();
@@ -79,19 +83,23 @@ function definirHistorico(parcial: Partial<HistoricoEstado>): void {
     notifyHistorico();
 }
 
-/* ===== Abertos ===== */
+/* ===== Ativos (abertos + agendados) ===== */
 
+/** Recarrega os empréstimos ATIVOS (ABERTO e AGENDADO). Devolve os ABERTO (compatível com o nome antigo). */
 export async function carregarAbertos(opcoes?: OpcoesLeitura): Promise<LoanUI[]> {
     const version = getSessionDataVersion();
-    const leitura = leiturasAbertos.iniciar();
-    const dados = await listarEmprestimosAbertos(isAutenticado(), opcoes);
-    if (version !== getSessionDataVersion() || !leiturasAbertos.podeAplicar(leitura)) return abertos;
-    const novos = dados.map(mapEmprestimo);
-    if (!mesmoConteudo(novos, abertos)) {
-        abertos = novos;
-        notify();
-    }
-    return abertos;
+    const leitura = leiturasAtivos.iniciar();
+    const dados = await listarEmprestimosAtivos(isAutenticado(), opcoes);
+    if (version !== getSessionDataVersion() || !leiturasAtivos.podeAplicar(leitura)) return getLoansAbertos();
+    definirAtivos(dados.map(mapEmprestimo));
+    return getLoansAbertos();
+}
+
+/** Aplica a lista (mantendo a ordem do servidor) e notifica só se algo mudou. */
+function definirAtivos(novos: LoanUI[]): void {
+    if (mesmoConteudo(novos, ativos)) return;
+    ativos = novos;
+    notify();
 }
 
 /* ===== Histórico ===== */
@@ -244,7 +252,7 @@ function notifyHistorico(): void {
 /* ===== Carga combinada (sessão, sincronização ao vivo, após operações) ===== */
 
 /**
- * Recarrega `abertos` (completo) e atualiza o histórico mantendo as páginas carregadas. Com `passivo` (sincronização
+ * Recarrega `ativos` (completo) e atualiza o histórico mantendo as páginas carregadas. Com `passivo` (sincronização
  * ao vivo) as requisições não renovam o timeout do admin. Só a primeira carga mostra o esqueleto (loadStatus).
  */
 export async function carregarEmprestimos(opcoes?: OpcoesLeitura): Promise<LoanUI[]> {
@@ -257,34 +265,81 @@ export async function carregarEmprestimos(opcoes?: OpcoesLeitura): Promise<LoanU
         throw falha.reason;
     }
     if (version === getSessionDataVersion()) concluirCarga('emprestimos');
-    return abertos;
+    return getLoansAbertos();
 }
 
 registrarCarregador('emprestimos', () => carregarEmprestimos());
 
-/** Todos os empréstimos em aberto (completo). */
+/** Todos os empréstimos em aberto (ABERTO), completo. Não inclui agendamentos. */
 export function getLoansAbertos(): LoanUI[] {
-    return abertos;
+    return ativos.filter((loan) => loan.status === 'aberto');
+}
+
+/** Agendamentos (AGENDADO), do início mais próximo para o mais distante (id desempata). */
+export function getAgendamentos(): LoanUI[] {
+    const inicio = (loan: LoanUI): number => new Date(loan.dataAgendada ?? loan.data).getTime();
+    return ativos
+        .filter((loan) => loan.status === 'agendado')
+        .sort((a, b) => (inicio(a) - inicio(b)) || a.id - b.id);
+}
+
+/** Abertos + agendados, na ordem do servidor. */
+export function getLoansAtivos(): LoanUI[] {
+    return ativos;
 }
 
 /** Sessão trocada/limpa. Os filtros do histórico são mantidos (a busca da tela continua valendo). */
 export function limparEmprestimos(): void {
     reiniciarCarga('emprestimos');
     geracaoHistorico += 1;
-    abertos = [];
+    ativos = [];
     historico = { ...historico, items: [], nextCursor: null, carregando: false, erro: null };
     notify();
     notifyHistorico();
 }
 
-export async function addLoan(loan: LoanDraft): Promise<void> {
-    await criarEmprestimo({
+/**
+ * Registra um empréstimo. Com `dataRetiradaISO` no futuro (> 5 min) o servidor cria um AGENDADO e exige
+ * `dataPrevistaDevolucaoISO`. Devolve o registro criado.
+ */
+export async function addLoan(loan: LoanDraft): Promise<Emprestimo> {
+    const criado = await criarEmprestimo({
         solicitanteNome: loan.aluno,
         responsavelId: Number(loan.responsavelId),
         ...(loan.dataRetiradaISO ? { dataRetirada: loan.dataRetiradaISO } : {}),
+        ...(loan.dataPrevistaDevolucaoISO ? { dataPrevistaDevolucao: loan.dataPrevistaDevolucaoISO } : {}),
         observacao: loan.observacao || undefined,
         itens: loan.itens.map((item) => ({ equipamentoId: Number(item.id), quantidade: item.quantidade }))
     });
+    await recarregarAposMutacao();
+    return criado;
+}
+
+/**
+ * Confirma a retirada de um agendamento (AGENDADO → ABERTO). O estado local é atualizado na hora (o item passa de
+ * `getAgendamentos()` para `getLoansAbertos()` e o histórico é corrigido) e as listas são recarregadas em seguida.
+ * Erros 409 (`nao_agendado`, `confirmacao_fora_da_janela`, `unidades_nao_devolvidas`) sobem como `ApiError`.
+ */
+export async function confirmarRetirada(id: number): Promise<Emprestimo> {
+    const confirmado = await confirmarRetiradaEmprestimo(id);
+    const atualizado = mapEmprestimo(confirmado);
+    definirAtivos(ativos.some((loan) => loan.id === id)
+        ? ativos.map((loan) => (loan.id === id ? atualizado : loan))
+        : [...ativos, atualizado]);
+    if (historico.items.some((loan) => loan.id === id)) {
+        definirHistorico({ items: historico.items.map((loan) => (loan.id === id ? atualizado : loan)) });
+    }
+    await recarregarAposMutacao();
+    return confirmado;
+}
+
+/** Exclui um agendamento: some na hora de `getAgendamentos()` e do histórico; depois recarrega as listas. */
+export async function excluirAgendamento(id: number): Promise<void> {
+    await excluirEmprestimoAgendado(id);
+    definirAtivos(ativos.filter((loan) => loan.id !== id));
+    if (historico.items.some((loan) => loan.id === id)) {
+        definirHistorico({ items: historico.items.filter((loan) => loan.id !== id) });
+    }
     await recarregarAposMutacao();
 }
 
@@ -317,7 +372,10 @@ async function recarregarAposMutacao(): Promise<void> {
     });
 }
 
-/** Assina mudanças nos empréstimos ABERTOS. Para o histórico use `subscribeHistorico`. */
+/**
+ * Assina mudanças nos empréstimos ATIVOS (abertos e agendados). O callback recebe os ABERTO; para os agendamentos
+ * leia `getAgendamentos()` dentro do callback. Para o histórico use `subscribeHistorico`.
+ */
 export function subscribe(callback: LoanListener): () => void {
     listeners.push(callback);
     return () => {
@@ -326,6 +384,7 @@ export function subscribe(callback: LoanListener): () => void {
 }
 
 function notify(): void {
+    const abertos = getLoansAbertos();
     listeners.forEach((callback) => callback(abertos));
 }
 

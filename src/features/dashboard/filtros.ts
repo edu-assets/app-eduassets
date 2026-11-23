@@ -3,11 +3,12 @@ import { t } from '../../core/state/i18nStore.js';
 import type { FiltrosHistorico } from '../../core/state/loanStore.js';
 
 export type PeriodoHistorico = 'hoje' | '7dias' | 'mes' | 'tudo';
-export type StatusFiltroHistorico = 'TODOS' | 'ABERTO' | 'DEVOLVIDO';
+export type StatusFiltroHistorico = 'TODOS' | 'ABERTO' | 'DEVOLVIDO' | 'AGENDADO' | 'ATIVO';
 
 const STATUS_CHIPS: Array<{ valor: StatusFiltroHistorico; chave: string }> = [
     { valor: 'TODOS', chave: 'dashboard.filtro_todos' },
     { valor: 'ABERTO', chave: 'dashboard.filtro_abertos' },
+    { valor: 'AGENDADO', chave: 'dashboard.filtro_agendados' },
     { valor: 'DEVOLVIDO', chave: 'dashboard.filtro_devolvidos' }
 ];
 

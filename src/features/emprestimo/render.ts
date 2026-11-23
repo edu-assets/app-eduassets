@@ -1,6 +1,7 @@
 import { renderItemRow, renderItensEmptyState } from './templates.js';
 import { renderOpcoesSelect } from '../../shared/components/selectOptions.js';
 import { calcularDisponivelEfetivo } from '../../core/utils/estoque.js';
+import { capacidade } from '../../core/state/disponibilidade.js';
 import { t } from '../../core/state/i18nStore.js';
 import { fillSelect, renderPlaceholderOption } from '../../shared/dom/fillSelect.js';
 import type { LoanItemUI, Equipamento, Responsavel } from '../../types/index.js';
@@ -33,6 +34,16 @@ export function disponivelRestante(equipamento: Equipamento | undefined, itens: 
     return Math.max(0, calcularDisponivelEfetivo(equipamento) - jaAdicionado);
 }
 
+/**
+ * Unidades que ainda podem ser pedidas neste empréstimo considerando a CAPACIDADE (total − quebradas − manutenção),
+ * não só o que está na prateleira agora: o que passar do disponível agora exige agendamento.
+ */
+export function capacidadeRestante(equipamento: Equipamento | undefined, itens: LoanItemUI[]): number {
+    if (!equipamento) return 0;
+    const jaAdicionado = itens.find((item) => String(item.id) === String(equipamento.id))?.quantidade ?? 0;
+    return Math.max(0, capacidade(equipamento) - jaAdicionado);
+}
+
 export function popularSelectEquipamentos(
     select: HTMLSelectElement,
     equipamentos: Equipamento[],
@@ -44,7 +55,7 @@ export function popularSelectEquipamentos(
         return {
             id: eq.id,
             label: `${eq.modelo} — ${eq.categoria?.nome ?? ''} (${sufixo})`,
-            disabled: restante <= 0
+            disabled: capacidadeRestante(eq, itens) <= 0
         };
     });
     fillSelect(select, renderPlaceholderOption(t('shell.selecionar_equipamento')), renderOpcoesSelect(opcoes));

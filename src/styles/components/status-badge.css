@@ -19,6 +19,11 @@
     color: var(--warning-color);
 }
 
+.status-badge--agendado {
+    background-color: var(--info-bg);
+    color: var(--info-color);
+}
+
 .status-badge--devolvido {
     background-color: var(--success-bg);
     color: var(--success-color);
@@ -32,4 +37,20 @@
 .status-badge--estoque-baixo {
     background-color: var(--warning-bg);
     color: var(--warning-color);
+}
+
+/* Agendamentos (Devoluções › Agendamentos): variações por horário, mesma forma dos demais badges. */
+.status-badge--hoje {
+    background-color: var(--primary-bg);
+    color: var(--primary-color);
+}
+
+.status-badge--atrasado {
+    background-color: var(--warning-bg);
+    color: var(--warning-color);
+}
+
+.status-badge--expirado {
+    background-color: var(--error-bg);
+    color: var(--error-color);
 }

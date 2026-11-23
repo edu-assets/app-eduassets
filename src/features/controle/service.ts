@@ -1,6 +1,6 @@
 import { getEquipamentos } from '../../core/state/equipamentoStore.js';
 import { addOcorrencia, updateOcorrencia, deleteOcorrencia, resolveOcorrencia } from '../../core/state/ocorrenciasStore.js';
-import type { TipoOcorrencia, ControleRegistroDados, OcorrenciaUpdatePayload, OcorrenciaUI } from '../../types/index.js';
+import type { TipoOcorrencia, ControleRegistroDados, OcorrenciaUpdatePayload, OcorrenciaUI, AgendamentoAfetado } from '../../types/index.js';
 
 const TIPO_API_MAP: Record<string, TipoOcorrencia> = {
     observacao: 'OBSERVACAO',
@@ -24,13 +24,14 @@ export function listarEquipamentosPorCategoria(categoriaNome: string | null): Eq
         .map((item) => ({ id: item.id, modelo: item.modelo }));
 }
 
-export async function adicionarRegistro(tipo: string, dados: ControleRegistroDados): Promise<void> {
+/** Devolve os agendamentos que a nova ocorrência deixou sem unidades suficientes (vazio na maioria dos casos). */
+export async function adicionarRegistro(tipo: string, dados: ControleRegistroDados): Promise<AgendamentoAfetado[]> {
     const equipamentoId = Number(dados.equipamentoId);
     if (!equipamentoId) {
         throw new Error('controle.selecione_equipamento_valido');
     }
 
-    await addOcorrencia({
+    return addOcorrencia({
         equipamentoId,
         tipo: mapTipoApi(tipo),
         problema: dados.problema,

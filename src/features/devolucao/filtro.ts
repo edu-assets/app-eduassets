@@ -30,6 +30,14 @@ export function filtrarOrdenarDevolucoes(loans: LoanUI[], filtro: FiltroDevoluco
     return [...filtrados].sort((a, b) => sinal * ((a.createdAt.getTime() - b.createdAt.getTime()) || (a.id - b.id)));
 }
 
+/** Agendamentos: mesma busca; a ordem usa o início da janela (mais próximos primeiro / mais distantes primeiro). */
+export function filtrarOrdenarAgendamentos(loans: LoanUI[], filtro: FiltroDevolucoes): LoanUI[] {
+    const filtrados = filtrarPorBusca(loans, filtro.termo, textoBusca);
+    const sinal = filtro.ordem === 'recentes' ? -1 : 1;
+    const inicio = (loan: LoanUI): number => new Date(loan.dataAgendada ?? loan.data).getTime() || 0;
+    return [...filtrados].sort((a, b) => sinal * ((inicio(a) - inicio(b)) || (a.id - b.id)));
+}
+
 export function renderDevolucoesFerramentas(filtro: FiltroDevolucoes): string {
     const opcao = (valor: OrdemDevolucoes, chave: string, icone: string) => {
         const ativo = filtro.ordem === valor;

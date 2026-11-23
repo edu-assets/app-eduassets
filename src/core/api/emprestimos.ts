@@ -7,7 +7,8 @@ import type { Emprestimo, EmprestimoCreatePayload, ItemEmprestimoPayload, Status
  * `q` só é enviado para usuários autenticados (a API recusa `q` de convidados com 400).
  */
 export interface FiltrosEmprestimos {
-    status?: StatusEmprestimo;
+    /** 'ATIVO' = ABERTO ∪ AGENDADO (tudo que ainda não foi devolvido). */
+    status?: StatusEmprestimo | 'ATIVO';
     de?: string;
     ate?: string;
     q?: string;
@@ -67,10 +68,12 @@ export function limiteDiaLocal(valor: string, fimDoDia: boolean): string {
     return `${valor}T${fimDoDia ? '23:59:59.999' : '00:00:00.000'}${fuso}`;
 }
 
+const STATUS_FILTRAVEIS: string[] = ['ABERTO', 'DEVOLVIDO', 'AGENDADO', 'ATIVO'];
+
 /** Normaliza os filtros: remove vazios, apara e limita `q`. */
 export function normalizarFiltros(filtros: FiltrosEmprestimos = {}): FiltrosEmprestimos {
     const resultado: FiltrosEmprestimos = {};
-    if (filtros.status === 'ABERTO' || filtros.status === 'DEVOLVIDO') resultado.status = filtros.status;
+    if (STATUS_FILTRAVEIS.includes(filtros.status as string)) resultado.status = filtros.status;
     if (filtros.de?.trim()) resultado.de = filtros.de.trim();
     if (filtros.ate?.trim()) resultado.ate = filtros.ate.trim();
     const q = filtros.q?.trim().slice(0, TAMANHO_MAXIMO_BUSCA).trim();
@@ -144,7 +147,7 @@ export function filtrarLocalmente(emprestimos: Emprestimo[], filtros: FiltrosEmp
     const fim = f.ate ? new Date(limiteDiaLocal(f.ate, true)).getTime() : null;
     const termo = autenticado && f.q ? f.q.toLowerCase() : '';
     return emprestimos.filter((emprestimo) => {
-        if (f.status && emprestimo.status !== f.status) return false;
+        if (f.status === 'ATIVO' ? emprestimo.status === 'DEVOLVIDO' : f.status && emprestimo.status !== f.status) return false;
         const retirada = new Date(emprestimo.dataRetirada).getTime();
         if (inicio !== null && retirada < inicio) return false;
         if (fim !== null && retirada > fim) return false;
@@ -235,12 +238,42 @@ export async function listarEmprestimosAbertos(autenticado: boolean, opcoes?: Op
     return items.filter((emprestimo) => emprestimo.status === 'ABERTO');
 }
 
+/**
+ * Todos os empréstimos ATIVOS: ABERTO e AGENDADO (Devoluções, estoque emprestado, agendamentos). Autenticado:
+ * `status=ATIVO` sem paginação (array completo). Convidado: percorre as páginas de `status=ATIVO`. O filtro também é
+ * aplicado localmente (a API antiga devolve todos os empréstimos).
+ */
+export async function listarEmprestimosAtivos(autenticado: boolean, opcoes?: OpcoesLeitura): Promise<Emprestimo[]> {
+    const ativo = (emprestimo: Emprestimo): boolean => emprestimo.status === 'ABERTO' || emprestimo.status === 'AGENDADO';
+    if (autenticado) {
+        const { resposta } = await lerComCompatibilidade({ status: 'ATIVO' }, {}, opcoes);
+        if (Array.isArray(resposta)) return resposta.filter(ativo);
+        // Resposta paginada inesperada: percorre as páginas.
+    }
+    const { items, completo } = await listarTodasPaginasEmprestimos({ autenticado, filtros: { status: 'ATIVO' } }, opcoes);
+    if (!completo) console.warn('[eduAssets] Lista de empréstimos ativos truncada no limite de páginas.');
+    return items.filter(ativo);
+}
+
 export function criarEmprestimo(dados: EmprestimoCreatePayload): Promise<Emprestimo> {
     return http.post<Emprestimo>('/emprestimos', dados);
 }
 
 export function atualizarItensEmprestimo(id: number, itens: ItemEmprestimoPayload[]): Promise<Emprestimo> {
     return http.patch<Emprestimo>(`/emprestimos/${id}`, { itens });
+}
+
+/**
+ * Confirma a retirada de um AGENDADO (vira ABERTO). Erros 409: `backend.emprestimos.nao_agendado`,
+ * `confirmacao_fora_da_janela`, `unidades_nao_devolvidas` (payload com `emprestimosPendentes`).
+ */
+export function confirmarRetiradaEmprestimo(id: number): Promise<Emprestimo> {
+    return http.patch<Emprestimo>(`/emprestimos/${id}/confirmar-retirada`);
+}
+
+/** Exclui um AGENDADO (204). Outros status: 409 `backend.emprestimos.nao_excluivel`. */
+export function excluirEmprestimoAgendado(id: number): Promise<void> {
+    return http.delete<void>(`/emprestimos/${id}`);
 }
 
 /** Sem `dataDevolucao` o servidor usa o próprio horário. */

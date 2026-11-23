@@ -182,3 +182,40 @@ describe('datepicker: horario vivo e relogio do servidor', () => {
         expect(picker.selectedDates[0].getSeconds()).toBe(0);
     });
 });
+
+describe('datepicker: limites do agendamento', () => {
+    beforeEach(() => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date(2026, 5, 10, 22, 19, 47));
+    });
+    afterEach(() => {
+        vi.useRealTimers();
+        vi.unstubAllGlobals();
+    });
+
+    it('campo de retirada aceita maxDate (agora + 15 dias) e mantém datas passadas liberadas', async () => {
+        const { criarDataAutoPicker } = await carregar(UA_DESKTOP);
+        const { input } = montarForm();
+        const limite = new Date(2026, 5, 25, 22, 19);
+        const picker = await criarDataAutoPicker(input, { maxDate: () => limite });
+        expect(picker.config.maxDate?.getTime()).toBe(limite.getTime());
+        expect(picker.config.minDate).toBeUndefined();
+    });
+
+    it('criarDataHoraPicker: valor inicial, min/max por abertura e aviso de mudança', async () => {
+        const { criarDataHoraPicker } = await carregar(UA_DESKTOP);
+        const { input } = montarForm();
+        const aoMudar = vi.fn();
+        let minimo = new Date(2026, 5, 10, 23, 0);
+        const picker = await criarDataHoraPicker(input, { defaultDate: new Date(2026, 5, 11, 8, 0), minDate: () => minimo, aoMudar });
+        expect(picker.selectedDates[0].getHours()).toBe(8);
+        expect(picker.config.minDate?.getTime()).toBe(minimo.getTime());
+
+        minimo = new Date(2026, 5, 10, 23, 30);
+        picker.open();
+        expect(picker.config.minDate?.getTime()).toBe(minimo.getTime());
+
+        picker.setDate(new Date(2026, 5, 12, 9, 0), true);
+        expect(aoMudar).toHaveBeenCalledTimes(1);
+    });
+});

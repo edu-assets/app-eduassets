@@ -1,8 +1,14 @@
 import { openModal } from '../../core/ui/index.js';
 import { formatarDataCard, gerarIniciais } from './utils.js';
+import { estadoAgendamento, formatarJanela } from './agendamento.js';
 import {
     renderDevolucaoTabelaHeader,
     renderDevolucaoCard,
+    renderAgendamentoCard,
+    renderAgendamentoTabelaHeader,
+    renderAgendamentoColData,
+    renderAgendamentosEmptyState,
+    textoLiberacaoAgendamento,
     renderDevolucaoEmptyState,
     renderDevolucaoSemResultados,
     renderDetalheItensView,
@@ -15,6 +21,7 @@ import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overla
 import type { LoanItemUI, LoanUI, Equipamento } from '../../types/index.js';
 import { definirAgora, type FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { getLoansAbertos } from '../../core/state/loanStore.js';
+import { agora } from '../../core/time/serverClock.js';
 import { t } from '../../core/state/i18nStore.js';
 import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
 import { limparErroCampo } from '../../shared/forms/fieldErrors.js';
@@ -55,6 +62,10 @@ interface AbrirDetalheEls extends DetalheItensEls, ObservacaoEls, ListaEls {
     detalheEmpty: HTMLElement;
     painel: HTMLElement | null;
     backdrop: HTMLElement | null;
+    /** Título e dica do detalhe (opcionais: só o modo agendamento os usa). */
+    detalheTitulo?: HTMLElement | null;
+    detalheAgendamentoHint?: HTMLElement | null;
+    btnDetalheConfirmarRetirada?: HTMLButtonElement | null;
 }
 
 interface SetModoEdicaoEls {
@@ -83,13 +94,20 @@ interface ModalConfirmacaoEls {
     devolucaoDataInput: HTMLInputElement;
 }
 
-/** `consulta`: busca ativa e total antes do filtro, para distinguir "sem resultados" de "nenhum em aberto". */
+export type AbaDevolucao = 'andamento' | 'agendamentos';
+
+/**
+ * `consulta`: busca ativa e total antes do filtro, para distinguir "sem resultados" de "nenhum em aberto";
+ * `aba` escolhe o layout (Em andamento por padrão) e `referencia` é o "agora" usado nos badges dos agendamentos.
+ */
 export function renderLista(
     els: ListaEls & FecharDetalheEls,
     estado: DevolucaoEstado,
     loans: LoanUI[],
-    consulta?: { termo: string; totalBase: number }
+    consulta?: { termo: string; totalBase: number; aba?: AbaDevolucao; referencia?: Date }
 ): void {
+    const agendamentos = consulta?.aba === 'agendamentos';
+    const referencia = consulta?.referencia ?? agora();
     if (aplicarEstadoCarga(els.lista, getLoadStatus('emprestimos').status, renderSkeletonLinhas(5))) {
         fecharDetalhe(els, estado);
         return;
@@ -97,12 +115,14 @@ export function renderLista(
     if (!loans.length) {
         els.lista.innerHTML = consulta && consulta.totalBase > 0 && consulta.termo.trim()
             ? renderDevolucaoSemResultados(consulta.termo)
-            : renderDevolucaoEmptyState();
+            : agendamentos ? renderAgendamentosEmptyState() : renderDevolucaoEmptyState();
         fecharDetalhe(els, estado);
         return;
     }
 
-    els.lista.innerHTML = renderDevolucaoTabelaHeader() + loans.map(renderDevolucaoCard).join('');
+    els.lista.innerHTML = agendamentos
+        ? renderAgendamentoTabelaHeader() + loans.map((loan) => renderAgendamentoCard(loan, referencia)).join('')
+        : renderDevolucaoTabelaHeader() + loans.map(renderDevolucaoCard).join('');
 
     if (estado.idDetalheAberto) {
         const aindaExiste = loans.some((loan) => loan.id === estado.idDetalheAberto);
@@ -110,9 +130,41 @@ export function renderLista(
     }
 }
 
-export function renderDetalheItens(els: DetalheItensEls, itens: LoanItemUI[], editMode: boolean): void {
+/**
+ * Atualiza, sem recriar os cards, o que depende da hora nos agendamentos visíveis: badge, janela, aviso de liberação
+ * e o botão "Confirmar retirada" (o foco e a seleção não se perdem). Também atualiza os botões do painel de detalhes.
+ */
+export function atualizarTemposAgendamentos(
+    els: ListaEls & { detalheAgendamentoHint?: HTMLElement | null; btnDetalheConfirmarRetirada?: HTMLButtonElement | null },
+    loans: LoanUI[],
+    idDetalheAberto: number | null,
+    referencia: Date = agora()
+): void {
+    els.lista.querySelectorAll<HTMLElement>('.devolucao-item[data-agendamento]').forEach((card) => {
+        const loan = loans.find((l) => String(l.id) === String(card.dataset.id));
+        if (!loan) return;
+        const colData = card.querySelector<HTMLElement>('.devolucao-col-data');
+        if (colData) colData.innerHTML = renderAgendamentoColData(loan, referencia);
+        const botao = card.querySelector<HTMLButtonElement>('.confirmar-retirada-btn');
+        if (botao) botao.disabled = !estadoAgendamento(loan, referencia).podeConfirmar;
+    });
+    const aberto = idDetalheAberto == null ? undefined : loans.find((l) => l.id === idDetalheAberto);
+    if (aberto?.status === 'agendado') atualizarAcoesDetalheAgendamento(els, aberto, referencia);
+}
+
+function atualizarAcoesDetalheAgendamento(
+    els: { detalheAgendamentoHint?: HTMLElement | null; btnDetalheConfirmarRetirada?: HTMLButtonElement | null },
+    loan: LoanUI,
+    referencia: Date
+): void {
+    const estado = estadoAgendamento(loan, referencia);
+    if (els.btnDetalheConfirmarRetirada) els.btnDetalheConfirmarRetirada.disabled = !estado.podeConfirmar;
+    if (els.detalheAgendamentoHint) els.detalheAgendamentoHint.textContent = textoLiberacaoAgendamento(estado, referencia);
+}
+
+export function renderDetalheItens(els: DetalheItensEls, itens: LoanItemUI[], editMode: boolean, comStatus = true): void {
     els.detalheItensContagem.textContent = `(${itens.length})`;
-    els.detalheLista.innerHTML = editMode ? renderDetalheItensEdit(itens) : renderDetalheItensView(itens);
+    els.detalheLista.innerHTML = editMode ? renderDetalheItensEdit(itens) : renderDetalheItensView(itens, comStatus);
 }
 
 export function renderObservacao(els: ObservacaoEls, observacao: string | null | undefined): void {
@@ -126,13 +178,23 @@ export function abrirDetalhe(els: AbrirDetalheEls, estado: DevolucaoEstado, loan
     estado.itensEditando = loan.itens.map((item) => ({ ...item }));
     estado.itensOriginais = loan.itens.map((item) => ({ ...item }));
 
+    const agendamento = loan.status === 'agendado';
+    els.painel?.classList.toggle('is-agendamento', agendamento);
+    if (els.detalheTitulo) els.detalheTitulo.textContent = t(agendamento ? 'devolucao.detalhes_agendamento' : 'shell.detalhes_do_emprestimo');
+
     els.detalheResp.textContent = loan.responsavel;
     els.detalheAluno.textContent = loan.aluno;
-    els.detalheData.textContent = t('devolucao.emprestimo_realizado_em').replace('{data}', formatarDataCard(loan.createdAt));
+    if (agendamento) {
+        const estadoAg = estadoAgendamento(loan);
+        els.detalheData.textContent = `${t('devolucao.agendado_para')} ${formatarJanela(estadoAg.inicio, estadoAg.fim)}`;
+        atualizarAcoesDetalheAgendamento(els, loan, agora());
+    } else {
+        els.detalheData.textContent = t('devolucao.emprestimo_realizado_em').replace('{data}', formatarDataCard(loan.createdAt));
+    }
     atualizarAutoriaDetalhe(els.detalheData, loan);
 
     setModoEdicao(els, estado, false);
-    renderDetalheItens(els, estado.itensEditando, false);
+    renderDetalheItens(els, estado.itensEditando, false, !agendamento);
     renderObservacao(els, loan.observacao);
 
     mostrarDetalhe(els);
@@ -151,6 +213,7 @@ export function fecharDetalhe(els: FecharDetalheEls, estado: DevolucaoEstado): v
     estado.itensEditando = [];
     estado.itensOriginais = [];
     setModoEdicao(els, estado, false);
+    els.painel?.classList.remove('is-agendamento');
     els.detalheConteudo.style.display = 'none';
     els.detalheEmpty.style.display = 'flex';
     marcarLinhaSelecionada(els, null);

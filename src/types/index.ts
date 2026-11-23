@@ -1,7 +1,7 @@
 /* ===== Enums ===== */
 
 export type NivelAcesso = 'ADMINISTRADOR' | 'EDITOR';
-export type StatusEmprestimo = 'ABERTO' | 'DEVOLVIDO';
+export type StatusEmprestimo = 'AGENDADO' | 'ABERTO' | 'DEVOLVIDO';
 export type TipoOcorrencia = 'OBSERVACAO' | 'MANUTENCAO' | 'QUEBRADO';
 export type StatusOcorrencia = 'ABERTO' | 'RESOLVIDO';
 
@@ -81,7 +81,12 @@ export interface Emprestimo extends AutoriaCampos {
     solicitanteNome: string;
     responsavelId: number;
     status: StatusEmprestimo;
+    /** Início da janela enquanto AGENDADO; depois de confirmada a retirada, é o horário real da retirada. */
     dataRetirada: string;
+    /** Início agendado (preenchido em empréstimos que nasceram como agendamento). */
+    dataAgendada?: string | null;
+    /** Fim previsto da janela de uso (obrigatório em agendamentos). */
+    dataPrevistaDevolucao?: string | null;
     dataDevolucao: string | null;
     observacao: string | null;
     createdAt: string;
@@ -103,6 +108,8 @@ export interface Ocorrencia extends AutoriaCampos {
     medidasTomadas: string | null;
     createdAt: string;
     equipamento?: Equipamento;
+    /** Só na resposta de criação: agendamentos que ficaram sem unidades por causa desta ocorrência. */
+    agendamentosAfetados?: AgendamentoAfetado[];
 }
 
 export interface AuthUser {
@@ -159,6 +166,8 @@ export interface EmprestimoCreatePayload {
     solicitanteNome: string;
     responsavelId: number;
     dataRetirada?: string;
+    /** ISO com fuso. Obrigatória quando `dataRetirada` está no futuro (agendamento). */
+    dataPrevistaDevolucao?: string;
     observacao?: string;
     itens: ItemEmprestimoPayload[];
 }
@@ -186,7 +195,7 @@ export type LoanItemUI = {
     quantidade: number;
 };
 
-export type StatusLoanUI = 'aberto' | 'devolvido';
+export type StatusLoanUI = 'aberto' | 'devolvido' | 'agendado';
 
 export interface LoanUI extends AutoriaCampos {
     devolvidoPor?: Autor | null;
@@ -198,6 +207,10 @@ export interface LoanUI extends AutoriaCampos {
     responsavelId: number;
     status: StatusLoanUI;
     data: string;
+    /** Início agendado (ISO) ou null. Com status 'agendado', `data` é o mesmo instante. */
+    dataAgendada: string | null;
+    /** Fim previsto da janela (ISO) ou null. */
+    dataPrevistaDevolucao: string | null;
     dataDevolucao: string | null;
     observacao: string;
     createdAt: Date;
@@ -209,6 +222,7 @@ export interface LoanDraft {
     aluno: string;
     responsavelId: string | number;
     dataRetiradaISO?: string;
+    dataPrevistaDevolucaoISO?: string;
     observacao?: string;
     itens: LoanItemUI[];
 }
@@ -297,4 +311,29 @@ export interface ItemEstoqueInsuficiente {
     categoria: string;
     solicitado: number;
     disponivel: number;
+}
+
+
+/** Agendamento afetado por uma ocorrência (campo `agendamentosAfetados` de cada ocorrência criada em POST /ocorrencias). */
+export interface AgendamentoAfetado {
+    id: number;
+    solicitanteNome: string;
+    dataAgendada: string;
+    dataPrevistaDevolucao: string;
+}
+
+/** Corpo (`ApiError.payload`) do 400 de estoque insuficiente em POST /emprestimos. */
+export interface PayloadEstoqueInsuficiente {
+    itens: ItemEstoqueInsuficiente[];
+    /** true quando a quantidade cabe na capacidade total (só falta janela livre): dá para agendar. */
+    agendavel?: boolean;
+    /** Sugestão (ISO) do próximo horário em que tudo estará livre; null se não houver. */
+    proximoHorarioLivre?: string | null;
+}
+
+/** Empréstimo pendente que impede confirmar a retirada (payload do 409 `unidades_nao_devolvidas`). */
+export interface EmprestimoPendenteDevolucao {
+    id: number;
+    solicitanteNome: string;
+    dataPrevistaDevolucao: string | null;
 }

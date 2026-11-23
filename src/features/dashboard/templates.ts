@@ -3,7 +3,7 @@ import { escapeHtml } from '../../core/utils/sanitize.js';
 import { getEquipamentoIcon } from '../../core/utils/equipamentoIcons.js';
 import { renderStatusBadge } from '../../shared/components/statusBadge.js';
 import { renderPessoaProtegida } from '../../shared/components/restrictedPerson.js';
-import { t, formatarDataHora } from '../../core/state/i18nStore.js';
+import { t, formatarDataHora, getLocale } from '../../core/state/i18nStore.js';
 import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
 import { renderEmptyState, renderEmptyStateSemResultados } from '../../shared/components/emptyState.js';
 import { caminhoIlustracao, renderIconeEquipamento } from '../../shared/components/kitVisual.js';
@@ -182,7 +182,28 @@ export function renderDashboardHistoricoContent(loans: LoanUI[], limiteChips: nu
     `).join('');
 }
 
+/**
+ * Linha de retirada do detalhe: agendamento já retirado mostra "Agendado para {data} · Retirado às {hora}";
+ * os demais (inclusive o agendamento ainda pendente) mostram a data de retirada.
+ */
+export function textoRetiradaDetalhe(loan: LoanUI): string {
+    if (loan.dataAgendada && loan.status !== 'agendado') {
+        const retirada = new Date(loan.data);
+        const hora = Number.isNaN(retirada.getTime())
+            ? ''
+            : retirada.toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
+        return t('devolucao.detalhe_agendado_retirado')
+            .replace('{data}', formatarDataHora(loan.dataAgendada))
+            .replace('{hora}', hora);
+    }
+    return `${t('dashboard.retirada_em')} ${formatarDataHora(loan.data)}`;
+}
+
 export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
+    const linhaPrevista = loan.dataPrevistaDevolucao
+        ? html`<span class="devolucao-detalhe-pessoa-data">${t('emprestimo.devolucao_prevista')}: ${formatarDataHora(loan.dataPrevistaDevolucao)}</span>`
+        : '';
+
     const itensHtml = loan.itens.map((item) => html`
         <li>
             <span class="icon-badge icon-badge--sm icon-badge--primary">
@@ -213,7 +234,8 @@ export function renderDashboardHistoricoDetalheBody(loan: LoanUI): string {
                     </svg>
                     <span class="info-value">${raw(renderPessoaProtegida(loan.aluno))}</span>
                 </div>
-                <span class="devolucao-detalhe-pessoa-data">${t('dashboard.retirada_em')} ${formatarDataHora(loan.data)}</span>
+                <span class="devolucao-detalhe-pessoa-data">${textoRetiradaDetalhe(loan)}</span>
+                ${raw(linhaPrevista)}
                 <span class="devolucao-detalhe-pessoa-data">${t('shell.devolucao')}: ${formatarDataHora(loan.dataDevolucao) || '—'}</span>
             </div>
         </div>

@@ -44,7 +44,7 @@ import type { DashboardEls } from '../features/dashboard/render.js';
 function loan(id: number, extra: Partial<LoanUI> = {}): LoanUI {
     return {
         id, numero: id, aluno: `Aluno ${id}`, responsavel: 'Maria', responsavelId: 1, status: 'aberto',
-        data: '', dataDevolucao: null, observacao: '', createdAt: new Date(2026, 0, id), itens: [], ...extra
+        data: '', dataAgendada: null, dataPrevistaDevolucao: null, dataDevolucao: null, observacao: '', createdAt: new Date(2026, 0, id), itens: [], ...extra
     };
 }
 

@@ -1,5 +1,6 @@
 import { showToast, closeModal } from '../../core/ui/index.js';
-import { getLoansAbertos } from '../../core/state/loanStore.js';
+import { getLoansAbertos, getLoansAtivos, getAgendamentos } from '../../core/state/loanStore.js';
+import { confirmarRetiradaAgendamento, excluirAgendamentoComConfirmacao } from './agendamentoAcoes.js';
 import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
 import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
@@ -58,6 +59,8 @@ interface DevolucaoEls {
     btnDetalheFechar: HTMLElement;
     btnDetalheCancelar: HTMLElement;
     btnConfirmarDevolucaoPainel: HTMLElement;
+    btnDetalheConfirmarRetirada?: HTMLButtonElement | null;
+    btnDetalheExcluirAgendamento?: HTMLElement | null;
     painel: HTMLElement | null;
     backdrop: HTMLElement | null;
     devolucaoPicker: FlatpickrInstance;
@@ -74,11 +77,25 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
             return;
         }
 
+        const btnRetirada = target.closest<HTMLElement>('.confirmar-retirada-btn');
+        if (btnRetirada) {
+            const alvo = getAgendamentos().find((l) => String(l.id) === String(btnRetirada.dataset.id));
+            if (alvo) void confirmarRetiradaAgendamento(alvo);
+            return;
+        }
+
+        const btnExcluir = target.closest<HTMLElement>('.excluir-agendamento-btn');
+        if (btnExcluir) {
+            const alvo = getAgendamentos().find((l) => String(l.id) === String(btnExcluir.dataset.id));
+            if (alvo) void excluirAgendamentoComConfirmacao(alvo);
+            return;
+        }
+
         // O botão Detalhes (acessível por teclado) cai no mesmo caminho do clique no card.
         const card = target.closest<HTMLElement>('.devolucao-item');
         if (!card) return;
 
-        const loan = getLoansAbertos().find((l) => String(l.id) === String(card.dataset.id));
+        const loan = getLoansAtivos().find((l) => String(l.id) === String(card.dataset.id));
         if (loan) abrirDetalhe(els, estado, loan);
     });
 
@@ -124,6 +141,17 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
     els.btnConfirmarDevolucaoPainel.addEventListener('click', () => {
         if (!estado.idDetalheAberto) return;
         abrirModalConfirmacao(els, estado, estado.idDetalheAberto);
+    });
+
+    // Ações do painel de detalhes quando o item aberto é um agendamento.
+    const agendamentoAberto = () => getAgendamentos().find((l) => l.id === estado.idDetalheAberto);
+    els.btnDetalheConfirmarRetirada?.addEventListener('click', () => {
+        const alvo = agendamentoAberto();
+        if (alvo) void confirmarRetiradaAgendamento(alvo);
+    });
+    els.btnDetalheExcluirAgendamento?.addEventListener('click', () => {
+        const alvo = agendamentoAberto();
+        if (alvo) void excluirAgendamentoComConfirmacao(alvo);
     });
 
     els.btnDetalheFechar.addEventListener('click', () => fecharDetalhe(els, estado));

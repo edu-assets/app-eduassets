@@ -4,7 +4,7 @@ import type { Emprestimo } from '../types/index.js';
 
 const mocks = vi.hoisted(() => ({
     autenticado: true,
-    listarEmprestimosAbertos: vi.fn(),
+    listarEmprestimosAtivos: vi.fn(),
     listarPaginaEmprestimos: vi.fn()
 }));
 
@@ -17,7 +17,7 @@ vi.mock('../core/state/authStore.js', () => ({
 vi.mock('../core/state/equipamentoStore.js', () => ({ carregarEquipamentos: vi.fn(async () => []) }));
 vi.mock('../core/api/emprestimos.js', async (importOriginal) => ({
     ...(await importOriginal<typeof import('../core/api/emprestimos.js')>()),
-    listarEmprestimosAbertos: mocks.listarEmprestimosAbertos,
+    listarEmprestimosAtivos: mocks.listarEmprestimosAtivos,
     listarPaginaEmprestimos: mocks.listarPaginaEmprestimos
 }));
 
@@ -47,7 +47,7 @@ beforeEach(async () => {
     vi.resetModules();
     localStorage.setItem('eduassets_lang', 'pt');
     mocks.autenticado = true;
-    mocks.listarEmprestimosAbertos.mockReset().mockResolvedValue([]);
+    mocks.listarEmprestimosAtivos.mockReset().mockResolvedValue([]);
     mocks.listarPaginaEmprestimos.mockReset();
     store = await import('../core/state/loanStore.js');
     loadStatus = await import('../core/state/loadStatus.js');
@@ -55,7 +55,7 @@ beforeEach(async () => {
 
 describe('histórico paginado no store', () => {
     it('carga inicial: abertos completos + primeira página; "Carregar mais" anexa a próxima página', async () => {
-        mocks.listarEmprestimosAbertos.mockResolvedValue([emprestimo(500, 'ABERTO')]);
+        mocks.listarEmprestimosAtivos.mockResolvedValue([emprestimo(500, 'ABERTO')]);
         mocks.listarPaginaEmprestimos.mockResolvedValueOnce(pagina(lote(200, 50), 151));
         await store.carregarEmprestimos();
 
@@ -162,11 +162,11 @@ describe('sincronização ao vivo do histórico', () => {
         const eventos: string[] = [];
         loadStatus.subscribeLoadStatus((chave, s) => { if (chave === 'emprestimos') eventos.push(s.status); });
 
-        mocks.listarEmprestimosAbertos.mockResolvedValue([emprestimo(201, 'ABERTO')]);
+        mocks.listarEmprestimosAtivos.mockResolvedValue([emprestimo(201, 'ABERTO')]);
         mocks.listarPaginaEmprestimos.mockResolvedValueOnce(pagina(lote(201, 50), 152));
         await store.carregarEmprestimos({ passivo: true });
 
-        expect(mocks.listarEmprestimosAbertos).toHaveBeenLastCalledWith(true, { passivo: true });
+        expect(mocks.listarEmprestimosAtivos).toHaveBeenLastCalledWith(true, { passivo: true });
         expect(mocks.listarPaginaEmprestimos).toHaveBeenLastCalledWith(
             expect.objectContaining({ cursor: null, limit: 50 }), { passivo: true }
         );

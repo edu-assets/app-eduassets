@@ -1086,3 +1086,39 @@ html[data-theme="dark"] .devolucao-vazia-texto {
         font-size: 0.8rem;
     }
 }
+
+/* ===== Devoluções: aba Agendamentos ===== */
+/* Coluna de ações mais larga: "Confirmar retirada" e "Excluir agendamento" empilhados com "Detalhes". */
+@media (min-width: 1025px) {
+    .devolucao-tabela-header--agendamento,
+    .devolucao-item--agendamento {
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.3fr) minmax(0, 1.3fr) 168px;
+    }
+}
+
+.devolucao-item--agendamento .devolucao-col-acao .btn {
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+}
+
+/* Painel de detalhes aberto num agendamento: troca as ações de devolução pelas de agendamento. */
+.detalhe-agendamento-acao,
+.detalhe-agendamento-hint {
+    display: none;
+}
+
+.devolucao-detalhe-painel.is-agendamento .detalhe-agendamento-acao {
+    display: inline-flex;
+}
+
+.devolucao-detalhe-painel.is-agendamento .detalhe-agendamento-hint:not(:empty) {
+    display: block;
+    margin: 0;
+    text-align: center;
+}
+
+.devolucao-detalhe-painel.is-agendamento #btn-detalhe-editar,
+.devolucao-detalhe-painel.is-agendamento #btn-confirmar-devolucao-painel {
+    display: none !important;
+}
