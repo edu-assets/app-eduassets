@@ -907,6 +907,11 @@ html[data-theme="dark"] .registros-row[data-problema="botao"] .controle-problema
         align-items: stretch;
     }
 
+    /* Em coluna, o flex-basis de 240px viraria altura e abriria um vão vazio. */
+    .controle-registros-header-row > div:first-child {
+        flex: 0 0 auto;
+    }
+
     .controle-registros-toolbar {
         flex-wrap: wrap;
     }
