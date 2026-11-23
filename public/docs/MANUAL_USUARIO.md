@@ -67,14 +67,13 @@ O painel aparece no menu como **Novo empréstimo** e tem o título **Registrar E
 
 1. Em **Dados do Empréstimo**, preencha **Solicitante** (para usuários logados, o campo sugere nomes já usados) e selecione o **Responsável**.
 2. Confira **Data e Hora** (início da retirada). O campo é preenchido automaticamente; clique nele se precisar escolher outra data ou horário.
-3. Confira **Devolução prevista**. Em um empréstimo imediato, o padrão é o fim do dia atual; em um agendamento, o padrão é o início da retirada mais 1 hora. O campo é obrigatório para agendamentos, precisa ser posterior à retirada, e a janela entre a retirada e a devolução prevista não pode passar de 15 dias.
-4. Em **Itens do Empréstimo**, escolha **Equipamento**, informe **Qtd.** e clique em **Adicionar**. Repita para cada modelo; os itens aparecem em **Itens adicionados** como chips compactos, com o ícone do equipamento e só o modelo em uma linha (a categoria aparece ao passar o mouse e para leitores de tela).
-5. Se necessário, preencha **Observação (opcional)**.
-6. Clique em **Registrar Empréstimo**. Quando **Data e Hora** está no futuro, o botão mostra **Agendar**.
+3. Em **Itens do Empréstimo**, escolha **Equipamento**, informe **Qtd.** e clique em **Adicionar**. Repita para cada modelo; os itens aparecem em **Itens adicionados** como chips compactos, com o ícone do equipamento e só o modelo em uma linha (a categoria aparece ao passar o mouse e para leitores de tela).
+4. Se necessário, preencha **Observação (opcional)**.
+5. Clique em **Registrar Empréstimo**. Quando **Data e Hora** está no futuro, o botão mostra **Agendar**.
 
-**Agendamentos:** uma retirada com data e hora mais de 5 minutos no futuro vira um **agendamento** (status **Agendado**), com até 15 dias de antecedência. Ao enviar uma data futura, o sistema abre a janela **Gostaria de agendar o uso desses equipamentos?**, com **Sim** e **Não**; **Não** volta ao formulário.
+**Agendamentos:** uma retirada com data e hora mais de 5 minutos no futuro vira um **agendamento** (status **Agendado**), com até 15 dias de antecedência. Ao enviar uma data futura, abre a janela de agendamento **Gostaria de agendar o uso desses equipamentos?**, com um aviso de que os equipamentos ficarão reservados e os campos **Início do agendamento** (a data escolhida) e **Devolução prevista** (início mais 1 hora, posterior ao início, janela de até 15 dias). **Agendar** confirma; **Cancelar** volta ao formulário sem registrar nada. Empréstimos imediatos não pedem devolução prevista: o sistema considera o fim do dia atual.
 
-**Sem unidades disponíveis agora:** se o pedido não cabe no estoque disponível neste momento, mas cabe na capacidade total do modelo, a janela **O número de equipamentos solicitado não está disponível. Gostaria de realizar um agendamento?** oferece agendar, já com o próximo horário livre preenchido. Acima da capacidade total, aparece o erro habitual de estoque insuficiente.
+**Sem unidades disponíveis agora:** se o pedido não cabe no estoque disponível neste momento, mas cabe na capacidade total do modelo, a mesma janela de agendamento abre com o título **O número de equipamentos solicitado não está disponível. Gostaria de realizar um agendamento?**, já com o próximo horário livre em **Início do agendamento**. Acima da capacidade total, aparece o erro habitual de estoque insuficiente.
 
 Na lista **Equipamento**, cada modelo mostra "(N disponíveis)" no momento; um modelo só fica desabilitado quando a capacidade total dele já está toda usada. A **Qtd.** pode chegar até a capacidade do modelo (total, menos os quebrados e as manutenções abertas); quando passa do que está livre agora, um aviso "só X disponíveis agora" aparece no próprio campo. A **Observação** tem contador de caracteres (0/250).
 

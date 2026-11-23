@@ -1,6 +1,14 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.7.0 oficial**, publicada em 23/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.7.1 oficial**, publicada em 23/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.7.1 — Formulário de empréstimo mais simples — 23 de novembro de 2026
+
+Versão de interface; a API, a documentação e o site só alinham o número da versão.
+
+- **Registrar Empréstimo:** o campo **Devolução prevista** saiu do formulário. Empréstimos imediatos usam o fim do dia atual como devolução prevista, sem nada a preencher.
+- **Janela de agendamento única:** uma data futura ou a falta de unidades agora abrem a mesma janela, com um aviso de reserva e os campos **Início do agendamento** e **Devolução prevista** (início mais 1 hora). **Agendar** confirma; **Cancelar** volta ao formulário sem registrar nada.
+- **Documentação:** Manual do Usuário §4 (passo a passo do empréstimo e janela de agendamento).
 
 ## v1.7.0 — Agendamentos de equipamentos — 23 de novembro de 2026
 

@@ -29,7 +29,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'auto_stories',
         file: { pt: '/docs/MANUAL_USUARIO.md', en: '/docs/USER_MANUAL.md' },
         category: 'geral',
-        version: '1.7.0',
+        version: '1.7.1',
         updatedAt: '2026-11-23'
     },
     {
@@ -74,7 +74,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'route',
         file: { pt: '/docs/ROADMAP.md', en: '/docs/ROADMAP_EN.md' },
         category: 'geral',
-        version: '1.7.0',
+        version: '1.7.1',
         updatedAt: '2026-11-23'
     },
     {
@@ -83,7 +83,7 @@ const DOCS_REGISTRY: DocumentoRegistrado[] = [
         icon: 'history',
         file: { pt: '/docs/CHANGELOG.md', en: '/docs/CHANGELOG_EN.md' },
         category: 'geral',
-        version: '1.7.0',
+        version: '1.7.1',
         updatedAt: '2026-11-23'
     },
     {

@@ -67,14 +67,13 @@ The sidebar item is **New loan** and the panel title is **Register Loan**. It re
 
 1. Under **Loan Details**, fill in **Requester** (for signed-in users the field suggests names already used) and select the **Responsible** person.
 2. Check **Date and Time** (the start of the pickup). It is filled automatically; click it to choose a different date or time when needed.
-3. Check **Expected return**. For an immediate loan, the default is the end of the current day; for a schedule, the default is the pickup start plus 1 hour. The field is required for schedules, must be after the pickup, and the window between the pickup and the expected return cannot exceed 15 days.
-4. Under **Loan Items**, choose **Equipment**, enter **Qty.**, and click **Add**. Repeat for each model; items appear under **Added items** as compact chips with the equipment icon and only the model name on one line (the category appears on hover and for screen readers).
-5. Optionally fill in **Note**.
-6. Click **Register Loan**. When **Date and Time** is in the future, the button reads **Schedule**.
+3. Under **Loan Items**, choose **Equipment**, enter **Qty.**, and click **Add**. Repeat for each model; items appear under **Added items** as compact chips with the equipment icon and only the model name on one line (the category appears on hover and for screen readers).
+4. Optionally fill in **Note**.
+5. Click **Register Loan**. When **Date and Time** is in the future, the button reads **Schedule**.
 
-**Schedules:** a pickup more than 5 minutes in the future becomes a **schedule** (status **Scheduled**), up to 15 days ahead. When you submit a future date, the window **Would you like to schedule the use of this equipment?** opens, with **Yes** and **No**; **No** returns to the form.
+**Schedules:** a pickup more than 5 minutes in the future becomes a **schedule** (status **Scheduled**), up to 15 days ahead. When you submit a future date, the scheduling window **Would you like to schedule the use of this equipment?** opens, with a notice that the equipment will be reserved and the fields **Schedule start** (the chosen date) and **Expected return** (start plus 1 hour, after the start, window of up to 15 days). **Schedule** confirms; **Cancel** returns to the form without saving anything. Immediate loans do not ask for an expected return: the system uses the end of the current day.
 
-**No units available now:** if the request does not fit the stock available right now, but fits the model's total capacity, the window **The requested number of equipment is not available. Would you like to make a schedule?** offers to schedule it, already prefilled with the next free time slot. Above total capacity, the usual insufficient-stock error appears.
+**No units available now:** if the request does not fit the stock available right now, but fits the model's total capacity, the same scheduling window opens with the title **The requested number of equipment is not available. Would you like to make a schedule?**, already prefilled with the next free time slot in **Schedule start**. Above total capacity, the usual insufficient-stock error appears.
 
 In the **Equipment** list each model shows "(N available)" at this moment; a model is disabled only when its whole capacity is already in use. **Qty.** can go up to the model's capacity (total, minus broken units and open maintenance); when it exceeds what is free right now, an inline warning "only X available now" appears in the field. **Note** has a character counter (0/250).
 

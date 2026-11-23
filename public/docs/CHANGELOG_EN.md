@@ -1,6 +1,14 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.7.0**, released on November 23, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.7.1**, released on November 23, 2026; earlier entries remain historical.
+
+## v1.7.1 — Simpler loan form — November 23, 2026
+
+Interface release; the API, documentation and site only align the version number.
+
+- **Register Loan:** the **Expected return** field left the form. Immediate loans use the end of the current day as the expected return, with nothing to fill in.
+- **Single scheduling window:** a future date or a shortage of units right now opens the same window, with a reservation notice and the **Schedule start** and **Expected return** fields (start plus 1 hour). **Schedule** confirms; **Cancel** returns to the form without saving anything.
+- **Documentation:** User Manual §4 (loan steps and scheduling window).
 
 ## v1.7.0 — Equipment scheduling — November 23, 2026
 
