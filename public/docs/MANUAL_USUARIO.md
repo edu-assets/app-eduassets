@@ -13,7 +13,7 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 | Papel | O que pode fazer na operação | O que é restrito |
 | --- | --- | --- |
 | **Convidado** | Consultar estoque, categorias, histórico e ocorrências anonimizados; usar consultas/exportações derivadas desses dados. | Não cria, altera, resolve, devolve ou exclui registros. Identificação do solicitante, responsável, observações e detalhes da ocorrência são omitidos/mascarados. Listagem de responsáveis, **Cadastros**, **Segurança** e **Meu Perfil** exigem autenticação. |
-| **Editor** | Fazer login, registrar empréstimos, editar itens de empréstimos abertos, confirmar devoluções e criar/editar/resolver registros em **Controle**; alterar a própria senha. | Não acessa a gestão de **Cadastros**, não provisiona/revoga RFID e não exclui ocorrências. |
+| **Editor** | Fazer login, registrar empréstimos e agendamentos, editar itens de empréstimos abertos, confirmar devoluções e retiradas agendadas, excluir agendamentos e criar/editar/resolver registros em **Controle**; alterar a própria senha. | Não acessa a gestão de **Cadastros**, não provisiona/revoga RFID e não exclui ocorrências. |
 | **Administrador** | Tudo que o Editor faz, além de operar **Cadastros**, gerenciar usuários e cartões RFID e excluir registros de **Controle**. | Continua sujeito às validações de estoque, formato e campos obrigatórios. |
 
 > **Importante:** os indicadores, menus e bloqueios da UI ajudam na usabilidade, mas **não são o controle de segurança**. A fronteira de segurança é o backend, que exige autenticação/JWT e aplica as permissões nas rotas. Não trate a ocultação de um botão como prova de autorização.
@@ -52,7 +52,7 @@ Em **Início**, use os atalhos **Novo empréstimo**, **Devoluções**, **Dashboa
 
 **Operações agora:** um resumo com quatro indicadores, cada um abre o painel correspondente:
 
-- **Em aberto:** empréstimos ainda não devolvidos e o horário do mais antigo (abre **Devoluções**).
+- **Em aberto:** empréstimos ainda não devolvidos e o horário do mais antigo (abre **Devoluções**). Agendamentos não entram nesse número; quando há agendamentos para hoje, o cartão mostra também **N agendamento(s) hoje**.
 - **Disponíveis:** unidades disponíveis do total, quantas estão emprestadas e a porcentagem livre (abre o **Dashboard**).
 - **Ocorrências:** ocorrências abertas, separadas em manutenção, quebrados e observações (abre **Controle**).
 - **Estoque:** modelos **Esgotados** ou com **Estoque baixo**, pelas mesmas regras do **Dashboard**; mostra **Tudo certo** quando não há nenhum (abre o **Dashboard**).
@@ -66,21 +66,28 @@ O ponto colorido de cada indicador mostra a situação: verde quando está tudo 
 O painel aparece no menu como **Novo empréstimo** e tem o título **Registrar Empréstimo**. Requer **Editor** ou **Administrador**; convidados veem o aviso "Faça login para registrar alterações." antes do formulário.
 
 1. Em **Dados do Empréstimo**, preencha **Solicitante** (para usuários logados, o campo sugere nomes já usados) e selecione o **Responsável**.
-2. Confira **Data e Hora**. O campo é preenchido automaticamente; clique nele se precisar selecionar outra data de retirada.
-3. Em **Itens do Empréstimo**, escolha **Equipamento**, informe **Qtd.** e clique em **Adicionar**. Repita para cada modelo; os itens aparecem em **Itens adicionados** como chips compactos, com o ícone do equipamento e só o modelo em uma linha (a categoria aparece ao passar o mouse e para leitores de tela).
-4. Se necessário, preencha **Observação (opcional)**.
-5. Clique em **Registrar Empréstimo**.
+2. Confira **Data e Hora** (início da retirada). O campo é preenchido automaticamente; clique nele se precisar escolher outra data ou horário.
+3. Confira **Devolução prevista**. Em um empréstimo imediato, o padrão é o fim do dia atual; em um agendamento, o padrão é o início da retirada mais 1 hora. O campo é obrigatório para agendamentos, precisa ser posterior à retirada, e a janela entre a retirada e a devolução prevista não pode passar de 15 dias.
+4. Em **Itens do Empréstimo**, escolha **Equipamento**, informe **Qtd.** e clique em **Adicionar**. Repita para cada modelo; os itens aparecem em **Itens adicionados** como chips compactos, com o ícone do equipamento e só o modelo em uma linha (a categoria aparece ao passar o mouse e para leitores de tela).
+5. Se necessário, preencha **Observação (opcional)**.
+6. Clique em **Registrar Empréstimo**. Quando **Data e Hora** está no futuro, o botão mostra **Agendar**.
 
-Na lista **Equipamento**, cada modelo mostra "(N disponíveis)" e os indisponíveis ficam desabilitados; a **Qtd.** é limitada ao disponível, com mensagem de erro no próprio campo. A **Observação** tem contador de caracteres (0/250).
+**Agendamentos:** uma retirada com data e hora mais de 5 minutos no futuro vira um **agendamento** (status **Agendado**), com até 15 dias de antecedência. Ao enviar uma data futura, o sistema abre a janela **Gostaria de agendar o uso desses equipamentos?**, com **Sim** e **Não**; **Não** volta ao formulário.
 
-O formulário exige pelo menos um item. A UI e o backend verificam a quantidade disponível em uma operação transacional; se o estoque não comportar a quantidade, o empréstimo não é registrado. Ao concluir, a quantidade disponível é reduzida.
+**Sem unidades disponíveis agora:** se o pedido não cabe no estoque disponível neste momento, mas cabe na capacidade total do modelo, a janela **O número de equipamentos solicitado não está disponível. Gostaria de realizar um agendamento?** oferece agendar, já com o próximo horário livre preenchido. Acima da capacidade total, aparece o erro habitual de estoque insuficiente.
 
-Enquanto **Data e Hora** não for alterada, o campo acompanha o relógio do servidor e o registro usa a hora do servidor no momento do salvamento. Se você alterar o campo, o horário escolhido é mantido. Datas com mais de 5 minutos no futuro não são aceitas.
+Na lista **Equipamento**, cada modelo mostra "(N disponíveis)" no momento; um modelo só fica desabilitado quando a capacidade total dele já está toda usada. A **Qtd.** pode chegar até a capacidade do modelo (total, menos os quebrados e as manutenções abertas); quando passa do que está livre agora, um aviso "só X disponíveis agora" aparece no próprio campo. A **Observação** tem contador de caracteres (0/250).
+
+O formulário exige pelo menos um item. A UI e o backend verificam a disponibilidade em uma operação transacional; se a quantidade não couber na janela pedida, o registro não é criado. Ao concluir uma retirada imediata, a quantidade disponível é reduzida.
+
+**Reservas por janela de horário:** cada agendamento reserva unidades entre a retirada e a devolução prevista. Agendamentos que não se sobrepõem dividem as mesmas unidades: com 20 notebooks, 15 reservados das 10:30 às 11:20 e outros 15 das 14:00 às 15:00 cabem juntos. Empréstimos abertos ocupam unidades até a devolução prevista; empréstimos atrasados, ou antigos sem devolução prevista, continuam ocupando até a devolução. Unidades reservadas não podem ser emprestadas imediatamente a outra pessoa. Um agendamento não altera o contador **Disponíveis** do estoque; só a confirmação da retirada altera.
+
+Enquanto **Data e Hora** não for alterada, o campo acompanha o relógio do servidor e o registro usa a hora do servidor no momento do salvamento. Se você alterar o campo, o horário escolhido é mantido. Datas com mais de 5 minutos no futuro viram agendamento, desde que dentro do prazo de 15 dias.
 
 ## 5. Devoluções
 
-1. Abra **Devoluções**. A lista mostra os empréstimos com status aberto.
-2. Clique em uma linha/cartão para abrir **Detalhes do Empréstimo**. Confira **Responsável**, **Solicitante**, itens e eventual observação.
+1. Abra **Devoluções**. A tela tem duas abas, cada uma com seu contador: **Em andamento** (empréstimos abertos) e **Agendamentos** (veja a subseção abaixo).
+2. Na aba **Em andamento**, clique em uma linha/cartão para abrir **Detalhes do Empréstimo**. Confira **Responsável**, **Solicitante**, itens e eventual observação.
 3. Para corrigir os itens antes da devolução, use **Editar itens**. Selecione **Equipamento**, informe **Quantidade**, clique em **Adicionar**, remova itens quando necessário e conclua com **Salvar Alterações**. Use **Cancelar** para abandonar a edição. Deve permanecer pelo menos um item.
 4. Clique em **Devolver** na lista ou em **Confirmar Devolução** no painel.
 5. Revise o modal **Confirmar Devolução** e clique em **Confirmar Devolução**; **Cancelar** fecha sem concluir.
@@ -91,17 +98,33 @@ Os itens retornam à quantidade disponível depois da confirmação. **Data e Ho
 
 Se **Data e Hora da Devolução** não for alterada, o registro usa a hora do servidor no momento da confirmação. A devolução não pode ser anterior à retirada do empréstimo, e datas com mais de 5 minutos no futuro não são aceitas.
 
+### Agendamentos
+
+Na aba **Agendamentos**, cada cartão mostra a janela agendada e um selo de situação:
+
+- **Hoje 10:30:** a retirada está marcada para hoje, no horário mostrado (o selo acompanha o horário de início).
+- **Agendado:** a retirada ainda está no futuro.
+- **Atrasado:** o horário de início já passou e a retirada ainda não foi confirmada.
+- **Expirado:** a janela agendada já terminou.
+
+Ações:
+
+1. **Confirmar retirada:** habilitada a partir de 30 minutos antes do início e até o fim da janela. Registra a hora real da retirada; o histórico mostra, por exemplo, "Agendado para 10:30 · Retirado às 10:50". O agendamento passa a ser um empréstimo em andamento e as unidades saem do contador **Disponíveis**. Se alguma unidade ainda não foi devolvida, a confirmação falha e a mensagem lista os empréstimos pendentes, com solicitante e devolução prevista.
+2. **Excluir agendamento:** para quando a pessoa não comparece. Remove o agendamento de forma definitiva; qualquer usuário autenticado pode fazê-lo.
+
+Agendamentos não podem ser editados: para mudar um, exclua e crie novamente. Um agendamento também não pode ser devolvido; é preciso confirmar a retirada antes.
+
 ## 6. Dashboard
 
 O **Dashboard** apresenta os cartões **Total de equipamentos**, **Disponíveis**, **Emprestados**, **Em Manutenção** e **Quebrados**, sem texto de porcentagem. No celular, os cartões são mais estreitos: **Total** fica em uma linha própria e os demais em grade 2×2.
 
 - Na aba **Estoque**, consulte os totais por categoria; o selo **Esgotado** aparece quando não há unidade disponível e **Estoque baixo** quando 10% ou menos do total (no mínimo 1 unidade) está disponível. Clique em uma linha para abrir os detalhes somente leitura da categoria.
-- Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível. Usuários autenticados também veem a autoria (quem registrou e quem devolveu); Convidados nunca recebem esses dados. Registros que já existiam antes de a autoria ser registrada não mostram a linha (em vez de "Registrado por —"). Os detalhes do estoque mostram quem cadastrou e alterou o equipamento. No celular, os cartões do Histórico têm hierarquia mais clara (título, status e detalhes separados, como nos cartões de **Estoque**). Na primeira carga, o Dashboard exibe esqueletos de carregamento e contadores "—"; se a carga falhar, aparece um erro no painel com **Tentar novamente**.
+- Na aba **Histórico**, veja empréstimos registrados, datas, itens e status. Agendamentos aparecem com o selo **Agendado**; o detalhe mostra a retirada agendada e a retirada real, além da devolução prevista. No Modo Convidado, os campos de identificação/observação ficam mascarados ou indisponíveis; usuários autenticados veem os dados conforme sua autorização. Clique em **Detalhes** quando disponível. Usuários autenticados também veem a autoria (quem registrou e quem devolveu); Convidados nunca recebem esses dados. Registros que já existiam antes de a autoria ser registrada não mostram a linha (em vez de "Registrado por —"). Os detalhes do estoque mostram quem cadastrou e alterou o equipamento. No celular, os cartões do Histórico têm hierarquia mais clara (título, status e detalhes separados, como nos cartões de **Estoque**). Na primeira carga, o Dashboard exibe esqueletos de carregamento e contadores "—"; se a carga falhar, aparece um erro no painel com **Tentar novamente**.
 - Use o campo **Buscar por informações...**. Em **Estoque**, a busca considera a categoria; em **Histórico**, considera número, solicitante e responsável.
-- **Filtros do Histórico:** o Histórico carrega 50 empréstimos por vez; use **Carregar mais** e acompanhe **Mostrando N empréstimos** (vale também para Convidados). Os chips de status (**Todos**, **Abertos**, **Devolvidos**) e de período (**Hoje**, **7 dias**, **Este mês**, **Tudo**) combinam com a busca, que para usuários logados é feita no servidor sobre todo o histórico. **Limpar filtros** volta à visão completa.
+- **Filtros do Histórico:** o Histórico carrega 50 empréstimos por vez; use **Carregar mais** e acompanhe **Mostrando N empréstimos** (vale também para Convidados). Os chips de status (**Todos**, **Abertos**, **Devolvidos**, **Agendados**) e de período (**Hoje**, **7 dias**, **Este mês**, **Tudo**) combinam com a busca, que para usuários logados é feita no servidor sobre todo o histórico. **Limpar filtros** volta à visão completa.
 - Na aba **Estoque**, o botão **Exportar** baixa imediatamente um CSV do estoque atual. Na aba **Histórico**, **Exportar** leva ao painel **Exportar**, onde há mais opções.
 
-O estoque exibido é derivado de empréstimos abertos e ocorrências de manutenção/quebra. Consulte **Controle** para registrar ou resolver uma ocorrência antes de interpretar os números.
+O estoque exibido é derivado de empréstimos abertos e ocorrências de manutenção/quebra; agendamentos só passam a contar quando a retirada é confirmada. Consulte **Controle** para registrar ou resolver uma ocorrência antes de interpretar os números.
 
 ## 7. Controle
 
@@ -115,7 +138,7 @@ O painel **Controle** separa os registros nas abas **Observação**, **Manutenç
 
 As abas e os menus de **Controle** funcionam pelo teclado: setas e Home/End para navegar e Esc para fechar.
 
-**Observação** é uma anotação e não altera o estoque. **Manutenção** retira a quantidade afetada de disponíveis até a resolução. **Quebrado** também retira de disponíveis e incrementa a contagem de quebrados.
+**Observação** é uma anotação e não altera o estoque. **Manutenção** retira a quantidade afetada de disponíveis até a resolução. **Quebrado** também retira de disponíveis e incrementa a contagem de quebrados. Registrar uma **Manutenção** ou um **Quebrado** nunca falha por causa de agendamentos: se as unidades afetadas fazem falta a agendamentos futuros, o sistema mostra um aviso com a lista dos agendamentos que não cabem mais.
 
 ### Resolver e excluir
 
@@ -129,7 +152,7 @@ Criar, editar e resolver exigem autenticação (**Editor** ou **Administrador**)
 
 **Cadastros** é administrativo. Abra um cartão, preencha os campos e clique em **Salvar**. A janela de **Cadastros** tem uma única rolagem (no celular ocupa a tela toda) e não abre outro modal por cima. **Editar**, **Ajustar total**, **Renomear**, **Redefinir senha** e **Cartão RFID** abrem uma tela de edição dentro da mesma janela, com **Voltar**, um título e o nome do registro; **Cancelar** e **Salvar** ficam fixos no rodapé (acima do teclado do celular). **Voltar**, **Cancelar**, Esc ou salvar retornam à lista, mantendo a busca e a posição de rolagem. A lista **Cadastrados** mostra os registros carregados pela API, todos no mesmo formato: avatar ou ícone à esquerda, nome em destaque com os selos ao lado, uma linha com a informação secundária (e-mail, categoria e disponibilidade ou cargo), a autoria (**Criado por**, **Cadastrado por**, **Atualizado por**, só quando houver autor registrado) e as ações. Na lista de **Usuários**, o selo mostra o nível (**Administrador** ou **Editor**), o e-mail fica sempre em uma linha (se não couber, termina em reticências e aparece inteiro ao passar o mouse) e as ações ficam na linha de baixo; a lista não rola para os lados no celular. Equipamentos mostram o ícone da categoria.
 
-- **Equipamentos:** **Categoria**, **Modelo** e **Quantidade**. **Ajustar total** altera a quantidade total de um modelo, sem poder ficar abaixo dos itens em uso.
+- **Equipamentos:** **Categoria**, **Modelo** e **Quantidade**. **Ajustar total** altera a quantidade total de um modelo, sem poder ficar abaixo dos itens em uso. Reduzir o total ou o número de quebrados também é recusado quando deixaria agendamentos futuros sem unidades suficientes.
 - **Responsáveis:** **Nome** e **Cargo**. Podem ser editados, desativados e reativados; responsáveis inativos não aparecem no formulário de **Registrar Empréstimo**, mas os empréstimos antigos continuam no histórico.
 - **Usuários:** **Nome**, **E-mail / Login** (deve ser um e-mail), **Senha** e **Nível de acesso** (**Administrador** ou **Editor**). Nome, nível de acesso e login podem ser editados, e o usuário pode ser desativado ou reativado (com confirmação); usuários desativados mostram o selo **Inativo**, e logins que não são e-mails válidos mostram um aviso. Você não pode desativar nem rebaixar a própria conta, nem remover o último administrador ativo. A recuperação de senha só funciona se a caixa de e-mail do login realmente existir.
 - **Categorias:** **Nome da categoria**; é possível renomear uma categoria existente (o nome não pode repetir o de outra).
@@ -157,6 +180,8 @@ Depois:
 
 Com login, as exportações incluem **Registrado por** e **Devolvido por** (empréstimos) e **Criada por** (ocorrências).
 
+Na exportação de **Empréstimos e devoluções**, as colunas **Agendado para** e **Devolução prevista** foram incluídas, e o texto do status é traduzido.
+
 Formatos confirmados: `.csv`, `.xlsx` (Excel) e `.pdf`. O CSV e o Excel usam a tabela principal e, quando aplicável, seções de ocorrências; o PDF gera o relatório equivalente. Se nenhum registro atender aos filtros, a exportação é recusada com uma mensagem em vez de criar um arquivo vazio.
 
 ## 10. Configurações
@@ -175,7 +200,7 @@ Em **Configurações → Sessão**, o Editor pode ativar **Encerrar sessão por 
 
 ### Notificações push para administradores
 
-Administradores recebem uma notificação do sistema, no computador ou no celular, sempre que outro usuário registra um **empréstimo**, uma **devolução** ou uma **ocorrência**. A notificação chega mesmo com o app fechado ou com o celular bloqueado. Ela é enviada apenas a contas **Administrador** ativas que ativaram o recurso naquele dispositivo; contas **Editor** nunca recebem, e quem registrou a operação não recebe o próprio alerta.
+Administradores recebem uma notificação do sistema, no computador ou no celular, sempre que outro usuário registra um **empréstimo**, um **agendamento**, uma **devolução** ou uma **ocorrência**. Agendamentos seguem a preferência de **empréstimos**. A notificação chega mesmo com o app fechado ou com o celular bloqueado. Ela é enviada apenas a contas **Administrador** ativas que ativaram o recurso naquele dispositivo; contas **Editor** nunca recebem, e quem registrou a operação não recebe o próprio alerta.
 
 Para ativar:
 
@@ -194,7 +219,7 @@ Para desativar neste dispositivo, clique em **Desativar neste dispositivo**.
 - **Brave:** ative **Usar serviços do Google para mensagens push** em `brave://settings/privacy`.
 - **Só aparece dentro do app:** a notificação é do sistema e aparece mesmo com a aba do eduAssets em segundo plano, com outro programa à frente ou com a aba fechada (navegador aberto). Se ela só aparece dentro do app, confira o sistema operacional: no Windows, **Configurações › Sistema › Notificações** (notificações ativadas, navegador permitido e **Não incomodar** desligado); no macOS, **Ajustes do Sistema › Notificações › o navegador**.
 
-**Conteúdo:** o título é **Novo empréstimo**, **Devolução registrada** ou **Nova ocorrência**. Empréstimos e devoluções mostram o solicitante, os equipamentos e quem registrou, por exemplo: *João Silva · Notebook Dell ×2, Projetor Epson ×1 · por Ana Souza*. Ocorrências mostram os equipamentos, o tipo (**Observação**, **Manutenção** ou **Quebrado**) e quem registrou. Os equipamentos aparecem como "Categoria Modelo", até três itens e depois "e mais N". A notificação nunca mostra observações, descrições, problemas, medidas tomadas nem números de patrimônio, e um pedido de ocorrência gera uma única notificação, mesmo com vários números de patrimônio. O texto está em português nesta versão e pode aparecer na tela de bloqueio. Ao tocar em uma notificação de empréstimo ou devolução, o app abre o **Dashboard** na aba **Histórico**; uma notificação de ocorrência abre o painel **Controle**.
+**Conteúdo:** o título é **Novo empréstimo**, **Novo agendamento**, **Devolução registrada** ou **Nova ocorrência**. Empréstimos e devoluções mostram o solicitante, os equipamentos e quem registrou, por exemplo: *João Silva · Notebook Dell ×2, Projetor Epson ×1 · por Ana Souza*. Ocorrências mostram os equipamentos, o tipo (**Observação**, **Manutenção** ou **Quebrado**) e quem registrou. Os equipamentos aparecem como "Categoria Modelo", até três itens e depois "e mais N". A notificação nunca mostra observações, descrições, problemas, medidas tomadas nem números de patrimônio, e um pedido de ocorrência gera uma única notificação, mesmo com vários números de patrimônio. O texto está em português nesta versão e pode aparecer na tela de bloqueio. Ao tocar em uma notificação de empréstimo ou devolução, o app abre o **Dashboard** na aba **Histórico**; uma notificação de agendamento abre o painel **Devoluções**; uma notificação de ocorrência abre o painel **Controle**.
 
 **Som e alerta:** a notificação do sistema usa o som e a vibração padrão do dispositivo, pois os navegadores não permitem som personalizado. Com o app aberto e visível, ele também exibe um aviso destacado e toca um som próprio, que pode ser desligado no interruptor **Som dentro do app**. No computador a notificação permanece até ser dispensada; no Android, ela vibra.
 
@@ -219,7 +244,7 @@ O schema atual relaciona:
 - **Categoria** e **Equipamento** (modelo, total disponível e quebrado);
 - **Responsável**;
 - **Usuário**, com nível **Administrador** ou **Editor** e token RFID opcional;
-- **Empréstimo** e seus itens, com status aberto/devolvido;
+- **Empréstimo** e seus itens, com status agendado/aberto/devolvido;
 - **Ocorrência**, com tipo observação/manutenção/quebrado e status aberto/resolvido.
 
 Quem prepara uma instância deve seguir o README e preencher valores próprios no `.env`: PostgreSQL em `DATABASE_URL`, `DIRECT_URL` quando necessário, `JWT_SECRET` forte (mínimo de 32 caracteres), `CORS_ORIGIN` fora do modo local e `VITE_API_BASE_URL` no build que não usa o proxy do Vite. Nunca coloque senhas, tokens ou segredos reais neste manual ou no repositório.
@@ -227,6 +252,7 @@ Quem prepara uma instância deve seguir o README e preencher valores próprios n
 ## 14. Limitações confirmadas
 
 - **Data de devolução:** timestamp offset-aware selecionado é persistido; clientes antigos podem omitir o campo e usar o horário do servidor. Alteração da data não reescreve o histórico dos registros já existentes.
+- **Agendamentos:** não podem ser editados (exclua e crie novamente), não podem ser devolvidos antes da confirmação da retirada e só são aceitos com até 15 dias de antecedência.
 - **RFID:** é opcional e depende de configuração (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), rede/loopback, ponte, dependências e hardware compatível. A mesma LAN, sozinha, não garante funcionamento.
 - **Implantação:** a instância oficial roda em `app.eduassets.tech` com a API em `api.eduassets.tech` (registros datados no [Guia de Hospedagem](Hospedagem.md)). Backup criptografado diário com retenção, monitoramento externo e ensaio de restauração estão descritos no mesmo guia; a ativação de cada item na VM é registrada pelo operador.
 - **Senha:** cada usuário altera a própria em **Segurança** e pode recuperá-la por e-mail em **Esqueci minha senha** (quando a instalação tem e-mail configurado); o administrador também redefine senhas em **Cadastros → Usuários**.
@@ -239,7 +265,7 @@ Quem prepara uma instância deve seguir o README e preencher valores próprios n
 
 **Não consigo criar, editar ou devolver.** Confira o papel em **Meu Perfil**, confirme que a sessão ainda está ativa e tente novamente. **Convidado** é somente leitura.
 
-**O empréstimo é recusado.** Verifique **Disponíveis** no **Dashboard**; itens já emprestados ou em **Manutenção** não podem ser emprestados. Confirme também que há pelo menos um item no formulário.
+**O empréstimo é recusado.** Verifique **Disponíveis** no **Dashboard**; itens já emprestados ou em **Manutenção** não podem ser emprestados agora. Se o pedido não cabe no estoque livre neste momento, o formulário oferece agendar no próximo horário livre; se passa da capacidade total do modelo, o empréstimo é recusado por estoque insuficiente. Confirme também que há pelo menos um item no formulário.
 
 **O cartão RFID não funciona.** Confirme as duas flags, o segredo compartilhado, o processo da ponte, a conexão loopback, o leitor e o cartão vinculado. Enquanto isso, use login por senha.
 

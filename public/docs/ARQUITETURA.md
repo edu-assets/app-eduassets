@@ -47,7 +47,7 @@ O código-fonte do frontend é mantido separadamente no repositório `edu-assets
 
 As camadas observadas do frontend são:
 
-- **`core/`**: infraestrutura como cliente/configuração da API, stores de token e domínio, autenticação/timeout de sessão, layout, UI, utilitários HTML e listener RFID.
+- **`core/`**: infraestrutura como cliente/configuração da API, stores de token e domínio, autenticação/timeout de sessão, layout, UI, utilitários HTML, espelho cliente da disponibilidade por janela (`utils/estoque.ts` e `state/disponibilidade.ts`, usado pelo formulário de **Novo empréstimo**) e listener RFID.
 - **`features/`**: módulos de tela (início, autenticação, dashboard, empréstimos/devoluções, controle de equipamentos e cadastros, exportação, configuração, segurança, perfil e documentação) compostos por `main.ts`. O resumo **Operações agora** do Início (`features/inicio/resumo.ts`) é calculado no cliente a partir dos stores de equipamentos, empréstimos e ocorrências já carregados, sem consulta adicional à API.
 - **`shared/`**: componentes e helpers de DOM reutilizados pelas features, entre eles os avisos de formulário inline (`shared/forms/fieldErrors.ts`, instalado no boot: intercepta o evento `invalid` e substitui o balão nativo do navegador por uma mensagem tematizada abaixo do campo) e o estado de carregamento de botões (`shared/dom/buttonLoading.ts`, que sobrepõe o indicador sem alterar o tamanho do botão). `shared/components/kitVisual.ts` aponta para o kit visual em `public/assets/kit` (ilustrações dos estados vazios, de erro e da 404, ícones de equipamento escolhidos pelo nome da categoria e avatares estáveis por id de usuário). A autoria (`shared/components/autoria.ts`) omite a linha quando o autor é nulo (registro anterior à autoria); só as exportações mantêm "—" na coluna.
 - O ponto de entrada não inicializa framework nem biblioteca global de estado. O estado de domínio é exposto por stores com funções `get...`, carga/mutação e `subscribe` para equipamentos, empréstimos, ocorrências, responsáveis, tema e i18n.
@@ -99,6 +99,10 @@ Os routers montados são `/auth`, `/categorias`, `/equipamentos`, `/responsaveis
 O datasource Prisma é PostgreSQL; `DATABASE_URL` é obrigatório fora de `NODE_ENV=test` e `DIRECT_URL` é opcional, com fallback a `DATABASE_URL` definido em `prisma.config.ts`. O schema contém `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo` e `Ocorrencia`, além dos enums de acesso/status. A migration `20261022090000_stock_checks_and_fk_indexes` instala constraints SQL `CHECK` para quantidades e índices de disponibilidade/FKs; a migration `20261022110000_user_session_version` adiciona `Usuario.sessionVersion`. As ações de FK no SQL inicial são `ON DELETE RESTRICT` e `ON UPDATE CASCADE`; consulte migrations junto com o schema Prisma. A credencial RFID é armazenada somente como hash único opcional em `Usuario`.
 
 Não há políticas RLS no schema Prisma. A autorização é implementada no código da aplicação e nos middlewares de rota; o schema não deve ser interpretado como isolamento por linha.
+
+### Disponibilidade e agendamentos
+
+`backend/src/services/disponibilidade.service.ts` concentra a regra de reserva por janela de horário. Um pedido, imediato ou agendado, só passa se, em todo instante de `[início, devolução prevista)`, as unidades ocupadas somadas ao pedido não ultrapassarem a capacidade do modelo (total − quebrados − manutenções abertas). A verificação é uma varredura de linha do tempo (sweep-line) sobre as janelas dos empréstimos abertos, que ocupam unidades até a devolução prevista, e dos agendamentos. As linhas de `Equipamento` envolvidas são travadas em ordem crescente de `id`. A mesma regra é usada na criação de empréstimos e agendamentos, na alteração de totais e quebrados (`quantidade_reservada`), na confirmação de retirada e na resposta de `POST /ocorrencias` (`agendamentosAfetados`).
 
 ## Bridge RFID e comportamento WebSocket
 

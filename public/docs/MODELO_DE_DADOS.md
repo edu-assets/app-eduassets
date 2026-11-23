@@ -72,7 +72,9 @@ O datasource do Prisma é PostgreSQL. Os campos escalares são não nulos, salvo
 | `solicitanteNome` | `String` | Não | — |
 | `responsavelId` | `Int` | Não | Escalar de chave estrangeira para `Responsavel.id` |
 | `status` | `StatusEmprestimo` | Não | `@default(ABERTO)` |
-| `dataRetirada` | `DateTime` | Não | Sem padrão no schema |
+| `dataRetirada` | `DateTime` | Não | Sem padrão no schema; enquanto `AGENDADO`, igual a `dataAgendada`; após a confirmação da retirada, a hora real |
+| `dataAgendada` | `DateTime` | Sim | Início agendado da retirada; preenchido em agendamentos e mantido após a confirmação. Índice composto `(status, dataAgendada)` |
+| `dataPrevistaDevolucao` | `DateTime` | Sim | Devolução prevista, que também é o fim da janela reservada. CHECK: `NULL` ou posterior a `dataRetirada`; `AGENDADO` exige preenchimento |
 | `dataDevolucao` | `DateTime` | Sim | — |
 | `observacao` | `String` | Sim | — |
 | `createdAt` | `DateTime` | Não | `@default(now())` |
@@ -146,7 +148,7 @@ Criada pela migration `20261113090000_push_subscriptions`, com índice em `usuar
 | Enum | Valores |
 |---|---|
 | `NivelAcesso` | `ADMINISTRADOR`, `EDITOR` |
-| `StatusEmprestimo` | `ABERTO`, `DEVOLVIDO` |
+| `StatusEmprestimo` | `AGENDADO`, `ABERTO`, `DEVOLVIDO` |
 | `TipoOcorrencia` | `OBSERVACAO`, `MANUTENCAO`, `QUEBRADO` |
 | `StatusOcorrencia` | `ABERTO`, `RESOLVIDO` |
 
@@ -170,7 +172,7 @@ As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.
 - `createdAt` de `Equipamento`, `Usuario`, `Emprestimo` e `Ocorrencia` usa `@default(now())`.
 - `Equipamento.updatedAt` usa `@updatedAt` do Prisma; não é declarado como campo nulo fornecido pelo usuário.
 - As declarações únicas são `Categoria.nome`, `Usuario.login`, `Usuario.rfidTokenHash` (nulo) e `PushSubscription.endpoint`. Elas geram enforcement/índices de unicidade para esses campos.
-- Os índices secundários explícitos cobrem `Emprestimo.status`, `Ocorrencia.status`, quantidades disponível/quebrada do equipamento, `ItemEmprestimo.emprestimoId`, o composto `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)` e `PushSubscription.usuarioId`. `Emprestimo(dataRetirada, id)` sustenta a paginação do histórico (ordem `dataRetirada` e `id` decrescentes).
+- Os índices secundários explícitos cobrem `Emprestimo.status`, `Ocorrencia.status`, quantidades disponível/quebrada do equipamento, `ItemEmprestimo.emprestimoId`, o composto `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)` e `PushSubscription.usuarioId`. `Emprestimo(dataRetirada, id)` sustenta a paginação do histórico (ordem `dataRetirada` e `id` decrescentes). `Emprestimo(status, dataAgendada)`, criado pela migration `20261123120000_loan_scheduling`, sustenta a busca de agendamentos.
 - `ItemEmprestimo.emprestimoId` e `Ocorrencia.equipamentoId` agora têm índices explícitos para as consultas e referências usadas; o primeiro também integra índice composto para localizar empréstimos abertos por equipamento.
 
 ## Regras de negócio verificadas nos serviços do backend
@@ -178,12 +180,24 @@ As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.
 ### Empréstimos e estoque
 
 - `criarEmprestimo` recebe `dataRetirada` opcional na entrada do serviço; quando omitida, o serviço grava o instante atual. O campo do Prisma continua obrigatório e sem padrão no schema.
-- A criação do empréstimo ocorre em transação. As quantidades dos itens são agrupadas por `equipamentoId`, o estoque disponível é validado, o empréstimo e seus itens são criados e o estoque disponível é decrementado atomicamente.
+- A criação do empréstimo ocorre em transação. As quantidades dos itens são agrupadas por `equipamentoId`, a disponibilidade é validada, o empréstimo e seus itens são criados e, em retirada imediata, o estoque disponível é decrementado atomicamente. Um agendamento valida a janela de reserva e não altera `quantidadeDisponivel`.
 - A validação considera equipamento inexistente como estoque insuficiente e lança `EstoqueInsuficienteError` quando alguma quantidade solicitada excede o estoque efetivo.
 - `atualizarItensEmprestimo` só edita empréstimo com status `ABERTO`. Ela devolve as quantidades antigas ao estoque efetivo, substitui as linhas de itens e decrementa as novas quantidades agrupadas em uma única transação.
-- `devolverEmprestimo` muda um empréstimo aberto para `DEVOLVIDO`, grava o timestamp offset-aware validado enviado pela UI (ou o instante atual quando clientes antigos omitem o campo) e incrementa o estoque disponível para cada item. Uma segunda devolução é rejeitada; a linha do empréstimo e o histórico dos itens são mantidos, não excluídos.
+- `devolverEmprestimo` muda um empréstimo aberto para `DEVOLVIDO`, grava o timestamp offset-aware validado enviado pela UI (ou o instante atual quando clientes antigos omitem o campo) e incrementa o estoque disponível para cada item. Uma segunda devolução é rejeitada; um agendamento (`AGENDADO`) também é rejeitado (`backend.emprestimos.agendamento_nao_confirmado`), pois precisa ser confirmado antes. A linha do empréstimo e o histórico dos itens são mantidos, não excluídos.
 - Os decrementos de estoque usam update atômico com condição `quantidadeDisponivel >= quantidade`; uma falha de concorrência aborta a transação em vez de reduzir o estoque abaixo da quantidade verificada.
-- Atualizações administrativas de equipamento bloqueiam a linha, incluem quantidades em empréstimos ativos e ocorrências abertas de manutenção no cálculo de capacidade e rejeitam combinações de total/disponível/quebrado abaixo do estoque comprometido. Ocorrências abertas de quebra também devem continuar representadas em `quantidadeQuebrada`.
+- Atualizações administrativas de equipamento bloqueiam a linha, incluem quantidades em empréstimos ativos e ocorrências abertas de manutenção no cálculo de capacidade e rejeitam combinações de total/disponível/quebrado abaixo do estoque comprometido, inclusive reservas de agendamentos futuros (`409` `backend.equipamentos.quantidade_reservada`). Ocorrências abertas de quebra também devem continuar representadas em `quantidadeQuebrada`.
+
+### Agendamentos e reservas
+
+- Um empréstimo cuja `dataRetirada` esteja mais de 5 minutos no futuro é criado com `status = AGENDADO`, a no máximo 15 dias de antecedência. `dataAgendada` recebe o início; `dataRetirada` recebe o mesmo valor até a confirmação.
+- As reservas são avaliadas por janela de horário `[início, dataPrevistaDevolucao)`. Janelas que não se sobrepõem compartilham as mesmas unidades: com 20 notebooks, 15 reservados das 10:30 às 11:20 e outros 15 das 14:00 às 15:00 cabem juntos.
+- A capacidade de um modelo é `quantidadeTotal − quantidadeQuebrada − manutenções abertas`. A verificação usa uma varredura por linha do tempo (sweep-line) sobre as janelas e trava as linhas de equipamento em ordem de `id`.
+- Um empréstimo `ABERTO` ocupa unidades até `dataPrevistaDevolucao`. Empréstimo atrasado, ou antigo sem `dataPrevistaDevolucao`, continua ocupando unidades até ser devolvido.
+- Unidades reservadas não podem ser emprestadas imediatamente a outra pessoa.
+- Agendamentos não alteram `quantidadeDisponivel`. A confirmação da retirada (`PATCH /emprestimos/:id/confirmar-retirada`) é o que move o empréstimo para `ABERTO`, grava a hora real em `dataRetirada` e passa as unidades ao contador de disponíveis.
+- A confirmação é permitida de 30 minutos antes do início até o fim da janela (`backend.emprestimos.confirmacao_fora_da_janela` fora dela) e falha com `backend.emprestimos.unidades_nao_devolvidas` enquanto unidades necessárias ainda estiverem ocupadas por empréstimos pendentes; o payload lista esses empréstimos.
+- `DELETE /emprestimos/:id` remove apenas agendamentos (`backend.emprestimos.nao_excluivel` para os demais). Agendamentos não podem ser editados: exclua e crie novamente.
+- Registrar manutenção ou quebra nunca falha por causa de agendamentos; quando as unidades afetadas fazem falta a agendamentos futuros, a resposta traz `agendamentosAfetados`.
 
 ### Ocorrências
 
@@ -203,7 +217,7 @@ As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.
 
 ### Notificações push
 
-- Empréstimos, devoluções e ocorrências disparam notificações somente depois do commit da transação; o envio nunca atrasa nem faz falhar a operação original.
+- Empréstimos (inclusive agendamentos, pelo evento "Novo agendamento"), devoluções e ocorrências disparam notificações somente depois do commit da transação; o envio nunca atrasa nem faz falhar a operação original.
 - Destinatários: contas ativas com `nivelAcesso = ADMINISTRADOR` que têm inscrição com a preferência correspondente ativa (`notificarEmprestimo`, `notificarDevolucao` ou `notificarOcorrencia`), verificados no momento do envio. Contas `EDITOR` nunca recebem, e o usuário que registrou a operação não recebe a própria notificação.
 - Um pedido de ocorrência gera uma única notificação, mesmo com vários números de patrimônio.
 - `PUT` faz upsert da inscrição por `endpoint`; `DELETE` remove apenas a inscrição do próprio usuário. O logout remove a inscrição do dispositivo, e a troca ou a redefinição de senha remove todas as inscrições do usuário.
@@ -215,7 +229,7 @@ As respostas anônimas de `GET /equipamentos`, `/emprestimos` e `/ocorrencias` u
 
 ## Limites de constraints e auditoria
 
-As migrations `20261022090000_stock_checks_and_fk_indexes` adicionam respectivamente constraints `CHECK` para contagens/quantidades e `Usuario.sessionVersion`, padrão `0`. A versão de sessão é comparada em cada autenticação; logout/troca de senha incrementam o valor para revogar sessões anteriores. A migration de sessão preserva usuários existentes, mas exige novo login para JWTs emitidos antes dela. A migration `20260725225116_add_password_hash_to_usuario` adiciona `passwordHash` obrigatório sem valor padrão e, portanto, não pode ser aplicada a uma tabela `Usuario` já populada sem uma estratégia de backfill revisada. As checks ficam no SQL porque o schema Prisma 6 não oferece atributo `CHECK`. A migration de estoque falha em vez de reescrever linhas antigas que violem uma constraint; valide migrations em banco descartável/staging antes de produção. Checks entre tabelas para empréstimos/ocorrências abertos permanecem nos serviços transacionais. Não há `CHECK` para datas nem para consistência entre status e datas. Grants, RLS, PostgREST e outros controles externos não são representados no schema Prisma; a verificação real está registrada abaixo.
+As migrations `20261022090000_stock_checks_and_fk_indexes` adicionam respectivamente constraints `CHECK` para contagens/quantidades e `Usuario.sessionVersion`, padrão `0`. A versão de sessão é comparada em cada autenticação; logout/troca de senha incrementam o valor para revogar sessões anteriores. A migration de sessão preserva usuários existentes, mas exige novo login para JWTs emitidos antes dela. A migration `20260725225116_add_password_hash_to_usuario` adiciona `passwordHash` obrigatório sem valor padrão e, portanto, não pode ser aplicada a uma tabela `Usuario` já populada sem uma estratégia de backfill revisada. As checks ficam no SQL porque o schema Prisma 6 não oferece atributo `CHECK`. A migration de estoque falha em vez de reescrever linhas antigas que violem uma constraint; valide migrations em banco descartável/staging antes de produção. Checks entre tabelas para empréstimos/ocorrências abertos permanecem nos serviços transacionais. A migration `20261123120000_loan_scheduling` adiciona os CHECKs de agendamento: `dataPrevistaDevolucao IS NULL OR dataPrevistaDevolucao > dataRetirada`, e um empréstimo `AGENDADO` exige `dataAgendada` e `dataPrevistaDevolucao` preenchidas. Não há `CHECK` para o horizonte de 15 dias nem para outras consistências entre status e datas; essas regras ficam nos serviços transacionais. Grants, RLS, PostgREST e outros controles externos não são representados no schema Prisma; a verificação real está registrada abaixo.
 
 ## Grants e RLS verificados no banco
 

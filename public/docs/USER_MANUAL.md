@@ -13,7 +13,7 @@ The current data model tracks quantities by **category/model**. It does not prov
 | Role | Operational capabilities | Restricted actions |
 | --- | --- | --- |
 | **Guest** | View anonymized stock, categories, loan summaries and issue summaries; use searches/exports derived from those views. | Cannot create, update, resolve, return, or delete records. Requester/responsible identities, notes and issue details are omitted/masked. Responsible-party listing, **Records**, **Security** and **My Profile** require authentication. |
-| **Editor** | Sign in, register loans, edit items in open loans, confirm returns, create/edit/resolve **Control** records, and change the account's own password. | Cannot use **Records**, provision/revoke RFID, or delete issues. |
+| **Editor** | Sign in, register loans and schedules, edit items in open loans, confirm returns and scheduled pickups, delete schedules, create/edit/resolve **Control** records, and change the account's own password. | Cannot use **Records**, provision/revoke RFID, or delete issues. |
 | **Administrator** | Everything an Editor can do, plus **Records**, user and RFID-card management, and deleting **Control** records. | Still subject to stock, format, and required-field validation. |
 
 > **Important:** menus, indicators, and UI guards improve usability, but **they are not the security control**. The backend is the security boundary: it requires authentication/JWTs and enforces permissions on its routes. Do not treat a hidden button as proof of authorization.
@@ -52,7 +52,7 @@ On **Home**, use the shortcuts **New loan**, **Returns**, **Dashboard**, and **C
 
 **Operations now:** a summary with four indicators; each one opens the related panel:
 
-- **Open:** loans not yet returned and the time of the oldest one (opens **Returns**).
+- **Open:** loans not yet returned and the time of the oldest one (opens **Returns**). Schedules are not counted in this number; when there are schedules for today, the card also shows **N schedule(s) today**.
 - **Available:** available units out of the total, how many are on loan, and the free percentage (opens the **Dashboard**).
 - **Incidents:** open incidents, split into maintenance, broken, and notes (opens **Control**).
 - **Stock:** models that are **Out of stock** or **Low stock**, using the same rules as the **Dashboard**; shows **All good** when there are none (opens the **Dashboard**).
@@ -66,21 +66,28 @@ The colored dot on each indicator shows its status: green when everything is in 
 The sidebar item is **New loan** and the panel title is **Register Loan**. It requires an **Editor** or **Administrator** session; guests see the notice "Sign in to save changes." before the form.
 
 1. Under **Loan Details**, fill in **Requester** (for signed-in users the field suggests names already used) and select the **Responsible** person.
-2. Check **Date and Time**. It is filled automatically; click it to choose a different pickup date when needed.
-3. Under **Loan Items**, choose **Equipment**, enter **Qty.**, and click **Add**. Repeat for each model; items appear under **Added items** as compact chips with the equipment icon and only the model name on one line (the category appears on hover and for screen readers).
-4. Optionally fill in **Note**.
-5. Click **Register Loan**.
+2. Check **Date and Time** (the start of the pickup). It is filled automatically; click it to choose a different date or time when needed.
+3. Check **Expected return**. For an immediate loan, the default is the end of the current day; for a schedule, the default is the pickup start plus 1 hour. The field is required for schedules, must be after the pickup, and the window between the pickup and the expected return cannot exceed 15 days.
+4. Under **Loan Items**, choose **Equipment**, enter **Qty.**, and click **Add**. Repeat for each model; items appear under **Added items** as compact chips with the equipment icon and only the model name on one line (the category appears on hover and for screen readers).
+5. Optionally fill in **Note**.
+6. Click **Register Loan**. When **Date and Time** is in the future, the button reads **Schedule**.
 
-In the **Equipment** list each model shows "(N available)" and unavailable models are disabled; **Qty.** is limited to what is available, with an inline error. **Note** has a character counter (0/250).
+**Schedules:** a pickup more than 5 minutes in the future becomes a **schedule** (status **Scheduled**), up to 15 days ahead. When you submit a future date, the window **Would you like to schedule the use of this equipment?** opens, with **Yes** and **No**; **No** returns to the form.
 
-At least one item is required. Both the UI and backend validate available quantity in a transaction; if stock is insufficient, the loan is not created. When successful, available quantity is reduced.
+**No units available now:** if the request does not fit the stock available right now, but fits the model's total capacity, the window **The requested number of equipment is not available. Would you like to make a schedule?** offers to schedule it, already prefilled with the next free time slot. Above total capacity, the usual insufficient-stock error appears.
 
-While **Date and Time** is untouched, the field follows the server clock and the record uses the server time at the moment of saving. If you change the field, your chosen time is kept. Dates more than 5 minutes in the future are not accepted.
+In the **Equipment** list each model shows "(N available)" at this moment; a model is disabled only when its whole capacity is already in use. **Qty.** can go up to the model's capacity (total, minus broken units and open maintenance); when it exceeds what is free right now, an inline warning "only X available now" appears in the field. **Note** has a character counter (0/250).
+
+At least one item is required. The UI and backend check availability in a transaction; if the quantity does not fit the requested window, the record is not created. When an immediate pickup succeeds, available quantity is reduced.
+
+**Reservations by time window:** each schedule reserves units between the pickup and the expected return. Schedules that do not overlap share the same units: with 20 notebooks, 15 reserved from 10:30 to 11:20 and another 15 from 14:00 to 15:00 fit together. Open loans occupy units until their expected return; overdue loans, or older loans without an expected return, keep occupying units until they are returned. Reserved units cannot be lent immediately to someone else. A schedule does not change the **Available** stock counter; only confirming the pickup does.
+
+While **Date and Time** is untouched, the field follows the server clock and the record uses the server time at the moment of saving. If you change the field, your chosen time is kept. Dates more than 5 minutes in the future become schedules, as long as they fall within the 15-day limit.
 
 ## 5. Returns
 
-1. Open **Returns**. The list shows loans whose status is open.
-2. Click a row/card to open **Loan Details**. Review **Responsible**, **Requester**, items, and any note.
+1. Open **Returns**. The screen has two tabs, each with its own count: **In progress** (open loans) and **Schedules** (see the subsection below).
+2. On the **In progress** tab, click a row/card to open **Loan Details**. Review **Responsible**, **Requester**, items, and any note.
 3. To correct items before returning, use **Edit items**. Select **Equipment**, enter **Quantity**, click **Add**, remove items when necessary, and finish with **Save Changes**. Use **Cancel** to abandon the edit. At least one item must remain.
 4. Click **Return** in the list or **Confirm Return** in the detail panel.
 5. Review the **Confirm Return** modal and click **Confirm Return**; **Cancel** closes it without completing the return.
@@ -91,17 +98,33 @@ Items become available again after confirmation. **Return Date and Time** is fil
 
 If **Return Date and Time** is untouched, the record uses the server time at the moment of confirmation. A return cannot be earlier than the loan's checkout, and dates more than 5 minutes in the future are not accepted.
 
+### Schedules
+
+On the **Schedules** tab, each card shows the scheduled window and a status badge:
+
+- **Today 10:30:** the pickup is scheduled for today, at the time shown (the badge follows the start time).
+- **Scheduled:** the pickup is still in the future.
+- **Overdue:** the start time has passed and the pickup has not been confirmed yet.
+- **Expired:** the scheduled window has ended.
+
+Actions:
+
+1. **Confirm pickup:** enabled from 30 minutes before the start until the end of the window. It records the actual pickup time; the history shows, for example, "Scheduled for 10:30 · Picked up at 10:50". The schedule becomes an open loan and its units leave the **Available** counter. If some units have not been returned yet, the confirmation fails and the message lists the pending loans, with requester and expected return.
+2. **Delete schedule:** for no-shows. It permanently removes the schedule; any signed-in user can do this.
+
+Schedules cannot be edited: to change one, delete it and create it again. A schedule also cannot be returned; its pickup must be confirmed first.
+
 ## 6. Dashboard
 
 The **Dashboard** shows **Total equipment**, **Available**, **On Loan**, **Maintenance**, and **Broken** summary cards, without percentage text. On phones the cards are narrower: **Total** sits on its own row and the others in a 2×2 grid.
 
 - In **Stock**, review totals by category; the **Out of stock** badge appears when no unit is available and **Low stock** when 10% or less of the total (at least 1 unit) is available. Click a row for the category's read-only details.
-- In **History**, review loan dates, items, and status. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Signed-in users also see authorship (who registered and who returned); Guests never receive this data. Records that existed before authorship was recorded show no authorship line (instead of "Registered by —"). Stock details show who created and changed the equipment. On phones the History cards have a clearer hierarchy (title, status and details separated, like the **Stock** cards). On first load the Dashboard shows loading skeletons and "—" counters; if loading fails, an in-panel error with **Try again** appears. Click **Details** when available.
+- In **History**, review loan dates, items, and status. Schedules appear with the **Scheduled** badge; the detail shows the scheduled and actual pickup times, plus the expected return. Guest Mode masks/unavailable requester/responsible identities and notes; authenticated users see fields permitted by their authorization. Signed-in users also see authorship (who registered and who returned); Guests never receive this data. Records that existed before authorship was recorded show no authorship line (instead of "Registered by —"). Stock details show who created and changed the equipment. On phones the History cards have a clearer hierarchy (title, status and details separated, like the **Stock** cards). On first load the Dashboard shows loading skeletons and "—" counters; if loading fails, an in-panel error with **Try again** appears. Click **Details** when available.
 - Use **Search by information...**. In **Stock**, it searches the category; in **History**, it searches number, requester, and responsible party.
-- **History filters:** History loads 50 loans at a time; use **Load more** and follow **Showing N loans** (guests too). The status chips (**All**, **Open**, **Returned**) and period chips (**Today**, **7 days**, **This month**, **All time**) combine with search, which for signed-in users runs on the server over the whole history. **Clear filters** returns to the full view.
+- **History filters:** History loads 50 loans at a time; use **Load more** and follow **Showing N loans** (guests too). The status chips (**All**, **Open**, **Returned**, **Scheduled**) and period chips (**Today**, **7 days**, **This month**, **All time**) combine with search, which for signed-in users runs on the server over the whole history. **Clear filters** returns to the full view.
 - In **Stock**, **Export** immediately downloads a CSV of the current stock. In **History**, **Export** takes you to the **Export** panel for more options.
 
-Displayed stock is derived from open loans and maintenance/broken issues. Check **Control** before interpreting a count affected by an issue.
+Displayed stock is derived from open loans and maintenance/broken issues; schedules only count once their pickup is confirmed. Check **Control** before interpreting a count affected by an issue.
 
 ## 7. Control
 
@@ -115,7 +138,7 @@ Displayed stock is derived from open loans and maintenance/broken issues. Check 
 
 The **Control** tabs and menus work with the keyboard: arrows and Home/End to navigate and Esc to close.
 
-**Observation** is a note and does not change stock. **Maintenance** removes the affected quantity from available stock until resolution. **Broken** also removes it from available stock and increments the broken count.
+**Observation** is a note and does not change stock. **Maintenance** removes the affected quantity from available stock until resolution. **Broken** also removes it from available stock and increments the broken count. Registering a **Maintenance** or **Broken** issue never fails because of schedules: if the affected units are needed by future schedules, the system shows a warning listing the schedules that no longer fit.
 
 ### Resolve and delete
 
@@ -129,7 +152,7 @@ Creating, editing, and resolving require authentication (**Editor** or **Adminis
 
 **Records** is administrative. Open a card, fill in the fields, and click **Save**. The **Records** window has a single scroll (full-screen on phones) and never opens another modal on top of it. **Edit**, **Adjust total**, **Rename**, **Reset password** and **RFID Card** open an edit view inside the same window, with **Back**, a title and the record name; **Cancel** and **Save** stay fixed at the bottom (above the phone keyboard). **Back**, **Cancel**, Esc or saving return to the list, keeping the search and scroll position. **Registered** lists the data loaded from the API, all in the same layout: an avatar or icon on the left, the name in emphasis with its badges, a line with secondary information (email, category and availability, or role), authorship (**Created by**, **Registered by**, **Updated by**, only when an author is recorded) and the actions. In the **System Users** list, the badge shows the access level (**Administrator** or **Editor**), the email always stays on one line (when it does not fit it ends with an ellipsis and shows in full on hover) and the actions sit on the line below; the list does not scroll sideways on phones. Equipment shows its category icon.
 
-- **Equipment:** **Category**, **Model**, and **Quantity**. **Adjust total** changes a model's total quantity and cannot go below the items in use.
+- **Equipment:** **Category**, **Model**, and **Quantity**. **Adjust total** changes a model's total quantity and cannot go below the items in use. Reducing the total or the broken count is also refused when it would leave future schedules without enough units.
 - **Responsible Parties:** **Name** and **Role**. They can be edited, deactivated and reactivated; inactive responsible parties do not appear in the **Register Loan** form, but older loans stay in the history.
 - **System Users:** **Name**, **Email / Login** (must be an email), **Password**, and **Access level** (**Administrator** or **Editor**). Name, access level and login can be edited, and the user can be deactivated or reactivated (with confirmation); deactivated users show an **Inactive** badge, and logins that are not valid emails show a warning. You cannot deactivate or demote your own account, nor remove the last active administrator. Password recovery only works if the login's mailbox really exists.
 - **Equipment Categories:** **Category Name**; an existing category can be renamed (the name cannot duplicate another).
@@ -157,6 +180,8 @@ Then:
 
 When signed in, exports include **Registered by** and **Returned by** (loans) and **Created by** (occurrences).
 
+The **Loans and returns** export includes the **Scheduled for** and **Expected return** columns, and the status text is translated.
+
 Confirmed formats are `.csv`, `.xlsx` (Excel), and `.pdf`. CSV and Excel contain the main table and, when applicable, issue sections; PDF produces the equivalent report. If no record matches the filters, the application refuses the export instead of creating an empty file.
 
 ## 10. Settings
@@ -175,7 +200,7 @@ In **Settings → Session**, an Editor can turn on **Sign out after inactivity**
 
 ### Push notifications for administrators
 
-Administrators receive a system notification, on the computer or the phone, whenever another user registers a **loan**, a **return** or an **issue**. The notification arrives even with the app closed or the phone locked. It is sent only to active **Administrator** accounts that enabled the feature on that device; **Editor** accounts never receive it, and the user who registered the operation does not get their own alert.
+Administrators receive a system notification, on the computer or the phone, whenever another user registers a **loan**, a **schedule**, a **return** or an **issue**. Schedules follow the **loans** preference. The notification arrives even with the app closed or the phone locked. It is sent only to active **Administrator** accounts that enabled the feature on that device; **Editor** accounts never receive it, and the user who registered the operation does not get their own alert.
 
 To enable it:
 
@@ -194,7 +219,7 @@ To turn it off on this device, click **Turn off on this device**.
 - **Brave:** turn on **Use Google services for push messaging** in `brave://settings/privacy`.
 - **Only appears inside the app:** the notification is a system notification and appears even with the eduAssets tab in the background, another program in front, or the tab closed (browser open). If it only appears inside the app, check the operating system: on Windows, **Settings › System › Notifications** (notifications on, the browser allowed and **Do not disturb** off); on macOS, **System Settings › Notifications › the browser**.
 
-**Content:** the title is **Novo empréstimo**, **Devolução registrada** or **Nova ocorrência** (Portuguese in this version). Loan and return notifications show the requester, the equipment and who registered the operation, for example: *João Silva · Notebook Dell ×2, Projetor Epson ×1 · por Ana Souza*. Issue notifications show the equipment, the type (**Observação**, **Manutenção** or **Quebrado**) and who registered it. Equipment appears as "Category Model", up to three items and then "e mais N" ("and N more"). A notification never shows notes, descriptions, problem text, measures taken or patrimony numbers, and one issue request produces a single notification even when it has several patrimony numbers. The notification can appear on the lock screen. Tapping a loan or return notification opens the **Dashboard** on the **History** tab; tapping an issue notification opens the **Control** panel.
+**Content:** the title is **Novo empréstimo**, **Novo agendamento**, **Devolução registrada** or **Nova ocorrência** (Portuguese in this version). Loan and return notifications show the requester, the equipment and who registered the operation, for example: *João Silva · Notebook Dell ×2, Projetor Epson ×1 · por Ana Souza*. Issue notifications show the equipment, the type (**Observação**, **Manutenção** or **Quebrado**) and who registered it. Equipment appears as "Category Model", up to three items and then "e mais N" ("and N more"). A notification never shows notes, descriptions, problem text, measures taken or patrimony numbers, and one issue request produces a single notification even when it has several patrimony numbers. The notification can appear on the lock screen. Tapping a loan or return notification opens the **Dashboard** on the **History** tab; tapping a schedule notification opens the **Returns** panel; tapping an issue notification opens the **Control** panel.
 
 **Sound and alerts:** the system notification uses the device's default sound and vibration, because browsers do not allow a custom sound. With the app open and visible, it also shows a highlighted toast and plays its own short sound, which can be turned off with the **Sound inside the app** switch. On desktop the notification stays until dismissed; on Android it vibrates.
 
@@ -219,7 +244,7 @@ The current schema relates:
 - **Category** and **Equipment** (model, total, available, and broken quantities);
 - **Responsible Party**;
 - **User**, with **Administrator** or **Editor** access and an optional RFID token;
-- **Loan** and its items, with open/returned status;
+- **Loan** and its items, with scheduled/open/returned status;
 - **Issue**, with observation/maintenance/broken type and open/resolved status.
 
 Anyone preparing an installation should follow the README and provide local values in `.env`: PostgreSQL in `DATABASE_URL`, `DIRECT_URL` when needed, a strong `JWT_SECRET` (at least 32 characters), `CORS_ORIGIN` outside local mode, and `VITE_API_BASE_URL` for a build that does not use the Vite proxy. Never put real passwords, tokens, or secrets in this manual or in the repository.
@@ -227,6 +252,7 @@ Anyone preparing an installation should follow the README and provide local valu
 ## 14. Confirmed limitations
 
 - **Return date:** the selected offset-aware timestamp is persisted; older clients may omit it and use server time. Changing the field does not rewrite existing historical records.
+- **Schedules:** cannot be edited (delete and create again), cannot be returned before the pickup is confirmed, and are accepted only up to 15 days ahead.
 - **RFID:** optional and dependent on configuration (`RFID_BRIDGE_ENABLED`/`VITE_RFID_BRIDGE_ENABLED`), network/loopback reachability, bridge, dependencies, and compatible hardware. The same LAN alone does not guarantee operation.
 - **Deployment:** the official instance runs at `app.eduassets.tech` with the API at `api.eduassets.tech` (dated records in the [Hosting Guide](Hosting.md)). Daily encrypted backups with retention, external monitoring and a restore drill are described in the same guide; the operator records when each item is enabled on the VM.
 - **Password:** each user changes their own in **Security** and can recover it by email through **Forgot my password** (when the installation has email configured); administrators can also reset passwords in **Records → System Users**.
@@ -239,7 +265,7 @@ Anyone preparing an installation should follow the README and provide local valu
 
 **I cannot create, edit, or return anything.** Check the role under **My Profile**, confirm that the session is still active, and try again. **Guest Mode** is read-only.
 
-**The loan is rejected.** Check **Available** on the **Dashboard**; items already on loan or in **Maintenance** cannot be checked out. Confirm that at least one item is in the form.
+**The loan is rejected.** Check **Available** on the **Dashboard**; items already on loan or in **Maintenance** cannot be checked out right now. If the request does not fit the free stock at this moment, the form offers to schedule it at the next free time; if it exceeds the model's total capacity, the loan is rejected for insufficient stock. Confirm that at least one item is in the form.
 
 **The RFID card does not work.** Check both flags, the shared secret, bridge process, loopback connection, reader, and card link. Use password login while troubleshooting.
 

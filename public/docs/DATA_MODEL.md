@@ -72,7 +72,9 @@ The Prisma datasource is PostgreSQL. Scalar fields are non-nullable unless their
 | `solicitanteNome` | `String` | No | — |
 | `responsavelId` | `Int` | No | Foreign-key scalar to `Responsavel.id` |
 | `status` | `StatusEmprestimo` | No | `@default(ABERTO)` |
-| `dataRetirada` | `DateTime` | No | No schema default |
+| `dataRetirada` | `DateTime` | No | No schema default; while `AGENDADO`, equal to `dataAgendada`; after the pickup is confirmed, the actual pickup time |
+| `dataAgendada` | `DateTime` | Yes | Scheduled start of the pickup; set on schedules and kept after confirmation. Composite index `(status, dataAgendada)` |
+| `dataPrevistaDevolucao` | `DateTime` | Yes | Expected return, which is also the end of the reserved window. CHECK: `NULL` or later than `dataRetirada`; `AGENDADO` requires it |
 | `dataDevolucao` | `DateTime` | Yes | — |
 | `observacao` | `String` | Yes | — |
 | `createdAt` | `DateTime` | No | `@default(now())` |
@@ -146,7 +148,7 @@ Created by the `20261113090000_push_subscriptions` migration, with an index on `
 | Enum | Values |
 |---|---|
 | `NivelAcesso` | `ADMINISTRADOR`, `EDITOR` |
-| `StatusEmprestimo` | `ABERTO`, `DEVOLVIDO` |
+| `StatusEmprestimo` | `AGENDADO`, `ABERTO`, `DEVOLVIDO` |
 | `TipoOcorrencia` | `OBSERVACAO`, `MANUTENCAO`, `QUEBRADO` |
 | `StatusOcorrencia` | `ABERTO`, `RESOLVIDO` |
 
@@ -170,7 +172,7 @@ The foreign-key relations are `Equipamento.categoriaId → Categoria.id`, `Empre
 - `createdAt` on `Equipamento`, `Usuario`, `Emprestimo`, and `Ocorrencia` uses `@default(now())`.
 - `Equipamento.updatedAt` uses Prisma's `@updatedAt`; it is not declared as a user-supplied nullable field.
 - Unique declarations are `Categoria.nome`, `Usuario.login`, nullable `Usuario.rfidTokenHash`, and `PushSubscription.endpoint`. These produce uniqueness enforcement/indexes for those fields.
-- Explicit secondary indexes cover `Emprestimo.status`, `Ocorrencia.status`, equipment availability/broken counts, `ItemEmprestimo.emprestimoId`, the composite `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)`, and `PushSubscription.usuarioId`. `Emprestimo(dataRetirada, id)` supports history pagination (`dataRetirada` and `id` descending).
+- Explicit secondary indexes cover `Emprestimo.status`, `Ocorrencia.status`, equipment availability/broken counts, `ItemEmprestimo.emprestimoId`, the composite `ItemEmprestimo(equipamentoId, emprestimoId)`, `Ocorrencia(equipamentoId, status, tipo)`, and `PushSubscription.usuarioId`. `Emprestimo(dataRetirada, id)` supports history pagination (`dataRetirada` and `id` descending). `Emprestimo(status, dataAgendada)`, created by migration `20261123120000_loan_scheduling`, supports schedule lookups.
 - `ItemEmprestimo.emprestimoId` and `Ocorrencia.equipamentoId` therefore have explicit query-supporting indexes; the former also has a composite index for equipment-to-open-loan lookup.
 
 ## Business rules verified in backend services
@@ -178,12 +180,24 @@ The foreign-key relations are `Equipamento.categoriaId → Categoria.id`, `Empre
 ### Loans and stock
 
 - `criarEmprestimo` accepts an optional service input for `dataRetirada`; when omitted, the service stores the current time. The Prisma field itself remains required and has no schema default.
-- Loan creation runs in a transaction. Requested item quantities are aggregated by `equipamentoId`, availability is checked, the loan and its items are created, and available stock is decremented atomically.
+- Loan creation runs in a transaction. Requested item quantities are aggregated by `equipamentoId`, availability is checked, the loan and its items are created, and for an immediate pickup available stock is decremented atomically. A schedule validates its reservation window and does not change `quantidadeDisponivel`.
 - The stock check treats a missing equipment record as insufficient stock and raises an `EstoqueInsuficienteError` when any requested quantity exceeds effective availability.
 - `atualizarItensEmprestimo` only edits a loan whose status is `ABERTO`. It returns the old item quantities to the effective availability, replaces the item rows, and decrements the new aggregated quantities in one transaction.
-- `devolverEmprestimo` changes an open loan to `DEVOLVIDO`, stores the validated offset-aware timestamp sent by the UI (or current server time when legacy clients omit it), and increments available stock for every item. A repeated return is rejected; the loan row and item history are retained rather than deleted.
+- `devolverEmprestimo` changes an open loan to `DEVOLVIDO`, stores the validated offset-aware timestamp sent by the UI (or current server time when legacy clients omit it), and increments available stock for every item. A repeated return is rejected, and so is a schedule (`AGENDADO`, error `backend.emprestimos.agendamento_nao_confirmado`), which must be confirmed first; the loan row and item history are retained rather than deleted.
 - Stock decrements use an atomic `where quantidadeDisponivel >= quantidade` update, so a failed concurrent decrement aborts the transaction instead of silently reducing stock below the checked amount.
-- Administrator equipment updates lock the equipment row, include active-loan item quantities and open maintenance incidents in the capacity check, and reject a new total/available/broken combination that would be below committed stock. Open broken incidents must also remain represented in `quantidadeQuebrada`.
+- Administrator equipment updates lock the equipment row, include active-loan item quantities and open maintenance incidents in the capacity check, and reject a new total/available/broken combination that would be below committed stock, including the reservations of future schedules (`409` `backend.equipamentos.quantidade_reservada`). Open broken incidents must also remain represented in `quantidadeQuebrada`.
+
+### Scheduling and reservations
+
+- A loan whose `dataRetirada` is more than 5 minutes in the future is created with `status = AGENDADO`, at most 15 days ahead. `dataAgendada` takes the start; `dataRetirada` holds the same value until confirmation.
+- Reservations are evaluated per time window `[start, dataPrevistaDevolucao)`. Windows that do not overlap share the same units: with 20 notebooks, 15 reserved from 10:30 to 11:20 and another 15 from 14:00 to 15:00 fit together.
+- The capacity of a model is `quantidadeTotal − quantidadeQuebrada − open maintenance incidents`. The check is a sweep-line over the time windows, and equipment rows are locked in `id` order.
+- An `ABERTO` loan occupies units until its `dataPrevistaDevolucao`. An overdue loan, or a legacy loan without `dataPrevistaDevolucao`, keeps occupying units until it is returned.
+- Reserved units cannot be lent immediately to someone else.
+- Schedules do not change `quantidadeDisponivel`. Confirming the pickup (`PATCH /emprestimos/:id/confirmar-retirada`) is what moves the loan to `ABERTO`, records the actual time in `dataRetirada` and moves the units into the available counter.
+- Confirmation is allowed from 30 minutes before the start until the end of the window (`backend.emprestimos.confirmacao_fora_da_janela` outside it), and fails with `backend.emprestimos.unidades_nao_devolvidas` while units needed are still occupied by pending loans; the payload lists those loans.
+- `DELETE /emprestimos/:id` removes only schedules (`backend.emprestimos.nao_excluivel` for the rest). Schedules cannot be edited: delete and create again.
+- Registering a maintenance or broken occurrence never fails because of schedules; when the affected units are needed by future schedules, the response carries `agendamentosAfetados`.
 
 ### Occurrences
 
@@ -203,7 +217,7 @@ The foreign-key relations are `Equipamento.categoriaId → Categoria.id`, `Empre
 
 ### Push notifications
 
-- Loans, returns and occurrences trigger notifications only after the transaction commits; sending never delays or fails the original operation.
+- Loans (including schedules, via the "Novo agendamento" event), returns and occurrences trigger notifications only after the transaction commits; sending never delays or fails the original operation.
 - Recipients: active accounts with `nivelAcesso = ADMINISTRADOR` that have a subscription with the matching preference enabled (`notificarEmprestimo`, `notificarDevolucao` or `notificarOcorrencia`), checked at send time. `EDITOR` accounts never receive notifications, and the user who registered the operation does not receive their own notification.
 - An occurrence request produces a single notification, even with several patrimony numbers.
 - `PUT` upserts the subscription by `endpoint`; `DELETE` removes only the caller's own subscription. Logout removes the device's subscription, and changing or resetting the password removes all of the user's subscriptions.
@@ -215,7 +229,7 @@ Anonymous `GET /equipamentos`, `/emprestimos`, and `/ocorrencias` responses use 
 
 ## Constraints and audit boundaries
 
-Migration `20261022090000_stock_checks_and_fk_indexes` adds database `CHECK` constraints for non-negative equipment counts, `quantidadeDisponivel + quantidadeQuebrada <= quantidadeTotal`, and positive loan-item quantities. Migration `20261022110000_user_session_version` adds `Usuario.sessionVersion` with default `0`; authentication compares it on each request and logout/password change increments it to revoke prior sessions. The session-version change preserves existing users but requires re-login for JWTs issued before it. Migration `20260725225116_add_password_hash_to_usuario` adds required `passwordHash` without a default, so it cannot be applied to an already-populated `Usuario` table without a reviewed backfill strategy. Check constraints are maintained in SQL because the installed Prisma 6 schema language does not support a `CHECK` attribute. The stock migration intentionally fails rather than rewriting legacy rows that violate a check; validate migrations against a disposable/staging database before any production release. Cross-table checks for open loans/incidents remain enforced by transactional services. No check was added for dates or status/date consistency. Grants, RLS policies, PostgREST policies, and other external database/security controls are not represented in the Prisma schema; the actual verification is recorded below.
+Migration `20261022090000_stock_checks_and_fk_indexes` adds database `CHECK` constraints for non-negative equipment counts, `quantidadeDisponivel + quantidadeQuebrada <= quantidadeTotal`, and positive loan-item quantities. Migration `20261022110000_user_session_version` adds `Usuario.sessionVersion` with default `0`; authentication compares it on each request and logout/password change increments it to revoke prior sessions. The session-version change preserves existing users but requires re-login for JWTs issued before it. Migration `20260725225116_add_password_hash_to_usuario` adds required `passwordHash` without a default, so it cannot be applied to an already-populated `Usuario` table without a reviewed backfill strategy. Check constraints are maintained in SQL because the installed Prisma 6 schema language does not support a `CHECK` attribute. The stock migration intentionally fails rather than rewriting legacy rows that violate a check; validate migrations against a disposable/staging database before any production release. Cross-table checks for open loans/incidents remain enforced by transactional services. Migration `20261123120000_loan_scheduling` adds the scheduling checks: `dataPrevistaDevolucao IS NULL OR dataPrevistaDevolucao > dataRetirada`, and an `AGENDADO` loan requires both `dataAgendada` and `dataPrevistaDevolucao`. No check covers the 15-day horizon or other status/date consistency; those rules stay in the transactional services. Grants, RLS policies, PostgREST policies, and other external database/security controls are not represented in the Prisma schema; the actual verification is recorded below.
 
 ## Database grants and RLS (verified)
 

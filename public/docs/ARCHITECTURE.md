@@ -47,7 +47,7 @@ The frontend source is maintained in the separate `edu-assets/app-eduassets` rep
 
 The observed frontend layers are:
 
-- **`core/`**: infrastructure such as the API client/configuration, token and domain stores, authentication/session behavior, layout, UI, HTML utilities, and RFID listening.
+- **`core/`**: infrastructure such as the API client/configuration, token and domain stores, authentication/session behavior, layout, UI, HTML utilities, the client mirror of window-based availability (`utils/estoque.ts` and `state/disponibilidade.ts`, used by the **New loan** form), and RFID listening.
 - **`features/`**: screen-level modules (home, authentication, dashboard, loans/returns, equipment and registration control, export, configuration, security, profile, and documentation) composed by `main.ts`. The Home **Operations now** summary (`features/inicio/resumo.ts`) is computed on the client from the equipment, loan, and incident stores that are already loaded, with no extra API request.
 - **`shared/`**: components and DOM helpers reused by features, including inline form messages (`shared/forms/fieldErrors.ts`, installed at boot: it intercepts the `invalid` event and replaces the browser's native bubble with a themed message below the field) and button loading state (`shared/dom/buttonLoading.ts`, which overlays the indicator without changing the button's size). `shared/components/kitVisual.ts` points to the visual kit in `public/assets/kit` (illustrations for empty, error and 404 states, equipment icons chosen by category name, and avatars that stay stable per user id). Authorship (`shared/components/autoria.ts`) omits the line when the author is null (a record older than authorship); only exports keep "—" in the column.
 - The entrypoint does not use a framework bootstrap or a global state library. Domain state is exposed through stores with `get...`, loading/mutation functions, and `subscribe` functions for equipment, loans, occurrences, responsible people, theme, and i18n.
@@ -99,6 +99,10 @@ The mounted routers are `/auth`, `/categorias`, `/equipamentos`, `/responsaveis`
 The Prisma datasource is PostgreSQL and reads `DATABASE_URL` and optional `DIRECT_URL` (falls back to `DATABASE_URL`). The schema currently contains `Categoria`, `Equipamento`, `Responsavel`, `Usuario`, `Emprestimo`, `ItemEmprestimo`, and `Ocorrencia`, with the access/status enums declared in the schema. Status indexes exist for loans and occurrences; quantity/FK indexes and SQL check constraints are versioned in migration `20261022090000_stock_checks_and_fk_indexes`. RFID credentials are stored as an optional unique hash on `Usuario`; `sessionVersion` enables cross-instance JWT revocation.
 
 There are **no RLS policies in the Prisma schema**. Authorization is implemented in application code and route middleware; the database schema must not be read as proof of row-level isolation.
+
+### Availability and scheduling
+
+`backend/src/services/disponibilidade.service.ts` holds the window-based reservation rule. A request, immediate or scheduled, passes only if, at every instant of `[start, expected return)`, the units occupied plus the request do not exceed the model's capacity (total − broken − open maintenance). The check is a sweep-line over the windows of open loans, which occupy units until their expected return, and of schedules. The affected `Equipamento` rows are locked in ascending `id` order. The same rule applies to loan and schedule creation, to administrative changes of totals and broken counts (`quantidade_reservada`), to pickup confirmation, and to the `POST /ocorrencias` response (`agendamentosAfetados`).
 
 ## RFID bridge and WebSocket behavior
 

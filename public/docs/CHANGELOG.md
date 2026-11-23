@@ -1,6 +1,20 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.6.2 oficial**, publicada em 18/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.7.0 oficial**, publicada em 23/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.7.0 — Agendamentos de equipamentos — 23 de novembro de 2026
+
+Versão de funcionalidade: a API tem migration de banco (`20261123120000_loan_scheduling`), o app ganha os agendamentos e a documentação foi atualizada.
+
+- **Agendamentos:** um empréstimo com retirada mais de 5 minutos no futuro vira agendamento (status **Agendado**), com até 15 dias de antecedência. O formulário de **Novo empréstimo** ganha **Devolução prevista** e o botão **Agendar** para datas futuras. Se as unidades não estão livres agora, mas cabem na capacidade do modelo, o sistema oferece agendar no próximo horário livre. As reservas são por janela de horário: agendamentos que não se sobrepõem dividem as mesmas unidades. Agendamentos não alteram o contador **Disponíveis** até a retirada ser confirmada.
+- **Devoluções:** abas **Em andamento** e **Agendamentos**, cada uma com contador, e os selos **Hoje**, **Atrasado**, **Expirado** e **Agendado**. **Confirmar retirada** registra a hora real da retirada (o histórico mostra, por exemplo, "Agendado para 10:30 · Retirado às 10:50"); **Excluir agendamento** remove os que não compareceram.
+- **Início:** o cartão **Em aberto** conta apenas os empréstimos abertos e mostra, em seus detalhes, os agendamentos de hoje.
+- **Dashboard e Exportar:** filtro **Agendados** no histórico, selo **Agendado** e detalhes com retirada agendada, retirada real e devolução prevista. A exportação ganha as colunas **Agendado para** e **Devolução prevista**, e o status é traduzido.
+- **Controle:** registrar manutenção ou quebra nunca falha por causa de agendamentos; um aviso lista os agendamentos que deixaram de caber.
+- **Cadastros:** reduzir o total ou o número de quebrados abaixo das unidades reservadas por agendamentos futuros é recusado.
+- **Notificações:** novo evento **Novo agendamento**, com a mesma preferência de novos empréstimos; abre **Devoluções**.
+- **API e banco:** `POST /emprestimos` aceita `dataPrevistaDevolucao`; novos `PATCH /emprestimos/:id/confirmar-retirada` e `DELETE /emprestimos/:id`; `GET /emprestimos` aceita `status=AGENDADO` e `status=ATIVO`. A migration `20261123120000_loan_scheduling` adiciona `dataAgendada` e `dataPrevistaDevolucao`, CHECKs e um índice. O erro `backend.emprestimos.data_retirada_futura` deixa de ser retornado.
+- **Documentação:** Manual do Usuário §2, §3, §4, §5, §6, §7, §8, §9, §10, §13, §14 e §15; Referência da API; Modelo de Dados; Arquitetura; Changelog.
 
 ## v1.6.2 — Avatares, autoria sem traço e Cadastros mais legível — 18 de novembro de 2026
 

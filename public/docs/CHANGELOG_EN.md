@@ -1,6 +1,20 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.6.2**, released on November 18, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.7.0**, released on November 23, 2026; earlier entries remain historical.
+
+## v1.7.0 — Equipment scheduling — November 23, 2026
+
+Feature release: the API has a database migration (`20261123120000_loan_scheduling`), the app gains scheduling and the documentation was updated.
+
+- **Scheduling:** a loan whose pickup is more than 5 minutes in the future becomes a schedule (status **Scheduled**), up to 15 days ahead. The **New loan** form gains **Expected return** and the **Schedule** button for future dates. If the units are not free now but fit the model's total capacity, the system offers to schedule at the next free time slot. Reservations are per time window: schedules that do not overlap share the same units. Schedules do not change the **Available** counter until the pickup is confirmed.
+- **Returns:** **In progress** and **Schedules** tabs, each with a count, and the badges **Today**, **Overdue**, **Expired** and **Scheduled**. **Confirm pickup** records the actual pickup time (the history shows, for example, "Scheduled for 10:30 · Picked up at 10:50"); **Delete schedule** removes no-shows.
+- **Home:** the **Open** card counts only open loans and, in its details, shows the schedules for today.
+- **Dashboard and Export:** a **Scheduled** history filter, a **Scheduled** badge, and details with the scheduled pickup, actual pickup and expected return. The export gains the **Scheduled for** and **Expected return** columns, and the status text is translated.
+- **Control:** registering a maintenance or broken issue never fails because of schedules; a warning lists the schedules that no longer fit.
+- **Records:** lowering a model's total or broken count below the units reserved by future schedules is refused.
+- **Notifications:** new **New schedule** event, with the same preference as new loans; it opens **Returns**.
+- **API and database:** `POST /emprestimos` accepts `dataPrevistaDevolucao`; new `PATCH /emprestimos/:id/confirmar-retirada` and `DELETE /emprestimos/:id`; `GET /emprestimos` accepts `status=AGENDADO` and `status=ATIVO`. Migration `20261123120000_loan_scheduling` adds `dataAgendada` and `dataPrevistaDevolucao`, CHECK constraints and an index. The `backend.emprestimos.data_retirada_futura` error is no longer returned.
+- **Documentation:** User Manual §2, §3, §4, §5, §6, §7, §8, §9, §10, §13, §14 and §15; API Reference; Data Model; Architecture; Changelog.
 
 ## v1.6.2 — Avatars, authorship without dashes and a more legible Records window — November 18, 2026
 
