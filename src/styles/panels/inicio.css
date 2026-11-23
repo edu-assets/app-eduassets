@@ -223,6 +223,9 @@
 .inicio-resumo-card {
     display: flex;
     flex-direction: column;
+    /* .nav-link centraliza os filhos; aqui cada linha precisa ocupar a largura do card
+       para que o ellipsis funcione e o texto não vaze no celular. */
+    align-items: stretch;
     gap: 14px;
     min-width: 0;
     padding: 20px 22px 16px;
