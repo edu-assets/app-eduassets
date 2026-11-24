@@ -6,7 +6,7 @@ import {
     atualizarItensEmprestimo,
     devolverEmprestimo,
     confirmarRetiradaEmprestimo,
-    excluirEmprestimoAgendado,
+    excluirEmprestimo as excluirEmprestimoApi,
     LIMITE_PAGINA_PADRAO,
     LIMITE_PAGINA_MAXIMO,
     MAX_PAGINAS
@@ -333,15 +333,21 @@ export async function confirmarRetirada(id: number): Promise<Emprestimo> {
     return confirmado;
 }
 
-/** Exclui um agendamento: some na hora de `getAgendamentos()` e do histórico; depois recarrega as listas. */
-export async function excluirAgendamento(id: number): Promise<void> {
-    await excluirEmprestimoAgendado(id);
+/**
+ * Exclui um agendamento ou um empréstimo em andamento (registro feito por engano): some na hora das listas ativas e do
+ * histórico; depois recarrega tudo (as unidades de um ABERTO voltam ao estoque, então a disponibilidade também muda).
+ */
+export async function excluirEmprestimo(id: number): Promise<void> {
+    await excluirEmprestimoApi(id);
     definirAtivos(ativos.filter((loan) => loan.id !== id));
     if (historico.items.some((loan) => loan.id === id)) {
         definirHistorico({ items: historico.items.filter((loan) => loan.id !== id) });
     }
     await recarregarAposMutacao();
 }
+
+/** Exclui um agendamento (mesmo caminho de `excluirEmprestimo`). */
+export const excluirAgendamento = excluirEmprestimo;
 
 /** Sem `dataDevolucao` o servidor registra a devolução com o próprio horário. */
 /** Retorna o empréstimo devolvido (com a data gravada pelo servidor). */

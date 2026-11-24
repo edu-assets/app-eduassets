@@ -196,7 +196,7 @@ As relações com chave estrangeira são `Equipamento.categoriaId → Categoria.
 - Unidades reservadas não podem ser emprestadas imediatamente a outra pessoa.
 - Agendamentos não alteram `quantidadeDisponivel`. A confirmação da retirada (`PATCH /emprestimos/:id/confirmar-retirada`) é o que move o empréstimo para `ABERTO`, grava a hora real em `dataRetirada` e passa as unidades ao contador de disponíveis.
 - A confirmação é permitida de 30 minutos antes do início até o fim da janela (`backend.emprestimos.confirmacao_fora_da_janela` fora dela) e falha com `backend.emprestimos.unidades_nao_devolvidas` enquanto unidades necessárias ainda estiverem ocupadas por empréstimos pendentes; o payload lista esses empréstimos.
-- `DELETE /emprestimos/:id` remove apenas agendamentos (`backend.emprestimos.nao_excluivel` para os demais). Agendamentos não podem ser editados: exclua e crie novamente.
+- `DELETE /emprestimos/:id` remove agendamentos e empréstimos em andamento registrados por engano; no `ABERTO`, as unidades voltam a `quantidadeDisponivel` na mesma transação (`EDITOR` até 24 horas depois de `max(createdAt, dataRetirada)`, `ADMINISTRADOR` sem limite). Empréstimos devolvidos não podem ser excluídos (`backend.emprestimos.nao_excluivel`). Agendamentos não podem ser editados: exclua e crie novamente.
 - Registrar manutenção ou quebra nunca falha por causa de agendamentos; quando as unidades afetadas fazem falta a agendamentos futuros, a resposta traz `agendamentosAfetados`.
 
 ### Ocorrências

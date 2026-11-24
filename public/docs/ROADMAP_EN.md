@@ -1,10 +1,10 @@
 # Roadmap — eduAssets
 
-> **Official version 1.7.2, released 2026-11-24.** This page describes product scope and future directions; it is not a live infrastructure-availability dashboard.
+> **Official version 1.8.0, released 2026-11-24.** This page describes product scope and future directions; it is not a live infrastructure-availability dashboard.
 
 ## Current scope
 
-From 1.3 to 1.7 the product added the push-notification banner and guided activation with a single version source (1.3), record authorship and user management (1.4), filtered history, per-panel routes and a safer session (1.5), the Home operations summary, the visual kit and avatars (1.6), and equipment scheduling with time-window reservations (1.7). Each release is detailed in the changelog.
+From 1.3 to 1.8 the product added the push-notification banner and guided activation with a single version source (1.3), record authorship and user management (1.4), filtered history, per-panel routes and a safer session (1.5), the Home operations summary, the visual kit and avatars (1.6), and equipment scheduling with time-window reservations (1.7), and deleting loans registered by mistake, with their units returned to stock (1.8). Each release is detailed in the changelog.
 
 ### 1.2 baseline
 

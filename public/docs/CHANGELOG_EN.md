@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.7.2**, released on November 24, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.8.0**, released on November 24, 2026; earlier entries remain historical.
+
+## v1.8.0 — Delete a loan registered by mistake — November 24, 2026
+
+Feature release: the API and app change, with no database migration, and the documentation was updated.
+
+- **Returns:** the **Loan Details** panel gains **Delete loan**, for an in-progress loan registered by mistake. Its units go back to the **Available** count and the loan leaves the history. A confirmation reminds that, if the equipment came back, **Return** is the right action.
+- **Permissions:** an **Editor** can delete up to 24 hours after registration (or after pickup, for a picked-up schedule); an **Administrator**, at any time. Returned loans cannot be deleted.
+- **API:** `DELETE /emprestimos/:id` now accepts `ABERTO` loans and returns their units to stock in the same transaction. New `403` `backend.emprestimos.exclusao_fora_do_prazo` error; `409` `backend.emprestimos.nao_excluivel` now means the loan was already returned.
+- **Documentation:** User Manual §2 and §5; API Reference; Data Model; Roadmap; Changelog.
 
 ## v1.7.2 — Interface fixes — November 24, 2026
 

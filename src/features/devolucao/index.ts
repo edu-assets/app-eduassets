@@ -50,6 +50,7 @@ export async function initDevolucao(): Promise<void> {
         btnConfirmarDevolucaoPainel: document.getElementById('btn-confirmar-devolucao-painel') as HTMLElement,
         btnDetalheConfirmarRetirada: document.getElementById('btn-detalhe-confirmar-retirada') as HTMLButtonElement | null,
         btnDetalheExcluirAgendamento: document.getElementById('btn-detalhe-excluir-agendamento') as HTMLElement | null,
+        btnDetalheExcluirEmprestimo: document.getElementById('btn-detalhe-excluir-emprestimo') as HTMLElement | null,
         detalheTitulo: document.getElementById('devolucao-detalhe-titulo'),
         detalheAgendamentoHint: document.getElementById('detalhe-agendamento-hint'),
         painel: document.querySelector('.devolucao-detalhe-painel') as HTMLElement | null,

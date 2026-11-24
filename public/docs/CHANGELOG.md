@@ -1,6 +1,15 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.7.2 oficial**, publicada em 24/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.8.0 oficial**, publicada em 24/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.8.0 — Excluir empréstimo registrado por engano — 24 de novembro de 2026
+
+Versão de funcionalidade: a API e o app mudam, sem migration de banco, e a documentação foi atualizada.
+
+- **Devoluções:** o painel **Detalhes do Empréstimo** ganha **Excluir empréstimo**, para um empréstimo em andamento registrado por engano. As unidades voltam ao contador **Disponíveis** e o empréstimo sai do histórico. Uma confirmação lembra que, se os equipamentos voltaram, o certo é **Devolver**.
+- **Permissões:** o **Editor** exclui até 24 horas depois do registro (ou da retirada, para um agendamento retirado); o **Administrador**, a qualquer momento. Empréstimos devolvidos não podem ser excluídos.
+- **API:** `DELETE /emprestimos/:id` passa a aceitar empréstimos `ABERTO` e devolve as unidades ao estoque na mesma transação. Novo erro `403` `backend.emprestimos.exclusao_fora_do_prazo`; `409` `backend.emprestimos.nao_excluivel` agora indica empréstimo já devolvido.
+- **Documentação:** Manual do Usuário §2 e §5; Referência da API; Modelo de Dados; Roadmap; Changelog.
 
 ## v1.7.2 — Correções de interface — 24 de novembro de 2026
 

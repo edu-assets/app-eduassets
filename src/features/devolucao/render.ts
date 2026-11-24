@@ -21,6 +21,8 @@ import { abrirPainelOverlay, fecharPainelOverlay } from '../../shared/dom/overla
 import type { LoanItemUI, LoanUI, Equipamento } from '../../types/index.js';
 import { definirAgora, type FlatpickrInstance } from '../../core/ui/datepicker.js';
 import { getLoansAbertos } from '../../core/state/loanStore.js';
+import { getUsuario } from '../../core/state/authStore.js';
+import { podeExcluirEmprestimo } from '../../core/utils/exclusaoEmprestimo.js';
 import { agora } from '../../core/time/serverClock.js';
 import { t } from '../../core/state/i18nStore.js';
 import { renderAutoriaEmprestimo, envolverAutoria } from '../../shared/components/autoria.js';
@@ -66,6 +68,7 @@ interface AbrirDetalheEls extends DetalheItensEls, ObservacaoEls, ListaEls {
     detalheTitulo?: HTMLElement | null;
     detalheAgendamentoHint?: HTMLElement | null;
     btnDetalheConfirmarRetirada?: HTMLButtonElement | null;
+    btnDetalheExcluirEmprestimo?: HTMLElement | null;
 }
 
 interface SetModoEdicaoEls {
@@ -74,6 +77,8 @@ interface SetModoEdicaoEls {
     btnDetalheSalvar: HTMLElement;
     btnConfirmarDevolucaoPainel: HTMLElement;
     btnDetalheCancelar: HTMLElement;
+    /** "Excluir empréstimo": só aparece (fora da edição) quando `data-permitido="1"`, definido ao abrir o detalhe. */
+    btnDetalheExcluirEmprestimo?: HTMLElement | null;
 }
 
 interface FecharDetalheEls extends SetModoEdicaoEls, ListaEls {
@@ -193,6 +198,9 @@ export function abrirDetalhe(els: AbrirDetalheEls, estado: DevolucaoEstado, loan
     }
     atualizarAutoriaDetalhe(els.detalheData, loan);
 
+    if (els.btnDetalheExcluirEmprestimo) {
+        els.btnDetalheExcluirEmprestimo.dataset.permitido = podeExcluirEmprestimo(loan, getUsuario()?.nivelAcesso, agora()) ? '1' : '0';
+    }
     setModoEdicao(els, estado, false);
     renderDetalheItens(els, estado.itensEditando, false, !agendamento);
     renderObservacao(els, loan.observacao);
@@ -212,6 +220,7 @@ export function fecharDetalhe(els: FecharDetalheEls, estado: DevolucaoEstado): v
     estado.idDetalheAberto = null;
     estado.itensEditando = [];
     estado.itensOriginais = [];
+    if (els.btnDetalheExcluirEmprestimo) els.btnDetalheExcluirEmprestimo.dataset.permitido = '0';
     setModoEdicao(els, estado, false);
     els.painel?.classList.remove('is-agendamento');
     els.detalheConteudo.style.display = 'none';
@@ -231,6 +240,9 @@ export function setModoEdicao(els: SetModoEdicaoEls, estado: DevolucaoEstado, at
     els.btnDetalheEditar.style.display = ativo ? 'none' : 'inline-flex';
     els.btnDetalheSalvar.style.display = ativo ? 'inline-flex' : 'none';
     els.btnConfirmarDevolucaoPainel.style.display = ativo ? 'none' : 'inline-flex';
+    if (els.btnDetalheExcluirEmprestimo) {
+        els.btnDetalheExcluirEmprestimo.style.display = !ativo && els.btnDetalheExcluirEmprestimo.dataset.permitido === '1' ? 'inline-flex' : 'none';
+    }
     els.btnDetalheCancelar.textContent = ativo ? t('devolucao.cancelar_edicao') : t('shell.cancelar');
 }
 

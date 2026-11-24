@@ -1,5 +1,5 @@
 import { confirmarAcao, showToast } from '../../core/ui/index.js';
-import { confirmarRetirada, excluirAgendamento } from '../../core/state/loanStore.js';
+import { confirmarRetirada, excluirAgendamento, excluirEmprestimo } from '../../core/state/loanStore.js';
 import { atualizarAgora } from '../../core/state/liveSync.js';
 import { t, traduzirErro, formatarDataHora } from '../../core/state/i18nStore.js';
 import { ApiError } from '../../core/api/apiClient.js';
@@ -117,6 +117,31 @@ export async function excluirAgendamentoComConfirmacao(loan: LoanUI): Promise<bo
         return true;
     } catch (erro) {
         showToast(traduzirErro(erro, 'feedback.erro_excluir_agendamento'), 'error');
+        void atualizarAgora();
+        return false;
+    }
+}
+
+/** Exclui um empréstimo em andamento registrado por engano (as unidades voltam ao estoque), depois de confirmar. */
+export async function excluirEmprestimoComConfirmacao(loan: LoanUI): Promise<boolean> {
+    if (bloquearSeConvidado()) return false;
+
+    const confirmado = await confirmarAcao({
+        titulo: t('devolucao.excluir_emprestimo_titulo'),
+        mensagem: t('devolucao.excluir_emprestimo_mensagem'),
+        rotuloConfirmar: 'devolucao.excluir_emprestimo',
+        variante: 'error',
+        icone: 'delete'
+    });
+    if (!confirmado) return false;
+
+    try {
+        await excluirEmprestimo(loan.id);
+        showToast(t('feedback.emprestimo_excluido'), 'success');
+        return true;
+    } catch (erro) {
+        showToast(traduzirErro(erro, 'feedback.erro_excluir_emprestimo'), 'error');
+        // Prazo vencido, já devolvido ou excluído por outra pessoa: atualiza a lista.
         void atualizarAgora();
         return false;
     }

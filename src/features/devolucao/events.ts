@@ -1,6 +1,6 @@
 import { showToast, closeModal } from '../../core/ui/index.js';
 import { getLoansAbertos, getLoansAtivos, getAgendamentos } from '../../core/state/loanStore.js';
-import { confirmarRetiradaAgendamento, excluirAgendamentoComConfirmacao } from './agendamentoAcoes.js';
+import { confirmarRetiradaAgendamento, excluirAgendamentoComConfirmacao, excluirEmprestimoComConfirmacao } from './agendamentoAcoes.js';
 import { ehLayoutEmpilhado } from '../../core/utils/viewport.js';
 import { LAYOUT_EMPILHADO_BREAKPOINT } from '../../core/constants/breakpoints.js';
 import { formatarErroEstoque } from '../../core/utils/erroEstoque.js';
@@ -61,6 +61,7 @@ interface DevolucaoEls {
     btnConfirmarDevolucaoPainel: HTMLElement;
     btnDetalheConfirmarRetirada?: HTMLButtonElement | null;
     btnDetalheExcluirAgendamento?: HTMLElement | null;
+    btnDetalheExcluirEmprestimo?: HTMLElement | null;
     painel: HTMLElement | null;
     backdrop: HTMLElement | null;
     devolucaoPicker: FlatpickrInstance;
@@ -152,6 +153,14 @@ export function attachDevolucaoEvents(els: DevolucaoEls, estado: DevolucaoEstado
     els.btnDetalheExcluirAgendamento?.addEventListener('click', () => {
         const alvo = agendamentoAberto();
         if (alvo) void excluirAgendamentoComConfirmacao(alvo);
+    });
+
+    // Empréstimo em andamento aberto no painel: o botão só aparece quando a permissão local permite (o servidor decide).
+    els.btnDetalheExcluirEmprestimo?.addEventListener('click', async () => {
+        if (estado.modoEdicaoAtivo) return;
+        const alvo = getLoansAbertos().find((l) => l.id === estado.idDetalheAberto);
+        if (!alvo) return;
+        if (await excluirEmprestimoComConfirmacao(alvo)) fecharDetalhe(els, estado);
     });
 
     els.btnDetalheFechar.addEventListener('click', () => fecharDetalhe(els, estado));

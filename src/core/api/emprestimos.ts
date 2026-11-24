@@ -271,8 +271,11 @@ export function confirmarRetiradaEmprestimo(id: number): Promise<Emprestimo> {
     return http.patch<Emprestimo>(`/emprestimos/${id}/confirmar-retirada`);
 }
 
-/** Exclui um AGENDADO (204). Outros status: 409 `backend.emprestimos.nao_excluivel`. */
-export function excluirEmprestimoAgendado(id: number): Promise<void> {
+/**
+ * Exclui um AGENDADO ou um ABERTO (204); no ABERTO o servidor devolve as unidades ao estoque. Erros: 403
+ * `exclusao_fora_do_prazo` (EDITOR após 24h), 409 `nao_excluivel` (já devolvido), 404 `nao_encontrado`.
+ */
+export function excluirEmprestimo(id: number): Promise<void> {
     return http.delete<void>(`/emprestimos/${id}`);
 }
 

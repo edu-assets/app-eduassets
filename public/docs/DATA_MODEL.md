@@ -196,7 +196,7 @@ The foreign-key relations are `Equipamento.categoriaId → Categoria.id`, `Empre
 - Reserved units cannot be lent immediately to someone else.
 - Schedules do not change `quantidadeDisponivel`. Confirming the pickup (`PATCH /emprestimos/:id/confirmar-retirada`) is what moves the loan to `ABERTO`, records the actual time in `dataRetirada` and moves the units into the available counter.
 - Confirmation is allowed from 30 minutes before the start until the end of the window (`backend.emprestimos.confirmacao_fora_da_janela` outside it), and fails with `backend.emprestimos.unidades_nao_devolvidas` while units needed are still occupied by pending loans; the payload lists those loans.
-- `DELETE /emprestimos/:id` removes only schedules (`backend.emprestimos.nao_excluivel` for the rest). Schedules cannot be edited: delete and create again.
+- `DELETE /emprestimos/:id` removes schedules and in-progress loans registered by mistake; for `ABERTO`, the units go back to `quantidadeDisponivel` in the same transaction (`EDITOR` up to 24 hours after `max(createdAt, dataRetirada)`, `ADMINISTRADOR` with no limit). Returned loans cannot be deleted (`backend.emprestimos.nao_excluivel`). Schedules cannot be edited: delete and create again.
 - Registering a maintenance or broken occurrence never fails because of schedules; when the affected units are needed by future schedules, the response carries `agendamentosAfetados`.
 
 ### Occurrences

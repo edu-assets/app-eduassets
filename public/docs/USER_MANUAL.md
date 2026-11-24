@@ -13,8 +13,8 @@ The current data model tracks quantities by **category/model**. It does not prov
 | Role | Operational capabilities | Restricted actions |
 | --- | --- | --- |
 | **Guest** | View anonymized stock, categories, loan summaries and issue summaries; use searches/exports derived from those views. | Cannot create, update, resolve, return, or delete records. Requester/responsible identities, notes and issue details are omitted/masked. Responsible-party listing, **Records**, **Security** and **My Profile** require authentication. |
-| **Editor** | Sign in, register loans and schedules, edit items in open loans, confirm returns and scheduled pickups, delete schedules, create/edit/resolve **Control** records, and change the account's own password. | Cannot use **Records**, provision/revoke RFID, or delete issues. |
-| **Administrator** | Everything an Editor can do, plus **Records**, user and RFID-card management, and deleting **Control** records. | Still subject to stock, format, and required-field validation. |
+| **Editor** | Sign in, register loans and schedules, edit items in open loans, confirm returns and scheduled pickups, delete schedules, delete in-progress loans registered by mistake (up to 24 hours after registration), create/edit/resolve **Control** records, and change the account's own password. | Cannot use **Records**, provision/revoke RFID, or delete issues. |
+| **Administrator** | Everything an Editor can do, plus **Records**, user and RFID-card management, deleting **Control** records, and deleting in-progress loans at any time. | Still subject to stock, format, and required-field validation. |
 
 > **Important:** menus, indicators, and UI guards improve usability, but **they are not the security control**. The backend is the security boundary: it requires authentication/JWTs and enforces permissions on its routes. Do not treat a hidden button as proof of authorization.
 
@@ -96,6 +96,15 @@ Each loan card has a **Details** button (also keyboard accessible). Signed-in us
 Items become available again after confirmation. **Return Date and Time** is filled automatically and can be edited; on confirmation the UI sends the selected offset-aware ISO timestamp, which the backend validates and persists. Older clients that omit the field continue to use server-current time.
 
 If **Return Date and Time** is untouched, the record uses the server time at the moment of confirmation. A return cannot be earlier than the loan's checkout, and dates more than 5 minutes in the future are not accepted.
+
+### Deleting a loan registered by mistake
+
+In the **Loan Details** panel, **Delete loan** removes an in-progress loan that was registered by mistake. Its units go back to the **Available** count and the loan leaves the history. If the equipment came back, use **Return**: a return keeps the history.
+
+- **Editor:** up to 24 hours after registration (or after pickup, for a picked-up schedule). After that, the button is not shown.
+- **Administrator:** at any time.
+
+Loans that were already returned cannot be deleted.
 
 ### Schedules
 

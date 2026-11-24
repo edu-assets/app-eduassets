@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
     listarEmprestimosAtivos: vi.fn(),
     listarPaginaEmprestimos: vi.fn(),
     confirmarRetiradaEmprestimo: vi.fn(),
-    excluirEmprestimoAgendado: vi.fn(),
+    excluirEmprestimo: vi.fn(),
     criarEmprestimo: vi.fn()
 }));
 
@@ -19,7 +19,7 @@ vi.mock('../core/api/emprestimos.js', async (importOriginal) => ({
     listarEmprestimosAtivos: mocks.listarEmprestimosAtivos,
     listarPaginaEmprestimos: mocks.listarPaginaEmprestimos,
     confirmarRetiradaEmprestimo: mocks.confirmarRetiradaEmprestimo,
-    excluirEmprestimoAgendado: mocks.excluirEmprestimoAgendado,
+    excluirEmprestimo: mocks.excluirEmprestimo,
     criarEmprestimo: mocks.criarEmprestimo
 }));
 
@@ -119,16 +119,41 @@ describe('ações de agendamento', () => {
         await store.carregarEmprestimos();
         const avisos = vi.fn();
         store.subscribe(avisos);
-        mocks.excluirEmprestimoAgendado.mockResolvedValue(undefined);
+        mocks.excluirEmprestimo.mockResolvedValue(undefined);
         mocks.listarEmprestimosAtivos.mockResolvedValue([agendado(3, '2026-11-26T09:00:00.000Z')]);
         mocks.listarPaginaEmprestimos.mockResolvedValue(pagina([agendado(3, '2026-11-26T09:00:00.000Z')], null));
 
         await store.excluirAgendamento(2);
 
-        expect(mocks.excluirEmprestimoAgendado).toHaveBeenCalledWith(2);
+        expect(mocks.excluirEmprestimo).toHaveBeenCalledWith(2);
         expect(store.getAgendamentos().map((l) => l.id)).toEqual([3]);
         expect(store.getHistorico().items.map((l) => l.id)).toEqual([3]);
         expect(avisos).toHaveBeenCalled();
+    });
+
+    it('excluirEmprestimo (ABERTO): remove das listas ativa e do histórico e recarrega (disponibilidade)', async () => {
+        mocks.listarEmprestimosAtivos.mockResolvedValue([emprestimo(1, 'ABERTO'), emprestimo(2, 'ABERTO')]);
+        mocks.listarPaginaEmprestimos.mockResolvedValue(pagina([emprestimo(2, 'ABERTO'), emprestimo(1, 'ABERTO')], null));
+        await store.carregarEmprestimos();
+        mocks.excluirEmprestimo.mockResolvedValue(undefined);
+        mocks.listarEmprestimosAtivos.mockClear();
+        mocks.listarEmprestimosAtivos.mockResolvedValue([emprestimo(2, 'ABERTO')]);
+        mocks.listarPaginaEmprestimos.mockResolvedValue(pagina([emprestimo(2, 'ABERTO')], null));
+
+        await store.excluirEmprestimo(1);
+
+        expect(mocks.excluirEmprestimo).toHaveBeenCalledWith(1);
+        expect(store.getLoansAbertos().map((l) => l.id)).toEqual([2]);
+        expect(store.getHistorico().items.map((l) => l.id)).toEqual([2]);
+        expect(mocks.listarEmprestimosAtivos).toHaveBeenCalled();
+    });
+
+    it('excluirEmprestimo com erro do servidor (403) mantém o empréstimo e propaga', async () => {
+        mocks.listarEmprestimosAtivos.mockResolvedValue([emprestimo(1, 'ABERTO')]);
+        await store.carregarEmprestimos();
+        mocks.excluirEmprestimo.mockRejectedValue(new Error('backend.emprestimos.exclusao_fora_do_prazo'));
+        await expect(store.excluirEmprestimo(1)).rejects.toThrow('fora_do_prazo');
+        expect(store.getLoansAbertos().map((l) => l.id)).toEqual([1]);
     });
 
     it('addLoan envia dataPrevistaDevolucao e devolve o registro criado', async () => {

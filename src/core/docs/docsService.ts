@@ -19,7 +19,7 @@ export interface SearchResultado {
 const cache = new Map<string, LoadedDocument>();
 const inflight = new Map<string, Promise<LoadedDocument>>();
 
-const DOCS_BASE_URL = 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/81d6e323cbdd2c340fb0d7317c51e747cb8851cc/public';
+const DOCS_BASE_URL = 'https://raw.githubusercontent.com/edu-assets/docs-eduassets/c9e96a527d956a94a3dae32ba3b86b37dd99b34b/public';
 
 async function buscarMarkdown(file: string): Promise<string> {
     if (DOCS_BASE_URL) {

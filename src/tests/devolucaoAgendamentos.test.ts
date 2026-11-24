@@ -10,7 +10,14 @@ const m = vi.hoisted(() => ({
     confirmarAcao: vi.fn(),
     showToast: vi.fn(),
     confirmarRetirada: vi.fn(),
-    excluirAgendamento: vi.fn()
+    excluirAgendamento: vi.fn(),
+    excluirEmprestimo: vi.fn(),
+    usuario: null as { nivelAcesso: string } | null
+}));
+
+vi.mock('../core/state/authStore.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../core/state/authStore.js')>()),
+    getUsuario: () => m.usuario
 }));
 
 vi.mock('../core/ui/index.js', () => ({
@@ -29,6 +36,7 @@ vi.mock('../core/state/loanStore.js', () => ({
     subscribe: (cb: () => void) => { m.listeners.push(cb); return () => undefined; },
     confirmarRetirada: (...a: unknown[]) => m.confirmarRetirada(...a),
     excluirAgendamento: (...a: unknown[]) => m.excluirAgendamento(...a),
+    excluirEmprestimo: (...a: unknown[]) => m.excluirEmprestimo(...a),
     returnLoan: vi.fn(), updateLoan: vi.fn()
 }));
 
@@ -96,6 +104,8 @@ describe('Devoluções: abas Em andamento / Agendamentos', () => {
         m.showToast.mockReset();
         m.confirmarRetirada.mockReset();
         m.excluirAgendamento.mockReset();
+        m.excluirEmprestimo.mockReset();
+        m.usuario = { nivelAcesso: 'EDITOR' };
         await initDevolucao();
     });
     afterEach(() => vi.useRealTimers());
@@ -269,6 +279,92 @@ describe('Devoluções: abas Em andamento / Agendamentos', () => {
         // Trocar de aba fecha o detalhe (o item deixa de estar na lista).
         aba('andamento').click();
         expect(painel.classList.contains('is-agendamento')).toBe(false);
+    });
+
+    describe('Excluir empréstimo no painel de detalhes', () => {
+        const botao = () => document.getElementById('btn-detalhe-excluir-emprestimo') as HTMLButtonElement;
+        const abrir = (id: number) => lista().querySelector<HTMLElement>(`[data-id="${id}"] .detalhes-btn`)!.click();
+        const visivel = () => botao().style.display !== 'none';
+
+        it('botão no padrão visual: neutro, ícone delete, entre Confirmar Devolução e Cancelar, escondido por padrão', () => {
+            expect(botao().classList.contains('btn-neutral')).toBe(true);
+            expect(botao().classList.contains('btn-block')).toBe(true);
+            expect(botao().hasAttribute('data-requires-auth')).toBe(true);
+            expect(botao().dataset.i18nKey).toBe('devolucao.excluir_emprestimo');
+            expect(botao().querySelector('.material-symbols-outlined')!.textContent).toBe('delete');
+            expect(botao().previousElementSibling).toBe(document.getElementById('btn-confirmar-devolucao-painel'));
+            expect(visivel()).toBe(false);
+            expect(lista().querySelector('.excluir-emprestimo-btn')).toBeNull();
+        });
+
+        it('EDITOR dentro das 24h vê o botão em um empréstimo em andamento', () => {
+            abrir(1);
+            expect(visivel()).toBe(true);
+        });
+
+        it('EDITOR depois das 24h não vê; ADMINISTRADOR vê sempre', () => {
+            m.abertos = [{ ...aberto(1, 'Carlos'), createdAt: em(-25 * 60), data: em(-25 * 60).toISOString() } as LoanUI, aberto(2, 'Dora')];
+            notificar();
+            abrir(1);
+            expect(visivel()).toBe(false);
+            m.usuario = { nivelAcesso: 'ADMINISTRADOR' };
+            abrir(1);
+            expect(visivel()).toBe(true);
+        });
+
+        it('convidado nunca vê', () => {
+            m.usuario = null;
+            abrir(1);
+            expect(visivel()).toBe(false);
+        });
+
+        it('some no modo de edição e volta ao cancelar a edição', () => {
+            abrir(1);
+            document.getElementById('btn-detalhe-editar')!.click();
+            expect(visivel()).toBe(false);
+            document.getElementById('btn-detalhe-cancelar')!.click();
+            expect(visivel()).toBe(true);
+        });
+
+        it('não aparece no detalhe de um agendamento', () => {
+            aba('agendamentos').click();
+            lista().querySelector<HTMLElement>('[data-id="10"] .detalhes-btn')!.click();
+            expect(visivel()).toBe(false);
+            expect(document.querySelector('.devolucao-detalhe-painel')!.classList.contains('is-agendamento')).toBe(true);
+        });
+
+        it('confirmar: exclui, fecha o painel e mostra o toast de sucesso', async () => {
+            abrir(1);
+            m.confirmarAcao.mockResolvedValue(true);
+            m.excluirEmprestimo.mockResolvedValue(undefined);
+            botao().click();
+            await esperar();
+            const opcoes = m.confirmarAcao.mock.calls[0][0];
+            expect(opcoes).toMatchObject({ variante: 'error', icone: 'delete', rotuloConfirmar: 'devolucao.excluir_emprestimo', titulo: 'Excluir este empréstimo?' });
+            expect(m.excluirEmprestimo).toHaveBeenCalledWith(1);
+            expect(m.showToast).toHaveBeenCalledWith('Empréstimo excluído e unidades devolvidas ao estoque.', 'success');
+            expect(document.getElementById('devolucao-detalhe-conteudo')!.style.display).toBe('none');
+            expect(visivel()).toBe(false);
+        });
+
+        it('cancelar a confirmação não exclui nem fecha o painel', async () => {
+            abrir(1);
+            m.confirmarAcao.mockResolvedValue(false);
+            botao().click();
+            await esperar();
+            expect(m.excluirEmprestimo).not.toHaveBeenCalled();
+            expect(document.getElementById('devolucao-detalhe-conteudo')!.style.display).toBe('flex');
+        });
+
+        it('erro do servidor (403 fora do prazo) vira toast traduzido e mantém o painel', async () => {
+            abrir(1);
+            m.confirmarAcao.mockResolvedValue(true);
+            m.excluirEmprestimo.mockRejectedValue(new ApiError('backend.emprestimos.exclusao_fora_do_prazo', 403, { erro: 'backend.emprestimos.exclusao_fora_do_prazo' }));
+            botao().click();
+            await esperar();
+            expect(m.showToast).toHaveBeenCalledWith('Este empréstimo foi registrado há mais de 24 horas. Só um administrador pode excluí-lo.', 'error');
+            expect(document.getElementById('devolucao-detalhe-conteudo')!.style.display).toBe('flex');
+        });
     });
 
     it('aba vazia usa o estado vazio do componente', () => {

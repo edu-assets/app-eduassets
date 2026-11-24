@@ -1,10 +1,10 @@
 # Roadmap — eduAssets
 
-> **Versão oficial 1.7.2, publicada em 24/11/2026.** Esta página descreve o escopo do produto e suas direções de evolução; não é um painel de disponibilidade da infraestrutura.
+> **Versão oficial 1.8.0, publicada em 24/11/2026.** Esta página descreve o escopo do produto e suas direções de evolução; não é um painel de disponibilidade da infraestrutura.
 
 ## Escopo atual
 
-Da 1.3 à 1.7, o produto ganhou o banner e a ativação guiada de notificações push com uma fonte única de versão (1.3), a autoria dos registros e a gestão de usuários (1.4), o histórico com filtros, rotas por painel e sessão mais segura (1.5), o resumo de operações no Início, o kit visual e os avatares (1.6) e o agendamento de equipamentos com reserva por janela de horário (1.7). Os detalhes de cada versão estão no changelog.
+Da 1.3 à 1.8, o produto ganhou o banner e a ativação guiada de notificações push com uma fonte única de versão (1.3), a autoria dos registros e a gestão de usuários (1.4), o histórico com filtros, rotas por painel e sessão mais segura (1.5), o resumo de operações no Início, o kit visual e os avatares (1.6) e o agendamento de equipamentos com reserva por janela de horário (1.7) e a exclusão de empréstimos registrados por engano, com devolução das unidades ao estoque (1.8). Os detalhes de cada versão estão no changelog.
 
 ### Base da 1.2
 

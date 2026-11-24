@@ -13,8 +13,8 @@ O modelo atual acompanha quantidades por **categoria/modelo**. Ele não faz rast
 | Papel | O que pode fazer na operação | O que é restrito |
 | --- | --- | --- |
 | **Convidado** | Consultar estoque, categorias, histórico e ocorrências anonimizados; usar consultas/exportações derivadas desses dados. | Não cria, altera, resolve, devolve ou exclui registros. Identificação do solicitante, responsável, observações e detalhes da ocorrência são omitidos/mascarados. Listagem de responsáveis, **Cadastros**, **Segurança** e **Meu Perfil** exigem autenticação. |
-| **Editor** | Fazer login, registrar empréstimos e agendamentos, editar itens de empréstimos abertos, confirmar devoluções e retiradas agendadas, excluir agendamentos e criar/editar/resolver registros em **Controle**; alterar a própria senha. | Não acessa a gestão de **Cadastros**, não provisiona/revoga RFID e não exclui ocorrências. |
-| **Administrador** | Tudo que o Editor faz, além de operar **Cadastros**, gerenciar usuários e cartões RFID e excluir registros de **Controle**. | Continua sujeito às validações de estoque, formato e campos obrigatórios. |
+| **Editor** | Fazer login, registrar empréstimos e agendamentos, editar itens de empréstimos abertos, confirmar devoluções e retiradas agendadas, excluir agendamentos, excluir empréstimos em andamento registrados por engano (até 24 horas depois do registro) e criar/editar/resolver registros em **Controle**; alterar a própria senha. | Não acessa a gestão de **Cadastros**, não provisiona/revoga RFID e não exclui ocorrências. |
+| **Administrador** | Tudo que o Editor faz, além de operar **Cadastros**, gerenciar usuários e cartões RFID, excluir registros de **Controle** e excluir empréstimos em andamento a qualquer momento. | Continua sujeito às validações de estoque, formato e campos obrigatórios. |
 
 > **Importante:** os indicadores, menus e bloqueios da UI ajudam na usabilidade, mas **não são o controle de segurança**. A fronteira de segurança é o backend, que exige autenticação/JWT e aplica as permissões nas rotas. Não trate a ocultação de um botão como prova de autorização.
 
@@ -96,6 +96,15 @@ O cartão de cada empréstimo tem o botão **Detalhes** (também acessível pelo
 Os itens retornam à quantidade disponível depois da confirmação. **Data e Hora da Devolução** é preenchido automaticamente e pode ser editado; ao confirmar, a UI envia o timestamp ISO com offset selecionado, que o backend valida e persiste. Clientes antigos que não enviem esse campo continuam usando o horário atual do servidor.
 
 Se **Data e Hora da Devolução** não for alterada, o registro usa a hora do servidor no momento da confirmação. A devolução não pode ser anterior à retirada do empréstimo, e datas com mais de 5 minutos no futuro não são aceitas.
+
+### Excluir um empréstimo registrado por engano
+
+No painel **Detalhes do Empréstimo**, **Excluir empréstimo** apaga um empréstimo em andamento que foi registrado por engano. As unidades voltam ao contador **Disponíveis** e o empréstimo sai do histórico. Se os equipamentos voltaram, use **Devolver**: a devolução mantém o histórico.
+
+- **Editor:** até 24 horas depois do registro (ou da retirada, no caso de um agendamento retirado). Depois disso, o botão não aparece.
+- **Administrador:** a qualquer momento.
+
+Empréstimos já devolvidos não podem ser excluídos.
 
 ### Agendamentos
 

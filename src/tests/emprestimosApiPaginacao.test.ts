@@ -24,7 +24,7 @@ import {
     listarEmprestimosAbertos,
     listarEmprestimosAtivos,
     confirmarRetiradaEmprestimo,
-    excluirEmprestimoAgendado,
+    excluirEmprestimo,
     filtrarLocalmente,
     normalizarFiltros,
     listarPaginaEmprestimos,
@@ -230,7 +230,7 @@ describe('empréstimos ativos e agendamentos (API)', () => {
         const { http } = await import('../core/api/apiClient.js');
         Object.assign(http, { patch, delete: del });
         await confirmarRetiradaEmprestimo(7);
-        await excluirEmprestimoAgendado(7);
+        await excluirEmprestimo(7);
         expect(patch).toHaveBeenCalledWith('/emprestimos/7/confirmar-retirada');
         expect(del).toHaveBeenCalledWith('/emprestimos/7');
     });

@@ -1119,6 +1119,7 @@ html[data-theme="dark"] .devolucao-vazia-texto {
 }
 
 .devolucao-detalhe-painel.is-agendamento #btn-detalhe-editar,
-.devolucao-detalhe-painel.is-agendamento #btn-confirmar-devolucao-painel {
+.devolucao-detalhe-painel.is-agendamento #btn-confirmar-devolucao-painel,
+.devolucao-detalhe-painel.is-agendamento #btn-detalhe-excluir-emprestimo {
     display: none !important;
 }
