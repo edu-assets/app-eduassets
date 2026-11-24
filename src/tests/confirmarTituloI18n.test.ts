@@ -7,7 +7,7 @@ import { initConfirm, confirmarAcao } from '../core/ui/confirm.js';
 import indexHtml from '../../index.html?raw';
 
 // Marcação real do modal: o tradutor automático não pode reescrever o título definido por confirmarAcao.
-const modal = indexHtml.match(/<div class="modal-overlay" id="modal-confirmar-exclusao">[\s\S]*?\n {4}<\/div>\n/)![0];
+const modal = indexHtml.match(/<div class="modal-overlay" id="modal-confirmar-exclusao">[\s\S]*?\r?\n {4}<\/div>\r?\n/)![0];
 
 describe('modal de confirmação + tradução automática', () => {
     it('mantém o título e a mensagem passados, sem voltar a "Excluir registro"', async () => {

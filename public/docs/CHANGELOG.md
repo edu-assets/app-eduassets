@@ -1,6 +1,14 @@
 # Changelog — eduAssets
 
-Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.7.1 oficial**, publicada em 23/11/2026; entradas anteriores permanecem como histórico.
+Este changelog preserva registros datados de desenvolvimento e implantação. A versão atual do produto é a **1.7.2 oficial**, publicada em 24/11/2026; entradas anteriores permanecem como histórico.
+
+## v1.7.2 — Correções de interface — 24 de novembro de 2026
+
+Versão de correção de interface; a API, a documentação e o site só alinham o número da versão.
+
+- **Janela de agendamento:** com a tradução automática da página ativa, o título da janela voltava a **Excluir registro**. O título, a mensagem e o aviso agora mantêm o texto correto.
+- **Início (celular):** o texto do cartão de resumo fica dentro do cartão e é truncado, em vez de vazar em telas estreitas.
+- **Controle (celular):** o cabeçalho do cartão de registros não deixa mais um espaço vazio acima da barra de ferramentas.
 
 ## v1.7.1 — Formulário de empréstimo mais simples — 23 de novembro de 2026
 

@@ -1,6 +1,6 @@
 # Roadmap — eduAssets
 
-> **Official version 1.7.1, released 2026-11-23.** This page describes product scope and future directions; it is not a live infrastructure-availability dashboard.
+> **Official version 1.7.2, released 2026-11-24.** This page describes product scope and future directions; it is not a live infrastructure-availability dashboard.
 
 ## Current scope
 

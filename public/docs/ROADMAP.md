@@ -1,6 +1,6 @@
 # Roadmap — eduAssets
 
-> **Versão oficial 1.7.1, publicada em 23/11/2026.** Esta página descreve o escopo do produto e suas direções de evolução; não é um painel de disponibilidade da infraestrutura.
+> **Versão oficial 1.7.2, publicada em 24/11/2026.** Esta página descreve o escopo do produto e suas direções de evolução; não é um painel de disponibilidade da infraestrutura.
 
 ## Escopo atual
 

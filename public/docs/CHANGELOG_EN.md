@@ -1,6 +1,14 @@
 # Changelog — eduAssets
 
-This changelog preserves dated development and deployment records. The current product version is **official 1.7.1**, released on November 23, 2026; earlier entries remain historical.
+This changelog preserves dated development and deployment records. The current product version is **official 1.7.2**, released on November 24, 2026; earlier entries remain historical.
+
+## v1.7.2 — Interface fixes — November 24, 2026
+
+Interface correction release; the API, documentation and site only align the version number.
+
+- **Scheduling window:** with the page's automatic translation on, the window title reverted to **Delete record**. The title, message and notice now keep the correct text.
+- **Home (mobile):** the summary card text stays inside the card and is truncated instead of overflowing on narrow screens.
+- **Controle (mobile):** the records card header no longer leaves an empty gap above the toolbar.
 
 ## v1.7.1 — Simpler loan form — November 23, 2026
 
