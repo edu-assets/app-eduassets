@@ -2619,6 +2619,8 @@
         </div>
     </div>
     <!-- Modal de confirmação genérico (core/ui/confirm.ts: confirmarAcao / confirmarExclusao).
+         Título, mensagem e callout são traduzidos pelo confirm.ts (data-i18n-exclude): o tradutor automático
+         guardaria a chave do texto inicial e reescreveria qualquer título novo como "Excluir registro".
          O id mantém o nome histórico "exclusão"; ícone, variante, rótulos e campos são definidos em cada chamada. -->
     <div class="modal-overlay" id="modal-confirmar-exclusao">
         <div class="modal-box modal-box--md">
@@ -2628,8 +2630,8 @@
                     <span class="material-symbols-outlined">delete</span>
                 </span>
                 <div class="modal-header-titles">
-                    <h3 id="confirmar-exclusao-titulo">Excluir registro</h3>
-                    <p class="modal-subtitle" id="confirmar-exclusao-mensagem">Esta ação não pode ser
+                    <h3 id="confirmar-exclusao-titulo" data-i18n-exclude>Excluir registro</h3>
+                    <p class="modal-subtitle" id="confirmar-exclusao-mensagem" data-i18n-exclude>Esta ação não pode ser
                         desfeita.</p>
                 </div>
             </div>
@@ -2643,7 +2645,7 @@
                     <span class="icon-badge icon-badge--sm icon-badge--warning">
                         <span class="material-symbols-outlined">warning</span>
                     </span>
-                    <span id="confirmar-exclusao-callout-text"></span>
+                    <span id="confirmar-exclusao-callout-text" data-i18n-exclude></span>
                 </div>
             </div>
             <div class="modal-footer">
